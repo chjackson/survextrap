@@ -52,8 +52,7 @@ survminer::ggsurvplot(survfit(Surv(years, status) ~ 1, data=colonc))
 The following is the simplest, default model in the package fitted to the short-term trial data alone. No external data are supplied.  After three years (the maximum follow up time of the short term data) 
 the model assumes the hazard stays constant.   
 
-The plot shows the posterior median and 95\% credible intervals for the survival and hazard functions.
-The spline adapts to give a practically perfect fit to the short-term data.   Although the model assumes the extrapolated hazard is constant, there is still a wide uncertainty interval around this constant value.  This might be thought to be plausible.
+The plot shows the posterior median and 95\% credible intervals for the survival and hazard functions.  The spline adapts to give a practically perfect fit to the short-term data - note the Kaplan-Meier curve is obscured by the fitted posterior median.   Although the model assumes the extrapolated hazard is constant, there is still a wide uncertainty interval around this constant value.  This might be thought to be plausible.
 
 ```{r,results="hide"}
 nd_mod <- survextrap(Surv(years, status) ~ 1, data=colonc, chains=1)
@@ -77,12 +76,12 @@ There are other ways we could have done this, such as changing the position of t
 But it is only necessary to extrapolate in this way if there is **no information at all** about the 
 long term hazard! 
 
-In many practical situations of extrapolation in time-to-event models, we do have information.   For human survival, we know that people do not tend to live longer than 100 years.  There are usually data from national agencies about mortality of general populations. 
+In many practical situations of extrapolation in time-to-event models, we do have information.   For human survival, we at least know that people do not tend to live longer than 100 years.  There are usually data from national agencies about mortality of general populations. 
 
 
 ## With a smaller dataset
 
-Works nice and quickly.   Hazard curve suggests some overfitting and an excessive number of knots
+Works nice and quickly.   Hazard curve suggests some overfitting and an excessive number of knots though, though unclear how much that matters
 
 ```{r,results="hide"}
 nd_mod3 <- survextrap(Surv(futime, fustat) ~ 1, data=ovarian, chains=1)
@@ -93,18 +92,18 @@ plot(nd_mod3)
 
 ## Mean and restricted mean survival 
 
-The functions `mean_survextrap` and `rmst_survextrap` calculate the mean and restricted mean survival time (RMST) from a fitted model.  Uncertainty is expressed by using the MCMC sample of the model parameters, and calculating the mean (or RMST) for each draw, which produces a sample from the posterior distribution of the mean (or RMST).   A posterior median and credible intervals are computed by summarising this sample.
+The functions `mean_survextrap` and `rmst_survextrap` calculate the mean and restricted mean survival time (RMST) from a fitted model.  Uncertainty is expressed by using the MCMC sample of the model parameters, and calculating the mean (or RMST) for each draw, which produces a sample from the posterior distribution.   The posterior median and credible intervals are computed by summarising this sample.
 
 For particular combinations of parameter values, the mean under the model `nd_mod` cannot be calculated (resulting in an error message about a divergent integral), suggesting there is a substantial posterior probability that the mean is infinite.  
 
-Instead we compute the restricted mean survival time $RMST(t)$ over three alternative time limits $t$: 3, 10 and 1000 years.  The upper 95\% credible limit for $RMST(1000)$ is over 500. 
+Instead we compute the restricted mean survival time $RMST(t)$ over three alternative time limits $t$: 3, 10 and 1000 years.  The upper 95\% credible limit for $RMST(1000)$ is very large. 
 
 ```{r}
 # mean_survextrap(nd_mod)
-rmst_survextrap(nd_mod, c(3,10,1000))
+rmst_survextrap(nd_mod2, c(3,10,1000))
 ```
 
-We do not really believe that the mean survival for this population can be over 500 years, however.
+We do not really believe that the mean survival for this population can be this large. 
 
 This is evidence that the fitted model is unrealistic, and we should have included external information to bound the estimates of the mean within plausible values. 
 

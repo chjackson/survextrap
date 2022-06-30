@@ -145,7 +145,7 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
         geom_line(size=line_size)
     if (is.null(ci)) ci <- (attr(haz,"nvals")==1)
     if (ci)
-        p <- p + 
+        p <- p +
             geom_ribbon(aes(ymin=lower, ymax=upper), alpha=ci_alpha)
     p
 }
@@ -158,8 +158,12 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
 ##'
 ##' @param km If \code{TRUE} then a Kaplan-Meier curve of the observed data is plotted,
 ##' using the results of \code{\link[survival:survfit]{survival::survfit()}} on the formula originally used
-##' for the \code{survextrap} fit. 
+##' for the \code{survextrap} fit.
 ##' By default, this is only done when there are no covariates or one factor covariate.
+##'
+##' The Kaplan-Meier estimates are returned in the \code{km} component of the fitted model object
+##' returned by \code{\link{survextrap}}, if you want to construct your own plots like these.
+##'
 ##'
 ##' @export
 plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter=NULL,
@@ -182,7 +186,7 @@ plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter
         geom_step(size=line_size)
     if (is.null(ci)) ci <- (attr(surv,"nvals")==1)
     if (ci)
-        g <- g + 
+        g <- g +
             geom_ribbon(aes(ymin=lower, ymax=upper), alpha=ci_alpha)
 
     if (is.null(km)) km <- one_factor_cov(x)
@@ -210,7 +214,7 @@ default_plottimes <- function(x, tmax=NULL, nplot=100){
 
 get_pars <- function(x, newdata=NULL, niter=NULL){
     stanmat <- as.matrix(x$stanfit)
-    ## TODO error if there are no samples 
+    ## TODO error if there are no samples
     if (is.null(niter)) niter <- nrow(stanmat)
     alpha    <- stanmat[1:niter, "alpha",  drop = FALSE]
     ms_coef_names <- sprintf("coefs[%s]",seq(x$nvars))

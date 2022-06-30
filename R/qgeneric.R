@@ -1,49 +1,49 @@
-##' Generic function to find quantiles of a distribution
-##'
-##' Generic function to find the quantiles of a distribution, given the
-##' equivalent probability distribution function.
-##'
-##' This function is used by default for custom distributions for which a
-##' quantile function is not provided.
-##'
-##' It works by finding the root of the equation \eqn{h(q) = pdist(q) - p = 0}.
-##' Starting from the interval \eqn{(-1, 1)}, the interval width is expanded by
-##' 50\% until \eqn{h()} is of opposite sign at either end.  The root is then
-##' found using \code{\link{uniroot}}.
-##'
-##' This assumes a suitably smooth, continuous distribution.
-##'
-##' @param pdist Probability distribution function, for example,
-##' \code{\link{pnorm}} for the normal distribution, which must be defined in
-##' the current workspace.  This should accept and return vectorised parameters
-##' and values.  It should also return the correct values for the entire real
-##' line, for example a positive distribution should have \code{pdist(x)==0}
-##' for \eqn{x<0}.
-##'
-##' @param p Vector of probabilities to find the quantiles for.
-##'
-##' @param matargs Character vector giving the elements of \code{...} which
-##' represent vector parameters of the distribution.  Empty by default.  When
-##' vectorised, these will become matrices.  
-##'
-##' @param scalarargs Character vector naming arguments of the distribution function that cannot be vectorised.
-##'
-##' @param ...  The remaining arguments define parameters of the distribution
-##' \code{pdist}.  These MUST be named explicitly.
-##'
-##' This may also contain the standard arguments \code{log.p}, and
-##' \code{lower.tail} (as used in, e.g. \code{\link{qnorm}})
-##'
-##' If the distribution is bounded above or below, then this should contain
-##' arguments \code{lbound} and \code{ubound} respectively, and these will be
-##' returned if \code{p} is 0 or 1 respectively.  Defaults to \code{-Inf} and
-##' \code{Inf} respectively.
-##'
-##' @return Vector of quantiles of the distribution at \code{p}.
-##'
-##' @author Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-##'
-##' @keywords internal distribution
+## Generic function to find quantiles of a distribution
+##
+## Generic function to find the quantiles of a distribution, given the
+## equivalent probability distribution function.
+##
+## This function is used by default for custom distributions for which a
+## quantile function is not provided.
+##
+## It works by finding the root of the equation \eqn{h(q) = pdist(q) - p = 0}.
+## Starting from the interval \eqn{(-1, 1)}, the interval width is expanded by
+## 50\% until \eqn{h()} is of opposite sign at either end.  The root is then
+## found using \code{\link{uniroot}}.
+##
+## This assumes a suitably smooth, continuous distribution.
+##
+## @param pdist Probability distribution function, for example,
+## \code{\link{pnorm}} for the normal distribution, which must be defined in
+## the current workspace.  This should accept and return vectorised parameters
+## and values.  It should also return the correct values for the entire real
+## line, for example a positive distribution should have \code{pdist(x)==0}
+## for \eqn{x<0}.
+##
+## @param p Vector of probabilities to find the quantiles for.
+##
+## @param matargs Character vector giving the elements of \code{...} which
+## represent vector parameters of the distribution.  Empty by default.  When
+## vectorised, these will become matrices.  
+##
+## @param scalarargs Character vector naming arguments of the distribution function that cannot be vectorised.
+##
+## @param ...  The remaining arguments define parameters of the distribution
+## \code{pdist}.  These MUST be named explicitly.
+##
+## This may also contain the standard arguments \code{log.p}, and
+## \code{lower.tail} (as used in, e.g. \code{\link{qnorm}})
+##
+## If the distribution is bounded above or below, then this should contain
+## arguments \code{lbound} and \code{ubound} respectively, and these will be
+## returned if \code{p} is 0 or 1 respectively.  Defaults to \code{-Inf} and
+## \code{Inf} respectively.
+##
+## @return Vector of quantiles of the distribution at \code{p}.
+##
+## @author Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+##
+## @keywords internal distribution
 qgeneric <- function(pdist, p, matargs=NULL, scalarargs=NULL, ...)
 {
     args <- list(...)

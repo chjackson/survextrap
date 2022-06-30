@@ -228,9 +228,9 @@ packages.</p>
 <div class="section level3">
 <h3 id="prior-distribution-for-the-hazard-curve">Prior distribution for the hazard curve<a class="anchor" aria-label="anchor" href="#prior-distribution-for-the-hazard-curve"></a>
 </h3>
-<p>A log-normal prior is used for the scale <span class="math inline">\(\eta\)</span>. Currently this is set to the</p>
-<p>(todo explain rationale. log crude event rate plus normal(0, 20) from
-<a href="https://arxiv.org/pdf/2002.09633.pdf" class="external-link">rstanarm</a>. )</p>
+<p>A log-normal prior is used for the scale <span class="math inline">\(\eta\)</span>. Currently this is set to the log
+crude event rate plus normal(0, 20) (inspired by <a href="https://arxiv.org/pdf/2002.09633.pdf" class="external-link">rstanarm</a>) - but this
+will be customisable in a future version.</p>
 <p>A multinomial logistic distribution defines the prior for the
 coefficients <span class="math inline">\(p_k\)</span> that define the
 mass of the hazard in each region: <span class="math inline">\(log(p_k /
@@ -330,6 +330,9 @@ of data - should it? With small datasets, there will be lots of knots
 and very few data points between them - and we will be relying more
 strongly on the prior to do the smoothing. If we implemented
 cross-validation, we could assess whether this matters.</p>
+<p>With external data, we want a choice of knots outside the data which
+we can defend as allowing a reasonable range of shapes for the hazard
+function, prior to observing the data.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
