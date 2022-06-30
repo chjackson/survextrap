@@ -13,7 +13,7 @@ plot_survival(
   niter = NULL,
   ci = NULL,
   xlab = "Time",
-  ylab = "Hazard",
+  ylab = "Survival",
   line_size = 1.5,
   ci_alpha = 0.2
 )
@@ -42,7 +42,7 @@ are not supplied, then \code{tmax} is set to the maximum follow up time
 in the data.}
 
 \item{km}{If \code{TRUE} then a Kaplan-Meier curve of the observed data is plotted,
-using the results of \code{\link[survival::survfit]{survival::survfit()}} on the formula originally used
+using the results of \code{\link[survival:survfit]{survival::survfit()}} on the formula originally used
 for the \code{survextrap} fit.
 By default, this is only done when there are no covariates or one factor covariate.}
 

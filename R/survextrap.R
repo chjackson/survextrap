@@ -50,13 +50,13 @@
 #' @param ... Additional arguments to supply to control the Stan fit, passed to the \pkg{rstan} function \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} 
 #'
 #'
-#'
+#' @export
 survextrap <- function(formula,
                        data,
                        external=NULL,
                        smooth_sd = "estimate",
                        prior_weights = NULL,
-                       est_smooth = FALSE,
+                       est_smooth = TRUE,
                        cure = FALSE,
                        cure_prior = c(1,1),
                        basehaz_ops = NULL,

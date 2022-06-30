@@ -1,5 +1,5 @@
 ---
-title: "Survival extrapolation using survextrap: methods details"
+title: "Details of methods behind survextrap"
 author: "Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>"
 date: "`r Sys.Date()`"
 output: 
@@ -9,7 +9,7 @@ output:
     theme: simplex
     code_folding: show
 vignette: >
-  %\VignetteIndexEntry{Survival extrapolation using survextrap}
+  %\VignetteIndexEntry{Details of methods behind survextrap}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -17,10 +17,15 @@ editor_options:
 ---
 
 ```{r,echo=FALSE,message=FALSE}
-knitr::opts_chunk$set(eval=FALSE)
+knitr::opts_chunk$set(eval=TRUE)
 ```
 
 # Technical details of the model
+
+See the [README](../index.html) for the design principles of the package, and the [examples vignette](examples.html) for examples of how to fit models.
+
+It is work in progress, so it will be sketchy in some places.
+
 
 ## M-splines 
 
@@ -41,13 +46,15 @@ with
 * a _scale_ parameter $\eta$ that describes the average level of the hazard. 
 
 ```{r,message=FALSE,warning=FALSE,class.source = 'fold-hide'}
-p_equal <- rep(1/13, 13)
-p_unif <- mspline_uniform_weights(knots=1:9, bknots=c(0,10))
-haz_unif <- plot_mspline(df=13, scale=10, p = p_unif, plot=FALSE)$hazard 
-plot_mspline(df=13, scale=10, p = p_equal, tmax=10) + 
+library(survextrap)
+library(ggplot2)
+p_naive <- rep(1/13, 13)
+p_const <- mspline_uniform_weights(knots=1:9, bknots=c(0,10))
+haz_unif <- plot_mspline(df=13, scale=10, p = p_const, plot=FALSE)$hazard 
+plot_mspline(df=13, scale=10, p = p_naive, tmax=10) + 
     geom_line(aes(x=time, y=haz), data=haz_unif, color="red", lwd=1.5, inherit.aes = FALSE) + 
-    annotate(geom="text", x=2, y=1.5, color="red", label="h(t): weights `p_auto`") +
-    annotate(geom="text", x=1.5, y=2.5, color="blue", label="h(t): weights `p_equal`") + 
+    annotate(geom="text", x=2, y=1.5, color="red", label="h(t): weights `p_const`") +
+    annotate(geom="text", x=1.5, y=2.5, color="blue", label="h(t): weights `p_naive`") + 
     xlab("Time t") + ylab("Hazard rate") + ylim(0,3) 
 ```
 
@@ -56,20 +63,22 @@ plot_mspline(df=13, scale=10, p = p_equal, tmax=10) +
 
 The weights $p_k$ define how the hazard changes through time.   If knots are equally spaced, then $p_k$ are nearly proportional to the hazard in the $k$th region, so that if all $p_k$ are equal, then the hazard is nearly constant (red line `p_equal` in the figure).   It is not exactly constant because of the influence of the regions at either end of the space, whose polynomial functions have a skewed shape.  
 
-To produce a practically constant hazard, we can search numerically for the $p_k$ which minimise the variance of a selection of points $t$ that span the area that we want to model.  This search can be done automatically in the package (red line `p_auto` in the figure). 
+To produce a practically constant hazard, we can search numerically for the $p_k$ which minimise the variance of a selection of points $t$ that span the area that we want to model.  This search can be done automatically in the package (red line `p_const` in the figure). 
 
-**Extrapolation?** To fully specify a parametric time-to-event model, we have to define the hazard for times greater than the time $t_{K}$ of the highest knot, which is 10 in the example.
+ **Extrapolation?** To fully specify a parametric time-to-event model, we have to define the hazard for times greater than the time $t_{K}$ of the highest knot, which is 10 in the example.
 
 The model in `survextrap` simply assumes that the hazard for $t > t_{K}$ is constant, the same as the hazard at $t_{K}$. 
 
 Therefore, if you want to estimate survival over a period where you think the hazard might not be constant, then you should make sure that the highest spline knot $t_K$ is after the end of this period.   
 
-(_Sidenote_. Another way to define the hazard beyond the last knot would be to extrapolate the final basis polynomials, but this is not implemented. Although it would lead to a more smoothly extrapolated hazard, it would be driven by data just before the boundary, and would be making opaque assumptions about how the hazard changes after the boundary.  Ihe idea behind the package is to make all assumptions explicit as data or mechanisms.  Perhaps a better approach would be to make the function smooth at the final knot but still constant after then, somehow). 
+(_Sidenote_. Another way to define the hazard beyond the last knot would be to extrapolate the final basis polynomials, but this is not implemented. Although it would lead to a more smoothly extrapolated hazard, it would be driven by data just before the boundary, and would be making opaque assumptions about how the hazard changes after the boundary.  The idea behind the package is to make all assumptions explicit as data or mechanisms.  Perhaps a better approach would be to make the function smooth at the final knot but still constant after then, somehow). 
 
-Examples of doing this with different kinds of data and knowledge are given in REF BELOW, summarise here
+Examples of doing this with different kinds of data and knowledge are given in `vignette("examples")`.
 
+Another arbitrary example of an M-spline curve:
 ```{r}
-plot_mspline(knots=c(1,3,5), bknots=c(0, 7), p=c(0.2, 0.3, 0.1, 0.1, 0.3, 0.1, 0.1), tmax=15)
+plot_mspline(knots=c(1,3,5), bknots=c(0, 7),
+     p=c(0.2, 0.3, 0.1, 0.1, 0.3, 0.1, 0.1), tmax=15)
 ```
 
 
@@ -81,6 +90,7 @@ plot_mspline(knots=c(1,3,5), bknots=c(0, 7), p=c(0.2, 0.3, 0.1, 0.1, 0.3, 0.1, 0
 
 The advantage of putting an M-spline on the hazard is that it respects the constraint that a hazard has to be non-negative, while it can be integrated analytically to produce the cumulative hazard. 
 
+A remaining disadvantage is that they still rely on a choice of knot locations.  We hope to show that this does not matter much.  Suggestions of alternative model families are welcome.  Gaussian processes, perhaps?  Though these are conceptually much harder.
 
 
 ## Bayesian model specification 

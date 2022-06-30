@@ -39,9 +39,7 @@
 ##' numerical inversion (using \code{\link{qgeneric}}).
 ##'
 ##' \code{rsurvmspline} generates random survival times by using
-##' \code{qsurvmspline} on a sample of uniform random numbers.  Due to the
-##' numerical root-finding involved in \code{qsurvmspline}, it is slow compared
-##' to typical random number generation functions.
+##' \code{qsurvmspline} on a sample of uniform random numbers.  
 ##'
 ##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
 ##'

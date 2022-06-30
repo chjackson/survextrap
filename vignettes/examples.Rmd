@@ -1,5 +1,5 @@
 ---
-title: "Survival extrapolation using survextrap: methods details"
+title: "Examples of using survextrap"
 author: "Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>"
 date: "`r Sys.Date()`"
 output: 
@@ -9,7 +9,7 @@ output:
     theme: simplex
     code_folding: show
 vignette: >
-  %\VignetteIndexEntry{Survival extrapolation using survextrap}
+  %\VignetteIndexEntry{Examples of using survextrap}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -17,37 +17,33 @@ editor_options:
 ---
 
 ```{r,echo=FALSE,message=FALSE}
-knitr::opts_chunk$set(eval=FALSE)
+knitr::opts_chunk$set(eval=TRUE, message=FALSE, warning=FALSE)
 ```
 
 
 ```{r,echo=FALSE,message=FALSE}
-library(survextrap)
-library(survminer)
-library(rstan)
-library(dplyr)
-library(flexsurvcure)
-rstan_options(auto_write = TRUE)
+rstan::rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 ```
 
 This vignette gives examples of how to run `survextrap` to fit survival models.
 
-See the README for the design principles of the package, and the METHODS VIGNETTE for technical details
-of the methods. 
+See the [README](../index.html) for the design principles of the package, and the [methods vignette](methods.html) for technical details of the methods.
 
-It is work in progress, so it will be sketchy in some places.   The code is supposed to work, but do not be surprised if there are bugs - please report any on github issues.
+It is work in progress, so it will be sketchy in some places.   The code is supposed to work, but do not be surprised if there are bugs - please report any on [github issues](https://github.com/chjackson/survextrap/issues).
 
 # Examples
 
 For these examples, we use a dataset of trial of chemotherapy for colon cancer, provided as `colon` in the `survival` package, with an outcome of recurrence-free survival (`etype==1`) and artificially censored at 3 years.
 ```{r}
+library(survextrap)
+library(dplyr)
 colonc <- colon |>
     mutate(years = time/365.25) |>
     filter(etype == 1) |>
     mutate(status = ifelse(years > 3, 0, status),
            years = ifelse(years > 3, 3, years))
-ggsurvplot(survfit(Surv(years, status) ~ 1, data=colonc))
+survminer::ggsurvplot(survfit(Surv(years, status) ~ 1, data=colonc))
 ```
 
 
@@ -59,18 +55,17 @@ the model assumes the hazard stays constant.
 The plot shows the posterior median and 95\% credible intervals for the survival and hazard functions.
 The spline adapts to give a practically perfect fit to the short-term data.   Although the model assumes the extrapolated hazard is constant, there is still a wide uncertainty interval around this constant value.  This might be thought to be plausible.
 
-```{r}
-nd_mod <- survextrap(Surv(years, status) ~ 1, data=colonc, chains=1, est_smooth = TRUE)
-print(nd_mod)
+```{r,results="hide"}
+nd_mod <- survextrap(Surv(years, status) ~ 1, data=colonc, chains=1)
 plot(nd_mod, tmax=5)
 ```
 
-We could allow for the possibility of hazard changes beyond three years by placing spline knots beyond this point.  
+The spline knots are shown as blue lines.  We could allow for the possibility of hazard changes beyond three years by spline knots beyond this point. 
 
 The `basehaz_ops` argument is used to control the spline, the `bknots` component of this is the vector comprising the lower and upper boundary knots.  Here we simply move the upper boundary knot from three to four years.
 
-```{r}
-nd_mod2 <- survextrap(Surv(years, status) ~ 1, data=colonc, chains=1, est_smooth = TRUE,
+```{r,results="hide"}
+nd_mod2 <- survextrap(Surv(years, status) ~ 1, data=colonc, chains=1, 
                      basehaz_ops = list(bknots = c(0, 4)))
 plot(nd_mod2, tmax=5)
 ```
@@ -87,11 +82,11 @@ In many practical situations of extrapolation in time-to-event models, we do hav
 
 ## With a smaller dataset
 
-Estimating the smoothing parameter works nicely and quickly.   Hazard curve suggests some overfitting and an excessive number of knots
+Works nice and quickly.   Hazard curve suggests some overfitting and an excessive number of knots
 
-```{r}
-nd_mod <- survextrap(Surv(futime, fustat) ~ 1, data=ovarian, chains=1, est_smooth = TRUE)
-plot(nd_mod)
+```{r,results="hide"}
+nd_mod3 <- survextrap(Surv(futime, fustat) ~ 1, data=ovarian, chains=1)
+plot(nd_mod3)
 ```
 
 
@@ -102,7 +97,7 @@ The functions `mean_survextrap` and `rmst_survextrap` calculate the mean and res
 
 For particular combinations of parameter values, the mean under the model `nd_mod` cannot be calculated (resulting in an error message about a divergent integral), suggesting there is a substantial posterior probability that the mean is infinite.  
 
-Instead we compute the restricted mean $RMST(t)$ [DEF] over three alternative time limits $t$: 3, 10 and 1000 years.  The upper 95\% credible limit for $RMST(1000)$ is over 500. 
+Instead we compute the restricted mean survival time $RMST(t)$ over three alternative time limits $t$: 3, 10 and 1000 years.  The upper 95\% credible limit for $RMST(1000)$ is over 500. 
 
 ```{r}
 # mean_survextrap(nd_mod)
@@ -121,26 +116,27 @@ This can be done with external data.
 
 ## Extrapolation using long term population data 
 
-Suppose we judge that after 5 years, the survival of these patients will be the same as in the general population, and we have some data describing the annual survival rates of a population
-who are similar to this one, perhaps from matching to national statistics or registry data by age and sex.    
+Suppose we judge that after 5 years, the survival of these patients will be the same as in the general population, and we have some data describing the annual survival rates of a population who are similar to this one, perhaps from matching to national statistics or registry data by age and sex.  We would construct it something like this (though fake data are shown here).
 
-TODO explain knot choice for external data.  
-
-```{r,eval=FALSE}
+```{r,results="hide"}
 extdat <- data.frame(start = c(5, 10, 15, 20), 
                      stop =  c(10, 15, 20, 25), 
                      n = c(100, 100, 100, 100), 
                      r = c(50, 40, 30, 20))
-nde_mod <- survextrap(Surv(years, status) ~ 1, data=colonc, est_smooth = TRUE,
+nde_mod <- survextrap(Surv(years, status) ~ 1, data=colonc, 
                       chains=1, external = extdat)
 plot(nde_mod)
+```
+
+```{r}
 mean_survextrap(nde_mod)
 rmst_survextrap(nde_mod, c(3, 10, 1000))
 ```
 
-Including the external data gives a more confident extrapolation. 
+Including the external data gives a more confident extrapolation.   The mean is finite.  RMST converges to the mean as it is supposed to. 
 
-Mean is finite.  RMST converges to the mean as it is supposed to
+At present, not much thought has gone into choice of knot locations with external data.  Currently these knots are based on just concatenating the event times in the individual data with the follow-up times in the external data, and then taking quantiles.   Suggestions are welcome for a smarter approach.   Knots in the middle of follow-up intervals?
+
 
 
 ## Expert elicitation on the long term
@@ -149,7 +145,7 @@ Information about long term survival could be elicited from experts.  To use thi
 
 For example, we ask the expert to consider a set of people who have survived for 10 years.  How many of them would they expect to survive a further 5 years?  Through some kind of formal elicitation process, they supply a best guess (median) of 30%, and a 95\% credible interval of 10\% to 50\%.  
 
-Using standard techniques from elicitation (link shelf fitdist) we can interpret that as a $Beta(6.6, 15.0)$ prior distribution for the survival probability.  We can interpret this as the posterior from having observed $y=6$ survivors out of $n=20$ people (recalling the posterior from a $Binomial(y, n)$ combined with a vague $Beta(0.5, 0.5)$ prior is $Beta(y+0.5, n-y+0.5)$, and rounding $n$ and $y$ to whole numbers).
+Using standard techniques from elicitation [SHELF](http://www.jeremy-oakley.staff.shef.ac.uk/shelf/) we can interpret that as a $Beta(6.6, 15.0)$ prior distribution for the survival probability.  We can interpret this as the posterior from having observed $y=6$ survivors out of $n=20$ people (recalling the posterior from a $Binomial(y, n)$ combined with a vague $Beta(0.5, 0.5)$ prior is $Beta(y+0.5, n-y+0.5)$, and rounding $n$ and $y$ to whole numbers).
 
 ```{r}
 SHELF::fitdist(vals=c(0.1, 0.3, 0.5), probs=c(0.025, 0.5, 0.975), lower=0, upper=1)$Beta
@@ -173,18 +169,19 @@ So the expert's judgment is equivalent to the information in an external dataset
 </table>
 
 and we can use it in a `survextrap` model as follows: 
-```{r}
+```{r,results="hide"}
 extdat <- data.frame(start = c(10), stop =  c(15), 
                      n = c(20), r = c(6))
-nde_mod <- survextrap(Surv(years, status) ~ 1, data=colonc, est_smooth = TRUE,
+nde_mod <- survextrap(Surv(years, status) ~ 1, data=colonc,
                       chains=1, external = extdat)
 plot(nde_mod)
+```
+
+```{r}
 mean_survextrap(nde_mod)
 ```
 
-There is still substantial uncertainty about the mean, even with this level of information, 
-but comparing to the second model REF above, it is better than no information at all. 
-TODO do this again when revisit knots. 
+There is still substantial uncertainty about the mean, even with this level of information, but comparing to the second model above (`nd_mod2`), it is better than no information at all.    More investigation of the role of the knot placement here (blue lines in the figure) might be wise - particularly the one at 15 years.
 
 This approach might be extended to include elicited values from multiple time points, or considering multiple experts.   In each case the elicited information can be converted straightforwardly into an aggregate table for use in `survextrap`.   
 
@@ -193,22 +190,25 @@ This approach might be extended to include elicited values from multiple time po
 
 ## Covariates
 
-Proportional hazards model.  
-
-Example: treatment group `rx`, a factor with three levels
+`survextrap` uses a proportional hazards model to represent covariates.    In the example here, we model survival by treatment group `rx`, which is a factor with three levels.  First fit a standard Cox model: 
 
 ```{r}
 coxph(Surv(years, status) ~ rx, data=colonc)
-rxph_mod <- survextrap(Surv(years, status) ~ rx, data=colonc, chains=1, est_smooth = TRUE)
+```
+
+Then fit a `survextrap` model and extract the log hazard ratios.  These agree with the Cox model - as expected, as we are using a proportional hazards model with a very flexible baseline hazard function.
+```{r}
+rxph_mod <- survextrap(Surv(years, status) ~ rx, data=colonc, chains=1, refresh=0)
 summary(rxph_mod) |>
     filter(variable=="loghr")
+```
+
+```{r}
 plot(rxph_mod, niter=100)
 ```
 
-Log hazard ratios agree with those from the Cox model. 
-
-Why is the fitted survival so different from the KM curves?  Is it because the proportional
-hazards assumption is wrong.   Can we have a graphical check for this.  Cumulative or log hazard?  
+Why is the fitted survival so different from the KM curves?  Is it because the hazards are non-proportional?
+More investigation is needed here. 
 
 Any number of covariates, categorical or continuous, can be included. 
 
@@ -221,7 +221,7 @@ extdat <- data.frame(start = c(5, 10), stop =  c(10, 15),
                      n = c(100, 100), r = c(50, 40), 
                      rx = "Obs")
 rxphe_mod <- survextrap(Surv(years, status) ~ rx, data=colonc, 
-                      chains=1, external = extdat)
+                      chains=1, external = extdat, refresh=0)
 rmst_survextrap(rxphe_mod, niter=100, t=20)
 plot(rxphe_mod, niter=100, tmax=5)
 plot_hazard(rxphe_mod, niter=100, tmax=20)
@@ -229,18 +229,13 @@ plot_hazard(rxphe_mod, niter=100, tmax=20)
 
 
 
-## Relative survival
-
-Not implemented yet.  Could easily support a constant background hazard in a conventional additive hazard model.  
-
-If a proportional hazards model was implemented, could also supply background survival as external count data and estimate the hazard ratio.
-
 
 ## Cure models
 
 Generate a dataset with an obvious cure fraction
 
-```{r,eval=FALSE}
+```{r,results="hide",cache=TRUE}
+library(flexsurvcure)
 set.seed(1)
 t <- rmixsurv(qweibull, n=1000, theta=0.5, shape=1.5, scale=1.2)
 censtime <- 10
@@ -249,12 +244,20 @@ plot(survfit(Surv(t, status) ~ 1, data=cure_df))
 
 ## These are slow to sample 
 noncure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, 
-                          cure=FALSE, est_smooth = TRUE)
+                          cure=FALSE)
 plot(noncure_mod) # doesn't quite capture the curve
 
 ## This is very slow, but it fits  
-cure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, cure=TRUE, modelid=1, est_smooth = TRUE)
+cure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, cure=TRUE, modelid=1)
 plot(cure_mod, tmax=10)
 ```
 
 Should we allow covariates on the cure fraction as well, as flexsurvcure does by default?
+
+
+
+## Relative survival models
+
+Not implemented yet.  Could easily support a constant background hazard in a conventional additive hazard model.  
+
+Could also use the proportional hazards model, as above, supplying background survival as external count data and estimating the hazard ratio.

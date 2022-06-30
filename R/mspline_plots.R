@@ -92,6 +92,24 @@ mspline_priorpred_df <- function(knots=NULL, bknots=c(0,10), df=10, degree=3,
     hazdf
 }
 
+##' Generate a sample from the prior distribution of M-spline hazard curves implied by
+##' a particular mean and variance for the baseline curve and scale parameter.
+##'
+##' See the methods vignette for full info for now
+##'
+##' @inheritParams mspline_plotsetup
+##'
+##' @param prior_mean Prior mean TODO document properly 
+##'
+##' @param prior_sd Prior SD TODO 
+##'
+##' @param scale Prior mean for scale parameter TODO 
+##'
+##' @param scale_sd Prior SD for scale parameter TODO
+##'
+##' @param nsim Number of simulations to draw
+##'
+##' @export
 plot_mspline_priorpred <- function(knots=NULL, bknots=c(0,10), df=10, degree=3,
                                    prior_mean, prior_sd=1, scale=1, scale_sd=1,
                                    tmin=0, tmax=10,

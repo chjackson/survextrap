@@ -43,7 +43,7 @@
 ##'
 ##' @author Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 ##'
-##' @keywords distribution
+##' @keywords internal distribution
 qgeneric <- function(pdist, p, matargs=NULL, scalarargs=NULL, ...)
 {
     args <- list(...)

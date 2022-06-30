@@ -54,7 +54,7 @@ The package has been developed under the expectation that many forms of external
 
 * Bayesian multiparameter evidence synthesis is used to jointly model all sources of data and judgements 
 
-* An M-spline is used to represent how the hazard changes through time.  The Bayesian fitting method automatically chooses the optimal level of smoothness and flexibility.  Spline "knots" should span the period covered by the data, and any period where there is a chance that hazard may vary.
+* An M-spline is used to represent how the hazard changes through time.  The Bayesian fitting method automatically chooses the optimal level of smoothness and flexibility.  Spline "knots" should span the period covered by the data, and any period where there is a chance that the hazard may vary.
 
 * A proportional hazards model is used to describe the relation of survival to predictors. 
 
@@ -65,19 +65,19 @@ The package has been developed under the expectation that many forms of external
 * Estimates and credible intervals for survival, hazard, mean and restricted mean survival can easily be extracted from the fitted model.
 
 
-### Methods details
+### Technical details of the methods
 
-See the vignette 
+See `vignette("methods")`
 
 
-### How to use it
+### Examples of how to use it 
 
-See the vignette 
+See `vignette("examples")`
 
 
 ## Development 
 
-The package is in active development.  It can currently fit a large range of useful models, but it is not finished.
+The package is in active development.  It can currently fit a large range of useful models, but it is not finished and is subject to be changed without warning.
 
 Major things to do are:
 
@@ -85,12 +85,18 @@ Major things to do are:
 
 * Better thought-out knot choice, particularly with external data.
 
-* More experience of using it with real external data.
+* More experience and examples of using it with real external data.
 
 * Relative survival / additive hazards models. 
 
 * Non-proportional hazards.  This is expected to be computationally difficult, and I'm not sure of the best approach.
 
-* Thorough testing.
+* Thorough testing and documentation.
 
-Feedback and suggestions are welcome - these can be posted on github issues.
+If you want to try it out - feel free to install from github:
+
+```{r}
+remotes::install_github("chjackson/survextrap")
+```
+
+Please give feedback and suggestions if you do - these can be posted on github issues.
