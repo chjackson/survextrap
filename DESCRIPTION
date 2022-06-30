@@ -41,5 +41,6 @@ Suggests:
     rmarkdown,
     testthat
 VignetteBuilder: knitr
-URL: https://github.com/chjackson/survextrap
+URL: https://github.com/chjackson/survextrap,
+    https://chjackson.github.io/survextrap/
 BugReports: https://github.com/chjackson/survextrap/issues

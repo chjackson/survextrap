@@ -35,6 +35,8 @@ This vignette gives examples of how to run `survextrap` to fit survival models.
 See the README for the design principles of the package, and the METHODS VIGNETTE for technical details
 of the methods. 
 
+It is work in progress, so it will be sketchy in some places.
+
 # Examples
 
 For these examples, we use a dataset of trial of chemotherapy for colon cancer, provided as `colon` in the `survival` package, with an outcome of recurrence-free survival (`etype==1`) and artificially censored at 3 years.
