@@ -1,17 +1,10 @@
 # survextrap 
 
-`survextrap` is an R package to model survival from a combination of 
+`survextrap` is an R package under development, to model survival from a combination of 
 
 1. A standard individual-level, right-censored survival dataset
 
 2. "External" data sources in the following aggregate "count" form:
-
-```{css,echo=FALSE}
-th, td {
-  padding: 5px;
-  border-bottom: 1px solid #ddd;
-}
-```
 
 <table> 
 <tr>
@@ -23,13 +16,13 @@ th, td {
 <tr>
 <td> $t_{1}$ </td>
 <td> $u_{1}$ </td>
-<td> $t_{2}$ </td>
-<td> $u_{2}$ </td>
+<td> $n_{1}$ </td>
+<td> $r_{1}$ </td>
 </tr>
 
 <tr>
-<td> $n_{1}$ </td>
-<td> $r_{1}$ </td>
+<td> $t_{2}$ </td>
+<td> $u_{2}$ </td>
 <td> $n_{2}$ </td>
 <td> $r_{2}$ </td>
 </tr>
@@ -84,7 +77,7 @@ See the vignette
 
 ## Development 
 
-The package is in active development.  While it can fit a large range of useful models, it is not finished.
+The package is in active development.  It can currently fit a large range of useful models, but it is not finished.
 
 Major things to do are:
 
@@ -97,5 +90,7 @@ Major things to do are:
 * Relative survival / additive hazards models. 
 
 * Non-proportional hazards.  This is expected to be computationally difficult, and I'm not sure of the best approach.
+
+* Thorough testing.
 
 Feedback and suggestions are welcome - these can be posted on github issues.
