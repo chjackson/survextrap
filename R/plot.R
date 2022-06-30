@@ -210,6 +210,7 @@ default_plottimes <- function(x, tmax=NULL, nplot=100){
 
 get_pars <- function(x, newdata=NULL, niter=NULL){
     stanmat <- as.matrix(x$stanfit)
+    ## TODO error if there are no samples 
     if (is.null(niter)) niter <- nrow(stanmat)
     alpha    <- stanmat[1:niter, "alpha",  drop = FALSE]
     ms_coef_names <- sprintf("coefs[%s]",seq(x$nvars))
