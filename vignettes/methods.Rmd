@@ -173,4 +173,4 @@ By default, the lower boundary knot is set to 0.   The upper boundary knot is se
 
 Currently, the number of knots does not depend on the absolute amount of data - should it?   With small datasets, there will be lots of knots and very few data points between them - and we will be relying more strongly on the prior to do the smoothing.  If we implemented cross-validation, we could assess whether this matters. 
 
-
+With external data, we want a choice of knots outside the data which we can defend as allowing a reasonable range of shapes for the hazard function, prior to observing the data.
