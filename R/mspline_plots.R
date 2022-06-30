@@ -175,7 +175,7 @@ plot_mspline <- function(knots=NULL, bknots=c(0,10), df=10, degree=3, p=NULL, sc
             geom_line(data=hazdf, aes(x=time, y=haz), col="blue", inherit.aes = FALSE, lwd=1.5) +
             xlab("") +
             ylab("") +
-            scale_x_continuous(breaks=c(knots, bknots)) +
+            scale_x_continuous(breaks=c(s$knots, s$bknots)) +
             theme_minimal() +
             theme(panel.grid.minor = element_blank())
     else list(basis=bdf, hazard=hazdf)

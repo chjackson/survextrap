@@ -145,11 +145,14 @@ Information about long term survival could be elicited from experts.  To use thi
 
 For example, we ask the expert to consider a set of people who have survived for 10 years.  How many of them would they expect to survive a further 5 years?  Through some kind of formal elicitation process, they supply a best guess (median) of 30%, and a 95\% credible interval of 10\% to 50\%.  
 
-Using standard techniques from elicitation [SHELF](http://www.jeremy-oakley.staff.shef.ac.uk/shelf/) we can interpret that as a $Beta(6.6, 15.0)$ prior distribution for the survival probability.  We can interpret this as the posterior from having observed $y=6$ survivors out of $n=20$ people (recalling the posterior from a $Binomial(y, n)$ combined with a vague $Beta(0.5, 0.5)$ prior is $Beta(y+0.5, n-y+0.5)$, and rounding $n$ and $y$ to whole numbers).
+Using standard techniques from elicitation ([SHELF](http://www.jeremy-oakley.staff.shef.ac.uk/shelf/)) we can interpret that as a $Beta(6.6, 15.0)$ prior distribution for the survival probability.  
 
 ```{r}
-SHELF::fitdist(vals=c(0.1, 0.3, 0.5), probs=c(0.025, 0.5, 0.975), lower=0, upper=1)$Beta
+SHELF::fitdist(vals=c(0.1, 0.3, 0.5), probs=c(0.025, 0.5, 0.975),
+               lower=0, upper=1)$Beta
 ```
+
+We can interpret this as the posterior from having observed $y=6$ survivors out of $n=20$ people (recalling the posterior from a $Binomial(y, n)$ combined with a vague $Beta(0.5, 0.5)$ prior is $Beta(y+0.5, n-y+0.5)$, and rounding $n$ and $y$ to whole numbers).
 
 So the expert's judgment is equivalent to the information in an external dataset of the form 
 
