@@ -39,7 +39,8 @@ Suggests:
     rstantools (>= 2.2.0),
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    flexsurvcure
 VignetteBuilder: knitr
 URL: https://github.com/chjackson/survextrap,
     https://chjackson.github.io/survextrap/

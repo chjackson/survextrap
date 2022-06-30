@@ -22,12 +22,13 @@ knitr::opts_chunk$set(eval=FALSE)
 
 
 ```{r,echo=FALSE,message=FALSE}
-library(tidyverse)
+library(survextrap)
 library(survminer)
 library(rstan)
+library(dplyr)
+library(flexsurvcure)
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
-devtools::load_all("~/work/survextrap/survextrap")
 ```
 
 This vignette gives examples of how to run `survextrap` to fit survival models.
@@ -35,15 +36,12 @@ This vignette gives examples of how to run `survextrap` to fit survival models.
 See the README for the design principles of the package, and the METHODS VIGNETTE for technical details
 of the methods. 
 
-It is work in progress, so it will be sketchy in some places.
+It is work in progress, so it will be sketchy in some places.   The code is supposed to work, but do not be surprised if there are bugs - please report any on github issues.
 
 # Examples
 
 For these examples, we use a dataset of trial of chemotherapy for colon cancer, provided as `colon` in the `survival` package, with an outcome of recurrence-free survival (`etype==1`) and artificially censored at 3 years.
 ```{r}
-devtools::load_all(".")
-library(tidyverse)
-library(survminer)
 colonc <- colon |>
     mutate(years = time/365.25) |>
     filter(etype == 1) |>
@@ -202,7 +200,7 @@ Example: treatment group `rx`, a factor with three levels
 ```{r}
 coxph(Surv(years, status) ~ rx, data=colonc)
 rxph_mod <- survextrap(Surv(years, status) ~ rx, data=colonc, chains=1, est_smooth = TRUE)
-summary(rxph_mod) %>%
+summary(rxph_mod) |>
     filter(variable=="loghr")
 plot(rxph_mod, niter=100)
 ```
@@ -243,8 +241,6 @@ If a proportional hazards model was implemented, could also supply background su
 Generate a dataset with an obvious cure fraction
 
 ```{r,eval=FALSE}
-
-library(flexsurvcure)
 set.seed(1)
 t <- rmixsurv(qweibull, n=1000, theta=0.5, shape=1.5, scale=1.2)
 censtime <- 10
@@ -258,14 +254,7 @@ plot(noncure_mod) # doesn't quite capture the curve
 
 ## This is very slow, but it fits  
 cure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, cure=TRUE, modelid=1, est_smooth = TRUE)
-cure_mod
-bayesplot::mcmc_trace(cure_mod$stanfit, pars="cure_prob[1]")
-st <- surv_survextrap(cure_mod, times=1:10)
 plot(cure_mod, tmax=10)
-
-flcure_mod <- flexsurvcure(Surv(t, status) ~ 1, data=cure_df, mixture=TRUE, dist="weibull")
-flcure_mod  # shape 1.54, scale 1.266.  logshape 0.43, logscale 0.24.  OK agrees 
-plot(flcure_mod)
 ```
 
 Should we allow covariates on the cure fraction as well, as flexsurvcure does by default?
