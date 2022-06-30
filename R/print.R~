@@ -1,0 +1,107 @@
+##' Print a fitted survextrap model
+##'
+##' @param x A fitted model object as returned by \code{\link{survextrap}}
+##'
+##' @export
+print.survextrap <- function(x, ...){
+    cat("M-spline survival model\n")
+    cat(sprintf("%s knots, degree %s, %s basis terms.\n", length(x$basehaz$knots), x$basehaz$degree, x$basehaz$nvars))
+    cat(sprintf("Smoothness SD: %s\n", round(x$smooth_sd, 2)))
+    print(x$stanfit)
+}
+
+
+##' Posterior summary statistics for parameters of survextrap models
+##'
+##' Suggestions for what else to add to this are welcome.  Convergence diagnostics?
+##' 
+##' @param object A fitted model object as returned by \code{\link{survextrap}}
+##'
+##' @export
+summary.survextrap <- function(object, ...){
+    sam <- posterior::as_draws(object$stanfit)
+    alpha <- tidybayes::gather_rvars(sam, alpha)
+    loghr <- tidybayes::gather_rvars(sam, loghr[i]) %>%
+        mutate(term=object$xnames)
+    hr <- loghr %>%
+        mutate(.value = exp(.value),
+               .variable = "hr")
+    coefs <- tidybayes::gather_rvars(sam, coefs[i])
+    summ <- alpha %>%
+        full_join(loghr, by=c(".variable",".value")) %>%
+        full_join(hr, by=c(".variable",".value","i","term")) %>%
+        full_join(coefs, by=c(".variable",".value","i")) %>%
+        mutate(sd = posterior::sd(.value)) %>%
+        tidybayes::median_qi(.value) %>%
+        rename(variable=.variable,
+               median=.value) %>%
+        select(variable, term, median,
+               `2.5%`=.lower, `97.5%`=.upper, sd)
+    summ
+}
+
+
+### this is what rstanarm does
+
+### PRINT METHOD
+## > rst
+## stan_surv
+##  baseline hazard: M-splines on hazard scale
+##  formula:         Surv(years, status) ~ 1
+##  observations:    929
+##  events:          407 (43.8%)
+##  right censored:  522 (56.2%)
+##  delayed entry:   no
+## ------
+##                 Median MAD_SD exp(Median)
+## (Intercept)     -0.5    0.1     NA
+## m-splines-coef1  0.0    0.0     NA
+## m-splines-coef2  0.2    0.0     NA
+## m-splines-coef3  0.5    0.1     NA
+## m-splines-coef4  0.2    0.1     NA
+## m-splines-coef5  0.1    0.0     NA
+## m-splines-coef6  0.1    0.0     NA
+
+## ------
+## * For help interpreting the printed output see ?print.stanreg
+## * For info on the priors used see ?prior_summary.stanreg
+
+
+### SUMMARY METHOD
+## > summary(rst)
+
+## Model Info:
+
+##  function:        stan_surv
+##  baseline hazard: M-splines on hazard scale
+##  formula:         Surv(years, status) ~ 1
+##  algorithm:       sampling
+##  sample:          4000 (posterior sample size)
+##  priors:          see help('prior_summary')
+##  observations:    929
+##  events:          407 (43.8%)
+##  right censored:  522 (56.2%)
+##  delayed entry:   no
+
+## Estimates:
+##                   mean   sd   10%   50%   90%
+## (Intercept)     -0.5    0.1 -0.6  -0.5  -0.5
+## m-splines-coef1  0.0    0.0  0.0   0.0   0.0
+## m-splines-coef2  0.2    0.0  0.1   0.2   0.2
+## m-splines-coef3  0.5    0.1  0.4   0.5   0.5
+## m-splines-coef4  0.2    0.1  0.1   0.2   0.3
+## m-splines-coef5  0.1    0.0  0.0   0.1   0.1
+## m-splines-coef6  0.1    0.0  0.0   0.1   0.1
+
+## MCMC diagnostics
+##                 mcse Rhat n_eff
+## (Intercept)     0.0  1.0  2824
+## m-splines-coef1 0.0  1.0  2727
+## m-splines-coef2 0.0  1.0  2184
+## m-splines-coef3 0.0  1.0  1772
+## m-splines-coef4 0.0  1.0  1904
+## m-splines-coef5 0.0  1.0  2308
+## m-splines-coef6 0.0  1.0  3916
+## log-posterior   0.1  1.0  1143
+
+## For each parameter, mcse is Monte Carlo standard error, n_eff is a crude measure of effective sample size, and Rhat is the potential scale reduction factor on split chains

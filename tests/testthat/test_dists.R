@@ -1,0 +1,54 @@
+alpha <- -0.35
+coefs <- c(0.0012, 0.029, 0.1, 0.15, 0.11, 0.11, 0.23, 0.0074, 0.052, 0.1)
+knots <- c(0, 0.36, 0.62, 0.91, 1.2, 1.54, 2.02, 3)
+
+test_that("psurvmspline",{
+    q <- c(-1, 0, Inf, NA, NaN)
+    expect_equal(psurvmspline(q, alpha, coefs, knots), c(0, 0, 1, NA, NaN))
+    expect_equal(psurvmspline(q, alpha, coefs, knots, lower.tail = FALSE), c(1, 1, 0, NA, NaN))
+    expect_equal(psurvmspline(q, alpha, coefs, knots, log.p = TRUE), c(-Inf, -Inf, 0, NA, NaN))
+    q <- c(1.2, 1.3)
+    pr <- psurvmspline(q, alpha, coefs, knots)
+    qsurvmspline(pr, alpha, coefs, knots)
+    expect_equal(qsurvmspline(pr, alpha, coefs, knots), q)
+
+    q <- array(1, dim=c(2,3))
+    pr <- psurvmspline(q, alpha, coefs, knots)
+    expect_equivalent(attributes(q), attributes(pr))
+})
+
+test_that("qsurvmspline",{
+    p <- c(0.1, 0.2)
+    qu <- qsurvmspline(p, alpha, coefs, knots)
+    expect_equal(psurvmspline(qu, alpha, coefs, knots), p)
+})
+
+test_that("dsurvmspline",{
+    x <- c(-1, NA, NaN)
+    expect_equal(dsurvmspline(x, alpha, coefs, knots), c(0, NA, NaN))
+    x <- 1:3
+    dens <- dsurvmspline(x, alpha, coefs, knots)
+    surv <- psurvmspline(x, alpha, coefs, knots, lower.tail=FALSE)
+    haz <- hsurvmspline(x, alpha, coefs, knots)
+    expect_equal(haz, dens/surv)
+})
+
+test_that("hsurvmspline",{
+    x <- c(-1, NA, NaN)
+    expect_equal(hsurvmspline(x, alpha, coefs, knots), c(0, NA, NaN))
+})
+
+test_that("Hsurvmspline",{
+    x <- c(-1, 0, Inf, NA, NaN)
+    expect_equal(Hsurvmspline(x, alpha, coefs, knots), c(0, 0, NaN, NA, NaN))
+    x <- 1:3
+    cumhaz <- Hsurvmspline(x, alpha, coefs, knots)
+    surv <- psurvmspline(x, alpha, coefs, knots, lower.tail = FALSE)
+    expect_equal(surv, exp(-cumhaz))
+})
+
+test_that("rsurvmspline",{
+    set.seed(1)
+    ran <- rsurvmspline(10, alpha, coefs, knots)
+    expect_type(ran, "double")
+})

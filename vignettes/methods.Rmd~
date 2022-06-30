@@ -1,0 +1,21 @@
+---
+title: "Survival extrapolation using survextrap: methods details"
+author: "Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    theme: simplex
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{Survival extrapolation using survextrap}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=FALSE,message=FALSE}
+knitr::opts_chunk$set(eval=FALSE)
+```

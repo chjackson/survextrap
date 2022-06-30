@@ -1,0 +1,491 @@
+---
+title: "Survival extrapolation using survextrap"
+author: "Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    theme: simplex
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{Survival extrapolation using survextrap}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=FALSE,message=FALSE}
+knitr::opts_chunk$set(eval=FALSE)
+```
+
+
+```{r,echo=FALSE,message=FALSE}
+library(tidyverse)
+library(survminer)
+library(rstan)
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+devtools::load_all("~/work/survextrap/survextrap")
+```
+
+# Overview 
+
+`survextrap` is an R package to estimate survival from a combination of 
+
+1. A standard individual-level, right-censored survival dataset
+
+2. "External" data sources in the following aggregate "count" form:
+
+```{css,echo=FALSE}
+th, td {
+  padding: 5px;
+  border-bottom: 1px solid #ddd;
+}
+```
+
+<table> 
+<tr>
+<th colspan="2">Follow-up period </th>
+<th colspan="2">Number</th>
+</tr> 
+<tr><th>Start time $t$</th><th>End time $u$</th><th>Alive at $t$</th><th>Still alive at $u$</th></tr>
+
+<tr>
+<td> $t_{1}$ </td>
+<td> $u_{1}$ </td>
+<td> $t_{2}$ </td>
+<td> $u_{2}$ </td>
+</tr>
+
+<tr>
+<td> $n_{1}$ </td>
+<td> $r_{1}$ </td>
+<td> $n_{2}$ </td>
+<td> $r_{2}$ </td>
+</tr>
+
+<tr>
+<td>etc...</td>
+<td></td>
+<td></td>
+<td></td>
+
+</tr>
+
+</table>
+
+Any number of rows can be supplied for the "external" data, and the time intervals do not have to be distinct or exhaustive. 
+
+The package has been developed under the expectation that many forms of external data that might be useful for survival extrapolation (such as population data, registry data or elicited judgements) can be manipulated into this common "count" form.
+
+
+### Principles  
+
+* Extrapolations from short-term individual level data should be done using _explicit data or judgements_ about how risk will change over time. 
+
+* Extrapolations should not rely on conventional parametric forms (e.g. Weibull, log-normal, gamma...) that do not have interpretations as meaningful _mechanisms_ for how risk changes over time.
+
+* Instead of selecting (or averaging) traditional parametric models, an _arbitrarily flexible_ parametric model should be used, that _adapts_ to give the optimal fit to the short-term and long-term data in combination.
+
+
+### How it works 
+
+* Bayesian multiparameter evidence synthesis is used to jointly model all sources of data and judgements 
+
+* An M-spline is used to represent how the hazard changes through time.  The Bayesian fitting method automatically chooses the optimal level of smoothness and flexibility.  Spline "knots" should span the period covered by the data, and any period where there is a chance that hazard may vary.
+
+* A proportional hazards model is used to describe the relation of survival to predictors. 
+
+* Mixture cure models are supported.  
+
+* The Stan software is used to do MCMC (Hamiltonian Monte Carlo) sampling from the posterior distribution.
+
+* Estimates and credible intervals for survival, hazard, mean and restricted mean survival can easily be extracted from the fitted model. 
+
+
+# Technical details of the model
+
+## M-splines 
+
+The axis of time is split into a set of regions defined by _knots_.   In the figure below, the knots are located at the integers from 0 to 10, as shown by the grid lines.
+
+Each knot is associated with a _cubic polynomial function_ $b_k(t)$, known as a _basis_ function.  M-spline basis functions are defined to be positive.
+
+Here there are 11 basis functions in the interior of the space. Each basis function has a peak around the knot, and diminishes to zero on either side.  Two additional basis functions are used with peaks at the boundaries of the space, so there are $K=13$ basis functions in total.    See [Ramsay](https://www.jstor.org/stable/2245395) for the exact definitions of $b_k(t)$. 
+
+The hazard $h(t)$ at time $t$ is defined by a _weighted sum_ of the basis functions:
+
+$$h(t) = \eta \sum_k p_k b_k(t)$$ 
+
+with 
+
+* weights $p_1,\ldots,p_K$ that sum to 1, $\sum_k p_k = 1$, known as the _basis coefficients_.
+    
+* a _scale_ parameter $\eta$ that describes the average level of the hazard. 
+
+```{r,message=FALSE,warning=FALSE,class.source = 'fold-hide'}
+p_equal <- rep(1/13, 13)
+p_unif <- mspline_uniform_weights(knots=1:9, bknots=c(0,10))
+haz_unif <- plot_mspline(df=13, scale=10, p = p_unif, plot=FALSE)$hazard 
+plot_mspline(df=13, scale=10, p = p_equal, tmax=10) + 
+    geom_line(aes(x=time, y=haz), data=haz_unif, color="red", lwd=1.5, inherit.aes = FALSE) + 
+    annotate(geom="text", x=2, y=1.5, color="red", label="h(t): weights `p_auto`") +
+    annotate(geom="text", x=1.5, y=2.5, color="blue", label="h(t): weights `p_equal`") + 
+    xlab("Time t") + ylab("Hazard rate") + ylim(0,3) 
+```
+
+
+## Using M-splines to represent particular hazard shapes
+
+The weights $p_k$ define how the hazard changes through time.   If knots are equally spaced, then $p_k$ are nearly proportional to the hazard in the $k$th region, so that if all $p_k$ are equal, then the hazard is nearly constant (red line `p_equal` in the figure).   It is not exactly constant because of the influence of the regions at either end of the space, whose polynomial functions have a skewed shape.  
+
+To produce a practically constant hazard, we can search numerically for the $p_k$ which minimise the variance of a selection of points $t$ that span the area that we want to model.  This search can be done automatically in the package (red line `p_auto` in the figure). 
+
+**Extrapolation?** To fully specify a parametric time-to-event model, we have to define the hazard for times greater than the time $t_{K}$ of the highest knot, which is 10 in the example.
+
+The model in `survextrap` simply assumes that the hazard for $t > t_{K}$ is constant, the same as the hazard at $t_{K}$. 
+
+Therefore, if you want to estimate survival over a period where you think the hazard might not be constant, then you should make sure that the highest spline knot $t_K$ is after the end of this period.   
+
+(_Sidenote_. Another way to define the hazard beyond the last knot would be to extrapolate the final basis polynomials, but this is not implemented. Although it would lead to a more smoothly extrapolated hazard, it would be driven by data just before the boundary, and would be making opaque assumptions about how the hazard changes after the boundary.  Ihe idea behind the package is to make all assumptions explicit as data or mechanisms.  Perhaps a better approach would be to make the function smooth at the final knot but still constant after then, somehow). 
+
+Examples of doing this with different kinds of data and knowledge are given in REF BELOW, summarise here
+
+```{r}
+plot_mspline(knots=c(1,3,5), bknots=c(0, 7), p=c(0.2, 0.3, 0.1, 0.1, 0.3, 0.1, 0.1), tmax=15)
+```
+
+
+#### Why not other kinds of spline?
+
+* The Royston/Parmar model (e.g. in flexsurv) uses a natural cubic spline for the log cumulative hazard function.  A cumulative hazard is defined to be a non-decreasing function, but the spline is not constrained.   The constraint is handled during fitting the model - spline coefficients which imply non-increasing cumulative hazard functions are rejected.  This is inefficient.
+
+* We could also have placed an unrestricted spline on the log hazard.   The disadvantage with this is that the cumulative hazard (required to obtain the likelihood for censored data) then has to be evaluated by numerical integration, which is slow.  
+
+The advantage of putting an M-spline on the hazard is that it respects the constraint that a hazard has to be non-negative, while it can be integrated analytically to produce the cumulative hazard. 
+
+
+
+## Bayesian model specification 
+
+The _parameters_ of the model, $p_k$ and $\eta$, are estimated from data using Bayesian inference.
+
+The _flexibility_ of the fitted model is determined by two things. 
+
+(a) The number $K$ and choice of knots.  This determines the _maximum potential flexibility_ of the hazard function.
+
+(b) The _prior distribution_ on the basis coefficients $p_k$.  This plays the role of _smoothing_ the fitted hazard function.
+
+The default approach taken by `survextrap` is to choose a large number of knots $K$, intended to accommodate all reasonable situations, and then _estimate_ the extent of smoothing needed from the data.
+
+* With _more data_, the fitted curve is as flexible as necessary to represent the data.
+
+* With _less data_, the fit is influenced more by the prior.
+
+This is a smoother, Bayesian analogue of the common approach to spline model selection based on choosing $K$ to give the model with the lowest AIC.  It also similar in principle to the "penalised likelihood" methods implemented in e.g. the `mgcv` and `rstpm2` packages.
+
+
+## Prior distribution for the hazard curve
+
+A log-normal prior is used for the scale $\eta$.   Currently this is set to the 
+
+(todo explain rationale. log crude event rate plus normal(0, 20) from [rstanarm](https://arxiv.org/pdf/2002.09633.pdf). )
+
+A multinomial logistic distribution defines the prior for the coefficients $p_k$ that define the mass of the hazard in each region: $log(p_k / p_1) = \beta_k$, with $\beta_1=0$ and $\beta_k \sim Logistic(\mu_k, \sigma)$ for $k = 2, \ldots, K$.  This prior is defined by:
+
+(a) **Prior mean**: $\boldsymbol{\mu} = (\mu_2,\ldots,\mu_K)$.  By default, this is determined from the special set of $p_k$ that result in a _constant hazard_ $h(t)$, REF graph above.
+
+(b) **Prior variability**: $\sigma$ controls the smoothness of the fitted hazard curve.
+
+    * If $\sigma=0$, then we are certain that the hazard function is the one defined by $\boldsymbol{\mu}$.
+
+    * Values of $\sigma$ around 1 favour wiggly curves, such that the fitted hazard curve is driven mainly by the the observed data. 
+
+    * For _very_ high values of $\sigma$, the hazard is dominated by a random one of the $K$ basis functions, which will not typically be useful in practice.
+
+(_Sidenote_. This is similar to the Dirichlet distribution for the $p_k$, but is slightly better behaved for estimation.  While the interpretation of $\sigma$ is not completely intuitive, we hope to show empirically that this prior works usefully well in practice) 
+
+The plots below show samples from the prior distribution for the hazard functions implied by 
+two choices of the joint distribution for $\eta$ and $p$.  In both, $\eta$ is log normal(0,1), which supports hazard rates between about 0.1 and 7, and the prior mean for $p$ is the special set that is centred around a constant hazard.  The two samples differ by the choice of prior variability.  $\sigma=0.05$ is a strong prior that forces the hazard to be nearly uniform, while $\sigma=1$ allows a wide range of wiggly shapes.   
+
+```{r,fig.height=3,class.source = 'fold-hide'}
+knots <- c(1:9); bknots <- c(0,10)
+p_mean <- mspline_uniform_weights(knots, bknots)
+prior_mean <- log(p_mean[-1] / p_mean[1])
+#prior_mean <- rep(1, length(knots) + 4)
+set.seed(1)
+p1 <- plot_mspline_priorpred(knots=knots, bknots=bknots, tmax=max(bknots)+1, 
+                       prior_mean=prior_mean, prior_sd=0.05, scale_sd=1, nsim=10) + 
+    ylim(0, 1) + ggtitle(bquote(sigma==0.05))
+p2 <- plot_mspline_priorpred(knots=knots, bknots=bknots, tmax=max(bknots)+1, 
+                       prior_mean=prior_mean, prior_sd=1, scale_sd=1, nsim=10) + 
+    ylim(0, 1) + ggtitle(bquote(sigma==1))
+gridExtra::grid.arrange(p1, p2, nrow=1)
+```
+
+By default, the package estimates $\sigma$ from the data, so the model is fitted in two steps (an "empirical Bayes" procedure):
+
+1. A "training" model fit is perfomed, where a prior is placed on $\sigma$, and the maximum a posteriori estimate $\hat\sigma$ of $\sigma$ is determined.
+
+2. A "final" model is then fitted, in which $\sigma$ is fixed to $\hat\sigma$, giving the "optimal" amount of smoothness for the hazard $h(t)$.
+
+This procedure still needs to be tested empirically to see whether it gives sensible results.  
+It seems to under-smooth in some cases.   The package can also give $\sigma$ a prior and estimate
+it as part of the full Bayesian model, which if it it works may give a better reflection of 
+model uncertainty.  Also it may not matter if the hazard function is under-smoothed, if the purpose 
+of the model is to estimate a quantity that is an average over time (e.g. mean survival).
+
+A sensible route to resolving these uncertainties might be use some kind of cross-validation to assess and choose between model specifications, though this hasn't been implemented yet  (is a "leave-one-out" approach OK with censored data?)
+
+
+## Choice of knots when modelling data
+
+By default, internal knots are placed at the quantiles of the vector comprising the uncensored survival times in the individual level data and the distinct follow-up times in the external data. (Smarter suggestions are welcome for this).
+
+6 internal knots are used, which (with cubic polynomials) leads to $K=10$ basis functions [check this notation] and parameters 
+
+Users can override this default however, and place knots at any position. 
+
+Lower boundary knot is set to 0.   The upper boundary knot is set to ??? highest time? 
+Advice to override if extrapolating
+
+The number of knots does not depend on the absolute amount of data - should it?   With small 
+datasets, there will be lots of knots and very few data points between them - and we will be relying more strongly on the prior to do the smoothing.  If we implemented cross-validation, we could 
+assess whether this matters. 
+
+
+
+# Examples
+
+For these examples, we use a dataset of trial of chemotherapy for colon cancer, provided as `colon` in the `survival` package, with an outcome of recurrence-free survival (`etype==1`) and artificially censored at 3 years.
+```{r}
+devtools::load_all(".")
+library(tidyverse)
+library(survminer)
+colonc <- colon |>
+    mutate(years = time/365.25) |>
+    filter(etype == 1) |>
+    mutate(status = ifelse(years > 3, 0, status),
+           years = ifelse(years > 3, 3, years))
+ggsurvplot(survfit(Surv(years, status) ~ 1, data=colonc))
+```
+
+
+## No external data
+
+The following is the simplest, default model in the package fitted to the short-term trial data alone. No external data are supplied.  After three years (the maximum follow up time of the short term data) 
+the model assumes the hazard stays constant.   
+
+The plot shows the posterior median and 95\% credible intervals for the survival and hazard functions.
+The spline adapts to give a practically perfect fit to the short-term data.   Although the model assumes the extrapolated hazard is constant, there is still a wide uncertainty interval around this constant value.  This might be thought to be plausible.
+
+```{r}
+nd_mod <- survextrap(Surv(years, status) ~ 1, data=colonc, chains=1, est_smooth = TRUE)
+print(nd_mod)
+plot(nd_mod, tmax=5)
+```
+
+We could allow for the possibility of hazard changes beyond three years by placing spline knots beyond this point.  
+
+The `basehaz_ops` argument is used to control the spline, the `bknots` component of this is the vector comprising the lower and upper boundary knots.  Here we simply move the upper boundary knot from three to four years.
+
+```{r}
+nd_mod2 <- survextrap(Surv(years, status) ~ 1, data=colonc, chains=1, est_smooth = TRUE,
+                     basehaz_ops = list(bknots = c(0, 4)))
+plot(nd_mod2, tmax=5)
+```
+
+This increases the amount of uncertainty about the extrapolated survival and hazard.  
+
+There are other ways we could have done this, such as changing the position of the knot, or adding extra knots around or beyond the upper part of the data.   The extrapolations are likely to be sensitive to the choice. 
+
+But it is only necessary to extrapolate in this way if there is **no information at all** about the 
+long term hazard! 
+
+In many practical situations of extrapolation in time-to-event models, we do have information.   For human survival, we know that people do not tend to live longer than 100 years.  There are usually data from national agencies about mortality of general populations. 
+
+
+## With a smaller dataset
+
+Estimating the smoothing parameter works nicely and quickly.   Hazard curve suggests some overfitting and an excessive number of knots
+
+```{r}
+nd_mod <- survextrap(Surv(futime, fustat) ~ 1, data=ovarian, chains=1, est_smooth = TRUE)
+plot(nd_mod)
+```
+
+
+
+## Mean and restricted mean survival 
+
+The functions `mean_survextrap` and `rmst_survextrap` calculate the mean and restricted mean survival time (RMST) from a fitted model.  Uncertainty is expressed by using the MCMC sample of the model parameters, and calculating the mean (or RMST) for each draw, which produces a sample from the posterior distribution of the mean (or RMST).   A posterior median and credible intervals are computed by summarising this sample.
+
+For particular combinations of parameter values, the mean under the model `nd_mod` cannot be calculated (resulting in an error message about a divergent integral), suggesting there is a substantial posterior probability that the mean is infinite.  
+
+Instead we compute the restricted mean $RMST(t)$ [DEF] over three alternative time limits $t$: 3, 10 and 1000 years.  The upper 95\% credible limit for $RMST(1000)$ is over 500. 
+
+```{r}
+# mean_survextrap(nd_mod)
+rmst_survextrap(nd_mod, c(3,10,1000))
+```
+
+We do not really believe that the mean survival for this population can be over 500 years, however.
+
+This is evidence that the fitted model is unrealistic, and we should have included external information to bound the estimates of the mean within plausible values. 
+
+This can be done with external data. 
+
+
+
+
+
+## Extrapolation using long term population data 
+
+Suppose we judge that after 5 years, the survival of these patients will be the same as in the general population, and we have some data describing the annual survival rates of a population
+who are similar to this one, perhaps from matching to national statistics or registry data by age and sex.    
+
+TODO explain knot choice for external data.  
+
+```{r,eval=FALSE}
+extdat <- data.frame(start = c(5, 10, 15, 20), 
+                     stop =  c(10, 15, 20, 25), 
+                     n = c(100, 100, 100, 100), 
+                     r = c(50, 40, 30, 20))
+nde_mod <- survextrap(Surv(years, status) ~ 1, data=colonc, est_smooth = TRUE,
+                      chains=1, external = extdat)
+plot(nde_mod)
+mean_survextrap(nde_mod)
+rmst_survextrap(nde_mod, c(3, 10, 1000))
+```
+
+Including the external data gives a more confident extrapolation. 
+
+Mean is finite.  RMST converges to the mean as it is supposed to
+
+
+## Expert elicitation on the long term
+
+Information about long term survival could be elicited from experts.  To use this information about the model, we should also elicit the expert's _uncertainty_.
+
+For example, we ask the expert to consider a set of people who have survived for 10 years.  How many of them would they expect to survive a further 5 years?  Through some kind of formal elicitation process, they supply a best guess (median) of 30%, and a 95\% credible interval of 10\% to 50\%.  
+
+Using standard techniques from elicitation (link shelf fitdist) we can interpret that as a $Beta(6.6, 15.0)$ prior distribution for the survival probability.  We can interpret this as the posterior from having observed $y=6$ survivors out of $n=20$ people (recalling the posterior from a $Binomial(y, n)$ combined with a vague $Beta(0.5, 0.5)$ prior is $Beta(y+0.5, n-y+0.5)$, and rounding $n$ and $y$ to whole numbers).
+
+```{r}
+SHELF::fitdist(vals=c(0.1, 0.3, 0.5), probs=c(0.025, 0.5, 0.975), lower=0, upper=1)$Beta
+```
+
+So the expert's judgment is equivalent to the information in an external dataset of the form 
+
+<table> 
+<tr>
+<th colspan="2">Follow-up period </th>
+<th colspan="2">Number</th>
+</tr> 
+<tr><th>Start time $t$</th><th>End time $u$</th><th>Alive at $t$</th><th>Still alive at $u$</th></tr>
+
+<tr>
+<td> 10 </td>
+<td> 15 </td>
+<td> 20 </td>
+<td> 6  </td>
+</tr>
+</table>
+
+and we can use it in a `survextrap` model as follows: 
+```{r}
+extdat <- data.frame(start = c(10), stop =  c(15), 
+                     n = c(20), r = c(6))
+nde_mod <- survextrap(Surv(years, status) ~ 1, data=colonc, est_smooth = TRUE,
+                      chains=1, external = extdat)
+plot(nde_mod)
+mean_survextrap(nde_mod)
+```
+
+There is still substantial uncertainty about the mean, even with this level of information, 
+but comparing to the second model REF above, it is better than no information at all. 
+TODO do this again when revisit knots. 
+
+This approach might be extended to include elicited values from multiple time points, or considering multiple experts.   In each case the elicited information can be converted straightforwardly into an aggregate table for use in `survextrap`.   
+
+
+
+
+## Covariates
+
+Proportional hazards model.  
+
+Example: treatment group `rx`, a factor with three levels
+
+```{r}
+coxph(Surv(years, status) ~ rx, data=colonc)
+rxph_mod <- survextrap(Surv(years, status) ~ rx, data=colonc, chains=1, est_smooth = TRUE)
+summary(rxph_mod) %>%
+    filter(variable=="loghr")
+plot(rxph_mod, niter=100)
+```
+
+Log hazard ratios agree with those from the Cox model. 
+
+Why is the fitted survival so different from the KM curves?  Is it because the proportional
+hazards assumption is wrong.   Can we have a graphical check for this.  Cumulative or log hazard?  
+
+Any number of covariates, categorical or continuous, can be included. 
+
+We can also have covariates in the external data.   If covariates are included in the model formula, and an external dataset is supplied, then we must specify covariate values for each row of the external dataset.   (If the covariates are factors, then they can be supplied as character vectors in `external`, but the values should be taken from the factor levels in the internal data [todo: this probably isn't a necessary restriction])
+
+For example, the external data might be assumed to have the same survival as the control group of the trial (corresponding to a value of `"Obs"` for the variable `rx`).
+
+```{r}
+extdat <- data.frame(start = c(5, 10), stop =  c(10, 15), 
+                     n = c(100, 100), r = c(50, 40), 
+                     rx = "Obs")
+rxphe_mod <- survextrap(Surv(years, status) ~ rx, data=colonc, 
+                      chains=1, external = extdat)
+rmst_survextrap(rxphe_mod, niter=100, t=20)
+plot(rxphe_mod, niter=100, tmax=5)
+plot_hazard(rxphe_mod, niter=100, tmax=20)
+```
+
+
+
+## Relative survival
+
+Not implemented yet.  Could easily support a constant background hazard in a conventional additive hazard model.  
+
+If a proportional hazards model was implemented, could also supply background survival as external count data and estimate the hazard ratio.
+
+
+## Cure models
+
+Generate a dataset with an obvious cure fraction
+
+```{r,eval=FALSE}
+
+library(flexsurvcure)
+set.seed(1)
+t <- rmixsurv(qweibull, n=1000, theta=0.5, shape=1.5, scale=1.2)
+censtime <- 10
+cure_df <- data.frame(t = pmin(t, censtime), status = as.numeric(t < censtime)) 
+plot(survfit(Surv(t, status) ~ 1, data=cure_df))
+
+## These are slow to sample 
+noncure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, 
+                          cure=FALSE, est_smooth = TRUE)
+plot(noncure_mod) # doesn't quite capture the curve
+
+## This is very slow, but it fits  
+cure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, cure=TRUE, modelid=1, est_smooth = TRUE)
+cure_mod
+bayesplot::mcmc_trace(cure_mod$stanfit, pars="cure_prob[1]")
+st <- surv_survextrap(cure_mod, times=1:10)
+plot(cure_mod, tmax=10)
+
+flcure_mod <- flexsurvcure(Surv(t, status) ~ 1, data=cure_df, mixture=TRUE, dist="weibull")
+flcure_mod  # shape 1.54, scale 1.266.  logshape 0.43, logscale 0.24.  OK agrees 
+plot(flcure_mod)
+```
+
+Should we allow covariates on the cure fraction as well, as flexsurvcure does by default.

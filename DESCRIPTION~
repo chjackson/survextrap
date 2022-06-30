@@ -1,0 +1,37 @@
+Package: survextrap
+Title: Survival Extrapolation With a Flexible Parametric Model and External Data
+Version: 0.1
+Authors@R: 
+    person("Christopher", "Jackson", , "chris.jackson@mrc-bsu.cam.ac.uk", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-6656-8913"))
+Description: Survival extrapolation using an individual-level right-censored time-to-event dataset, supplemented with aggregated external data on longer-term survival.  A Bayesian spline-based parametric model is used, where the appropriate flexibility is automatically determined from the data.  The external data may be in the form of elicited judgements about survival probabilities at specific times, with credible intervals.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.0
+Biarch: true
+Depends: 
+    R (>= 3.4.0),
+    survival
+Imports: 
+    methods,
+    Rcpp (>= 0.12.0),
+    rstan (>= 2.18.1),
+    posterior,
+    magrittr,
+    dplyr,
+    tidyr,
+    ggplot2
+LinkingTo: 
+    BH (>= 1.66.0),
+    Rcpp (>= 0.12.0),
+    RcppEigen (>= 0.3.3.3.0),
+    RcppParallel (>= 5.0.1),
+    rstan (>= 2.18.1),
+    StanHeaders (>= 2.18.0)
+SystemRequirements: GNU make
+Suggests: 
+    rstantools (>= 2.2.0),
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

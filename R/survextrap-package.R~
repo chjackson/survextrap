@@ -1,0 +1,20 @@
+#' The 'survextrap' package.
+#'
+#' @description A DESCRIPTION OF THE PACKAGE
+#'
+#' @docType package
+#' @name survextrap-package
+#' @aliases survextrap
+#' @useDynLib survextrap, .registration = TRUE
+#' @import methods
+#' @import Rcpp
+#' @importFrom rstan sampling nlist
+#' @import dplyr
+#' @importFrom tidyr extract pivot_wider pivot_longer
+#' @importFrom posterior as_draws
+#' @importFrom magrittr "%>%"
+#'
+#' @references
+#' Stan Development Team (NA). RStan: the R interface to Stan. R package version 2.26.11. https://mc-stan.org
+#'
+NULL
