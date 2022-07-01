@@ -48,9 +48,25 @@
 #'
 #' @param modelid TODO
 #'
-#' @param algorithm TODO
+#' @param fit_method Method from \pkg{rstan} used to fit the model.  Defaults to MCMC. 
 #'
-#' @param ... Additional arguments to supply to control the Stan fit, passed to the \pkg{rstan} function \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}
+#'  If \code{fit_method="mcmc"} then a sample from the posterior is drawn using Markov Chain Monte Carlo
+##' sampling, via \pkg{rstan}'s \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} function.
+##' This is the default.  It is the most accurate but the slowest method.
+##'
+##'   If \code{fit_method="opt"}, then instead of an MCMC sample from the posterior,
+##'   `disbayes` returns the posterior mode calculated using optimisation, via
+##'   \pkg{rstan}'s \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} function.
+##'   A sample from a normal approximation to the (real-line-transformed)
+##'   posterior distribution is drawn in order to obtain credible intervals.
+##' 
+##'   If \code{fit_method="vb"}, then variational Bayes methods are used, via \pkg{rstan}'s
+##'   \code{\link[rstan:stanmodel-method-vb]{rstan::vb()}} function.  This is labelled as "experimental" by
+##'   \pkg{rstan}.  It might give a better approximation to the posterior
+##'   than \code{fit_method="opt"}, but has not been investigated much for `disbayes` models.
+##' 
+#' @param ... Additional arguments to supply to control the Stan fit, passed to the appropriate
+#' \pkg{rstan} function.
 #'
 #'
 #' @export
@@ -63,7 +79,7 @@ survextrap <- function(formula,
                        cure_prior = c(1,1),
                        basehaz_ops = NULL,
                        modelid = 1,
-                       algorithm = "mcmc",
+                       fit_method = "mcmc",
                        ...)
 {
 
@@ -144,7 +160,7 @@ survextrap <- function(formula,
     nvars <- basehaz$nvars
 
     if (is.null(prior_weights)){
-        prior_weights <- mspline_uniform_weights(knots = basehaz$iknots, bknots=basehaz$bknots)
+        prior_weights <- mspline_uniform_weights(iknots = basehaz$iknots, bknots=basehaz$bknots)
     } else {
         ## TODO validate prior weights, reconcile with betaraw
     }
@@ -189,12 +205,18 @@ survextrap <- function(formula,
     }
     standata$smooth_sd_fixed <- if (est_smooth) aa(numeric()) else aa(smooth_sd)
 
-    if (algorithm=="opt")
-        fits <- rstan::optimizing(stanmodels$survextrap, data=standata, init=staninit)
-    else 
+    if (fit_method=="opt")
+        fits <- rstan::optimizing(stanmodels$survextrap, data=standata, init=staninit,
+                                  hessian=TRUE, draws=1000) # TODO defaults
+    else if (fit_method=="mcmc") 
         fits <- rstan::sampling(stanmodels$survextrap, data=standata, 
-                                pars = "beta", include=FALSE, 
+                                pars = "beta", include=FALSE,
                                 ...)
+    else if (fit_method=="vb") 
+        fits <- rstan::vb(stanmodels$survextrap, data=standata, 
+                          pars = "beta", include=FALSE,
+                          ...)
+    else stop(sprintf("Unknown fit_method: %s",fit_method))
 
     km <- survminer::surv_summary(survfit(formula, data=data), data=data)
 
@@ -213,7 +235,8 @@ survextrap <- function(formula,
                 xinds = x$xinds,
                 xbar = x$xbar,
                 log_crude_event_rate = log_crude_event_rate,
-                mf_baseline = x$mf_baseline)
+                mf_baseline = x$mf_baseline,
+                fit_method = fit_method)
     class(res) <- "survextrap"
     res
 }

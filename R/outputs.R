@@ -85,8 +85,8 @@ get_linpreds <- function(x, stanmat, newdata=NULL, niter=NULL){
 }
 
 get_pars <- function(x, newdata=NULL, niter=NULL){
-    stanmat <- as.matrix(x$stanfit)
-    ## TODO error if there are no samples
+    stanmat <- get_draws(x)
+    if (length(stanmat)==0) stop("Stan model does not contain samples")
     if (is.null(niter)) niter <- nrow(stanmat)
     alpha    <- stanmat[1:niter, "alpha",  drop = FALSE]
     ms_coef_names <- sprintf("coefs[%s]",seq(x$nvars))

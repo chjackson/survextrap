@@ -14,7 +14,7 @@ survextrap(
   cure_prior = c(1, 1),
   basehaz_ops = NULL,
   modelid = 1,
-  algorithm = "mcmc",
+  fit_method = "mcmc",
   ...
 )
 }
@@ -67,7 +67,25 @@ to convert other hazard forms into prior weights). ?? prior mean or beta?}
 
 \item{modelid}{TODO}
 
-\item{...}{Additional arguments to supply to control the Stan fit, passed to the \pkg{rstan} function \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}}
+\item{fit_method}{Method from \pkg{rstan} used to fit the model.  Defaults to MCMC.
+
+If \code{fit_method="mcmc"} then a sample from the posterior is drawn using Markov Chain Monte Carlo
+sampling, via \pkg{rstan}'s \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} function.
+This is the default.  It is the most accurate but the slowest method.
+
+If \code{fit_method="opt"}, then instead of an MCMC sample from the posterior,
+\code{disbayes} returns the posterior mode calculated using optimisation, via
+\pkg{rstan}'s \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} function.
+A sample from a normal approximation to the (real-line-transformed)
+posterior distribution is drawn in order to obtain credible intervals.
+
+If \code{fit_method="vb"}, then variational Bayes methods are used, via \pkg{rstan}'s
+\code{\link[rstan:stanmodel-method-vb]{rstan::vb()}} function.  This is labelled as "experimental" by
+\pkg{rstan}.  It might give a better approximation to the posterior
+than \code{fit_method="opt"}, but has not been investigated much for \code{disbayes} models.}
+
+\item{...}{Additional arguments to supply to control the Stan fit, passed to the appropriate
+\pkg{rstan} function.}
 }
 \description{
 survextrap

@@ -93,7 +93,7 @@ Major things to do are:
 
 * Non-proportional hazards.  This is expected to be computationally difficult, and I'm not sure of the best approach.
 
-* Thorough testing and documentation.
+* Thorough testing, documentation and error handling.
 
 If you want to try it out - feel free to install from github:
 

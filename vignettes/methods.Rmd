@@ -49,9 +49,9 @@ with
 library(survextrap)
 library(ggplot2)
 p_naive <- rep(1/13, 13)
-p_const <- mspline_uniform_weights(knots=1:9, bknots=c(0,10))
-haz_unif <- plot_mspline(df=13, scale=10, p = p_const, plot=FALSE)$hazard 
-plot_mspline(df=13, scale=10, p = p_naive, tmax=10) + 
+p_const <- mspline_uniform_weights(iknots=1:9, bknots=c(0,10))
+haz_unif <- plot_mspline(df=13, scale=10, coefs = p_const, plot=FALSE)$hazard 
+plot_mspline(df=13, scale=10, coefs = p_naive, tmax=10) + 
     geom_line(aes(x=time, y=haz), data=haz_unif, color="red", lwd=1.5, inherit.aes = FALSE) + 
     annotate(geom="text", x=2, y=1.5, color="red", label="h(t): weights `p_const`") +
     annotate(geom="text", x=1.5, y=2.5, color="blue", label="h(t): weights `p_naive`") + 
@@ -77,8 +77,8 @@ Examples of doing this with different kinds of data and knowledge are given in `
 
 Another arbitrary example of an M-spline curve:
 ```{r}
-plot_mspline(knots=c(1,3,5), bknots=c(0, 7),
-     p=c(0.2, 0.3, 0.1, 0.1, 0.3, 0.1, 0.1), tmax=15)
+plot_mspline(iknots=c(1,3,5), bknots=c(0, 7),
+     coefs=c(0.2, 0.3, 0.1, 0.1, 0.3, 0.1, 0.1), tmax=15)
 ```
 
 
@@ -134,15 +134,15 @@ The plots below show samples from the prior distribution for the hazard function
 two choices of the joint distribution for $\eta$ and $p$.  In both, $\eta$ is log normal(0,1), which supports hazard rates between about 0.1 and 7, and the prior mean for $p$ is the special set that is centred around a constant hazard.  The two samples differ by the choice of prior variability.  $\sigma=0.05$ is a strong prior that forces the hazard to be nearly uniform, while $\sigma=1$ allows a wide range of wiggly shapes.   
 
 ```{r,fig.height=3,class.source = 'fold-hide'}
-knots <- c(1:9); bknots <- c(0,10)
-p_mean <- mspline_uniform_weights(knots, bknots)
+iknots <- c(1:9); bknots <- c(0,10)
+p_mean <- mspline_uniform_weights(iknots, bknots)
 prior_mean <- log(p_mean[-1] / p_mean[1])
 #prior_mean <- rep(1, length(knots) + 4)
 set.seed(1)
-p1 <- plot_mspline_priorpred(knots=knots, bknots=bknots, tmax=max(bknots)+1, 
+p1 <- plot_mspline_priorpred(iknots=iknots, bknots=bknots, tmax=max(bknots)+1, 
                        prior_mean=prior_mean, prior_sd=0.05, scale_sd=1, nsim=10) + 
     ylim(0, 1) + ggtitle(bquote(sigma==0.05))
-p2 <- plot_mspline_priorpred(knots=knots, bknots=bknots, tmax=max(bknots)+1, 
+p2 <- plot_mspline_priorpred(iknots=iknots, bknots=bknots, tmax=max(bknots)+1, 
                        prior_mean=prior_mean, prior_sd=1, scale_sd=1, nsim=10) + 
     ylim(0, 1) + ggtitle(bquote(sigma==1))
 gridExtra::grid.arrange(p1, p2, nrow=1)

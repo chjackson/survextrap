@@ -6,7 +6,7 @@
 a particular mean and variance for the baseline curve and scale parameter.}
 \usage{
 plot_mspline_priorpred(
-  knots = NULL,
+  iknots = NULL,
   bknots = c(0, 10),
   df = 10,
   degree = 3,
@@ -16,33 +16,38 @@ plot_mspline_priorpred(
   scale_sd = 1,
   tmin = 0,
   tmax = 10,
-  nsim = 10
+  nsim = 10,
+  plot = TRUE
 )
 }
 \arguments{
-\item{knots}{Internal knots.  If not supplied, df has to be specified.  Then defaults
-to equally spaced knots between the boundary knots.}
+\item{iknots}{Internal knots.  If not supplied, \code{df} has to be specified, in which case
+the default is \code{df - degree - 1} equally spaced knots between the boundary knots.}
 
 \item{bknots}{Boundary knots.   Defaults to \code{c(0,10)}.}
 
-\item{df}{df TODO}
+\item{df}{Desired number of basis terms, or "degrees of freedom" in the spline.
+If \code{iknots} is not supplied, the number of internal knots is then chosen to satisfy this.}
 
 \item{degree}{Spline polynomial degree.}
 
-\item{prior_mean}{Prior mean TODO document properly}
+\item{prior_mean}{Vector of means for logistic distributions.}
 
-\item{prior_sd}{Prior SD TODO}
+\item{prior_sd}{Scale or SD parameter for logistic distributions (\code{scale} in \code{dllogis})}
 
-\item{scale}{Prior mean for scale parameter TODO}
+\item{scale}{Prior mean on log scale for the log-normal prior for the scale parameter.}
 
-\item{scale_sd}{Prior SD for scale parameter TODO}
+\item{scale_sd}{Prior SD on log scale for the log-normal prior for the scale parameter.}
 
-\item{tmin}{Minimum plotting time.  Defaults to lower boundary knot}
+\item{tmin}{Minimum plotting time.  Defaults to lower boundary knot.}
 
-\item{tmax}{Maximum plotting time.  Defaults to upper boundary knot}
+\item{tmax}{Maximum plotting time.  Defaults to upper boundary knot.}
 
 \item{nsim}{Number of simulations to draw}
+
+\item{plot}{If \code{TRUE} then a \code{ggplot2} plot object is returned.  If \code{FALSE} then the
+underlying data are returned and no plot is done.}
 }
 \description{
-See the methods vignette for full info for now
+See \code{vignette("methods")} for more information on this model.
 }

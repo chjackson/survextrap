@@ -2,19 +2,23 @@
 % Please edit documentation in R/mspline_plots.R
 \name{mspline_uniform_weights}
 \alias{mspline_uniform_weights}
-\title{Estimate M-spline basis weights which give a constant hazard}
+\title{Estimate M-spline basis weights which give a constant function.}
 \usage{
-mspline_uniform_weights(knots, bknots, times = NULL, degree = 3)
+mspline_uniform_weights(iknots, bknots, times = NULL, degree = 3)
 }
 \arguments{
-\item{knots}{TODO}
+\item{iknots}{Internal knots.}
 
-\item{bknots}{TODO}
+\item{bknots}{Boundary knots.}
 
-\item{times}{TODO}
+\item{times}{Times to use to construct the numerical calculation.
+By default, this is 20 equally-spaced times between the boundary knots.}
 
-\item{degree}{TODO}
+\item{degree}{Spline polynomial degree.}
 }
 \description{
-Estimate M-spline basis weights which give a constant hazard
+This works by choosing the basis coefficients that minimise the
+variance between log hazard values at different time points.
+It is used in \code{\link{survextrap}} to choose the default prior mean
+for the hazard function.
 }

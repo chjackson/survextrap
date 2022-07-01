@@ -56,11 +56,11 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_mspline</span><span class="op">(</span></span>
-<span>  knots <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  iknots <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bknots <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  df <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  p <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  coefs <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  scale <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  tmin <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  tmax <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -70,40 +70,46 @@
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>knots</dt>
-<dd><p>Internal knots</p></dd>
+    <dl><dt>iknots</dt>
+<dd><p>Internal knots.  If not supplied, <code>df</code> has to be specified, in which case
+the default is <code>df - degree - 1</code> equally spaced knots between the boundary knots.</p></dd>
 
 
 <dt>bknots</dt>
-<dd><p>Boundary knots</p></dd>
+<dd><p>Boundary knots.   Defaults to <code>c(0,10)</code>.</p></dd>
 
 
 <dt>df</dt>
-<dd><p>TODO</p></dd>
+<dd><p>Desired number of basis terms, or "degrees of freedom" in the spline.
+If <code>iknots</code> is not supplied, the number of internal knots is then chosen to satisfy this.</p></dd>
 
 
 <dt>degree</dt>
-<dd><p>Degree of polynomials defining the spline</p></dd>
+<dd><p>Spline polynomial degree.</p></dd>
 
 
-<dt>p</dt>
-<dd><p>Weights TODO rename to coefs</p></dd>
+<dt>coefs</dt>
+<dd><p>Coefficients of the spline basis terms.  These are normalised internally to sum to 1,
+if they do not already sum to 1.</p></dd>
 
 
 <dt>scale</dt>
-<dd><p>Scale parameter</p></dd>
+<dd><p>Scale parameter. After computing the standard M-spline function as a weighted sum of the basis
+terms, the function is multiplied by <code>scale</code>.   The log of the scale is the parameter called
+<code>alpha</code> in the results of a <code>survextrap</code> model, the intercept of the linear model on the log hazard.</p></dd>
 
 
 <dt>tmin</dt>
-<dd><p>Minimum time to plot</p></dd>
+<dd><p>Minimum plotting time.  Defaults to lower boundary knot.</p></dd>
 
 
 <dt>tmax</dt>
-<dd><p>Maximum time to plot to</p></dd>
+<dd><p>Maximum plotting time.  Defaults to upper boundary knot.</p></dd>
 
 
 <dt>plot</dt>
-<dd><p>Plot</p></dd>
+<dd><p>If <code>TRUE</code> then a <code>ggplot2</code> plot object is returned.  If <code>FALSE</code> then the
+underlying data are returned and no plot is done.</p></dd>
 
 </dl></div>
 

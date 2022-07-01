@@ -5,7 +5,7 @@
 \title{Get times and basis for an illustration of an M-spline with given knots.}
 \usage{
 mspline_plotsetup(
-  knots,
+  iknots,
   bknots = c(0, 10),
   tmin = NULL,
   tmax = NULL,
@@ -15,18 +15,19 @@ mspline_plotsetup(
 )
 }
 \arguments{
-\item{knots}{Internal knots.  If not supplied, df has to be specified.  Then defaults
-to equally spaced knots between the boundary knots.}
+\item{iknots}{Internal knots.  If not supplied, \code{df} has to be specified, in which case
+the default is \code{df - degree - 1} equally spaced knots between the boundary knots.}
 
 \item{bknots}{Boundary knots.   Defaults to \code{c(0,10)}.}
 
-\item{tmin}{Minimum plotting time.  Defaults to lower boundary knot}
+\item{tmin}{Minimum plotting time.  Defaults to lower boundary knot.}
 
-\item{tmax}{Maximum plotting time.  Defaults to upper boundary knot}
+\item{tmax}{Maximum plotting time.  Defaults to upper boundary knot.}
 
 \item{degree}{Spline polynomial degree.}
 
-\item{df}{df TODO}
+\item{df}{Desired number of basis terms, or "degrees of freedom" in the spline.
+If \code{iknots} is not supplied, the number of internal knots is then chosen to satisfy this.}
 
 \item{extrap_model}{If \code{"constant"} then the hazard after the final boundary
 knot equals the hazard at this knot.  Otherwise the basis functions are simply

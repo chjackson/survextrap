@@ -5,11 +5,11 @@
 \title{Plot a M-spline function, showing how it is built up from its basis}
 \usage{
 plot_mspline(
-  knots = NULL,
+  iknots = NULL,
   bknots = c(0, 10),
   df = 10,
   degree = 3,
-  p = NULL,
+  coefs = NULL,
   scale = 1,
   tmin = 0,
   tmax = 10,
@@ -17,23 +17,29 @@ plot_mspline(
 )
 }
 \arguments{
-\item{knots}{Internal knots}
+\item{iknots}{Internal knots.  If not supplied, \code{df} has to be specified, in which case
+the default is \code{df - degree - 1} equally spaced knots between the boundary knots.}
 
-\item{bknots}{Boundary knots}
+\item{bknots}{Boundary knots.   Defaults to \code{c(0,10)}.}
 
-\item{df}{TODO}
+\item{df}{Desired number of basis terms, or "degrees of freedom" in the spline.
+If \code{iknots} is not supplied, the number of internal knots is then chosen to satisfy this.}
 
-\item{degree}{Degree of polynomials defining the spline}
+\item{degree}{Spline polynomial degree.}
 
-\item{p}{Weights TODO rename to coefs}
+\item{coefs}{Coefficients of the spline basis terms.  These are normalised internally to sum to 1,
+if they do not already sum to 1.}
 
-\item{scale}{Scale parameter}
+\item{scale}{Scale parameter. After computing the standard M-spline function as a weighted sum of the basis
+terms, the function is multiplied by \code{scale}.   The log of the scale is the parameter called
+\code{alpha} in the results of a \code{survextrap} model, the intercept of the linear model on the log hazard.}
 
-\item{tmin}{Minimum time to plot}
+\item{tmin}{Minimum plotting time.  Defaults to lower boundary knot.}
 
-\item{tmax}{Maximum time to plot to}
+\item{tmax}{Maximum plotting time.  Defaults to upper boundary knot.}
 
-\item{plot}{Plot}
+\item{plot}{If \code{TRUE} then a \code{ggplot2} plot object is returned.  If \code{FALSE} then the
+underlying data are returned and no plot is done.}
 }
 \description{
 Plot a M-spline function, showing how it is built up from its basis

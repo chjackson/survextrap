@@ -7,7 +7,7 @@
 mspline_basis(times, iknots, bknots, degree = 3, integrate = FALSE)
 }
 \arguments{
-\item{times}{A numeric vector of times .  TODO DOCUMENT negative}
+\item{times}{A numeric vector of times at which to evaluate the basis.}
 
 \item{iknots}{Internal knots}
 
@@ -23,5 +23,7 @@ A two-dimensional array.  Rows are the times, and columns are the basis terms.
 \description{
 Extrapolation beyond the boundary knots is done by assuming that each basis term
 is constant beyond the boundary at its value at the boundary.
-This gives a continuous but non-smooth function.
+This gives a continuous but non-smooth function.   Each basis term is assumed to be
+zero at times less than zero, since these models are used for hazard functions
+in survival data.
 }

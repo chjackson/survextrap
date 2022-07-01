@@ -74,8 +74,8 @@ the same for all alternative times and parameter values.}
 distribution function, \code{hsurvmspline} gives the hazard and
 \code{Hsurvmspline} gives the cumulative hazard.
 
-\code{qsurvmspline} gives the quantile function, which is computed by crude
-numerical inversion (using \code{\link{qgeneric}}).
+\code{qsurvmspline} gives the quantile function, which is computed by
+numerical inversion.
 
 \code{rsurvmspline} generates random survival times by using
 \code{qsurvmspline} on a sample of uniform random numbers.

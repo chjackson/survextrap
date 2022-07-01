@@ -54,9 +54,11 @@ NULL
 ##'
 ##' Extrapolation beyond the boundary knots is done by assuming that each basis term
 ##' is constant beyond the boundary at its value at the boundary.
-##' This gives a continuous but non-smooth function.
+##' This gives a continuous but non-smooth function.   Each basis term is assumed to be
+##' zero at times less than zero, since these models are used for hazard functions
+##' in survival data. 
 ##'
-##' @param times A numeric vector of times .  TODO DOCUMENT negative
+##' @param times A numeric vector of times at which to evaluate the basis. 
 ##'
 ##' @param iknots Internal knots
 ##'
@@ -85,12 +87,27 @@ mspline_basis <- function(times, iknots, bknots, degree=3, integrate = FALSE) {
         out[iind] <- predict(ibasis0, times_int)
     }
     eind <- which(times > tmax)
+    ## Above the upper boundary knot 
     times_ext <- times[eind]
     n_ext <- length(times_ext)
     Mmax <- predict(basis0, tmax)
     Imax <- predict(ibasis0, tmax)
     for (i in seq_len(n_ext)){
         out[eind[i],] <- Imax + Mmax*(times_ext[i] - tmax)
+    }
+    ## Below the lower boundary knot 
+    eind <- which(times < tmin & times > 0)
+    times_ext <- times[eind]
+    n_ext <- length(times_ext)
+    Mmin <- predict(basis0, tmin)
+    Imin <- predict(ibasis0, tmin)
+    for (i in seq_len(n_ext)){
+        ## TODO.  hazard in this period is constant at Mmin.  is this consistent with integrated haz at times just above tmin? 
+        ## If this is weird should we force the lower boundary knot to be zero?
+        ## There should always be boundary knots bounding the period that we think the hazard might change
+        ## but if we just think it is constatnw we should be allowed to say that
+        ## TESTME
+        out[eind[i],] <- Mmin*times_int[i]
     }
   } else {
       times <- pmin(times, tmax)
