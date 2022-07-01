@@ -104,7 +104,9 @@ in the data.</p></dd>
 <dd><p>If <code>TRUE</code> then a Kaplan-Meier curve of the observed data is plotted,
 using the results of <code><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survival::survfit()</a></code> on the formula originally used
 for the <code>survextrap</code> fit.
-By default, this is only done when there are no covariates or one factor covariate.</p></dd>
+By default, this is only done when there are no covariates or one factor covariate.</p>
+<p>The Kaplan-Meier estimates are returned in the <code>km</code> component of the fitted model object
+returned by <code><a href="survextrap.html">survextrap</a></code>, if you want to construct your own plots like these.</p></dd>
 
 
 <dt>niter</dt>

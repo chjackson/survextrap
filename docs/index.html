@@ -154,7 +154,8 @@ etc…
 <li><p>An M-spline is used to represent how the hazard changes through time. The Bayesian fitting method automatically chooses the optimal level of smoothness and flexibility. Spline “knots” should span the period covered by the data, and any period where there is a chance that the hazard may vary.</p></li>
 <li><p>A proportional hazards model is used to describe the relation of survival to predictors.</p></li>
 <li><p>Mixture cure models are supported.</p></li>
-<li><p>The Stan software is used to do MCMC (Hamiltonian Monte Carlo) sampling from the posterior distribution.</p></li>
+<li><p>It has an R interface, designed to be friendly to those familiar with standard R modelling functions.</p></li>
+<li><p>Stan is used under the surface to do MCMC (Hamiltonian Monte Carlo) sampling from the posterior distribution, in a similar fashion to the <code>rstanarm</code> package.</p></li>
 <li><p>Estimates and credible intervals for survival, hazard, mean and restricted mean survival can easily be extracted from the fitted model.</p></li>
 </ul>
 </div>

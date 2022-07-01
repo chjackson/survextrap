@@ -72,15 +72,13 @@ the same for all alternative times and parameter values.}
 \value{
 \code{dsurvmspline} gives the density, \code{psurvmspline} gives the
 distribution function, \code{hsurvmspline} gives the hazard and
-\code{Hsurvmspline} gives the cumulative hazard, as described in
+\code{Hsurvmspline} gives the cumulative hazard.
 
 \code{qsurvmspline} gives the quantile function, which is computed by crude
 numerical inversion (using \code{\link{qgeneric}}).
 
 \code{rsurvmspline} generates random survival times by using
-\code{qsurvmspline} on a sample of uniform random numbers.  Due to the
-numerical root-finding involved in \code{qsurvmspline}, it is slow compared
-to typical random number generation functions.
+\code{qsurvmspline} on a sample of uniform random numbers.
 }
 \description{
 Probability density, distribution, quantile, random generation, hazard,

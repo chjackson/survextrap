@@ -43,7 +43,7 @@ colonc <- colon |>
     filter(etype == 1) |>
     mutate(status = ifelse(years > 3, 0, status),
            years = ifelse(years > 3, 3, years))
-survminer::ggsurvplot(survfit(Surv(years, status) ~ 1, data=colonc))
+survminer::ggsurvplot(survfit(Surv(years, status) ~ 1, data=colonc), data=colonc)
 ```
 
 
@@ -81,7 +81,7 @@ In many practical situations of extrapolation in time-to-event models, we do hav
 
 ## With a smaller dataset
 
-Works nice and quickly.   Hazard curve suggests some overfitting and an excessive number of knots though, though unclear how much that matters
+Works nice and quickly.   Hazard curve suggests some overfitting and an excessive number of knots, though it's unclear how much that matters.
 
 ```{r,results="hide"}
 nd_mod3 <- survextrap(Surv(futime, fustat) ~ 1, data=ovarian, chains=1)
@@ -205,12 +205,10 @@ summary(rxph_mod) |>
     filter(variable=="loghr")
 ```
 
+The posterior median survival curves (thick lines) agree with the subgroup-specific Kaplan-Meier estimates (thin lines).
 ```{r}
 plot(rxph_mod, niter=100)
 ```
-
-Why is the fitted survival so different from the KM curves?  Is it because the hazards are non-proportional?
-More investigation is needed here. 
 
 Any number of covariates, categorical or continuous, can be included. 
 

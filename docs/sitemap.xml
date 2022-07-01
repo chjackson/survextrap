@@ -22,6 +22,9 @@
     <loc>https://chjackson.github.io/survextrap/LICENSE.html</loc>
   </url>
   <url>
+    <loc>https://chjackson.github.io/survextrap/reference/hazard.html</loc>
+  </url>
+  <url>
     <loc>https://chjackson.github.io/survextrap/reference/hazard_survextrap.html</loc>
   </url>
   <url>
@@ -71,6 +74,9 @@
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/survextrap.html</loc>
+  </url>
+  <url>
+    <loc>https://chjackson.github.io/survextrap/reference/survival.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/Survmspline.html</loc>

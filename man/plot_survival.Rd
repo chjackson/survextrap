@@ -44,7 +44,10 @@ in the data.}
 \item{km}{If \code{TRUE} then a Kaplan-Meier curve of the observed data is plotted,
 using the results of \code{\link[survival:survfit]{survival::survfit()}} on the formula originally used
 for the \code{survextrap} fit.
-By default, this is only done when there are no covariates or one factor covariate.}
+By default, this is only done when there are no covariates or one factor covariate.
+
+The Kaplan-Meier estimates are returned in the \code{km} component of the fitted model object
+returned by \code{\link{survextrap}}, if you want to construct your own plots like these.}
 
 \item{niter}{Number of MCMC iterations to use to compute credible
 intervals.  Set to a low value to make this function quicker, at the cost of

@@ -143,17 +143,15 @@ the same for all alternative times and parameter values.</p></dd>
 
 <p><code>dsurvmspline</code> gives the density, <code>psurvmspline</code> gives the
 distribution function, <code>hsurvmspline</code> gives the hazard and
-<code>Hsurvmspline</code> gives the cumulative hazard, as described in</p>
+<code>Hsurvmspline</code> gives the cumulative hazard.</p>
 
 
 <p><code>qsurvmspline</code> gives the quantile function, which is computed by crude
-numerical inversion (using <code><a href="qgeneric.html">qgeneric</a></code>).</p>
+numerical inversion (using <code>qgeneric</code>).</p>
 
 
 <p><code>rsurvmspline</code> generates random survival times by using
-<code>qsurvmspline</code> on a sample of uniform random numbers.  Due to the
-numerical root-finding involved in <code>qsurvmspline</code>, it is slow compared
-to typical random number generation functions.</p>
+<code>qsurvmspline</code> on a sample of uniform random numbers.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

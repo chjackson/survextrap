@@ -16,7 +16,7 @@
 ##' of being summarised as a median and 95% credible intervals.
 ##'
 ##' @export
-surv_survextrap <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE) {
+survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE) {
     if (is.null(newdata)) newdata <- x$mf_baseline
     pars <- get_pars(x, newdata=newdata, niter=niter)
     if (is.null(times)) times <- default_plottimes(x, tmax)
@@ -59,10 +59,10 @@ surv_survextrap <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, 
 ##' Estimates of hazard from a survextrap model
 ##'
 ##' @inheritParams print.survextrap
-##' @inheritParams surv_survextrap
+##' @inheritParams survival
 ##'
 ##' @export
-hazard_survextrap <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE){
+hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE){
     if (is.null(newdata)) newdata <- x$mf_baseline
     pars <- get_pars(x, newdata=newdata, niter=niter)
     if (is.null(times)) times <- default_plottimes(x, tmax)
@@ -95,7 +95,7 @@ hazard_survextrap <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL
         cure_prob_mat <- array(rep(rep(pars$cure_prob, each=nt), nvals),
                                dim = c(nt, niter, nvals))
         loghaz_sam <- log(1 - cure_prob_mat) +  logdens_sam -
-            log(surv_survextrap(x, times=times, sample=TRUE))
+            log(survival(x, times=times, sample=TRUE))
     }
     haz_sam <- exp(loghaz_sam)
     if (!sample){
@@ -112,7 +112,7 @@ hazard_survextrap <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL
 
 ##' Plot hazard curves from a survextrap model
 ##'
-##' @inheritParams surv_survextrap
+##' @inheritParams survival
 ##'
 ##' @param ci If \code{TRUE} then credible intervals are drawn.  Defaults to
 ##' drawing the intervals if the plot shows the curve for only one covariate value.
@@ -129,7 +129,7 @@ hazard_survextrap <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL
 plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
                         ci=NULL, xlab="Time", ylab="Hazard", line_size=1.5, ci_alpha=0.2){
     lower <- upper <- NULL # TODO do strings work
-    haz <- hazard_survextrap(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
+    haz <- hazard(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
     knots <- x$basehaz$knots[x$basehaz$knots <= max(haz$times)]
     aes <- list(x="times", y="median")
     if (attr(haz, "nvals") > 1)
@@ -153,7 +153,7 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
 
 ##' Plot survival curves from a survextrap model
 ##'
-##' @inheritParams surv_survextrap
+##' @inheritParams survival
 ##' @inheritParams plot_hazard
 ##'
 ##' @param km If \code{TRUE} then a Kaplan-Meier curve of the observed data is plotted,
@@ -169,7 +169,7 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
 plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter=NULL,
                           ci=NULL, xlab="Time", ylab="Survival", line_size=1.5, ci_alpha=0.2){
     lower <- upper <- NULL
-    surv <- surv_survextrap(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
+    surv <- survival(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
     knots <- x$basehaz$knots[x$basehaz$knots <= max(surv$times)]
     aes <- list(x="times", y="median")
     if (attr(surv,"nvals") > 1)
@@ -210,20 +210,6 @@ default_plottimes <- function(x, tmax=NULL, nplot=100){
     tmin <- 0
     if (is.null(tmax)) tmax <- max(c(x$eventtime, x$external$stop))
     times <- seq(tmin, tmax, by = (tmax - tmin) / nplot)
-}
-
-get_pars <- function(x, newdata=NULL, niter=NULL){
-    stanmat <- as.matrix(x$stanfit)
-    ## TODO error if there are no samples
-    if (is.null(niter)) niter <- nrow(stanmat)
-    alpha    <- stanmat[1:niter, "alpha",  drop = FALSE]
-    ms_coef_names <- sprintf("coefs[%s]",seq(x$nvars))
-    coefs      <- stanmat[1:niter, ms_coef_names,  drop = FALSE]
-    cure_prob <- if (x$cure) stanmat[1:niter, "cure_prob[1]"] else NULL
-    linpreds <- get_linpreds(x=x, stanmat=stanmat, newdata=newdata, niter=niter)
-    res <- nlist(alpha, linpreds, coefs, cure_prob)
-    attr(res, "niter") <- niter
-    res
 }
 
 #' Plot method for survextrap model objects

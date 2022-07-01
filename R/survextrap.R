@@ -19,16 +19,17 @@
 #' other common forms of external data, e.g. registry or population data, or elicited judgements
 #' about conditional survival
 #'
-#' @param smooth_sd Smoothing parameter. If this is `"estimate"` (the default), then the smoothing
-#' parameter is estimated by empirical Bayes.   Alternatively, a fixed value can be supplied here.
-#' TODO finalize what distribution is used.
+#' @param smooth_sd Smoothing parameter estimation.
+#'
+#' `"bayes"`: the smoothing parameter is estimated by full Bayes.
+#'
+#'  `"eb"`: empirical Bayes is used. 
+#'
+#' Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number. 
 #'
 #' @param prior_weights Spline basis weights defining the prior mean for the hazard function. By
 #' default these are set to values that define a constant hazard function.  (TODO: a tool for people
 #' to convert other hazard forms into prior weights). ?? prior mean or beta?
-#'
-#' @param est_smooth If `TRUE`, then the smoothing parameter is given a prior distribution and
-#' estimated by full Bayes, and the `smooth_sd` argument is ignored.  This is `FALSE` by default.
 #'
 #' @param cure If `TRUE` a mixture cure model is used.
 #'
@@ -47,20 +48,22 @@
 #'
 #' @param modelid TODO
 #'
-#' @param ... Additional arguments to supply to control the Stan fit, passed to the \pkg{rstan} function \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} 
+#' @param algorithm TODO
+#'
+#' @param ... Additional arguments to supply to control the Stan fit, passed to the \pkg{rstan} function \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}
 #'
 #'
 #' @export
 survextrap <- function(formula,
                        data,
                        external=NULL,
-                       smooth_sd = "estimate",
+                       smooth_sd = "bayes",
                        prior_weights = NULL,
-                       est_smooth = TRUE,
                        cure = FALSE,
                        cure_prior = c(1,1),
                        basehaz_ops = NULL,
                        modelid = 1,
+                       algorithm = "mcmc",
                        ...)
 {
 
@@ -81,8 +84,9 @@ survextrap <- function(formula,
     make_x <- function(formula, mf, xlevs=NULL){
         x <- model.matrix(formula, mf, xlev = xlevs)
         x <- drop_intercept(x)
-        x_bar <- aa(colMeans(x))
-        x_centered <- sweep(x, 2, x_bar, FUN = "-")
+        ncovs <- NCOL(x)
+        xbar <- aa(colMeans(x))
+        x_centered <- sweep(x, 2, xbar, FUN = "-")
 
         mf2 <- mf[-attr(terms(mf), "response")]
         if (ncol(mf2) > 0){
@@ -101,15 +105,15 @@ survextrap <- function(formula,
             mf_baseline <- as.data.frame(c(mean_of_numerics, base_levs))
         } else xlevs <- mf_baseline <- xinds <- NULL
 
-        nlist(x, x_centered, x_bar, N = NROW(x),
-              K = NCOL(x),
+        nlist(x, x_centered, xbar, N = NROW(x),
+              ncovs = NCOL(x),
               xnames=colnames(x),
               xlevs, xinds,
               mf_baseline)
     }
 
     x <- make_x(formula, mf)
-    ncovs <- x$K
+    ncovs <- x$ncovs
     x_event <- x$x_centered[ind_event, , drop = FALSE]
     x_rcens <- x$x_centered[ind_rcens, , drop = FALSE]
 
@@ -119,7 +123,7 @@ survextrap <- function(formula,
     if (is.infinite(log_crude_event_rate))
         log_crude_event_rate <- 0 # avoids error when there are zero events
 
-    external <- parse_external(external, formula, ncovs, xlevs=x$xlevs)
+    external <- parse_external(external, formula, ncovs, xlevs=x$xlevs, xbar=x$xbar)
     t_ext_stop <- aa(external$stop)
     t_ext_start <- aa(external$start)
     r_ext <- aa(external$r)
@@ -139,7 +143,6 @@ survextrap <- function(formula,
     ibasis_rcens <- make_basis(t_rcens, basehaz, integrate = TRUE)
     nvars <- basehaz$nvars
 
-    est_smooth <- as.integer(est_smooth);
     if (is.null(prior_weights)){
         prior_weights <- mspline_uniform_weights(knots = basehaz$iknots, bknots=basehaz$bknots)
     } else {
@@ -162,6 +165,8 @@ survextrap <- function(formula,
     ibasis_ext_stop <- if (nextern>0) make_basis(t_ext_stop, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
     ibasis_ext_start <- if (nextern>0) make_basis(t_ext_start, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
 
+    est_smooth <- (smooth_sd == "bayes")
+    if (est_smooth) smooth_sd <- 1
     standata <- nlist(nevent, nrcens, nvars, nextern, ncovs,
                       log_crude_event_rate,
                       basis_event, ibasis_event, ibasis_rcens,
@@ -170,25 +175,26 @@ survextrap <- function(formula,
                       r_ext, n_ext, x_ext,
                       beta_mean,
                       est_smooth,
-                      cure = cure,
+                      cure,
                       cure_shape = cure_prior, ## TODO standardise name, mean+ESS param
-                      modelid = modelid
+                      modelid
                       )
     staninit <- list(gamma = aa(0),
                      loghr = aa(rep(0, ncovs)),
                      beta_err = rep(0, nvars),
                      smooth_sd = aa(smooth_sd),
                      cure_prob = cure_prob_init)
-    if (est_smooth) smooth_sd <- 1
-    if (identical(smooth_sd, "estimate") && !est_smooth){
+    if (identical(smooth_sd, "eb")){
         smooth_sd <- eb_smoothness(standata, staninit)
     }
-    standata$smooth_sd_fixed <- aa(smooth_sd)
-    ## todo validate prior_ess
+    standata$smooth_sd_fixed <- if (est_smooth) aa(numeric()) else aa(smooth_sd)
 
-    fits <- rstan::sampling(stanmodels$survextrap, data=standata,
-                            pars = "beta", include=FALSE,
-                            ...)
+    if (algorithm=="opt")
+        fits <- rstan::optimizing(stanmodels$survextrap, data=standata, init=staninit)
+    else 
+        fits <- rstan::sampling(stanmodels$survextrap, data=standata, 
+                                pars = "beta", include=FALSE, 
+                                ...)
 
     km <- survminer::surv_summary(survfit(formula, data=data), data=data)
 
@@ -196,7 +202,8 @@ survextrap <- function(formula,
                 stanfit=fits, standata=standata, basehaz=basehaz,
                 entrytime=t_beg, eventtime=t_end, external=external, # TODO way to strip the data
                 nvars = nvars,
-                prior_weights = prior_weights, 
+                ncovs = ncovs,
+                prior_weights = prior_weights,
                 smooth_sd = smooth_sd,
                 cure = cure,
                 modelid = modelid,
@@ -204,6 +211,8 @@ survextrap <- function(formula,
                 xnames = x$xnames,
                 xlevs = x$xlevs,
                 xinds = x$xinds,
+                xbar = x$xbar,
+                log_crude_event_rate = log_crude_event_rate,
                 mf_baseline = x$mf_baseline)
     class(res) <- "survextrap"
     res
@@ -373,7 +382,7 @@ make_d <- function(model_frame) {
          stop(err))
 }
 
-parse_external <- function(external, formula, ncovs, xlevs=NULL){
+parse_external <- function(external, formula, ncovs, xlevs=NULL, xbar){
     ## TODO validate here.
     if (is.null(external))
         external <- list(nextern=0, stop=numeric(), start=numeric(),
@@ -385,8 +394,7 @@ parse_external <- function(external, formula, ncovs, xlevs=NULL){
             form <- delete.response(terms(formula))
             x <- model.matrix(form, external, xlev = xlevs)
             x <- drop_intercept(x)
-            x_bar <- aa(colMeans(x)) # TODO do we need these??
-            x_centered <- sweep(x, 2, x_bar, FUN = "-")
+            x_centered <- sweep(x, 2, xbar, FUN = "-")
         }
     }
     if ((external$nextern==0) || (ncovs==0))
@@ -430,8 +438,9 @@ get_iknots <- function(x, df = 5L, degree = 3L, iknots = NULL, intercept = FALSE
   }
 
   # validate number of internal knots
-  if (nk < 0) {
-    stop2("Number of internal knots cannot be negative.")
+    if (nk < 0) {
+    ## FIXME why does this not print the error sometines? 
+    stop("Number of internal knots cannot be negative.")
   }
 
   # if no internal knots then return empty vector
@@ -443,6 +452,7 @@ get_iknots <- function(x, df = 5L, degree = 3L, iknots = NULL, intercept = FALSE
   if (is.null(iknots)) {
     iknots <- qtile(x, nq = nk + 1) # evenly spaced percentiles
   }
+
 
   # return internal knot locations, ensuring they are positive
   validate_positive_scalar(iknots)
@@ -456,6 +466,7 @@ handle_basehaz_surv <- function(basehaz_ops,
                                 times_ext,
                                 status,
                                 min_t, max_t){
+
     df     <- basehaz_ops$df
     knots  <- basehaz_ops$knots
     degree <- basehaz_ops$degree

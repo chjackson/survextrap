@@ -8,13 +8,13 @@ survextrap(
   formula,
   data,
   external = NULL,
-  smooth_sd = "estimate",
+  smooth_sd = "bayes",
   prior_weights = NULL,
-  est_smooth = FALSE,
   cure = FALSE,
   cure_prior = c(1, 1),
   basehaz_ops = NULL,
   modelid = 1,
+  algorithm = "mcmc",
   ...
 )
 }
@@ -38,16 +38,17 @@ It is intended to add facilities to the package to produce this format of data f
 other common forms of external data, e.g. registry or population data, or elicited judgements
 about conditional survival}
 
-\item{smooth_sd}{Smoothing parameter. If this is \code{"estimate"} (the default), then the smoothing
-parameter is estimated by empirical Bayes.   Alternatively, a fixed value can be supplied here.
-TODO finalize what distribution is used.}
+\item{smooth_sd}{Smoothing parameter estimation.
+
+\code{"bayes"}: the smoothing parameter is estimated by full Bayes.
+
+\code{"eb"}: empirical Bayes is used.
+
+Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number.}
 
 \item{prior_weights}{Spline basis weights defining the prior mean for the hazard function. By
 default these are set to values that define a constant hazard function.  (TODO: a tool for people
 to convert other hazard forms into prior weights). ?? prior mean or beta?}
-
-\item{est_smooth}{If \code{TRUE}, then the smoothing parameter is given a prior distribution and
-estimated by full Bayes, and the \code{smooth_sd} argument is ignored.  This is \code{FALSE} by default.}
 
 \item{cure}{If \code{TRUE} a mixture cure model is used.}
 

@@ -60,7 +60,9 @@ The package has been developed under the expectation that many forms of external
 
 * Mixture cure models are supported.
 
-* The Stan software is used to do MCMC (Hamiltonian Monte Carlo) sampling from the posterior distribution.
+* It has an R interface, designed to be friendly to those familiar with standard R modelling functions.
+
+* Stan is used under the surface to do MCMC (Hamiltonian Monte Carlo) sampling from the posterior distribution, in a similar fashion to the `rstanarm` package. 
 
 * Estimates and credible intervals for survival, hazard, mean and restricted mean survival can easily be extracted from the fitted model.
 

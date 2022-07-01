@@ -78,7 +78,7 @@ functions {
 		base_loghaz = mspline_log_haz(eta, basis, coefs);
 	    } else {
 		for (i in 1:rows(eta)){
-		    base_loghaz[i] = weibull_lpdf(ibasis[i,1] | coefs[1], exp(eta[1])) -
+		    base_loghaz[i] = weibull_lpdf(basis[i,1] | coefs[1], exp(eta[1])) -
 			weibull_lccdf(ibasis[i,1] | coefs[1], exp(eta[1]));
 		}
 	    }
@@ -106,30 +106,6 @@ functions {
     return target();
   }
 
-  /**
-  * Log-prior for baseline hazard parameters
-  *
-  * @param aux_unscaled Vector (potentially of length 1) of unscaled
-  *   auxiliary parameter(s)
-  * @param dist Integer specifying the type of prior distribution
-  * @param df Real specifying the df for the prior distribution, or in the case
-  *   of the dirichlet distribution it is the concentration parameter(s)
-  * @return Nothing
-  */
-  real basehaz_lp(vector aux_unscaled, int dist, vector df) {
-    if (dist > 0) {
-      if (dist == 1)
-        target += normal_lpdf(aux_unscaled | 0, 1);
-      else if (dist == 2)
-        target += student_t_lpdf(aux_unscaled | df, 0, 1);
-      else if (dist == 3)
-        target += exponential_lpdf(aux_unscaled | 1);
-      else
-        target += dirichlet_lpdf(aux_unscaled | df); // df is concentration here
-    }
-    return target();
-  }
-
 }
 
 data {
@@ -152,17 +128,14 @@ data {
   matrix[nrcens,ncovs] x_rcens;
 
  // external data describing knowledge about long-term survival
- // expressed as binomial outcomes of r survivors out of n people alive at time 0
- // Will need to be conditioned appropriately,
- // especially with multiple time points, don't want double counting of same judgement
- // so wont we want a sequence P(surv to t_r | alive at t_{r-1}) = ratio of surv probs 
+ // expressed as binomial outcomes of r survivors by t2 out of n people alive at t1
   int<lower=0> r_ext[nextern];
   int<lower=0> n_ext[nextern];
   matrix[nextern,ncovs] x_ext;
 
   vector[nvars-1] beta_mean; // logit of prior guess at basis weights (by default, those that give a constant hazard)
   int est_smooth;
-  vector<lower=0>[1] smooth_sd_fixed;
+  vector<lower=0>[1-est_smooth] smooth_sd_fixed;
 
   int cure;
   vector<lower=0>[2] cure_shape;
@@ -200,7 +173,6 @@ model {
     vector[nextern] eta_extern; // for external data
     vector[nextern] p_ext_stop; // unconditional survival prob at external time points
     vector[nextern] p_ext_start; // 
-    vector[nvars] prior_conc_est; // dirichlet concentration pars
 
     if (ncovs > 0) {
 	// does x * beta,    matrix[n,K] * vector[K] is this a matrix product 

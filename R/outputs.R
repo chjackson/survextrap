@@ -72,9 +72,28 @@ newdata_to_X <- function(newdata, x){
 }
 
 get_linpreds <- function(x, stanmat, newdata=NULL, niter=NULL){
-    X <- newdata_to_X(newdata, x) # nvals x npars
+    if (x$ncovs > 0){
+        X <- newdata_to_X(newdata, x) # nvals x npars
+        X <- drop_intercept(X)
+        X <- sweep(X, 2, x$xbar, FUN = "-")
+    } else X <- NULL
+    X <- cbind("(Intercept)"=1, X)
     if (is.null(niter)) niter <- nrow(stanmat)
     loghr_names <- grep("loghr", colnames(stanmat), value=TRUE)
     beta <- stanmat[1:niter, c("alpha", loghr_names)]
     beta %*% t(X) # niter x nvals
+}
+
+get_pars <- function(x, newdata=NULL, niter=NULL){
+    stanmat <- as.matrix(x$stanfit)
+    ## TODO error if there are no samples
+    if (is.null(niter)) niter <- nrow(stanmat)
+    alpha    <- stanmat[1:niter, "alpha",  drop = FALSE]
+    ms_coef_names <- sprintf("coefs[%s]",seq(x$nvars))
+    coefs      <- stanmat[1:niter, ms_coef_names,  drop = FALSE]
+    cure_prob <- if (x$cure) stanmat[1:niter, "cure_prob[1]"] else NULL
+    linpreds <- get_linpreds(x=x, stanmat=stanmat, newdata=newdata, niter=niter)
+    res <- nlist(alpha, linpreds, coefs, cure_prob)
+    attr(res, "niter") <- niter
+    res
 }

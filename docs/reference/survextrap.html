@@ -59,13 +59,13 @@
 <span>  <span class="va">formula</span>,</span>
 <span>  <span class="va">data</span>,</span>
 <span>  external <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  smooth_sd <span class="op">=</span> <span class="st">"estimate"</span>,</span>
+<span>  smooth_sd <span class="op">=</span> <span class="st">"bayes"</span>,</span>
 <span>  prior_weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  est_smooth <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cure <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cure_prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  basehaz_ops <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  modelid <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  algorithm <span class="op">=</span> <span class="st">"mcmc"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -93,20 +93,16 @@ about conditional survival</p></dd>
 
 
 <dt>smooth_sd</dt>
-<dd><p>Smoothing parameter. If this is <code>"estimate"</code> (the default), then the smoothing
-parameter is estimated by empirical Bayes.   Alternatively, a fixed value can be supplied here.
-TODO finalize what distribution is used.</p></dd>
+<dd><p>Smoothing parameter estimation.</p>
+<p><code>"bayes"</code>: the smoothing parameter is estimated by full Bayes.</p>
+<p><code>"eb"</code>: empirical Bayes is used.</p>
+<p>Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number.</p></dd>
 
 
 <dt>prior_weights</dt>
 <dd><p>Spline basis weights defining the prior mean for the hazard function. By
 default these are set to values that define a constant hazard function.  (TODO: a tool for people
 to convert other hazard forms into prior weights). ?? prior mean or beta?</p></dd>
-
-
-<dt>est_smooth</dt>
-<dd><p>If <code>TRUE</code>, then the smoothing parameter is given a prior distribution and
-estimated by full Bayes, and the <code>smooth_sd</code> argument is ignored.  This is <code>FALSE</code> by default.</p></dd>
 
 
 <dt>cure</dt>
