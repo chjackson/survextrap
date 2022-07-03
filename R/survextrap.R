@@ -23,32 +23,35 @@
 #'
 #' `"bayes"`: the smoothing parameter is estimated by full Bayes.
 #'
-#'  `"eb"`: empirical Bayes is used. 
+#'  `"eb"`: empirical Bayes is used.
 #'
-#' Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number. 
+#' Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number.
 #'
-#' @param prior_weights Spline basis weights defining the prior mean for the hazard function. By
-#' default these are set to values that define a constant hazard function.  (TODO: a tool for people
-#' to convert other hazard forms into prior weights). ?? prior mean or beta?
+#' @param coefs_mean Spline basis coefficients that define the prior mean for the hazard function. By
+#' default, these are set to values that define a constant hazard function.
 #'
-#' @param cure If `TRUE` a mixture cure model is used.
+#' @param cure If `TRUE`, a mixture cure model is used.
 #'
-#' @param cure_prior Beta shape parameters for the cure probability (vector of two)
+#' @param cure_prior Beta shape parameters for the cure probability (vector of two).
 #'
-#' @param basehaz_ops A list of control parameters
+#' @param basehaz_ops A list of control parameters defining the spline model.
 #'
-#' `knots`: Internal knots.  If this is not supplied, then `df` chosen quantiles of the uncensored survival times.
+#' `iknots`: Internal knots.  If this is not supplied, then the number of knots is taken from `df`,
+#' and their location is taken from equally-spaced quantiles of the observed event times (concatenated
+#' with the distinct follow-up times in the external data).
 #'
-#' `bknots`: Boundary knots.  Zero and maximum time
-#' ?? external?
+#' `bknots`: Boundary knots.  If this is not supplied, the boundary knots are set to zero and the
+#' maximum event time (including the follow-up times in the external data).
 #'
-#' `df`: Degrees of freedom, i.e. the number of parameters.  Default 10.
+#' `df`: Degrees of freedom, i.e. the number of parameters (or basis terms) that define the hazard
+#' as a spline function of time.  Defaults to 10.  Note this does not necessarily overfit because
+#' the function is smoothed through the prior.
 #'
-#' `degree`: polynomial degree used for the basis function (default 3, a cubic)
+#' `degree`: Polynomial degree used for the basis function. The default is 3, giving a cubic.
 #'
-#' @param modelid TODO
+#' @param modelid TODO developer use only.
 #'
-#' @param fit_method Method from \pkg{rstan} used to fit the model.  Defaults to MCMC. 
+#' @param fit_method Method from \pkg{rstan} used to fit the model.  Defaults to MCMC.
 #'
 #'  If \code{fit_method="mcmc"} then a sample from the posterior is drawn using Markov Chain Monte Carlo
 ##' sampling, via \pkg{rstan}'s \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} function.
@@ -59,12 +62,17 @@
 ##'   \pkg{rstan}'s \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} function.
 ##'   A sample from a normal approximation to the (real-line-transformed)
 ##'   posterior distribution is drawn in order to obtain credible intervals.
-##' 
+##'
 ##'   If \code{fit_method="vb"}, then variational Bayes methods are used, via \pkg{rstan}'s
 ##'   \code{\link[rstan:stanmodel-method-vb]{rstan::vb()}} function.  This is labelled as "experimental" by
 ##'   \pkg{rstan}.  It might give a better approximation to the posterior
 ##'   than \code{fit_method="opt"}, but has not been investigated much for `disbayes` models.
-##' 
+##'
+##' @param loo Compute leave-one-out cross-validation statistics.  This is done by default for MCMC fits,
+##' and not for optimisation or VB fits. Set to \code{FALSE} to save a bit of run time.
+##' If these statistics are computed, then they are returned in the \code{loo} component of the
+##' object returned by \code{survextrap}.
+##'
 #' @param ... Additional arguments to supply to control the Stan fit, passed to the appropriate
 #' \pkg{rstan} function.
 #'
@@ -74,21 +82,22 @@ survextrap <- function(formula,
                        data,
                        external=NULL,
                        smooth_sd = "bayes",
-                       prior_weights = NULL,
+                       coefs_mean = NULL,
                        cure = FALSE,
                        cure_prior = c(1,1),
                        basehaz_ops = NULL,
                        modelid = 1,
                        fit_method = "mcmc",
+                       loo = (fit_method=="mcmc"),
                        ...)
 {
-
-    mftmp <- make_model_frame(formula, data)
-    mf <- mftmp$mf # model frame
+    
+    Terms <- terms(formula) # no random effects for now
+    mf <- stats::model.frame(Terms, data)
 
     t_beg <- make_t(mf, type = "beg") # entry time
     t_end <- make_t(mf, type = "end") # exit  time
-    t_upp <- make_t(mf, type = "upp") # upper time for interval censoring
+    t_upp <- make_t(mf, type = "upp") # upper time for interval censoring [ not implemented yet ]
     status <- make_d(mf)
     t_event <- aa(t_end[status == 1]) # exact event time
     t_rcens <- aa(t_end[status == 0]) # right censoring time
@@ -96,37 +105,6 @@ survextrap <- function(formula,
     nrcens <- sum(status == 0)
     ind_event <- which(status==1)
     ind_rcens <- which(status==0)
-
-    make_x <- function(formula, mf, xlevs=NULL){
-        x <- model.matrix(formula, mf, xlev = xlevs)
-        x <- drop_intercept(x)
-        ncovs <- NCOL(x)
-        xbar <- aa(colMeans(x))
-        x_centered <- sweep(x, 2, xbar, FUN = "-")
-
-        mf2 <- mf[-attr(terms(mf), "response")]
-        if (ncol(mf2) > 0){
-            xinds <- list(
-                factor = which(sapply(mf2, is.factor)),
-                numeric = which(sapply(mf2, is.numeric))
-            )
-            xlevs <- lapply(mf2[xinds$factor], levels)
-            if ((length(xinds$factor)==1) && (length(xinds$numeric)==0)){
-                base_levs <- xlevs
-            }
-            else if (length(xinds$factor) > 0)
-                base_levs <- lapply(xlevs, function(x)x[1])
-            else base_levs <- NULL
-            mean_of_numerics <- lapply(mf2[xinds$numeric], mean)
-            mf_baseline <- as.data.frame(c(mean_of_numerics, base_levs))
-        } else xlevs <- mf_baseline <- xinds <- NULL
-
-        nlist(x, x_centered, xbar, N = NROW(x),
-              ncovs = NCOL(x),
-              xnames=colnames(x),
-              xlevs, xinds,
-              mf_baseline)
-    }
 
     x <- make_x(formula, mf)
     ncovs <- x$ncovs
@@ -146,26 +124,26 @@ survextrap <- function(formula,
     n_ext <- aa(external$n)
     nextern <- external$nextern
     x_ext <- external$x_centered
+    tmax <- max(c(t_end,t_upp,external$tmax), na.rm = TRUE)
 
     basehaz <- handle_basehaz_surv(basehaz_ops    = basehaz_ops,
                                    times          = t_end,
                                    times_ext      = unique(c(t_ext_start, t_ext_stop)),
                                    status         = status,
-                                   min_t          = min(t_beg),
-                                   max_t          = max(c(t_end,t_upp,external$tmax), na.rm = TRUE))
+                                   tmin          = min(t_beg),
+                                   tmax          = tmax)
 
     basis_event  <- make_basis(t_event, basehaz)
     ibasis_event <- make_basis(t_event, basehaz, integrate = TRUE)
     ibasis_rcens <- make_basis(t_rcens, basehaz, integrate = TRUE)
     nvars <- basehaz$nvars
 
-    if (is.null(prior_weights)){
-        prior_weights <- mspline_uniform_weights(iknots = basehaz$iknots, bknots=basehaz$bknots)
+    if (is.null(coefs_mean)){
+        coefs_mean <- mspline_uniform_weights(iknots = basehaz$iknots, bknots=basehaz$bknots)
     } else {
-        ## TODO validate prior weights, reconcile with betaraw
+        ## TODO validate
     }
-    beta_mean <- log(prior_weights[-1] / prior_weights[1])
-    cure_prob_init <- if (cure) 0.5 else aa(numeric())
+    beta_mean <- log(coefs_mean[-1] / coefs_mean[1])
     if (!(modelid %in% 1:2)) stop("modelid should be 1 or 2")
 
     if (modelid==2){
@@ -195,10 +173,11 @@ survextrap <- function(formula,
                       cure_shape = cure_prior, ## TODO standardise name, mean+ESS param
                       modelid
                       )
+    cure_prob_init <- if (cure) 0.5 else aa(numeric())
     staninit <- list(gamma = aa(0),
-                     loghr = aa(rep(0, ncovs)),
-                     beta_err = rep(0, nvars),
-                     smooth_sd = aa(smooth_sd),
+                     loghr = aa(rep(0, standata$ncovs)),
+                     beta_err = rep(0, standata$nvars),
+                     smooth_sd = aa(if(standata$est_smooth) smooth_sd else numeric()),
                      cure_prob = cure_prob_init)
     if (identical(smooth_sd, "eb")){
         smooth_sd <- eb_smoothness(standata, staninit)
@@ -208,43 +187,67 @@ survextrap <- function(formula,
     if (fit_method=="opt")
         fits <- rstan::optimizing(stanmodels$survextrap, data=standata, init=staninit,
                                   hessian=TRUE, draws=1000) # TODO defaults
-    else if (fit_method=="mcmc") 
-        fits <- rstan::sampling(stanmodels$survextrap, data=standata, 
+    else if (fit_method=="mcmc")
+        fits <- rstan::sampling(stanmodels$survextrap, data=standata,
                                 pars = "beta", include=FALSE,
                                 ...)
-    else if (fit_method=="vb") 
-        fits <- rstan::vb(stanmodels$survextrap, data=standata, 
+    else if (fit_method=="vb")
+        fits <- rstan::vb(stanmodels$survextrap, data=standata,
                           pars = "beta", include=FALSE,
                           ...)
     else stop(sprintf("Unknown fit_method: %s",fit_method))
 
     km <- survminer::surv_summary(survfit(formula, data=data), data=data)
 
-    res <- list(formula=formula,
-                stanfit=fits, standata=standata, basehaz=basehaz,
-                entrytime=t_beg, eventtime=t_end, external=external, # TODO way to strip the data
-                nvars = nvars,
-                ncovs = ncovs,
-                prior_weights = prior_weights,
-                smooth_sd = smooth_sd,
-                cure = cure,
-                modelid = modelid,
-                km = km,
-                xnames = x$xnames,
-                xlevs = x$xlevs,
-                xinds = x$xinds,
-                xbar = x$xbar,
-                log_crude_event_rate = log_crude_event_rate,
-                mf_baseline = x$mf_baseline,
-                fit_method = fit_method)
+    misc_keep <- nlist(formula, stanfit=fits, fit_method)
+    standata_keep <- standata[c("nvars","ncovs","log_crude_event_rate")]
+    model_keep <- standata[c("cure","modelid")]
+    spline_keep <- nlist(basehaz)
+    x_keep <- x[c("xnames","xlevs","xinds","xbar","mfbase")]
+    prior_keep <- nlist(coefs_mean, smooth_sd)
+    res <- c(misc_keep, standata_keep, model_keep, spline_keep, x_keep, prior_keep, nlist(km))
+
     class(res) <- "survextrap"
+    if (loo) res$loo <- loo_survextrap(res, standata)
     res
+}
+
+
+make_x <- function(formula, mf, xlevs=NULL){
+    x <- model.matrix(formula, mf, xlev = xlevs)
+    x <- drop_intercept(x)
+    ncovs <- NCOL(x)
+    xbar <- aa(colMeans(x))
+    x_centered <- sweep(x, 2, xbar, FUN = "-")
+
+    mf2 <- mf[-attr(terms(mf), "response")]
+    if (ncol(mf2) > 0){
+        xinds <- list(
+            factor = which(sapply(mf2, is.factor)),
+            numeric = which(sapply(mf2, is.numeric))
+        )
+        xlevs <- lapply(mf2[xinds$factor], levels)
+        if ((length(xinds$factor)==1) && (length(xinds$numeric)==0)){
+            base_levs <- xlevs
+        }
+        else if (length(xinds$factor) > 0)
+            base_levs <- lapply(xlevs, function(x)x[1])
+        else base_levs <- NULL
+        mean_of_numerics <- lapply(mf2[xinds$numeric], mean)
+        mfbase <- as.data.frame(c(mean_of_numerics, base_levs))
+    } else xlevs <- mfbase <- xinds <- NULL
+
+    nlist(x, x_centered, xbar, N = NROW(x),
+          ncovs = NCOL(x),
+          xnames=colnames(x),
+          xlevs, xinds,
+          mfbase)
 }
 
 
 eb_smoothness <- function(standata, staninit){
     standata$est_smooth <- 1
-    standata$smooth_sd_fixed  <- aa(1) # dummy
+    standata$smooth_sd_fixed  <- aa(numeric()) # dummy
     fits <- rstan::optimizing(stanmodels$survextrap, data=standata, init=staninit, hessian=FALSE, verbose=TRUE)
     if (fits$return_code==0){
         smooth_sd <- fits$par["smooth_sd[1]"]
@@ -253,56 +256,6 @@ eb_smoothness <- function(standata, staninit){
         smooth_sd <- 1
     }
     smooth_sd
-}
-
-parse_formula_and_data <- function(formula, data) {
-  formula <- validate_formula(formula, needs_response = TRUE)
-  allvars <- all.vars(formula)
-  allvars_form <- reformulate(allvars)
-
-  # LHS of entire formula
-  lhs       <- lhs(formula)         # LHS as expression
-  lhs_form  <- reformulate_lhs(lhs) # LHS as formula
-
-  # RHS of entire formula
-  rhs       <- rhs(formula)         # RHS as expression
-  rhs_form  <- reformulate_rhs(rhs) # RHS as formula
-
-  # evaluate model data (row subsetting etc)
-  data <- make_model_data(allvars_form, data)
-
-  # evaluated response variables
-  surv <- eval(lhs, envir = data) # Surv object
-  surv <- validate_surv(surv)
-  type <- attr(surv, "type")
-
-  if (type == "right") {
-    min_t    <- 0
-    max_t    <- max(surv[, "time"])
-    status   <- as.vector(surv[, "status"])
-    t_end    <- as.vector(surv[, "time"])
-  }  else {
-      stop("Right-censoring is only kind of censoring supported")
-  }
-
-  if (any(is.na(status)))
-    stop2("Invalid status indicator in Surv object.")
-
-  if (any(status < 0 || status > 3))
-    stop2("Invalid status indicator in Surv object.")
-
-  type <- attr(surv, "type")
-
-  nlist(formula,
-        data,
-        allvars,
-        allvars_form,
-        lhs,
-        lhs_form,
-        rhs,
-        rhs_form,
-        surv_type = attr(surv, "type"))
-
 }
 
 validate_formula <- function(formula, needs_response = TRUE) {
@@ -336,20 +289,6 @@ validate_surv <- function(x, ok_types = c("right", "counting",
 }
 
 
-## omitted xlevs, drop.unused.levels
-
-make_model_frame <- function(formula,
-                             data,
-                             na.action){
-  Terms <- terms(formula) # no random effects for now
-  mf <- stats::model.frame(Terms,
-                           data,
-                           na.action = na.action)
-    list(mf=mf,
-         mt=attr(mf, "Terms"))
-}
-
-
 # Return the response vector (time)
 #
 # @param model_frame The model frame.
@@ -362,31 +301,30 @@ make_model_frame <- function(formula,
 #          is the upper limit of the interval.
 # @return A numeric vector.
 make_t <- function(model_frame, type = c("beg", "end", "gap", "upp")) {
+    type <- match.arg(type)
+    resp <- if (survival::is.Surv(model_frame))
+                model_frame else model.response(model_frame)
+    surv <- attr(resp, "type")
+    err  <- paste0("Bug found: cannot handle '", surv, "' Surv objects.")
 
-  type <- match.arg(type)
-  resp <- if (survival::is.Surv(model_frame))
-    model_frame else model.response(model_frame)
-  surv <- attr(resp, "type")
-  err  <- paste0("Bug found: cannot handle '", surv, "' Surv objects.")
+    t_beg <- switch(surv,
+                    "right"     = rep(0, nrow(model_frame)),
+                    stop(err))
 
-  t_beg <- switch(surv,
-                  "right"     = rep(0, nrow(model_frame)),
-                  stop(err))
+    t_end <- switch(surv,
+                    "right"     = as.vector(resp[, "time"]),
+                    stop(err))
 
-  t_end <- switch(surv,
-                  "right"     = as.vector(resp[, "time"]),
-                  stop(err))
+    t_upp <- switch(surv,
+                    "right"     = rep(NaN, nrow(model_frame)),
+                    stop(err))
 
-  t_upp <- switch(surv,
-                  "right"     = rep(NaN, nrow(model_frame)),
-                  stop(err))
-
-  switch(type,
-         "beg" = t_beg,
-         "end" = t_end,
-         "gap" = t_end - t_beg,
-         "upp" = t_upp,
-         stop("Bug found: cannot handle specified 'type'."))
+    switch(type,
+           "beg" = t_beg,
+           "end" = t_end,
+           "gap" = t_end - t_beg,
+           "upp" = t_upp,
+           stop("Bug found: cannot handle specified 'type'."))
 }
 
 # Return the response vector (status indicator)
@@ -432,14 +370,47 @@ make_basis <- function(times, basehaz, integrate = FALSE) {
   if (!N) { # times is NULL or empty vector
     return(matrix(0, 0, K))
   }
-  switch(basehaz$type_name,
-         "ms"          = mspline_basis(times, iknots = basehaz$iknots, bknots=basehaz$bknots,
-                                       degree = basehaz$degree, integrate = integrate),
-         stop2("Bug found: unknown type of baseline hazard."))
+  mspline_basis(times, iknots = basehaz$iknots, bknots=basehaz$bknots,
+                degree = basehaz$degree, integrate = integrate)
 }
 
 aa <- function(x, ...) as.array(x,...)
 
+
+handle_basehaz_surv <- function(basehaz_ops,
+                                times,
+                                times_ext,
+                                status,
+                                tmin, tmax){
+    df     <- basehaz_ops$df
+    iknots <- basehaz_ops$iknots
+    bknots <- basehaz_ops$bknots # TODO validate
+    degree <- basehaz_ops$degree
+    if (is.null(df))
+        df <- 10L
+    if (is.null(degree))
+        degree <- 3L # cubic splines
+    tt <- times[status == 1] # uncensored event times
+    if (is.null(iknots) && !length(tt)) {
+        warning2("No observed events found in the data. Censoring times will ",
+                 "be used to evaluate default knot locations for splines.")
+        tt <- times
+    }
+    ## TODO validate iknots and bknots here.  Want to allow them outside data
+    if (!is.null(iknots)) {
+    }
+    if (is.null(bknots)){
+        bknots <- c(0, tmax)
+    }
+    names(bknots) <- c("lower","upper")
+    ttk <- unique(c(tt, times_ext))
+    iknots <- get_iknots(ttk, df = df, iknots = iknots, degree = degree, intercept = TRUE)
+    if (any(times<0)) stop("Some survival times are negative") # TODO should do this validation somewhere else
+
+    nvars  <- df
+    knots <- c(bknots[1], iknots, bknots[2])
+    nlist(nvars, iknots, bknots, degree, df, knots)
+}
 
 # Return a vector with internal knots for 'x', based on evenly spaced quantiles
 #
@@ -459,71 +430,21 @@ get_iknots <- function(x, df = 5L, degree = 3L, iknots = NULL, intercept = FALSE
   } else {
     nk <- length(iknots)
   }
-
   # validate number of internal knots
     if (nk < 0) {
-    ## FIXME why does this not print the error sometines? 
     stop("Number of internal knots cannot be negative.")
   }
-
   # if no internal knots then return empty vector
   if (nk == 0) {
     return(numeric(0))
   }
-
   # obtain default knot locations if necessary
   if (is.null(iknots)) {
     iknots <- qtile(x, nq = nk + 1) # evenly spaced percentiles
   }
-
-
   # return internal knot locations, ensuring they are positive
   validate_positive_scalar(iknots)
 
   return(iknots)
-}
-
-
-handle_basehaz_surv <- function(basehaz_ops,
-                                times,
-                                times_ext,
-                                status,
-                                min_t, max_t){
-
-    df     <- basehaz_ops$df
-    knots  <- basehaz_ops$knots
-    degree <- basehaz_ops$degree
-    if (is.null(df))
-        df <- 10L
-    if (is.null(degree))
-        degree <- 3L # cubic splines
-    tt <- times[status == 1] # uncensored event times
-    if (is.null(knots) && !length(tt)) {
-        warning2("No observed events found in the data. Censoring times will ",
-                 "be used to evaluate default knot locations for splines.")
-        tt <- times
-    }
-    ## TODO validate knots here.  Want to allow them outside data
-    if (!is.null(knots)) {
-    }
-    bknots <- basehaz_ops$bknots # TODO validate
-    if (is.null(bknots)){
-        bknots <- c(0, max_t)
-    }
-    ttk <- unique(c(tt, times_ext))
-    iknots <- get_iknots(ttk, df = df, iknots = knots, degree = degree, intercept = TRUE)
-    if (any(times<0)) stop("Some survival times are negative") # TODO should do this validation somewhere else
-
-    nvars  <- df
-
-    nlist(type_name = "ms",
-          nvars,
-          iknots,
-          bknots,
-          degree,
-          df = nvars,
-          user_df = nvars,
-          knots = c(bknots[1], iknots, bknots[2]))
-
 }
 

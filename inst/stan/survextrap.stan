@@ -86,6 +86,15 @@ functions {
 	}
 	return res;
     }
+
+    vector log_dens(vector eta, matrix basis, vector coefs,
+		   data int cure, real cure_prob, matrix ibasis,
+		    data int modelid){
+	vector[rows(eta)] res;
+	res = log_haz(eta, basis, coefs, cure, cure_prob, ibasis, modelid) +
+	    log_surv(eta, ibasis, coefs, cure, cure_prob, modelid);
+	return res;
+    }
     
   /**
   * Log-prior for intercept parameters
@@ -155,6 +164,7 @@ parameters {
 transformed parameters {
     vector[nvars] beta;
     vector[nvars] coefs; // constrained coefs for M-splines
+
     if (est_smooth)
 	beta = append_row(0, beta_mean + beta_err*smooth_sd[1]);
     else 
@@ -164,13 +174,14 @@ transformed parameters {
     } else {
 	coefs[1] = exp(beta_err[1]); // coefs[2] unused
     }
+
 }
 
 model {
-    real dummy;
     vector[nevent] eta_event; // for events
     vector[nrcens] eta_rcens; // for right censored
     vector[nextern] eta_extern; // for external data
+    real dummy;
     vector[nextern] p_ext_stop; // unconditional survival prob at external time points
     vector[nextern] p_ext_start; // 
 
@@ -196,10 +207,7 @@ model {
     if (nrcens > 0) eta_rcens += gamma[1];
     if (nextern > 0) eta_extern += gamma[1];
 
-    // M-spline hazard models, optionally with cure
-    if (nevent > 0) target +=  log_haz(eta_event,  basis_event, coefs,
-				       cure, cure_prob[1], ibasis_event, modelid);
-    if (nevent > 0) target +=  log_surv(eta_event, ibasis_event, coefs, cure, cure_prob[1], modelid);
+    if (nevent > 0) target +=  log_dens(eta_event,  basis_event, coefs, cure, cure_prob[1], ibasis_event, modelid);
     if (nrcens > 0) target +=  log_surv(eta_rcens, ibasis_rcens, coefs, cure, cure_prob[1], modelid);
 
     if (nextern > 0) {
@@ -232,6 +240,6 @@ model {
 }
 
 generated quantities {
-  // transformed intercept
-  real alpha = log_crude_event_rate + gamma[1];
+    // transformed intercept
+    real alpha = log_crude_event_rate + gamma[1];
 }

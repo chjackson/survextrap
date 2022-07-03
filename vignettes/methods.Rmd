@@ -158,7 +158,7 @@ If sampling is poor, then this alternative procedure might work - fit the model 
 
 Either way, these procedures still need to be tested empirically to see whether they gives sensible results.   It seems to under-smooth in some cases. Though it may not matter if the hazard function is under-smoothed, if the purpose of the model is to estimate a quantity that is an average over time (e.g. mean survival).
 
-A sensible route to resolving these uncertainties might be use cross-validation to assess and choose between model specifications, though this hasn't been implemented yet  (is a "leave-one-out" approach OK with censored data?).  Note that this would only assess short-term fit, using the same principle as AIC.
+A sensible route to resolving these uncertainties might be use cross-validation to assess and choose between model specifications.  The package provides an interface to the ([loo](https://mc-stan.org/users/interfaces/loo)) method for Bayesian cross-validation - though note that this only assesses fit to the individual-level data, using the same principle as AIC.
 
 
 ## Choice of knots when modelling data
@@ -169,8 +169,10 @@ By default, internal knots are placed at the quantiles of the vector comprising 
 
 Users can override this default however, and place knots at any position. 
 
-By default, the lower boundary knot is set to 0.   The upper boundary knot is set to the highest follow-up time in the data.    This default should be overridden if you want to extrapolate, and you think the hazard might change.  
+By default, the lower boundary knot is set to 0.   The upper boundary knot is set to the highest follow-up time in the data.    This default should be overridden if you want to extrapolate, and you think the hazard might change.   A sensible guide is to place the upper knot at the latest time that you are interested in modelling.  Beyond this time, you either think the hazard will not change, or any changes in the hazard do not matter for the purpose of the model.
 
-Currently, the number of knots does not depend on the absolute amount of data - should it?   With small datasets, there will be lots of knots and very few data points between them - and we will be relying more strongly on the prior to do the smoothing.  If we implemented cross-validation, we could assess whether this matters. 
+The priors should then be chosen to give a low probability that the hazard varies outside the range thought reasonable, e.g. in terms of orders of magnitude.   The package should provide a nice way to convert beliefs of this kind into priors.
+
+Currently, the number of knots does not depend on the absolute amount of data - should it?   With small datasets, there will be lots of knots and very few data points between them - and we will be relying more strongly on the prior to do the smoothing.  We could assess whether this matters by using cross-validation. 
 
 With external data, we want a choice of knots outside the data which we can defend as allowing a reasonable range of shapes for the hazard function, prior to observing the data.

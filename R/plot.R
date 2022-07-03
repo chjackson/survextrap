@@ -17,7 +17,7 @@
 ##'
 ##' @export
 survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE) {
-    if (is.null(newdata)) newdata <- x$mf_baseline
+    if (is.null(newdata)) newdata <- x$mfbase
     pars <- get_pars(x, newdata=newdata, niter=niter)
     if (is.null(times)) times <- default_plottimes(x, tmax)
     nt <- length(times)
@@ -63,7 +63,7 @@ survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=
 ##'
 ##' @export
 hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE){
-    if (is.null(newdata)) newdata <- x$mf_baseline
+    if (is.null(newdata)) newdata <- x$mfbase
     pars <- get_pars(x, newdata=newdata, niter=niter)
     if (is.null(times)) times <- default_plottimes(x, tmax)
     nt <- length(times)
@@ -208,7 +208,7 @@ one_factor_cov <- function(x){
 
 default_plottimes <- function(x, tmax=NULL, nplot=100){
     tmin <- 0
-    if (is.null(tmax)) tmax <- max(c(x$eventtime, x$external$stop))
+    if (is.null(tmax)) tmax <- x$basehaz$bknots["upper"]
     times <- seq(tmin, tmax, by = (tmax - tmin) / nplot)
 }
 

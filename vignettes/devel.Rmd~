@@ -1,0 +1,160 @@
+---
+title: "survextrap development notes"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{devel}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(survextrap)
+```
+
+
+# Spline model 
+
+M spline looks promising,  nice interpretation of terms, linearish default
+
+Prior on coefficients for smoothness.  Could make hierarchical and estimate variance by EB, but having difficulty with convergence here. 
+How does squared second deriv principle apply in Bayesian?
+
+How does it extrapolate, when terms have to have a finite integral?  Is there a boundary term that doesn't need a finite integral?
+Make this intuitive and warn people to not rely on parametric assumptions to extrapolate.
+Can we at least demonstrate that uncertainty about hazard fans out naturally, so we can do a reasonable VoI calculation
+Is this anything like B-splines? 
+https://fromthebottomoftheheap.net/2020/06/03/extrapolating-with-gams/ discusses how extrapolation depends on order of penalty 
+
+Hey theres loads of packates that have done m splines, google scholar for "m-splines in regression"
+SmoothHazard https://www.jstatsoft.org/article/view/v079i07 max pen lik [sq sec deriv, CV] for int cens illdeath
+abrahamowicz 1992:
+
+What's the one that harrell said in that thread 
+
+
+# Covariates
+
+Proportional hazards model looks straightforward. 
+
+What about time varying effects?  stan_surv can do B spline or piecewise constant log HR.
+Uses quadrature in these cases.  Is this necessary even for piecewise constant?
+Or couldn't we use M-spline for HR, which is a polynomial, so multlipiying by another polynomial would give somethign that can be integrated, in theory, though algorithm probably tricky to develop. 
+
+
+# Cross-validation
+
+Using loo package.  How is censoring handled?  Do we have to impose a censoring mechanism?
+
+Only makes sense for internal data.  Want to demonstrate that automatic procedure works.  Sensible, but wouldn't expect the automatically chosen optimal model to be way off in CV performance.
+
+
+# Open issues
+
+Empirical Bayes estimation not working reliably
+
+Trying to jointly estimate gamma [real], ms_coefs [simplex], smooth_sd [ pos real ]
+gamma given normal prior
+ms_coefs given dirichlet prior with parameters: alpha = (1,1,...,1)*smooth_prec
+Belief is that all regions equally likely, strength of shrinkage controlled by smooth_prec
+What is the hierarchical centering model and is it relevant here.   Random effects have mean zero? not same
+
+how can we print
+from rstan 
+see if it works with smallest degree/df basis. works with 1/3, 2/3, 1,4, fails with 2/4 
+
+
+# Cure 
+
+pmixsurv is pcure + (1 - pcure)*S(t)
+hmixsurv is ((1 - pcure) * f(t)) / (pcure + (1 - pcure) * S(t))
+just do it.
+Represents cause-specific survival
+Can be added to population hazard to get overall mort for cured 
+
+Nonmixture cure?  Whyd we use it , is it just another fpm
+S(t) = pcure ^ F(t).   So pcure is an asymptote to S(t)
+h = -log(pcure)*d(t), ie proportional hazards between cured/uncured, if no other covs 
+
+Careful of identifiability of cure fraction.  Will need longer term info.  Ensure spline shape accounts for this info and is not just driven by denser early events 
+Nonmixture cure model has a biological rationale based on cancer cells, but this is not thought to be widely applicable, see https://academic.oup.com/biostatistics/article/8/3/576/280322?login=true 
+mechanism?  in mixture, a proportion are never at risk
+nonmixture, survival of "uncured" depends on cure fraction??
+
+Covariates are put on the cure prob in flexsurvcure
+
+[ermeel]
+"One nice thing about the case where we use a random-walk prior (constrained to be non-negative) and integrated B-splines (B hat) is that (since sum of Bi(x) = 1) we have that sum  Bihat(x) = x thus when all weights are equal we can obtain (with an appropriate intercept term) the Weibull distribution. My understanding of the random-walk prior is that it is consistent with prior knowledge stating that the different spline-basis-coefficients change slightly with a tendency for neighbouring coefficients being equal (in average). Thus this would be a nice way to start from Weibull and explore continuous deviations from it, while allowing for much more flexibility due to many more knots being possible." does that affect extrap tho? 
+Could we define the hazard to be constant from the final value, ad hocly ? 
+R+P linear extrap the log CH as fn of log t 
+
+# Relation to previous methods
+
+
+## Relative survival 
+
+Additive hazard models preferred due to modelling causes of death.  Excess hazard in POI is due to cause, gen pop has zero haz for cause.  All cause survival factorises as background*relative.  BG survival avail in long term.
+
+Could implement Bayesian additive or prop hazard models with count data.   Would acknowledge unc.
+
+Or could allow constant background hazard but wouldn't be able to extrap 
+
+How are covariates dealt with, just match to the appropriate population?   DSU acknowledged this could be challenge.
+
+Generally used for cancer when cause of death is missing.    If cause of death is known, could estimate cause specific survival and extrapolate that using a cure model.  Would still need to model other causes if ACM of interest.
+
+
+## Demiris 
+
+Prop or add haz between study pop and gen pop.   Can do by handling covariates in both short term and external data.  
+
+
+## Benaglia 
+
+Prop or add cause-specific haz between study pop and gen pop.  Other-cause hazard common.  Some data might have cause unknown, which needs specialised poly hazard modelling.
+
+What is the relation to relative survival?  Is this just a Bayesian version that acknowledges unc in all sources, and deaths from one dataset have a mixture of causes? 
+
+
+## Guyot and Welton 
+
+Disease-specific survival constrained to be less than general population.  Could handle through including covariates and a strong prior for the covariate effect (eg restricted positive)
+
+Trial control arm converges in survival to that of a disease cohort.  They just set them to be equal after 6 years.  Could implement using a covariate that changes at 6 years.   Similarly converges to gen pop at a very large time. 
+
+Ad hoc method about the hazard ratio converging to 1.  This will need some model for converging hazard ratios with a tweakable parameter and uncertainty.   "the effect of a [cancer] treatment on mortality risk can be expected to accelerate over an initial period, and then decelerate as non-cancer causes of death begin to predominate".
+
+
+## TODO list others in the review
+
+## Bullement review
+
+
+# Key citations
+
+NICE DSU 21
+
+
+
+# Methods to discard
+
+Piecewise approaches.  Superseded by splines.  Note that we can use a spline of degree 1 if we really want
+
+Fractional polynomials.  Superseded by splines
+
+Mixture models - represent subgroups by covariates, flexible hazard by spline.  Latent subgroups too advanced
+
+Landmark models 
+
+
+# Reverse Bayes methods
+
+How would they apply.   Decision between two treatments.   Suppose they are equal.  What prior on long term treatment effect would be needed for them to be equal?    Examine whether this is plausible. 
+
+What'd it be in a hospital resource use application?  just pick a policy-relevant value of e.g. quantile of length of stay?

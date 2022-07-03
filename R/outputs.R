@@ -36,7 +36,7 @@ mean_survextrap <- function(x, newdata=NULL, niter=NULL){
 ##' @export
 rmst_survextrap <- function(x, t, newdata=NULL, niter=NULL){
     variable <- NULL
-    if (is.null(newdata)) newdata <- x$mf_baseline
+    if (is.null(newdata)) newdata <- x$mfbase
     pars <- get_pars(x, newdata=newdata, niter=niter)
     niter <- attr(pars, "niter")
     nt <- length(t)
@@ -88,12 +88,16 @@ get_pars <- function(x, newdata=NULL, niter=NULL){
     stanmat <- get_draws(x)
     if (length(stanmat)==0) stop("Stan model does not contain samples")
     if (is.null(niter)) niter <- nrow(stanmat)
+    if (is.null(newdata)) newdata <- x$mfbase
     alpha    <- stanmat[1:niter, "alpha",  drop = FALSE]
+    gamma <- stanmat[1:niter, "gamma[1]", drop=FALSE]
+    loghr_names <- sprintf("loghr[%s]",seq(x$ncovs))
+    loghr <- if (x$ncovs>0) stanmat[1:niter, loghr_names, drop=FALSE] else NULL
     ms_coef_names <- sprintf("coefs[%s]",seq(x$nvars))
     coefs      <- stanmat[1:niter, ms_coef_names,  drop = FALSE]
     cure_prob <- if (x$cure) stanmat[1:niter, "cure_prob[1]"] else NULL
     linpreds <- get_linpreds(x=x, stanmat=stanmat, newdata=newdata, niter=niter)
-    res <- nlist(alpha, linpreds, coefs, cure_prob)
+    res <- nlist(alpha, gamma, loghr, linpreds, coefs, cure_prob)
     attr(res, "niter") <- niter
     res
 }

@@ -83,7 +83,7 @@ The package is in active development.  It can currently fit a large range of use
 
 Major things to do are:
 
-* Cross-validation.
+* Thoughtful default priors for hazard changes without external data, e.g. in terms of orders of magnitude.
 
 * Better thought-out knot choice, particularly with external data.
 

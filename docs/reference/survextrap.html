@@ -60,12 +60,13 @@
 <span>  <span class="va">data</span>,</span>
 <span>  external <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  smooth_sd <span class="op">=</span> <span class="st">"bayes"</span>,</span>
-<span>  prior_weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  coefs_mean <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cure <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cure_prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  basehaz_ops <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  modelid <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  fit_method <span class="op">=</span> <span class="st">"mcmc"</span>,</span>
+<span>  loo <span class="op">=</span> <span class="op">(</span><span class="va">fit_method</span> <span class="op">==</span> <span class="st">"mcmc"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -99,39 +100,62 @@ about conditional survival</p></dd>
 <p>Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number.</p></dd>
 
 
-<dt>prior_weights</dt>
-<dd><p>Spline basis weights defining the prior mean for the hazard function. By
-default these are set to values that define a constant hazard function.  (TODO: a tool for people
-to convert other hazard forms into prior weights). ?? prior mean or beta?</p></dd>
+<dt>coefs_mean</dt>
+<dd><p>Spline basis coefficients that define the prior mean for the hazard function. By
+default, these are set to values that define a constant hazard function.</p></dd>
 
 
 <dt>cure</dt>
-<dd><p>If <code>TRUE</code> a mixture cure model is used.</p></dd>
+<dd><p>If <code>TRUE</code>, a mixture cure model is used.</p></dd>
 
 
 <dt>cure_prior</dt>
-<dd><p>Beta shape parameters for the cure probability (vector of two)</p></dd>
+<dd><p>Beta shape parameters for the cure probability (vector of two).</p></dd>
 
 
 <dt>basehaz_ops</dt>
-<dd><p>A list of control parameters</p>
-<p><code>knots</code>: Internal knots.  If this is not supplied, then <code>df</code> chosen quantiles of the uncensored survival times.</p>
-<p><code>bknots</code>: Boundary knots.  Zero and maximum time
-?? external?</p>
-<p><code>df</code>: Degrees of freedom, i.e. the number of parameters.  Default 10.</p>
-<p><code>degree</code>: polynomial degree used for the basis function (default 3, a cubic)</p></dd>
+<dd><p>A list of control parameters defining the spline model.</p>
+<p><code>iknots</code>: Internal knots.  If this is not supplied, then the number of knots is taken from <code>df</code>,
+and their location is taken from equally-spaced quantiles of the observed event times (concatenated
+with the distinct follow-up times in the external data).</p>
+<p><code>bknots</code>: Boundary knots.  If this is not supplied, the boundary knots are set to zero and the
+maximum event time (including the follow-up times in the external data).</p>
+<p><code>df</code>: Degrees of freedom, i.e. the number of parameters (or basis terms) that define the hazard
+as a spline function of time.  Defaults to 10.  Note this does not necessarily overfit because
+the function is smoothed through the prior.</p>
+<p><code>degree</code>: Polynomial degree used for the basis function. The default is 3, giving a cubic.</p></dd>
 
 
 <dt>modelid</dt>
-<dd><p>TODO</p></dd>
+<dd><p>TODO developer use only.</p></dd>
 
 
 <dt>fit_method</dt>
-<dd><p>TODO</p></dd>
+<dd><p>Method from <span class="pkg">rstan</span> used to fit the model.  Defaults to MCMC.</p>
+<p>If <code>fit_method="mcmc"</code> then a sample from the posterior is drawn using Markov Chain Monte Carlo
+sampling, via <span class="pkg">rstan</span>'s <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html" class="external-link">rstan::sampling()</a></code> function.
+This is the default.  It is the most accurate but the slowest method.</p>
+<p>If <code>fit_method="opt"</code>, then instead of an MCMC sample from the posterior,
+<code>disbayes</code> returns the posterior mode calculated using optimisation, via
+<span class="pkg">rstan</span>'s <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html" class="external-link">rstan::optimizing()</a></code> function.
+A sample from a normal approximation to the (real-line-transformed)
+posterior distribution is drawn in order to obtain credible intervals.</p>
+<p>If <code>fit_method="vb"</code>, then variational Bayes methods are used, via <span class="pkg">rstan</span>'s
+<code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-vb.html" class="external-link">rstan::vb()</a></code> function.  This is labelled as "experimental" by
+<span class="pkg">rstan</span>.  It might give a better approximation to the posterior
+than <code>fit_method="opt"</code>, but has not been investigated much for <code>disbayes</code> models.</p></dd>
+
+
+<dt>loo</dt>
+<dd><p>Compute leave-one-out cross-validation statistics.  This is done by default for MCMC fits,
+and not for optimisation or VB fits. Set to <code>FALSE</code> to save a bit of run time.
+If these statistics are computed, then they are returned in the <code>loo</code> component of the
+object returned by <code>survextrap</code>.</p></dd>
 
 
 <dt>...</dt>
-<dd><p>Additional arguments to supply to control the Stan fit, passed to the <span class="pkg">rstan</span> function <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html" class="external-link">rstan::sampling()</a></code></p></dd>
+<dd><p>Additional arguments to supply to control the Stan fit, passed to the appropriate
+<span class="pkg">rstan</span> function.</p></dd>
 
 </dl></div>
 

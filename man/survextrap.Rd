@@ -9,12 +9,13 @@ survextrap(
   data,
   external = NULL,
   smooth_sd = "bayes",
-  prior_weights = NULL,
+  coefs_mean = NULL,
   cure = FALSE,
   cure_prior = c(1, 1),
   basehaz_ops = NULL,
   modelid = 1,
   fit_method = "mcmc",
+  loo = (fit_method == "mcmc"),
   ...
 )
 }
@@ -46,26 +47,29 @@ about conditional survival}
 
 Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number.}
 
-\item{prior_weights}{Spline basis weights defining the prior mean for the hazard function. By
-default these are set to values that define a constant hazard function.  (TODO: a tool for people
-to convert other hazard forms into prior weights). ?? prior mean or beta?}
+\item{coefs_mean}{Spline basis coefficients that define the prior mean for the hazard function. By
+default, these are set to values that define a constant hazard function.}
 
-\item{cure}{If \code{TRUE} a mixture cure model is used.}
+\item{cure}{If \code{TRUE}, a mixture cure model is used.}
 
-\item{cure_prior}{Beta shape parameters for the cure probability (vector of two)}
+\item{cure_prior}{Beta shape parameters for the cure probability (vector of two).}
 
-\item{basehaz_ops}{A list of control parameters
+\item{basehaz_ops}{A list of control parameters defining the spline model.
 
-\code{knots}: Internal knots.  If this is not supplied, then \code{df} chosen quantiles of the uncensored survival times.
+\code{iknots}: Internal knots.  If this is not supplied, then the number of knots is taken from \code{df},
+and their location is taken from equally-spaced quantiles of the observed event times (concatenated
+with the distinct follow-up times in the external data).
 
-\code{bknots}: Boundary knots.  Zero and maximum time
-?? external?
+\code{bknots}: Boundary knots.  If this is not supplied, the boundary knots are set to zero and the
+maximum event time (including the follow-up times in the external data).
 
-\code{df}: Degrees of freedom, i.e. the number of parameters.  Default 10.
+\code{df}: Degrees of freedom, i.e. the number of parameters (or basis terms) that define the hazard
+as a spline function of time.  Defaults to 10.  Note this does not necessarily overfit because
+the function is smoothed through the prior.
 
-\code{degree}: polynomial degree used for the basis function (default 3, a cubic)}
+\code{degree}: Polynomial degree used for the basis function. The default is 3, giving a cubic.}
 
-\item{modelid}{TODO}
+\item{modelid}{TODO developer use only.}
 
 \item{fit_method}{Method from \pkg{rstan} used to fit the model.  Defaults to MCMC.
 
@@ -83,6 +87,11 @@ If \code{fit_method="vb"}, then variational Bayes methods are used, via \pkg{rst
 \code{\link[rstan:stanmodel-method-vb]{rstan::vb()}} function.  This is labelled as "experimental" by
 \pkg{rstan}.  It might give a better approximation to the posterior
 than \code{fit_method="opt"}, but has not been investigated much for \code{disbayes} models.}
+
+\item{loo}{Compute leave-one-out cross-validation statistics.  This is done by default for MCMC fits,
+and not for optimisation or VB fits. Set to \code{FALSE} to save a bit of run time.
+If these statistics are computed, then they are returned in the \code{loo} component of the
+object returned by \code{survextrap}.}
 
 \item{...}{Additional arguments to supply to control the Stan fit, passed to the appropriate
 \pkg{rstan} function.}
