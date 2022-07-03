@@ -83,15 +83,15 @@ The package is in active development.  It can currently fit a large range of use
 
 Major things to do are:
 
+* Relative survival / additive hazards models. 
+
 * Thoughtful default priors for hazard changes without external data, e.g. in terms of orders of magnitude.
 
 * Better thought-out knot choice, particularly with external data.
 
-* More experience and examples of using it with real external data.
+* More experience and examples of using it with real external data, including a vignette that lists how to implement all previously-suggested approaches for extrapolation with external data.
 
-* Relative survival / additive hazards models. 
-
-* Non-proportional hazards.  This is expected to be computationally difficult, and I'm not sure of the best approach.
+* Non-proportional hazards models.  This is expected to be computationally difficult, and I'm not sure of the best approach.
 
 * Thorough testing, documentation and error handling.
 
@@ -101,4 +101,4 @@ If you want to try it out - feel free to install from github:
 remotes::install_github("chjackson/survextrap")
 ```
 
-Please give feedback and suggestions if you do - these can be posted on github issues.
+Please give feedback and suggestions if you do.  These can be posted on [github issues](https://github.com/chjackson/survextrap/issues), or [email](chris.jackson@mrc-bsu.cam.ac.uk).
