@@ -156,7 +156,7 @@ If sampling is poor, then this alternative procedure might work - fit the model 
 
 2. A "final" model is then fitted, in which $\sigma$ is fixed to $\hat\sigma$, giving the "optimal" amount of smoothness for the hazard $h(t)$.
 
-Either way, these procedures still need to be tested empirically to see whether they gives sensible results.   It seems to under-smooth in some cases. Though it may not matter if the hazard function is under-smoothed, if the purpose of the model is to estimate a quantity that is an average over time (e.g. mean survival).
+Either way, these procedures still need to be tested empirically to see whether they give sensible results.   It seems to under-smooth in some cases. Though it may not matter if the hazard function is under-smoothed, if the purpose of the model is to estimate a quantity that is an average over time (e.g. mean survival).
 
 A sensible route to resolving these uncertainties might be use cross-validation to assess and choose between model specifications.  The package provides an interface to the ([loo](https://mc-stan.org/users/interfaces/loo)) method for Bayesian cross-validation - though note that this only assesses fit to the individual-level data, using the same principle as AIC.
 

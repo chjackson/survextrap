@@ -155,7 +155,7 @@ etc…
 <li><p>A proportional hazards model is used to describe the relation of survival to predictors.</p></li>
 <li><p>Mixture cure models are supported.</p></li>
 <li><p>It has an R interface, designed to be friendly to those familiar with standard R modelling functions.</p></li>
-<li><p>Stan is used under the surface to do MCMC (Hamiltonian Monte Carlo) sampling from the posterior distribution, in a similar fashion to the <code>rstanarm</code> package.</p></li>
+<li><p>Stan is used under the surface to do MCMC (Hamiltonian Monte Carlo) sampling from the posterior distribution, in a similar fashion to <a href="https://mc-stan.org/rstanarm/" class="external-link">rstanarm</a> and <a href="https://CRAN.R-project.org/package=survHE" class="external-link">survHE</a>.</p></li>
 <li><p>Estimates and credible intervals for survival, hazard, mean and restricted mean survival can easily be extracted from the fitted model.</p></li>
 </ul>
 </div>
@@ -175,16 +175,16 @@ etc…
 <p>The package is in active development. It can currently fit a large range of useful models, but it is not finished and is subject to be changed without warning.</p>
 <p>Major things to do are:</p>
 <ul>
+<li><p>Relative survival / additive hazards models.</p></li>
 <li><p>Thoughtful default priors for hazard changes without external data, e.g. in terms of orders of magnitude.</p></li>
 <li><p>Better thought-out knot choice, particularly with external data.</p></li>
-<li><p>More experience and examples of using it with real external data.</p></li>
-<li><p>Relative survival / additive hazards models.</p></li>
-<li><p>Non-proportional hazards. This is expected to be computationally difficult, and I’m not sure of the best approach.</p></li>
+<li><p>More experience and examples of using it with real external data, including a vignette that lists how to implement all previously-suggested approaches for extrapolation with external data.</p></li>
+<li><p>Non-proportional hazards models. This is expected to be computationally difficult, and I’m not sure of the best approach.</p></li>
 <li><p>Thorough testing, documentation and error handling.</p></li>
 </ul>
 <p>If you want to try it out - feel free to install from github:</p>
 <pre class="{r}"><code><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"chjackson/survextrap"</span><span class="op">)</span></span></code></pre>
-<p>Please give feedback and suggestions if you do - these can be posted on github issues.</p>
+<p>Please give feedback and suggestions if you do. These can be posted on <a href="https://github.com/chjackson/survextrap/issues" class="external-link">github issues</a>, or <a href="chris.jackson@mrc-bsu.cam.ac.uk">email</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

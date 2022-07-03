@@ -77,7 +77,7 @@ A sensible guide is to place the upper knot at the latest time that you are inte
 
 The priors should then be chosen to give a low probability that the hazard varies outside the range thought reasonable, e.g. in terms of orders of magnitude.   The package should provide a nice way to convert beliefs of this kind into priors.
 
-But note that it is only necessary to extrapolate in this way, using knots and default priors, if there is **no sunatantive information** about the long term hazard!
+But note that it is only necessary to extrapolate in this way, using knots and default priors, if there is **no substantive information** about the long term hazard!
 
 In many practical situations of extrapolation in time-to-event models, we do have information.   For human survival, we at least know that people do not tend to live longer than 100 years.  There are usually data from national agencies about mortality of general populations. 
 
