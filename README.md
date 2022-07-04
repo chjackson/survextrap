@@ -54,7 +54,7 @@ The package has been developed under the expectation that many forms of external
 
 * Bayesian multiparameter evidence synthesis is used to jointly model all sources of data and judgements 
 
-* An M-spline is used to represent how the hazard changes through time.  The Bayesian fitting method automatically chooses the optimal level of smoothness and flexibility.  Spline "knots" should span the period covered by the data, and any period where there is a chance that the hazard may vary.
+* An M-spline is used to represent how the hazard changes through time (as in [rstanarm](https://arxiv.org/abs/2002.09633)).  The Bayesian fitting method automatically chooses the optimal level of smoothness and flexibility.  Spline "knots" should span the period covered by the data, and any period where there is a chance that the hazard may vary.
 
 * A proportional hazards model is used to describe the relation of survival to predictors. 
 
