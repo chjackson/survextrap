@@ -90,7 +90,9 @@ plot_mspline(iknots=c(1,3,5), bknots=c(0, 7),
 
 The advantage of putting an M-spline on the hazard is that it respects the constraint that a hazard has to be non-negative, while it can be integrated analytically to produce the cumulative hazard. 
 
-A remaining disadvantage is that they still rely on a choice of knot locations.  We hope to show that this does not matter much.  Suggestions of alternative model families are welcome.  Gaussian processes, perhaps?  Though these are conceptually much harder.
+A remaining disadvantage is that they still rely on a choice of knot locations.  We hope to show that this does not matter much.  Suggestions of alternative model families are welcome.  Gaussian processes, perhaps?  Though these are conceptually much harder.   Does the GLM framework of Kearns et al make it easier to compute likelihoods for arbitrarily flexible models (at the cost of approximating the hazard with a piecewise-constant time grid?)?
+
+* I'd assume there is no difference between different kinds of arbitrarily-flexible model (fractional polynomials, particular kinds of spline) in terms of how well they tend to fit observed data, because they are all designed to do that job very well.  The difference I think will be in their computational efficiency, and how easily we can devise cleary-understandable priors on their parameters.  Priors will be influential in the places where there are no data.  For extrapolation, we don't want to rely on opaque nuances of the functional forms used in specific model families. 
 
 
 ## Bayesian model specification 

@@ -45,7 +45,7 @@ The package has been developed under the expectation that many forms of external
 
 * Extrapolations from short-term individual level data should be done using _explicit data or judgements_ about how risk will change over time. 
 
-* Extrapolations should not rely on conventional parametric forms (e.g. Weibull, log-normal, gamma...) that do not have interpretations as meaningful _mechanisms_ for how risk changes over time.
+* Extrapolations should not rely on standard parametric forms (e.g. Weibull, log-normal, gamma...) that are only used out of convention and do not have interpretations as plausible _mechanisms_ for how risk will change over time.
 
 * Instead of selecting (or averaging) traditional parametric models, an _arbitrarily flexible_ parametric model should be used, that _adapts_ to give the optimal fit to the short-term and long-term data in combination.
 
@@ -54,7 +54,7 @@ The package has been developed under the expectation that many forms of external
 
 * Bayesian multiparameter evidence synthesis is used to jointly model all sources of data and judgements 
 
-* An M-spline is used to represent how the hazard changes through time (as in [rstanarm](https://arxiv.org/abs/2002.09633)).  The Bayesian fitting method automatically chooses the optimal level of smoothness and flexibility.  Spline "knots" should span the period covered by the data, and any period where there is a chance that the hazard may vary.
+* An M-spline is used to represent how the hazard changes through time (as in [rstanarm](https://arxiv.org/abs/2002.09633)).  The Bayesian fitting method automatically chooses the optimal level of smoothness and flexibility.  Spline "knots" should span the period covered by the data, and any future period where there is a chance that the hazard may vary.
 
 * A proportional hazards model is used to describe the relation of survival to predictors. 
 
@@ -64,7 +64,7 @@ The package has been developed under the expectation that many forms of external
 
 * Stan is used under the surface to do MCMC (Hamiltonian Monte Carlo) sampling from the posterior distribution, in a similar fashion to [rstanarm](https://mc-stan.org/rstanarm/) and [survHE](https://CRAN.R-project.org/package=survHE). 
 
-* Estimates and credible intervals for survival, hazard, mean and restricted mean survival can easily be extracted from the fitted model.
+* Estimates and posterior credible intervals / samples for survival, hazard, mean and restricted mean survival can easily be extracted.
 
 
 ### Technical details of the methods
@@ -83,7 +83,9 @@ The package is in active development.  It can currently fit a large range of use
 
 Major things to do are:
 
-* Relative survival / additive hazards models. 
+* Relative survival / additive hazards models.
+	- Will be easy to implement the typical model with a fixed known background hazard as additive offset to a flexibly modelled excess hazard.
+	- Any interest in situations where background is uncertain, e.g. as modelled external data with a different hazard from the trial data?  Package can already express this as a proportional hazards model, but what about additive hazards models, or time-varying hazard ratios or differences?
 
 * Thoughtful default priors for hazard changes without external data, e.g. in terms of orders of magnitude.
 
@@ -91,7 +93,9 @@ Major things to do are:
 
 * More experience and examples of using it with real external data, including a vignette that lists how to implement all previously-suggested approaches for extrapolation with external data.
 
-* Non-proportional hazards models.  This is expected to be computationally difficult, and I'm not sure of the best approach.
+* Explain relation to dynamic GLMs as used by [Kearns et al](https://doi.org/10.1177%2F0272989X19873661) and related papers. Can "random walk" principles used in their dynamic model inspire a sensible prior for hazard changes?
+
+* Non-proportional hazards models.  This is expected to be computationally difficult, and I'm not sure of the best approach.  Would it be easier in the GLM formulation (at the cost of a discrete-time approximation)?
 
 * Thorough testing, documentation and error handling.
 
