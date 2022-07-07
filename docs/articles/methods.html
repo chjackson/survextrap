@@ -74,7 +74,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2022-07-03</h4>
+            <h4 data-toc-skip class="date">2022-07-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -93,15 +93,15 @@ for examples of how to fit models.</p>
 <h3 id="m-splines">M-splines<a class="anchor" aria-label="anchor" href="#m-splines"></a>
 </h3>
 <p>The axis of time is split into a set of regions defined by
-<em>knots</em>. In the figure below, the knots are located at the
+<em>knots</em>. In the example below, the knots are located at the
 integers from 0 to 10, as shown by the grid lines.</p>
 <p>Each knot is associated with a <em>cubic polynomial function</em>
 <span class="math inline">\(b_k(t)\)</span>, known as a <em>basis</em>
 function. M-spline basis functions are defined to be positive.</p>
-<p>Here there are 11 basis functions in the interior of the space. Each
-basis function has a peak around the knot, and diminishes to zero on
-either side. Two additional basis functions are used with peaks at the
-boundaries of the space, so there are <span class="math inline">\(K=13\)</span> basis functions in total. See <a href="https://www.jstor.org/stable/2245395" class="external-link">Ramsay</a> for the exact
+<p>In this example, there are 11 basis functions in the interior of the
+space. Each basis function has a peak around the knot, and diminishes to
+zero on either side. Two additional basis functions are used with peaks
+at the boundaries of the space, so there are <span class="math inline">\(K=13\)</span> basis functions in total. See <a href="https://www.jstor.org/stable/2245395" class="external-link">Ramsay</a> for the exact
 definitions of <span class="math inline">\(b_k(t)\)</span>.</p>
 <p>The hazard <span class="math inline">\(h(t)\)</span> at time <span class="math inline">\(t\)</span> is defined by a <em>weighted sum</em>
 of the basis functions:</p>
@@ -181,18 +181,31 @@ defined to be a non-decreasing function, but the spline is not
 constrained. The constraint is handled during fitting the model - spline
 coefficients which imply non-increasing cumulative hazard functions are
 rejected. This is inefficient.</p></li>
-<li><p>We could also have placed an unrestricted spline on the log
-hazard. The disadvantage with this is that the cumulative hazard
+<li><p>We could also have placed an unrestricted spline, of any kind, on
+the log hazard. The disadvantage with this is that the cumulative hazard
 (required to obtain the likelihood for censored data) then has to be
 evaluated by numerical integration, which is slow.</p></li>
-</ul>
-<p>The advantage of putting an M-spline on the hazard is that it
+<li><p>The advantage of putting an M-spline on the hazard is that it
 respects the constraint that a hazard has to be non-negative, while it
-can be integrated analytically to produce the cumulative hazard.</p>
-<p>A remaining disadvantage is that they still rely on a choice of knot
-locations. We hope to show that this does not matter much. Suggestions
-of alternative model families are welcome. Gaussian processes, perhaps?
-Though these are conceptually much harder.</p>
+can be integrated analytically to produce the cumulative
+hazard.</p></li>
+<li><p>A remaining disadvantage of M-splines is that they still rely on
+a choice of knot locations. We hope to show that this does not matter
+much. Suggestions of alternative model families are welcome. Gaussian
+processes, perhaps? Though these are conceptually much harder. Does the
+GLM framework (<a href="https://doi.org/10.1177%2F0272989X19873661" class="external-link">Kearns et al</a>) make
+it easier to compute likelihoods for arbitrarily flexible models (at the
+cost of a discrete-time approximatinion to the hazard)?</p></li>
+<li><p>I’d assume there is no difference between different kinds of
+arbitrarily-flexible model (fractional polynomials, particular kinds of
+spline) in terms of how well they tend to fit observed data, because
+they are all designed to do that job very well. The difference I think
+will be in their computational efficiency, and how easily we can devise
+clearly-understandable priors on their parameters. Priors will be
+influential in the places where there are no data. For extrapolation, we
+don’t want to rely on opaque nuances of the functional forms used in
+specific model families.</p></li>
+</ul>
 </div>
 </div>
 <div class="section level3">
@@ -305,7 +318,7 @@ under-smoothed, if the purpose of the model is to estimate a quantity
 that is an average over time (e.g. mean survival).</p>
 <p>A sensible route to resolving these uncertainties might be use
 cross-validation to assess and choose between model specifications. The
-package provides an interface to the (<a href="https://mc-stan.org/users/interfaces/loo" class="external-link">loo</a>) method for
+package provides an interface to the <a href="https://mc-stan.org/users/interfaces/loo" class="external-link">LOO-CV</a> method for
 Bayesian cross-validation - though note that this only assesses fit to
 the individual-level data, using the same principle as AIC.</p>
 </div>
@@ -316,18 +329,17 @@ the individual-level data, using the same principle as AIC.</p>
 comprising the uncensored survival times in the individual level data
 and the distinct follow-up times in the external data. (Smarter
 suggestions are welcome for this).</p>
-<p>6 internal knots are used, which (with cubic polynomials) leads to
-<span class="math inline">\(K=10\)</span> basis functions [check this
-notation] and parameters</p>
-<p>Users can override this default however, and place knots at any
-position.</p>
+<p>6 internal knots are used by default, which (with cubic polynomials)
+leads to <span class="math inline">\(K=10\)</span> basis functions.</p>
+<p>Users can override this default however, and use any number of knots,
+placed at any position.</p>
 <p>By default, the lower boundary knot is set to 0. The upper boundary
 knot is set to the highest follow-up time in the data. This default
 should be overridden if you want to extrapolate, and you think the
 hazard might change. A sensible guide is to place the upper knot at the
 latest time that you are interested in modelling. Beyond this time, you
 either think the hazard will not change, or any changes in the hazard do
-not matter for the purpose of the model.</p>
+not matter for whatever purpose the model is used for.</p>
 <p>The priors should then be chosen to give a low probability that the
 hazard varies outside the range thought reasonable, e.g. in terms of
 orders of magnitude. The package should provide a nice way to convert

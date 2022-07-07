@@ -52,7 +52,7 @@ The package has been developed under the expectation that many forms of external
 
 ### How it works 
 
-* Bayesian multiparameter evidence synthesis is used to jointly model all sources of data and judgements 
+* Bayesian multiparameter evidence synthesis is used to jointly model all sources of data and judgements.
 
 * An M-spline is used to represent how the hazard changes through time (as in [rstanarm](https://arxiv.org/abs/2002.09633)).  The Bayesian fitting method automatically chooses the optimal level of smoothness and flexibility.  Spline "knots" should span the period covered by the data, and any future period where there is a chance that the hazard may vary.
 
@@ -105,4 +105,4 @@ If you want to try it out - feel free to install from github:
 remotes::install_github("chjackson/survextrap")
 ```
 
-Please give feedback and suggestions if you do.  These can be posted on [github issues](https://github.com/chjackson/survextrap/issues), or [email](chris.jackson@mrc-bsu.cam.ac.uk).
+Please give feedback and suggestions if you do.  These can be posted on [github issues](https://github.com/chjackson/survextrap/issues), or [email](mailto:chris.jackson@mrc-bsu.cam.ac.uk).

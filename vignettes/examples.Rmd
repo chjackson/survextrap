@@ -59,7 +59,7 @@ nd_mod <- survextrap(Surv(years, status) ~ 1, data=colonc, chains=1)
 plot(nd_mod, tmax=5)
 ```
 
-The spline knots are shown as blue lines.  We could allow for the possibility of hazard changes beyond three years by spline knots beyond this point. 
+The spline knots are shown as blue lines.  We could allow for the possibility of hazard changes beyond three years by placing spline knots beyond this point. 
 
 The `basehaz_ops` argument is used to control the spline.  The `bknots` component of this is the vector comprising the lower and upper boundary knots.  Here we simply move the upper boundary knot from three to four years.
 
@@ -81,7 +81,7 @@ But note that it is only necessary to extrapolate in this way, using knots and d
 
 In many practical situations of extrapolation in time-to-event models, we do have information.   For human survival, we at least know that people do not tend to live longer than 100 years.  There are usually data from national agencies about mortality of general populations. 
 
-The idea of the package is to make this information as explicit as possible - ideally in the form of data. 
+The idea of the package is to make this external information as explicit as possible - ideally in the form of data. 
 
 
 ## With a smaller dataset

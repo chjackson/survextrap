@@ -29,11 +29,11 @@ It is work in progress, so it will be sketchy in some places.
 
 ## M-splines 
 
-The axis of time is split into a set of regions defined by _knots_.   In the figure below, the knots are located at the integers from 0 to 10, as shown by the grid lines.
+The axis of time is split into a set of regions defined by _knots_.  In the example below, the knots are located at the integers from 0 to 10, as shown by the grid lines.
 
 Each knot is associated with a _cubic polynomial function_ $b_k(t)$, known as a _basis_ function.  M-spline basis functions are defined to be positive.
 
-Here there are 11 basis functions in the interior of the space. Each basis function has a peak around the knot, and diminishes to zero on either side.  Two additional basis functions are used with peaks at the boundaries of the space, so there are $K=13$ basis functions in total.    See [Ramsay](https://www.jstor.org/stable/2245395) for the exact definitions of $b_k(t)$. 
+In this example, there are 11 basis functions in the interior of the space. Each basis function has a peak around the knot, and diminishes to zero on either side.  Two additional basis functions are used with peaks at the boundaries of the space, so there are $K=13$ basis functions in total.    See [Ramsay](https://www.jstor.org/stable/2245395) for the exact definitions of $b_k(t)$. 
 
 The hazard $h(t)$ at time $t$ is defined by a _weighted sum_ of the basis functions:
 
@@ -86,13 +86,13 @@ plot_mspline(iknots=c(1,3,5), bknots=c(0, 7),
 
 * The Royston/Parmar model (e.g. in flexsurv) uses a natural cubic spline for the log cumulative hazard function.  A cumulative hazard is defined to be a non-decreasing function, but the spline is not constrained.   The constraint is handled during fitting the model - spline coefficients which imply non-increasing cumulative hazard functions are rejected.  This is inefficient.
 
-* We could also have placed an unrestricted spline on the log hazard.   The disadvantage with this is that the cumulative hazard (required to obtain the likelihood for censored data) then has to be evaluated by numerical integration, which is slow.  
+* We could also have placed an unrestricted spline, of any kind, on the log hazard.   The disadvantage with this is that the cumulative hazard (required to obtain the likelihood for censored data) then has to be evaluated by numerical integration, which is slow.  
 
-The advantage of putting an M-spline on the hazard is that it respects the constraint that a hazard has to be non-negative, while it can be integrated analytically to produce the cumulative hazard. 
+* The advantage of putting an M-spline on the hazard is that it respects the constraint that a hazard has to be non-negative, while it can be integrated analytically to produce the cumulative hazard. 
 
-A remaining disadvantage is that they still rely on a choice of knot locations.  We hope to show that this does not matter much.  Suggestions of alternative model families are welcome.  Gaussian processes, perhaps?  Though these are conceptually much harder.   Does the GLM framework of Kearns et al make it easier to compute likelihoods for arbitrarily flexible models (at the cost of approximating the hazard with a piecewise-constant time grid?)?
+* A remaining disadvantage of M-splines is that they still rely on a choice of knot locations.  We hope to show that this does not matter much.  Suggestions of alternative model families are welcome.  Gaussian processes, perhaps?  Though these are conceptually much harder.   Does the GLM framework ([Kearns et al](https://doi.org/10.1177%2F0272989X19873661)) make it easier to compute likelihoods for arbitrarily flexible models (at the cost of a discrete-time approximatinion to the hazard)?
 
-* I'd assume there is no difference between different kinds of arbitrarily-flexible model (fractional polynomials, particular kinds of spline) in terms of how well they tend to fit observed data, because they are all designed to do that job very well.  The difference I think will be in their computational efficiency, and how easily we can devise cleary-understandable priors on their parameters.  Priors will be influential in the places where there are no data.  For extrapolation, we don't want to rely on opaque nuances of the functional forms used in specific model families. 
+* I'd assume there is no difference between different kinds of arbitrarily-flexible model (fractional polynomials, particular kinds of spline) in terms of how well they tend to fit observed data, because they are all designed to do that job very well.  The difference I think will be in their computational efficiency, and how easily we can devise clearly-understandable priors on their parameters.  Priors will be influential in the places where there are no data.  For extrapolation, we don't want to rely on opaque nuances of the functional forms used in specific model families.
 
 
 ## Bayesian model specification 
@@ -160,18 +160,18 @@ If sampling is poor, then this alternative procedure might work - fit the model 
 
 Either way, these procedures still need to be tested empirically to see whether they give sensible results.   It seems to under-smooth in some cases. Though it may not matter if the hazard function is under-smoothed, if the purpose of the model is to estimate a quantity that is an average over time (e.g. mean survival).
 
-A sensible route to resolving these uncertainties might be use cross-validation to assess and choose between model specifications.  The package provides an interface to the ([loo](https://mc-stan.org/users/interfaces/loo)) method for Bayesian cross-validation - though note that this only assesses fit to the individual-level data, using the same principle as AIC.
+A sensible route to resolving these uncertainties might be use cross-validation to assess and choose between model specifications.  The package provides an interface to the [LOO-CV](https://mc-stan.org/users/interfaces/loo) method for Bayesian cross-validation - though note that this only assesses fit to the individual-level data, using the same principle as AIC.
 
 
 ## Choice of knots when modelling data
 
 By default, internal knots are placed at the quantiles of the vector comprising the uncensored survival times in the individual level data and the distinct follow-up times in the external data. (Smarter suggestions are welcome for this).
 
-6 internal knots are used, which (with cubic polynomials) leads to $K=10$ basis functions [check this notation] and parameters 
+6 internal knots are used by default, which (with cubic polynomials) leads to $K=10$ basis functions. 
 
-Users can override this default however, and place knots at any position. 
+Users can override this default however, and use any number of knots, placed at any position. 
 
-By default, the lower boundary knot is set to 0.   The upper boundary knot is set to the highest follow-up time in the data.    This default should be overridden if you want to extrapolate, and you think the hazard might change.   A sensible guide is to place the upper knot at the latest time that you are interested in modelling.  Beyond this time, you either think the hazard will not change, or any changes in the hazard do not matter for the purpose of the model.
+By default, the lower boundary knot is set to 0.   The upper boundary knot is set to the highest follow-up time in the data.    This default should be overridden if you want to extrapolate, and you think the hazard might change.   A sensible guide is to place the upper knot at the latest time that you are interested in modelling.  Beyond this time, you either think the hazard will not change, or any changes in the hazard do not matter for whatever purpose the model is used for.
 
 The priors should then be chosen to give a low probability that the hazard varies outside the range thought reasonable, e.g. in terms of orders of magnitude.   The package should provide a nice way to convert beliefs of this kind into priors.
 
