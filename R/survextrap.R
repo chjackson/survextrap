@@ -49,7 +49,11 @@
 #'
 #' `degree`: Polynomial degree used for the basis function. The default is 3, giving a cubic.
 #'
-#' @param modelid TODO developer use only.
+#' @param modelid \code{"mspline"} for the default M-spline model.
+#'
+#' Only current alternative is \code{"weibull"} for a Weibull accelerated failure time model.
+#' Just included for the purpose of package testing. Not fully tested, and not recommended for use in
+#' practice for survival extrapolation.
 #'
 #' @param fit_method Method from \pkg{rstan} used to fit the model.  Defaults to MCMC.
 #'
@@ -86,7 +90,7 @@ survextrap <- function(formula,
                        cure = FALSE,
                        cure_prior = c(1,1),
                        basehaz_ops = NULL,
-                       modelid = 1,
+                       modelid = "mspline",
                        fit_method = "mcmc",
                        loo = (fit_method=="mcmc"),
                        ...)
@@ -126,7 +130,7 @@ survextrap <- function(formula,
     x_ext <- external$x_centered
     tmax <- max(c(t_end,t_upp,external$tmax), na.rm = TRUE)
 
-    basehaz <- handle_basehaz_surv(basehaz_ops    = basehaz_ops,
+    basehaz <- make_basehaz(basehaz_ops    = basehaz_ops,
                                    times          = t_end,
                                    times_ext      = unique(c(t_ext_start, t_ext_stop)),
                                    status         = status,
@@ -144,23 +148,26 @@ survextrap <- function(formula,
         ## TODO validate
     }
     beta_mean <- log(coefs_mean[-1] / coefs_mean[1])
-    if (!(modelid %in% 1:2)) stop("modelid should be 1 or 2")
-
-    if (modelid==2){
-        ## nvars is number of parameters including the intercept
-        nvars <- 2
-        ## "basis" is the observed times and "ibasis" is the censored
-        basis_event <- array(t_event, dim=c(length(t_event), 2)) # just first col of these used
-        ibasis_event <- array(t_event, dim=c(length(t_event), 2))
-        ibasis_rcens <- array(t_rcens, dim=c(length(t_rcens), 2))
-        beta_mean <- aa(1) # prior mean for log shape parameter. shape is coefs[1], log scale is eta[1]
-    }
-
-    ibasis_ext_stop <- if (nextern>0) make_basis(t_ext_stop, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
-    ibasis_ext_start <- if (nextern>0) make_basis(t_ext_start, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
+    modelids <- c("mspline", "weibull")
+    if (!(modelid %in% modelids)) stop("modelid should be mspline or weibull")
+    modelid_num <- match(modelid, modelids)
+    cure_info <- make_cure(cure)
 
     est_smooth <- (smooth_sd == "bayes")
     if (est_smooth) smooth_sd <- 1
+
+    if (modelid=="weibull"){
+        ## Weibull model. 
+        nvars <- 2 # Number of free parameters, consistent with M-spline.  M-spline model has an extra "1 minus sum of rest" parameter
+        basis_event <- array(t_event, dim=c(length(t_event), 2)) # just first col of these used. 
+        ibasis_event <- array(t_event, dim=c(length(t_event), 2))
+        ibasis_rcens <- array(t_rcens, dim=c(length(t_rcens), 2))
+        beta_mean <- aa(1) # prior mean for log shape parameter. shape is coefs[1], log scale is eta[1]
+        est_smooth <- FALSE
+    }
+    ibasis_ext_stop <- if (nextern>0) make_basis(t_ext_stop, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
+    ibasis_ext_start <- if (nextern>0) make_basis(t_ext_start, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
+
     standata <- nlist(nevent, nrcens, nvars, nextern, ncovs,
                       log_crude_event_rate,
                       basis_event, ibasis_event, ibasis_rcens,
@@ -171,7 +178,7 @@ survextrap <- function(formula,
                       est_smooth,
                       cure,
                       cure_shape = cure_prior, ## TODO standardise name, mean+ESS param
-                      modelid
+                      modelid = modelid_num
                       )
     cure_prob_init <- if (cure) 0.5 else aa(numeric())
     staninit <- list(gamma = aa(0),
@@ -201,7 +208,7 @@ survextrap <- function(formula,
 
     misc_keep <- nlist(formula, stanfit=fits, fit_method)
     standata_keep <- standata[c("nvars","ncovs","log_crude_event_rate")]
-    model_keep <- standata[c("cure","modelid")]
+    model_keep <- nlist(cure, modelid)
     spline_keep <- nlist(basehaz)
     x_keep <- x[c("xnames","xlevs","xinds","xbar","mfbase")]
     prior_keep <- nlist(coefs_mean, smooth_sd)
@@ -377,7 +384,7 @@ make_basis <- function(times, basehaz, integrate = FALSE) {
 aa <- function(x, ...) as.array(x,...)
 
 
-handle_basehaz_surv <- function(basehaz_ops,
+make_basehaz <- function(basehaz_ops,
                                 times,
                                 times_ext,
                                 status,
@@ -448,3 +455,26 @@ get_iknots <- function(x, df = 5L, degree = 3L, iknots = NULL, intercept = FALSE
   return(iknots)
 }
 
+make_cure <- function(cure, data){
+    if (inherits(cure,"formula")){
+        ## Covariates on cure TODO 
+        ## Reconcile with covariates in main formula.
+        ## What do we need from that.  Covs should also appear in external data 
+        ## centered and mean cov values, which are factor and which numeric. 
+#        nlist(x, x_centered, xbar, N = NROW(x),
+#              ncovs = NCOL(x), xnames=colnames(x), xlevs, xinds, mfbase)
+        Terms <- terms(cure) # no random effects for now
+        mf <- stats::model.frame(Terms, data)
+        x <- model.matrix(formula, mf)
+        x <- drop_intercept(x)
+        xnames <- colnames(x)
+        cure <- TRUE
+        ncovs <- ncovs
+    } else if (is.logical(cure)){
+        x <- xnames <- NULL
+        ncovs <- 0
+    } else {
+        stop("`cure` must either be TRUE, FALSE or a model formula")
+    }
+    nlist(cure, x, xnames, ncovs)
+}

@@ -13,7 +13,7 @@ survextrap(
   cure = FALSE,
   cure_prior = c(1, 1),
   basehaz_ops = NULL,
-  modelid = 1,
+  modelid = "mspline",
   fit_method = "mcmc",
   loo = (fit_method == "mcmc"),
   ...
@@ -69,7 +69,11 @@ the function is smoothed through the prior.
 
 \code{degree}: Polynomial degree used for the basis function. The default is 3, giving a cubic.}
 
-\item{modelid}{TODO developer use only.}
+\item{modelid}{\code{"mspline"} for the default M-spline model.
+
+Only current alternative is \code{"weibull"} for a Weibull accelerated failure time model.
+Just included for the purpose of package testing. Not fully tested, and not recommended for use in
+practice for survival extrapolation.}
 
 \item{fit_method}{Method from \pkg{rstan} used to fit the model.  Defaults to MCMC.
 

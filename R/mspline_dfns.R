@@ -102,11 +102,6 @@ mspline_basis <- function(times, iknots, bknots, degree=3, integrate = FALSE) {
     Mmin <- predict(basis0, tmin)
     Imin <- predict(ibasis0, tmin)
     for (i in seq_len(n_ext)){
-        ## TODO.  hazard in this period is constant at Mmin.  is this consistent with integrated haz at times just above tmin? 
-        ## If this is weird should we force the lower boundary knot to be zero?
-        ## There should always be boundary knots bounding the period that we think the hazard might change
-        ## but if we just think it is constatnw we should be allowed to say that
-        ## TESTME
         out[eind[i],] <- Mmin*times_int[i]
     }
   } else {

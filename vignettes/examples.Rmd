@@ -105,7 +105,7 @@ Instead we compute the restricted mean survival time $RMST(t)$ over three altern
 
 ```{r}
 # mean_survextrap(nd_mod)
-rmst_survextrap(nd_mod2, c(3,10,1000))
+rmst_survextrap(nd_mod2, c(3,10,1000), niter=100)
 ```
 
 We do not really believe that the mean survival for this population can be this large. 
@@ -253,8 +253,8 @@ noncure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1,
 plot(noncure_mod) # doesn't quite capture the curve
 
 ## This is very slow, but it fits  
-cure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, cure=TRUE, modelid=1)
-plot(cure_mod, tmax=10)
+cure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, cure=TRUE, iter=1000)
+plot(cure_mod, tmax=10, niter=20) 
 ```
 
 Should we allow covariates on the cure fraction as well, as flexsurvcure does by default?

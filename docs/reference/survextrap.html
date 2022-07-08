@@ -64,7 +64,7 @@
 <span>  cure <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cure_prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  basehaz_ops <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  modelid <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  modelid <span class="op">=</span> <span class="st">"mspline"</span>,</span>
 <span>  fit_method <span class="op">=</span> <span class="st">"mcmc"</span>,</span>
 <span>  loo <span class="op">=</span> <span class="op">(</span><span class="va">fit_method</span> <span class="op">==</span> <span class="st">"mcmc"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -127,7 +127,10 @@ the function is smoothed through the prior.</p>
 
 
 <dt>modelid</dt>
-<dd><p>TODO developer use only.</p></dd>
+<dd><p><code>"mspline"</code> for the default M-spline model.</p>
+<p>Only current alternative is <code>"weibull"</code> for a Weibull accelerated failure time model.
+Just included for the purpose of package testing. Not fully tested, and not recommended for use in
+practice for survival extrapolation.</p></dd>
 
 
 <dt>fit_method</dt>

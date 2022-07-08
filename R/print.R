@@ -48,6 +48,17 @@ summary.survextrap <- function(object, ...){
                median=.value) %>%
         select(variable, term, median,
                lower=.lower, upper=.upper, sd, i)
+    if (object$modelid == "weibull"){
+        ## TODO should change the parameter names to something more sensible if we
+        ## keep the Weibull model in.  Shape, scale, consistently with dweibull
+        summ <- summ %>%
+            dplyr::filter(!(variable=="coefs" & i==2))
+        if (object$ncovs==0) {
+            summ <- summ %>% dplyr::select(-i)
+            summ$variable[summ$variable=="loghr"] <- "logtaf"
+            summ$variable[summ$variable=="hr"] <- "taf"
+        }
+    }
     summ
 }
 

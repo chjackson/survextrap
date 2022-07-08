@@ -41,18 +41,18 @@ functions {
     
     vector log_surv(vector eta, matrix ibasis, vector coefs, data int cure, real cure_prob, data int modelid) {
 	vector[rows(eta)] res;
-	vector[rows(eta)] base_surv;
+	vector[rows(eta)] base_logsurv;
 	if (modelid==1){ 
-	    base_surv = mspline_log_surv(eta, ibasis, coefs);
+	    base_logsurv = mspline_log_surv(eta, ibasis, coefs);
 	} else if (modelid==2) {
 	    for (i in 1:rows(eta)) {
-		base_surv[i] = weibull_lccdf(ibasis[i,1] | coefs[1], exp(eta[1])); // TODO rhs is real, lhs is vector
+		base_logsurv[i] = weibull_lccdf(ibasis[i,1] | coefs[1], exp(eta[i])); // TODO rhs is real, lhs is vector
 	    }
 	}
 	if (cure) {
-	    res = log(cure_prob + (1 - cure_prob)*exp(base_surv));
+	    res = log(cure_prob + (1 - cure_prob)*exp(base_logsurv));
 	} else {
-	    res = base_surv;
+	    res = base_logsurv;
 	}
 	return res;
     }
@@ -68,7 +68,7 @@ functions {
 		base_logdens = mspline_log_dens(eta, basis, ibasis, coefs);
 	    } else {
 		for (i in 1:rows(eta)){
-		    base_logdens[i] = weibull_lpdf(basis[i,1] | coefs[1], exp(eta[1]));
+		    base_logdens[i] = weibull_lpdf(basis[i,1] | coefs[1], exp(eta[i]));
 		}
 	    }
 	    res = log(1 - cure_prob) + base_logdens -
@@ -78,8 +78,8 @@ functions {
 		base_loghaz = mspline_log_haz(eta, basis, coefs);
 	    } else {
 		for (i in 1:rows(eta)){
-		    base_loghaz[i] = weibull_lpdf(basis[i,1] | coefs[1], exp(eta[1])) -
-			weibull_lccdf(ibasis[i,1] | coefs[1], exp(eta[1]));
+		    base_loghaz[i] = weibull_lpdf(basis[i,1] | coefs[1], exp(eta[i])) -
+			weibull_lccdf(ibasis[i,1] | coefs[1], exp(eta[i]));
 		}
 	    }
 	    res = base_loghaz; 
@@ -172,7 +172,8 @@ transformed parameters {
     if (modelid==1){
 	coefs = softmax(beta);
     } else {
-	coefs[1] = exp(beta_err[1]); // coefs[2] unused
+	coefs[1] = exp(beta_err[1]); 
+	coefs[2] = 0; // dummy, unused
     }
 
 }
@@ -202,7 +203,6 @@ model {
     if (nextern > 0) eta_extern += log_crude_event_rate;
       
     // add on intercept to linear predictor
-    // this is used in m-splines
     if (nevent > 0) eta_event += gamma[1];
     if (nrcens > 0) eta_rcens += gamma[1];
     if (nextern > 0) eta_extern += gamma[1];

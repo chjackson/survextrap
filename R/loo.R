@@ -1,8 +1,6 @@
 # Leave-one-out cross-validation for survextrap models
 #
 loo_survextrap <- function(x, standata){
-    if (x$modelid != 1) stop("LOO not currently implemented for modelid 1")
-    if (x$cure) stop("LOO not currently implemented for cure models")
     ll <- loglik_ipd(x, standata)
     chains <- x$stanfit@sim$chains
     iter <- NROW(ll)
@@ -30,11 +28,12 @@ loglik_ipd <- function(x, standata){
     }
     eta_event <- unclass(eta_event)
     eta_rcens <- unclass(eta_rcens)
+    cure_prob <- as.numeric(pars$cure_prob)
     ll_event <- log_dens(eta_event,  standata$basis_event,
-                         pars$coefs, standata$cure, pars$cure_prob,
+                         pars$coefs, standata$cure, cure_prob,
                          standata$ibasis_event, standata$modelid)
     ll_rcens <- log_surv(eta_rcens, standata$ibasis_rcens,
-                         pars$coefs, standata$cure, pars$cure_prob,
+                         pars$coefs, standata$cure, cure_prob,
                          standata$modelid)
     cbind(ll_event, ll_rcens)
 }
@@ -44,10 +43,44 @@ log_dens <- function(eta, basis, coefs, cure, cure_prob, ibasis, modelid){
         log_surv(eta, ibasis, coefs, cure, cure_prob, modelid)
 }
 
-log_haz <- function(eta, basis, coefs, cure, cure_prob, ibasis, modelid){
+mspline_log_surv <- function(eta, ibasis, coefs) {
+    - (coefs %*% t(ibasis)) * exp(eta);
+}
+
+mspline_log_haz <- function(eta, basis, coefs) {
     log(coefs %*% t(basis)) + eta
 }
 
+log_haz <- function(eta, basis, coefs, cure, cure_prob, ibasis, modelid){
+    if (cure){
+        if (modelid==1){
+            base_logdens <- mspline_log_haz(eta, basis, coefs) + mspline_log_surv(eta, ibasis, coefs);
+        } else  {
+            base_logdens <- dweibull(basis, shape=coefs[,1], scale=exp(eta), log=TRUE)
+        }
+        res <- log(1 - cure_prob) + base_logdens -
+            log_surv(eta, ibasis, coefs, cure, cure_prob, modelid)
+    } else {
+        if (modelid==1)
+            res <- mspline_log_haz(eta, basis, coefs)
+        else if (modelid==2)
+            res <- dweibull(basis, shape=coefs[,1], scale=exp(eta), log=TRUE) -
+                pweibull(ibasis, shape=coefs[,1], scale=exp(eta), log.p=TRUE, lower.tail=FALSE)
+        else stop("unknown modelid")
+    }
+    res
+}
+
 log_surv <- function(eta, ibasis, coefs, cure, cure_prob, modelid){
-    - (coefs %*% t(ibasis)) * exp(eta)
+    if (modelid==1)
+        base_logsurv <- mspline_log_surv(eta, ibasis, coefs)
+    else if (modelid==2)
+        base_logsurv <- pweibull(ibasis, shape=coefs[,1], scale=exp(eta), log=TRUE, lower.tail=FALSE)
+    else stop("unknown modelid")
+    if (cure){
+        res <- log(cure_prob + (1 - cure_prob)*exp(base_logsurv))
+    } else {
+        res <- base_logsurv
+    }
+    res
 }
