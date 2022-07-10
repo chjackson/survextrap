@@ -21,7 +21,7 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
     knots <- x$basehaz$knots[x$basehaz$knots <= max(haz$times)]
     aes <- list(x="times", y="median")
     if (attr(haz, "nvals") > 1)
-        aes <- c(aes, list(col = names(x$xlevs), group = names(x$xlevs)))
+        aes <- c(aes, list(col = names(newdata), group = names(newdata)))
     geom_maps <- do.call("aes_string", aes)
     geom_ylab <- ggplot2::ylab(ylab)
     geom_xlab <- ggplot2::xlab(xlab)
@@ -61,7 +61,7 @@ plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter
     knots <- x$basehaz$knots[x$basehaz$knots <= max(surv$times)]
     aes <- list(x="times", y="median")
     if (attr(surv,"nvals") > 1)
-        aes <- c(aes, list(col = names(x$xlevs), group = names(x$xlevs)))
+        aes <- c(aes, list(col = names(newdata), group = names(newdata)))
     geom_maps <- do.call("aes_string", aes)
     geom_ylab <- ggplot2::ylab(ylab)
     geom_xlab <- ggplot2::xlab(xlab)
@@ -81,7 +81,7 @@ plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter
     if (km){
         aes <- list(x="time", y="surv")
         if (one_factor_cov(x)) {
-            covname <- names(x$xlevs)
+            covname <- names(newdata)
             aes <- c(aes, list(col=covname))
         }
         geom_maps <- do.call("aes_string", aes)
@@ -91,7 +91,10 @@ plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter
 }
 
 one_factor_cov <- function(x){
-    (length(x$xinds$factor)<=1) && (length(x$xinds$numeric)==0)
+    (length(x$xinds$factor)<=1) &&
+        (length(x$xinds$numeric)==0) && 
+        (x$ncurecovs == 0)
+    ## if there are cure covs, make people choose for themselves what curves to draw
 }
 
 default_plottimes <- function(x, tmax=NULL, nplot=100){
@@ -111,16 +114,17 @@ default_plottimes <- function(x, tmax=NULL, nplot=100){
 #' @import ggplot2
 #'
 #' @export
-plot.survextrap <- function(x, type="hazsurv", ...){
+plot.survextrap <- function(x, type="hazsurv", newdata=NULL, ...){
+    newdata <- default_newdata(x, newdata)
     switch(type,
-           "hazsurv" = plot_hazsurv(x, ...),
-           "survival" = plot_survival(x, ...),
-           "hazard" = plot_hazard(x, ...)
+           "hazsurv" = plot_hazsurv(x, newdata=newdata, ...),
+           "survival" = plot_survival(x, newdata=newdata, ...),
+           "hazard" = plot_hazard(x, newdata=newdata, ...)
            )
 }
 
-plot_hazsurv <- function(x, ...){
-    ps <- plot_survival(x, ...)
-    ph <- plot_hazard(x, ...)
+plot_hazsurv <- function(x, newdata=NULL, ...){
+    ps <- plot_survival(x, newdata=newdata, ...)
+    ph <- plot_hazard(x, newdata=newdata, ...)
     gridExtra::grid.arrange(ps, ph, nrow=1)
 }

@@ -1,5 +1,5 @@
 Package: survextrap
-Title: Survival Extrapolation With a Flexible Parametric Model and External Data
+Title: Survival Extrapolation with a Flexible Parametric Model and External Data
 Version: 0.1
 Authors@R: 
     person("Christopher", "Jackson", , "chris.jackson@mrc-bsu.cam.ac.uk", role = c("aut", "cre"),

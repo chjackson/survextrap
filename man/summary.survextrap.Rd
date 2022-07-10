@@ -9,7 +9,21 @@
 \arguments{
 \item{object}{A fitted model object as returned by \code{\link{survextrap}}}
 
-\item{...}{Other argument (currently unused).}
+\item{...}{Other argument (currently unused).
+
+\code{alpha}
+
+\code{coefs}
+
+\code{loghr}
+
+\code{hr}
+
+\code{pcure}
+
+\code{logor_cure}
+
+\code{or_cure}}
 }
 \description{
 The intervals are 95\\% credible intervals.

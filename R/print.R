@@ -23,22 +23,52 @@ print.survextrap <- function(x, ...){
 ##'
 ##' @param ... Other argument (currently unused).
 ##'
+##' `alpha`
+##'
+##' `coefs`
+##'
+##' `loghr`
+##'
+##' `hr`
+##'
+##' `pcure`
+##'
+##' `logor_cure`
+##'
+##' `or_cure`
+##'
 ##' @export
 summary.survextrap <- function(object, ...){
-    i <- .value <- .variable <- variable <- term <- .lower <- .upper <- NULL
+    i <- .value <- .variable <- variable <- term <- .lower <- .upper <- logor_cure <- NULL
     sam <- get_draws(object)
     alpha <- tidybayes::gather_rvars(sam, alpha)
     coefs <- tidybayes::gather_rvars(sam, coefs[i])
     summ <- alpha %>% mutate(i=NA)
+    if (object$cure){
+        pcure <- tidybayes::gather_rvars(sam, pcure) # this is the silly mean one
+        summ <- summ %>% full_join(pcure, by=c(".variable",".value"))
+    }
     if (object$ncovs>0){
         loghr <- tidybayes::gather_rvars(sam, loghr[i]) %>%
-            mutate(term=object$xnames)
+            mutate(term=object$x$xnames)
         hr <- loghr %>%
             mutate(.value = exp(.value),
                    .variable = "hr")
         summ <- summ %>%
             full_join(loghr, by=c(".variable",".value","i")) %>%
             full_join(hr, by=c(".variable",".value","i","term"))
+    }
+    ## TODO baseline cure prob or zeroed version,
+    ## document which is which.  wanna throw away the one with the means of contrasts?
+    if (object$ncurecovs>0){
+        logor <- tidybayes::gather_rvars(sam, logor_cure[i]) %>%
+            mutate(term=object$xcure$xnames)
+        or <- logor %>%
+            mutate(.value = exp(.value),
+                   .variable = "or_cure")
+        summ <- summ %>%
+            full_join(logor, by=c(".variable",".value","i")) %>%
+            full_join(or, by=c(".variable",".value","i","term"))
     }
     summ <- summ %>%
         full_join(coefs, by=c(".variable",".value","i")) %>%

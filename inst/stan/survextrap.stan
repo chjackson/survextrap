@@ -39,7 +39,7 @@ functions {
 	return res;
     }
     
-    vector log_surv(vector eta, matrix ibasis, vector coefs, data int cure, real cure_prob, data int modelid) {
+    vector log_surv(vector eta, matrix ibasis, vector coefs, data int cure, vector pcure, data int modelid) {
 	vector[rows(eta)] res;
 	vector[rows(eta)] base_logsurv;
 	if (modelid==1){ 
@@ -50,7 +50,9 @@ functions {
 	    }
 	}
 	if (cure) {
-	    res = log(cure_prob + (1 - cure_prob)*exp(base_logsurv));
+	    for (i in 1:rows(eta)) {
+		res[i] = log(pcure[i] + (1 - pcure[i])*exp(base_logsurv[i]));
+	    }
 	} else {
 	    res = base_logsurv;
 	}
@@ -58,11 +60,12 @@ functions {
     }
 
     vector log_haz(vector eta, matrix basis, vector coefs,
-		   data int cure, real cure_prob, matrix ibasis,
+		   data int cure, vector pcure, matrix ibasis,
 		   data int modelid) {
 	vector[rows(eta)] res;
 	vector[rows(eta)] base_logdens;
 	vector[rows(eta)] base_loghaz;
+	vector[rows(eta)] base_logsurv;
 	if (cure) {
 	    if (modelid==1){
 		base_logdens = mspline_log_dens(eta, basis, ibasis, coefs);
@@ -71,8 +74,10 @@ functions {
 		    base_logdens[i] = weibull_lpdf(basis[i,1] | coefs[1], exp(eta[i]));
 		}
 	    }
-	    res = log(1 - cure_prob) + base_logdens -
-		log_surv(eta, ibasis, coefs, cure, cure_prob, modelid);
+	    base_logsurv = log_surv(eta, ibasis, coefs, cure, pcure, modelid);
+	    for (i in 1:rows(eta)){
+		res[i] = log(1 - pcure[i]) + base_logdens[i] - base_logsurv[i];
+	    }
 	} else {
 	    if (modelid==1){
 		base_loghaz = mspline_log_haz(eta, basis, coefs);
@@ -88,11 +93,11 @@ functions {
     }
 
     vector log_dens(vector eta, matrix basis, vector coefs,
-		   data int cure, real cure_prob, matrix ibasis,
+		   data int cure, vector pcure, matrix ibasis,
 		    data int modelid){
 	vector[rows(eta)] res;
-	res = log_haz(eta, basis, coefs, cure, cure_prob, ibasis, modelid) +
-	    log_surv(eta, ibasis, coefs, cure, cure_prob, modelid);
+	res = log_haz(eta, basis, coefs, cure, pcure, ibasis, modelid) +
+	    log_surv(eta, ibasis, coefs, cure, pcure, modelid);
 	return res;
     }
     
@@ -123,6 +128,7 @@ data {
   int<lower=0> nvars;      // num. aux parameters for baseline hazard
   int<lower=0> nextern;    // number of time points with external data
   int<lower=0> ncovs;      // number of covariate effects on the hazard
+  int<lower=0> ncurecovs;      // number of covariate effects on the cure probability
 
   // log crude event rate / time (for centering linear predictor)
   real log_crude_event_rate;
@@ -135,12 +141,15 @@ data {
   matrix[nextern,nvars] ibasis_ext_start; // 
   matrix[nevent,ncovs] x_event; // matrix of covariate values 
   matrix[nrcens,ncovs] x_rcens;
+  matrix[nevent,ncurecovs] xcure_event; // matrix of covariate values on cure prob
+  matrix[nrcens,ncurecovs] xcure_rcens;
 
  // external data describing knowledge about long-term survival
  // expressed as binomial outcomes of r survivors by t2 out of n people alive at t1
   int<lower=0> r_ext[nextern];
   int<lower=0> n_ext[nextern];
   matrix[nextern,ncovs] x_ext;
+  matrix[nextern,ncurecovs] xcure_ext;
 
   vector[nvars-1] beta_mean; // logit of prior guess at basis weights (by default, those that give a constant hazard)
   int est_smooth;
@@ -157,7 +166,8 @@ parameters {
   vector[ncovs] loghr;
   vector[nvars-1] beta_err;
   vector<lower=0>[est_smooth] smooth_sd;
-  vector<lower=0,upper=1>[cure] cure_prob;
+  vector<lower=0,upper=1>[cure] pcure;
+  vector[ncurecovs] logor_cure;
 }
 
 
@@ -183,8 +193,12 @@ model {
     vector[nrcens] eta_rcens; // for right censored
     vector[nextern] eta_extern; // for external data
     real dummy;
+    real cp;
     vector[nextern] p_ext_stop; // unconditional survival prob at external time points
     vector[nextern] p_ext_start; // 
+    vector[nevent] pcure_event; // 
+    vector[nrcens] pcure_rcens; // 
+    vector[nextern] pcure_extern; // 
 
     if (ncovs > 0) {
 	// does x * beta,    matrix[n,K] * vector[K] is this a matrix product 
@@ -207,12 +221,23 @@ model {
     if (nrcens > 0) eta_rcens += gamma[1];
     if (nextern > 0) eta_extern += gamma[1];
 
-    if (nevent > 0) target +=  log_dens(eta_event,  basis_event, coefs, cure, cure_prob[1], ibasis_event, modelid);
-    if (nrcens > 0) target +=  log_surv(eta_rcens, ibasis_rcens, coefs, cure, cure_prob[1], modelid);
+    if (cure) cp = pcure[1]; else cp = 0;
+    pcure_event = rep_vector(cp, nevent);
+    pcure_rcens = rep_vector(cp, nrcens);
+    pcure_extern = rep_vector(cp, nextern);
+    
+    if (ncurecovs > 0){
+	if (nevent > 0) pcure_event = inv_logit(logit(pcure_event) + xcure_event * logor_cure);
+	if (nrcens > 0) pcure_rcens = inv_logit(logit(pcure_rcens) + xcure_rcens * logor_cure);
+	if (nextern > 0) pcure_extern = inv_logit(logit(pcure_extern) + xcure_ext * logor_cure);
+    }
+
+    if (nevent > 0) target +=  log_dens(eta_event,  basis_event, coefs, cure, pcure_event, ibasis_event, modelid);
+    if (nrcens > 0) target +=  log_surv(eta_rcens, ibasis_rcens, coefs, cure, pcure_rcens, modelid);
 
     if (nextern > 0) {
-	p_ext_stop = exp(log_surv(eta_extern, ibasis_ext_stop, coefs, cure, cure_prob[1], modelid));
-	p_ext_start = exp(log_surv(eta_extern, ibasis_ext_start, coefs, cure, cure_prob[1], modelid));
+	p_ext_stop = exp(log_surv(eta_extern, ibasis_ext_stop, coefs, cure, pcure_extern, modelid));
+	p_ext_start = exp(log_surv(eta_extern, ibasis_ext_start, coefs, cure, pcure_extern, modelid));
 	target += binomial_lpmf(r_ext | n_ext, p_ext_stop ./ p_ext_start);
     }
       
@@ -231,7 +256,7 @@ model {
 
     // prior for cure fraction
     if (cure) { 
-	cure_prob ~ beta(cure_shape[1], cure_shape[2]);
+	pcure ~ beta(cure_shape[1], cure_shape[2]);
     }
 
     if (est_smooth){

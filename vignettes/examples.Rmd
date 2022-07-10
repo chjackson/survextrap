@@ -97,15 +97,15 @@ plot(nd_mod3)
 
 ## Mean and restricted mean survival 
 
-The functions `mean_survextrap` and `rmst_survextrap` calculate the mean and restricted mean survival time (RMST) from a fitted model.  Uncertainty is expressed by using the MCMC sample of the model parameters, and calculating the mean (or RMST) for each draw, which produces a sample from the posterior distribution.   The posterior median and credible intervals are computed by summarising this sample.
+The functions `mean` and `rmst` calculate the mean and restricted mean survival time (RMST) from a fitted model.  Uncertainty is expressed by using the MCMC sample of the model parameters, and calculating the mean (or RMST) for each draw, which produces a sample from the posterior distribution.   The posterior median and credible intervals are computed by summarising this sample.
 
 For particular combinations of parameter values, the mean under the model `nd_mod` cannot be calculated (resulting in an error message about a divergent integral), suggesting there is a substantial posterior probability that the mean is infinite.  
 
 Instead we compute the restricted mean survival time $RMST(t)$ over three alternative time limits $t$: 3, 10 and 1000 years.  The upper 95\% credible limit for $RMST(1000)$ is very large. 
 
 ```{r}
-# mean_survextrap(nd_mod)
-rmst_survextrap(nd_mod2, c(3,10,1000), niter=100)
+# mean(nd_mod)
+rmst(nd_mod2, c(3,10,1000), niter=100)
 ```
 
 We do not really believe that the mean survival for this population can be this large. 
@@ -133,8 +133,8 @@ plot(nde_mod)
 ```
 
 ```{r}
-mean_survextrap(nde_mod)
-rmst_survextrap(nde_mod, c(3, 10, 1000))
+mean(nde_mod)
+rmst(nde_mod, c(3, 10, 1000))
 ```
 
 Including the external data gives a more confident extrapolation.   The mean is finite.  RMST converges to the mean as it is supposed to. 
@@ -185,7 +185,7 @@ plot(nde_mod)
 ```
 
 ```{r}
-mean_survextrap(nde_mod)
+mean(nde_mod)
 ```
 
 There is still substantial uncertainty about the mean, even with this level of information, but comparing to the second model above (`nd_mod2`), it is better than no information at all.    More investigation of the role of the knot placement here (blue lines in the figure) might be wise - particularly the one at 15 years.
@@ -227,7 +227,7 @@ extdat <- data.frame(start = c(5, 10), stop =  c(10, 15),
                      rx = "Obs")
 rxphe_mod <- survextrap(Surv(years, status) ~ rx, data=colonc, 
                       chains=1, external = extdat, refresh=0)
-rmst_survextrap(rxphe_mod, niter=100, t=20)
+rmst(rxphe_mod, niter=100, t=20)
 plot(rxphe_mod, niter=100, tmax=5)
 plot_hazard(rxphe_mod, niter=100, tmax=20)
 ```
@@ -242,26 +242,44 @@ Generate a dataset with an obvious cure fraction
 ```{r,results="hide",cache=TRUE}
 library(flexsurvcure)
 set.seed(1)
-t <- rmixsurv(qweibull, n=1000, theta=0.5, shape=1.5, scale=1.2)
+t <- rmixsurv(qweibull, n=200, theta=0.5, shape=1.5, scale=1.2)
 censtime <- 10
 cure_df <- data.frame(t = pmin(t, censtime), status = as.numeric(t < censtime)) 
 plot(survfit(Surv(t, status) ~ 1, data=cure_df))
 
-## These are slow to sample 
 noncure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, 
                           cure=FALSE)
 plot(noncure_mod) # doesn't quite capture the curve
 
-## This is very slow, but it fits  
 cure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, cure=TRUE, iter=1000)
 plot(cure_mod, tmax=10, niter=20) 
 ```
 
-Should we allow covariates on the cure fraction as well, as flexsurvcure does by default?
+Covariates on the cure fraction can be supplied by putting a formula in the `cure` argument. 
+These will be modelled using logistic regression. 
+
+Demonstrate this by simulating some data with a log odds ratio for cure of 0.5:
+
+```{r}
+x <- rep(c(0,1), each=500)
+logor_cure <- 0.5
+cure_prob <- plogis(qlogis(0.5) + logor_cure * x)
+t <- numeric(1000)
+set.seed(1)
+for (i in 1:1000)
+    t[i] <- flexsurvcure::rmixsurv(qweibull, n=1, theta=cure_prob[i], shape=1.5, scale=1.2)
+censtime <- 10
+cure_df <- data.frame(t = pmin(t, censtime), status = as.numeric(t < censtime), x=x) 
+curec_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, cure=~x, iter=1000,
+                        fit_method="opt")
+summary(curec_mod) %>% 
+    filter(variable %in% c("pcure", "logor_cure", "or_cure"))
+```
 
 
 
-## Relative survival models
+
+# Relative survival 
 
 Not implemented yet.  Could easily support a constant background hazard in a conventional additive hazard model.  
 
