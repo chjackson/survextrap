@@ -85,8 +85,17 @@ Probability density, distribution, quantile, random generation, hazard,
 cumulative hazard, mean and restricted mean functions for the
 M-spline time-to-event model.
 }
+\details{
+These are the same as the M-splines used to model survival data in \code{rstanarm}, except that an
+additional assumption is made that the hazard is constant beyond the boundary knots at its
+value at the boundary.   This gives a continuous but non-smooth function.
+}
 \references{
-M-spline paper, rstanarm paper
+Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425–441.
+
+Brilleman, S. L., Elci, E. M., Novik, J. B., & Wolfe, R. (2020). Bayesian survival analysis using the rstanarm R package. arXiv preprint arXiv:2002.09633.
+
+Wang, W., Yan, J. (2021). Shape-restricted regression splines with R package splines2. Journal of Data Science_, \emph{19}(3), 498-517. doi:10.6339/21-JDS1020 \url{https://doi.org/10.6339/21-JDS1020}.
 }
 \author{
 Christopher Jackson \href{mailto:chris.jackson@mrc-bsu.cam.ac.uk}{chris.jackson@mrc-bsu.cam.ac.uk}

@@ -24,13 +24,15 @@
 mspline_plotsetup <- function(iknots, bknots=c(0,10),
                               tmin=NULL, tmax=NULL, degree=3, df=10,
                               extrap_model = "constant"){
+    validate_knots(bknots, name="bknots")
+    bknots <- sort(bknots)
     if (is.null(tmin)) tmin <- bknots[1]
     if (is.null(tmax)) tmax <- bknots[2]
     if (is.null(iknots)) {
         nik <- df - degree  - 1
         iknots <- seq(bknots[1], bknots[2], length.out=nik+2)[-c(1,nik+2)]
     }
-    if (is.null(tmax)) tmax <- max(bknots)
+    validate_knots(iknots, name="iknots")
     time <- seq(tmin, tmax, length.out=1000)[-c(1,length(time))]
     timeb <- time
     if (extrap_model=="constant"){

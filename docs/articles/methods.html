@@ -74,7 +74,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2022-07-10</h4>
+            <h4 data-toc-skip class="date">2022-07-11</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -180,7 +180,9 @@ spline for the log cumulative hazard function. A cumulative hazard is
 defined to be a non-decreasing function, but the spline is not
 constrained. The constraint is handled during fitting the model - spline
 coefficients which imply non-increasing cumulative hazard functions are
-rejected. This is inefficient.</p></li>
+rejected. This is inefficient. A worse problem, perhaps, is that it is
+unclear how to specify priors - a meaningful joint prior on the
+coefficients would have to rule out invalid combinations.</p></li>
 <li><p>We could also have placed an unrestricted spline, of any kind, on
 the log hazard. The disadvantage with this is that the cumulative hazard
 (required to obtain the likelihood for censored data) then has to be

@@ -43,7 +43,17 @@
 ##'
 ##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
 ##'
-##' @references M-spline paper, rstanarm paper
+##' @details These are the same as the M-splines used to model survival data in `rstanarm`, except that an
+##' additional assumption is made that the hazard is constant beyond the boundary knots at its
+##' value at the boundary.   This gives a continuous but non-smooth function. 
+##'
+##' @references
+##'
+##' Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425–441. 
+##' 
+##' Brilleman, S. L., Elci, E. M., Novik, J. B., & Wolfe, R. (2020). Bayesian survival analysis using the rstanarm R package. arXiv preprint arXiv:2002.09633.
+##'
+##' Wang, W., Yan, J. (2021). Shape-restricted regression splines with R package splines2. Journal of Data Science_, *19*(3), 498-517. doi:10.6339/21-JDS1020 <https://doi.org/10.6339/21-JDS1020>.
 ##'
 ##' @keywords distribution
 ##'
@@ -71,6 +81,8 @@ NULL
 ##' @return A two-dimensional array.  Rows are the times, and columns are the basis terms.
 ##'
 mspline_basis <- function(times, iknots, bknots, degree=3, integrate = FALSE) {
+  validate_knots(iknots, name="iknots")
+  validate_knots(bknots, name="bknots")
   tmax <- bknots[2]
   tmin <- bknots[1]
   # evaluate basis at knots first, to set up use of predict()
@@ -117,9 +129,8 @@ mspline_basis <- function(times, iknots, bknots, degree=3, integrate = FALSE) {
 ##' @export
 psurvmspline <- function(q, alpha, coefs, knots, degree=3, lower.tail=TRUE, log.p=FALSE){
     ind <- att <- NULL
-    d <- survmspline_dist_setup(q=q, alpha=alpha, coefs=coefs)
+    d <- survmspline_dist_setup(q=q, alpha=alpha, coefs=coefs, knots=knots)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
-    ## TODO validate knots, degree. force to be the same for all q, pars
     if (any(ind)){
         log_cumhaz <- Hsurvmspline(x=q, alpha=alpha, coefs=coefs, knots=knots, degree=degree, log=TRUE)
         log_surv <- as.numeric(-exp(log_cumhaz))  # ie -exp(alpha)*lp
@@ -141,10 +152,11 @@ psurvmspline <- function(q, alpha, coefs, knots, degree=3, lower.tail=TRUE, log.
 ##' @export
 Hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE){
     ind <- att <- NULL
-    d <- survmspline_dist_setup(q=x, alpha=alpha, coefs=coefs)
+    d <- survmspline_dist_setup(q=x, alpha=alpha, coefs=coefs, knots=knots)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
-        iknots <- knots[-c(1,length(knots))] # TODO consistent interface for this
+        knots <- sort(knots)
+        iknots <- knots[-c(1,length(knots))]
         bknots <- knots[c(1,length(knots))]
         ibasis <- mspline_basis(q, iknots=iknots, bknots=bknots, degree=degree, integrate=TRUE)
         log_cumhaz <- as.vector(alpha) + log(rowSums(coefs * ibasis))
@@ -161,9 +173,10 @@ Hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE){
 ##' @export
 hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE){
     ind <- att <- NULL
-    d <- survmspline_dist_setup(q=x, alpha=alpha, coefs=coefs)
+    d <- survmspline_dist_setup(q=x, alpha=alpha, coefs=coefs, knots=knots)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
+        knots <- sort(knots)
         iknots <- knots[-c(1,length(knots))]
         bknots <- knots[c(1,length(knots))]
         basis <- mspline_basis(q, iknots=iknots, bknots=bknots, degree=degree)
@@ -181,7 +194,7 @@ hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE){
 ##' @export
 dsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE){
     ind <- att <- NULL
-    d <- survmspline_dist_setup(q=x, alpha=alpha, coefs=coefs)
+    d <- survmspline_dist_setup(q=x, alpha=alpha, coefs=coefs, knots=knots)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
         loghaz <- hsurvmspline(q, alpha, coefs, knots, degree, log=TRUE)
@@ -213,7 +226,8 @@ rsurvmspline <- function(n, alpha, coefs, knots, degree=3){
     ret
 }
 
-survmspline_dist_setup <- function(q, alpha, coefs){
+survmspline_dist_setup <- function(q, alpha, coefs, knots){
+    validate_knots(knots)
     if (!is.matrix(coefs)) coefs <- matrix(coefs, nrow=1)
     lg <- nrow(coefs)
     nret <- max(length(q), nrow(coefs), length(alpha))
@@ -232,6 +246,15 @@ survmspline_dist_setup <- function(q, alpha, coefs){
     alpha <- alpha[ind]
     coefs <- coefs[ind,,drop=FALSE]
     nlist(ret, q, alpha, coefs, ind, att)
+}
+
+validate_knots <- function(knots, name="knots"){
+    if (any(!is.numeric(knots))) stop(sprintf("some of `%s` are not numeric", name))
+    if (any(knots < 0)) stop(sprintf("some of `%s` are < 0", name))
+    if (name=="bknots")
+        if (length(knots) != 2) stop("`bknots` should be a vector of length 2")
+    ## splines2 handles checking whether internal knots are within boundary 
+    ## splines2 handles checking the degree
 }
 
 

@@ -34,16 +34,12 @@ It is work in progress, so it will be sketchy in some places.   The code is supp
 
 # Examples
 
-For these examples, we use a dataset of trial of chemotherapy for colon cancer, provided as `colon` in the `survival` package, with an outcome of recurrence-free survival (`etype==1`) and artificially censored at 3 years.
+For these examples, we use a dataset of trial of chemotherapy for colon cancer, provided as `colon` in the `survival` package, with an outcome of recurrence-free survival (`etype==1`), artificially censored at 3 years, and restricted to a random 20% subset.  This is provided as `colons` in the `survextrap` package for convenience.
+
 ```{r}
 library(survextrap)
 library(dplyr)
-colonc <- colon |>
-    mutate(years = time/365.25) |>
-    filter(etype == 1) |>
-    mutate(status = ifelse(years > 3, 0, status),
-           years = ifelse(years > 3, 3, years))
-survminer::ggsurvplot(survfit(Surv(years, status) ~ 1, data=colonc), data=colonc)
+survminer::ggsurvplot(survfit(Surv(years, status) ~ 1, data=colons), data=colons)
 ```
 
 
@@ -55,7 +51,7 @@ the model assumes the hazard stays constant.
 The plot shows the posterior median and 95\% credible intervals for the survival and hazard functions.  The spline adapts to give a practically perfect fit to the short-term data - note the Kaplan-Meier curve is obscured by the fitted posterior median.   Although the model assumes the extrapolated hazard is constant, there is still a wide uncertainty interval around this constant value.  This might be thought to be plausible.
 
 ```{r,results="hide"}
-nd_mod <- survextrap(Surv(years, status) ~ 1, data=colonc, chains=1)
+nd_mod <- survextrap(Surv(years, status) ~ 1, data=colons, chains=1)
 plot(nd_mod, tmax=5)
 ```
 
@@ -64,7 +60,7 @@ The spline knots are shown as blue lines.  We could allow for the possibility of
 The `basehaz_ops` argument is used to control the spline.  The `bknots` component of this is the vector comprising the lower and upper boundary knots.  Here we simply move the upper boundary knot from three to four years.
 
 ```{r,results="hide"}
-nd_mod2 <- survextrap(Surv(years, status) ~ 1, data=colonc, chains=1, 
+nd_mod2 <- survextrap(Surv(years, status) ~ 1, data=colons, chains=1, 
                      basehaz_ops = list(bknots = c(0, 4)))
 plot(nd_mod2, tmax=5)
 ```
@@ -84,15 +80,6 @@ In many practical situations of extrapolation in time-to-event models, we do hav
 The idea of the package is to make this external information as explicit as possible - ideally in the form of data. 
 
 
-## With a smaller dataset
-
-Works nice and quickly.   Hazard curve suggests some overfitting and an excessive number of knots, though it's unclear how much that matters.
-
-```{r,results="hide"}
-nd_mod3 <- survextrap(Surv(futime, fustat) ~ 1, data=ovarian, chains=1)
-plot(nd_mod3)
-```
-
 
 
 ## Mean and restricted mean survival 
@@ -102,6 +89,7 @@ The functions `mean` and `rmst` calculate the mean and restricted mean survival 
 For particular combinations of parameter values, the mean under the model `nd_mod` cannot be calculated (resulting in an error message about a divergent integral), suggesting there is a substantial posterior probability that the mean is infinite.  
 
 Instead we compute the restricted mean survival time $RMST(t)$ over three alternative time limits $t$: 3, 10 and 1000 years.  The upper 95\% credible limit for $RMST(1000)$ is very large. 
+(`niter` controls how many MCMC iterations to use to summarise the distribution - this is artificially reduced here so this example runs faster. In real applications you should check there are enough iterations to get summaries with the amount of precision yoy want - this will usually be 1000 or more)
 
 ```{r}
 # mean(nd_mod)
@@ -127,14 +115,14 @@ extdat <- data.frame(start = c(5, 10, 15, 20),
                      stop =  c(10, 15, 20, 25), 
                      n = c(100, 100, 100, 100), 
                      r = c(50, 40, 30, 20))
-nde_mod <- survextrap(Surv(years, status) ~ 1, data=colonc, 
+nde_mod <- survextrap(Surv(years, status) ~ 1, data=colons, 
                       chains=1, external = extdat)
 plot(nde_mod)
 ```
 
 ```{r}
-mean(nde_mod)
-rmst(nde_mod, c(3, 10, 1000))
+mean(nde_mod, niter=100)
+rmst(nde_mod, c(3, 10, 1000), niter=100)
 ```
 
 Including the external data gives a more confident extrapolation.   The mean is finite.  RMST converges to the mean as it is supposed to. 
@@ -179,13 +167,13 @@ and we can use it in a `survextrap` model as follows:
 ```{r,results="hide"}
 extdat <- data.frame(start = c(10), stop =  c(15), 
                      n = c(20), r = c(6))
-nde_mod <- survextrap(Surv(years, status) ~ 1, data=colonc,
+nde_mod <- survextrap(Surv(years, status) ~ 1, data=colons,
                       chains=1, external = extdat)
 plot(nde_mod)
 ```
 
 ```{r}
-mean(nde_mod)
+mean(nde_mod, niter = 100)
 ```
 
 There is still substantial uncertainty about the mean, even with this level of information, but comparing to the second model above (`nd_mod2`), it is better than no information at all.    More investigation of the role of the knot placement here (blue lines in the figure) might be wise - particularly the one at 15 years.
@@ -200,12 +188,12 @@ This approach might be extended to include elicited values from multiple time po
 `survextrap` uses a proportional hazards model to represent covariates.    In the example here, we model survival by treatment group `rx`, which is a factor with three levels.  First fit a standard Cox model: 
 
 ```{r}
-coxph(Surv(years, status) ~ rx, data=colonc)
+coxph(Surv(years, status) ~ rx, data=colons)
 ```
 
 Then fit a `survextrap` model and extract the log hazard ratios.  These agree with the Cox model - as expected, as we are using a proportional hazards model with a very flexible baseline hazard function.
 ```{r}
-rxph_mod <- survextrap(Surv(years, status) ~ rx, data=colonc, chains=1, refresh=0)
+rxph_mod <- survextrap(Surv(years, status) ~ rx, data=colons, chains=1, refresh=0)
 summary(rxph_mod) |>
     filter(variable=="loghr")
 ```
@@ -225,13 +213,12 @@ For example, the external data might be assumed to have the same survival as the
 extdat <- data.frame(start = c(5, 10), stop =  c(10, 15), 
                      n = c(100, 100), r = c(50, 40), 
                      rx = "Obs")
-rxphe_mod <- survextrap(Surv(years, status) ~ rx, data=colonc, 
+rxphe_mod <- survextrap(Surv(years, status) ~ rx, data=colons, 
                       chains=1, external = extdat, refresh=0)
 rmst(rxphe_mod, niter=100, t=20)
 plot(rxphe_mod, niter=100, tmax=5)
 plot_hazard(rxphe_mod, niter=100, tmax=20)
 ```
-
 
 
 

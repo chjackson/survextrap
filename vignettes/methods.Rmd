@@ -84,7 +84,7 @@ plot_mspline(iknots=c(1,3,5), bknots=c(0, 7),
 
 #### Why not other kinds of spline?
 
-* The Royston/Parmar model (e.g. in flexsurv) uses a natural cubic spline for the log cumulative hazard function.  A cumulative hazard is defined to be a non-decreasing function, but the spline is not constrained.   The constraint is handled during fitting the model - spline coefficients which imply non-increasing cumulative hazard functions are rejected.  This is inefficient.
+* The Royston/Parmar model (e.g. in flexsurv) uses a natural cubic spline for the log cumulative hazard function.  A cumulative hazard is defined to be a non-decreasing function, but the spline is not constrained.   The constraint is handled during fitting the model - spline coefficients which imply non-increasing cumulative hazard functions are rejected.  This is inefficient.  A worse problem, perhaps, is that it is unclear how to specify priors - a meaningful joint prior on the coefficients would have to rule out invalid combinations.
 
 * We could also have placed an unrestricted spline, of any kind, on the log hazard.   The disadvantage with this is that the cumulative hazard (required to obtain the likelihood for censored data) then has to be evaluated by numerical integration, which is slow.  
 

@@ -21,7 +21,10 @@ for each level of this factor.
 
 (b) if there are multiple covariates, or any numeric covariates, then the output
 is computed at the mean of each numeric covariate in the original data, and at the
-baseline level of each factor covariate.}
+baseline level of each factor covariate.
+
+For cure models, then if there are covariates on the cure fraction and the uncured
+survival, then the covariates on the cure fraction are used by default.}
 
 \item{niter}{Number of MCMC iterations to use to compute credible
 intervals.  Set to a low value to make this function quicker, at the cost of

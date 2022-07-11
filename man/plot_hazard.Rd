@@ -29,7 +29,10 @@ for each level of this factor.
 
 (b) if there are multiple covariates, or any numeric covariates, then the output
 is computed at the mean of each numeric covariate in the original data, and at the
-baseline level of each factor covariate.}
+baseline level of each factor covariate.
+
+For cure models, then if there are covariates on the cure fraction and the uncured
+survival, then the covariates on the cure fraction are used by default.}
 
 \item{times}{Vector of times at which to compute the estimates.}
 

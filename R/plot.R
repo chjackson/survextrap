@@ -17,6 +17,7 @@
 plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
                         ci=NULL, xlab="Time", ylab="Hazard", line_size=1.5, ci_alpha=0.2){
     lower <- upper <- NULL # TODO do strings work
+    newdata <- default_newdata(x, newdata)
     haz <- hazard(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
     knots <- x$basehaz$knots[x$basehaz$knots <= max(haz$times)]
     aes <- list(x="times", y="median")
@@ -57,6 +58,7 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
 plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter=NULL,
                           ci=NULL, xlab="Time", ylab="Survival", line_size=1.5, ci_alpha=0.2){
     lower <- upper <- NULL
+    newdata <- default_newdata(x, newdata)
     surv <- survival(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
     knots <- x$basehaz$knots[x$basehaz$knots <= max(surv$times)]
     aes <- list(x="times", y="median")
@@ -105,7 +107,7 @@ default_plottimes <- function(x, tmax=NULL, nplot=100){
 
 #' Plot method for survextrap model objects
 #'
-#' @param x  Fitted model object from \code{\link{survextrap}}.
+#' @inheritParams survival
 #'
 #' @param type `"survival"` for a plot of the survival function, `"hazard"` for the hazard function, against time.
 #'
@@ -115,7 +117,6 @@ default_plottimes <- function(x, tmax=NULL, nplot=100){
 #'
 #' @export
 plot.survextrap <- function(x, type="hazsurv", newdata=NULL, ...){
-    newdata <- default_newdata(x, newdata)
     switch(type,
            "hazsurv" = plot_hazsurv(x, newdata=newdata, ...),
            "survival" = plot_survival(x, newdata=newdata, ...),

@@ -102,6 +102,7 @@ Major things to do are:
 If you want to try it out - feel free to install from github:
 
 ```{r}
+install.packages("remotes") # if necessary 
 remotes::install_github("chjackson/survextrap")
 ```
 

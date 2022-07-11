@@ -47,3 +47,4 @@ VignetteBuilder: knitr
 URL: https://github.com/chjackson/survextrap,
     https://chjackson.github.io/survextrap/
 BugReports: https://github.com/chjackson/survextrap/issues
+LazyData: true

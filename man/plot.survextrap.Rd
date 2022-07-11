@@ -4,12 +4,26 @@
 \alias{plot.survextrap}
 \title{Plot method for survextrap model objects}
 \usage{
-\method{plot}{survextrap}(x, type = "hazsurv", ...)
+\method{plot}{survextrap}(x, type = "hazsurv", newdata = NULL, ...)
 }
 \arguments{
-\item{x}{Fitted model object from \code{\link{survextrap}}.}
+\item{x}{A fitted model object as returned by \code{\link{survextrap}}}
 
 \item{type}{\code{"survival"} for a plot of the survival function, \code{"hazard"} for the hazard function, against time.}
+
+\item{newdata}{Data frame of covariate values to compute the output for.
+If there are covariates in the model and this is not supplied,
+the following default is used:
+
+(a) if the only covariate is one factor variable, then the output is computed
+for each level of this factor.
+
+(b) if there are multiple covariates, or any numeric covariates, then the output
+is computed at the mean of each numeric covariate in the original data, and at the
+baseline level of each factor covariate.
+
+For cure models, then if there are covariates on the cure fraction and the uncured
+survival, then the covariates on the cure fraction are used by default.}
 
 \item{...}{Additional arguments, passed on to \code{plot_hazard} and \code{plot_survival}.}
 }

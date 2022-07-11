@@ -13,6 +13,9 @@
 ##' is computed at the mean of each numeric covariate in the original data, and at the
 ##' baseline level of each factor covariate.
 ##'
+##' For cure models, then if there are covariates on the cure fraction and the uncured
+##' survival, then the covariates on the cure fraction are used by default. 
+##'
 ##' @param niter Number of MCMC iterations to use to compute credible
 ##' intervals.  Set to a low value to make this function quicker, at the cost of
 ##' some approximation error (which may not be important for plotting).
@@ -28,8 +31,12 @@ mean.survextrap <- function(x, newdata=NULL, niter=NULL, ...){
 }
 
 default_newdata <- function(x, newdata){
-    if (is.null(newdata) && (x$ncovs > 0))
-        newdata <- x$x$mfbase  # TODO WHAT IF CURE COVS?
+    if (is.null(newdata)){
+        if (x$ncurecovs > 0)
+            newdata <- x$xcure$mfbase
+        else if (x$ncovs > 0)
+            newdata <- x$x$mfbase
+    }
     newdata
 }
 
@@ -191,17 +198,16 @@ timedep_output <- function(x, output="survival", newdata=NULL, times=NULL, tmax=
     nt <- length(times)
     niter <- attr(pars, "niter")
     nvals <- if (is.null(newdata)) 1 else nrow(newdata)
-    times_mat <- array(rep(times, niter*nvals), dim=c(nt, niter, nvals))
-    alpha_user_mat <- array(rep(pars$alpha_user, each=nt), dim=c(nt, niter, nvals))
-    cureprob_mat <- if (x$cure) array(rep(pars$cureprob_user, each=nt), dim = c(nt, niter, nvals)) else NULL
+    times_arr <- array(rep(times, niter*nvals), dim=c(nt, niter, nvals))
+    alpha_user_arr <- array(rep(pars$alpha_user, each=nt), dim=c(nt, niter, nvals))
+    cureprob_arr <- if (x$cure) array(rep(pars$cureprob_user, each=nt), dim = c(nt, niter, nvals)) else NULL
 
     ## TODO cumulative hazard
-    ## TODO should _mat be called _arr if it is 3d
     res_sam <- switch(output,
-                      "survival" = survival_core(x, pars, times_mat, alpha_user_mat,
-                                                 cureprob_mat, niter, nvals, nt),
-                      "hazard" = hazard_core(x, pars, times_mat, alpha_user_mat,
-                                             cureprob_mat, niter, nvals, nt)
+                      "survival" = survival_core(x, pars, times_arr, alpha_user_arr,
+                                                 cureprob_arr, niter, nvals, nt),
+                      "hazard" = hazard_core(x, pars, times_arr, alpha_user_arr,
+                                             cureprob_arr, niter, nvals, nt)
                       )
     dimnames(res_sam) <- list(time=1:nt, iteration=1:niter, value=1:nvals)
 
@@ -217,39 +223,39 @@ timedep_output <- function(x, output="survival", newdata=NULL, times=NULL, tmax=
     res
 }
 
-survival_core <- function(x, pars, times_mat, alpha_user_mat, cureprob_mat, niter, nvals, nt){
+survival_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
     if (x$modelid=="mspline"){
         coefs_mat <- pars$coefs[rep(rep(1:niter, each=nt),nvals),] # only for spline
-        surv_sam <- psurvmspline(times_mat, alpha_user_mat, coefs_mat,
+        surv_sam <- psurvmspline(times_arr, alpha_user_arr, coefs_mat,
                                  x$basehaz$knots, x$basehaz$degree, lower.tail=FALSE)
     } else if (x$modelid=="weibull") {
-        surv_sam <- pweibull(times_mat, shape=pars$coefs[,1],
-                               scale=exp(alpha_user_mat), lower.tail=FALSE)
+        surv_sam <- pweibull(times_arr, shape=pars$coefs[,1],
+                               scale=exp(alpha_user_arr), lower.tail=FALSE)
     }
     if (x$cure)  {
-        surv_sam <- cureprob_mat + (1 - cureprob_mat)*surv_sam
+        surv_sam <- cureprob_arr + (1 - cureprob_arr)*surv_sam
     }
     surv_sam
 }
 
-hazard_core <- function(x, pars, times_mat, alpha_user_mat, cureprob_mat, niter, nvals, nt){
+hazard_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
     if (x$modelid=="mspline"){
-        coefs_mat <- pars$coefs[rep(rep(1:niter, each=nt),nvals),]
+        coefs_arr <- pars$coefs[rep(rep(1:niter, each=nt),nvals),]
         if (x$cure)
-            logdens_sam <- dsurvmspline(times_mat, alpha_user_mat, coefs_mat,
+            logdens_sam <- dsurvmspline(times_arr, alpha_user_arr, coefs_arr,
                                         x$basehaz$knots, x$basehaz$degree, log=TRUE)
-        loghaz_sam <- hsurvmspline(times_mat, alpha_user_mat, coefs_mat,
+        loghaz_sam <- hsurvmspline(times_arr, alpha_user_arr, coefs_arr,
                                    x$basehaz$knots, x$basehaz$degree, log=TRUE)
     } else if (x$modelid=="weibull") {
-        logdens_sam <- stats::dweibull(times_mat, shape=pars$coefs[,1],
-                                       scale=exp(alpha_user_mat), log=TRUE)
+        logdens_sam <- stats::dweibull(times_arr, shape=pars$coefs[,1],
+                                       scale=exp(alpha_user_arr), log=TRUE)
         loghaz_sam <- logdens_sam -
-            stats::pweibull(times_mat, shape=pars$coefs[,1], scale=exp(pars$alpha),
+            stats::pweibull(times_arr, shape=pars$coefs[,1], scale=exp(pars$alpha),
                             lower.tail=FALSE, log.p=TRUE)
     }
     if (x$cure)  {
-        loghaz_sam <- log(1 - cureprob_mat) +  logdens_sam -
-            log(survival_core(x, pars, times_mat, alpha_user_mat, niter, nvals, nt))
+        loghaz_sam <- log(1 - cureprob_arr) +  logdens_sam -
+            log(survival_core(x, pars, times_arr, alpha_user_arr, niter, nvals, nt))
     }
     haz_sam <- exp(loghaz_sam)
     haz_sam

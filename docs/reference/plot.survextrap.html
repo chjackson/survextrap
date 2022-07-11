@@ -56,17 +56,30 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for survextrap</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"hazsurv"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"hazsurv"</span>, newdata <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>Fitted model object from <code><a href="survextrap.html">survextrap</a></code>.</p></dd>
+<dd><p>A fitted model object as returned by <code><a href="survextrap.html">survextrap</a></code></p></dd>
 
 
 <dt>type</dt>
 <dd><p><code>"survival"</code> for a plot of the survival function, <code>"hazard"</code> for the hazard function, against time.</p></dd>
+
+
+<dt>newdata</dt>
+<dd><p>Data frame of covariate values to compute the output for.
+If there are covariates in the model and this is not supplied,
+the following default is used:</p>
+<p>(a) if the only covariate is one factor variable, then the output is computed
+for each level of this factor.</p>
+<p>(b) if there are multiple covariates, or any numeric covariates, then the output
+is computed at the mean of each numeric covariate in the original data, and at the
+baseline level of each factor covariate.</p>
+<p>For cure models, then if there are covariates on the cure fraction and the uncured
+survival, then the covariates on the cure fraction are used by default.</p></dd>
 
 
 <dt>...</dt>
