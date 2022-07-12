@@ -196,7 +196,7 @@ survextrap <- function(formula,
     pcure_init <- if (cure) 0.5 else numeric()
     staninit <- list(gamma = aa(0),
                      loghr = aa(rep(0, standata$ncovs)),
-                     beta_err = rep(0, standata$nvars),
+                     beta_err = aa(rep(0, standata$nvars)),
                      smooth_sd = aa(if(standata$est_smooth) smooth_sd else numeric()),
                      pcure = aa(pcure_init))
     if (identical(smooth_sd, "eb")){
