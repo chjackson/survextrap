@@ -193,12 +193,12 @@ survextrap <- function(formula,
                       cure_shape = cure_prior, ## TODO standardise name, mean+ESS param
                       modelid = modelid_num
                       )
-    pcure_init <- if (cure) 0.5 else aa(numeric())
+    pcure_init <- if (cure) 0.5 else numeric()
     staninit <- list(gamma = aa(0),
                      loghr = aa(rep(0, standata$ncovs)),
                      beta_err = rep(0, standata$nvars),
                      smooth_sd = aa(if(standata$est_smooth) smooth_sd else numeric()),
-                     pcure = pcure_init)
+                     pcure = aa(pcure_init))
     if (identical(smooth_sd, "eb")){
         smooth_sd <- eb_smoothness(standata, staninit)
     }
