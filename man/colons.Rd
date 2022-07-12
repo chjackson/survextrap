@@ -5,10 +5,10 @@
 \alias{colons}
 \title{Colon cancer survival data}
 \format{
-Documented in \code{\link[pkg=survival]{colon}}.
+Documented in \code{\link[survival]{colon}}.
 }
 \source{
-See \code{\link[pkg=survival]{colon}}.
+See \code{\link[survival]{colon}}.
 }
 \usage{
 colons
@@ -21,6 +21,6 @@ survival, artificially censored at 3 years, and taking a 20\%
 random sample.
 }
 \references{
-See \code{\link[pkg=survival]{colon}}.
+See \code{\link[survival]{colon}}.
 }
 \keyword{datasets}

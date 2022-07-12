@@ -99,11 +99,10 @@ Major things to do are:
 
 * Thorough testing, documentation and error handling.
 
-If you want to try it out - feel free to install from github:
+If you want to try it out - feel free to install the development version as: 
 
 ```{r}
-install.packages("remotes") # if necessary 
-remotes::install_github("chjackson/survextrap")
+install.packages("survextrap", repos=c('https://chjackson.r-universe.dev', 'https://cloud.r-project.org'))
 ```
 
 Please give feedback and suggestions if you do.  These can be posted on [github issues](https://github.com/chjackson/survextrap/issues), or [email](mailto:chris.jackson@mrc-bsu.cam.ac.uk).

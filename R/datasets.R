@@ -6,11 +6,11 @@
 ##' survival, artificially censored at 3 years, and taking a 20%
 ##' random sample.
 ##' 
-##' @format Documented in \code{\link[pkg=survival]{colon}}. 
+##' @format Documented in \code{\link[survival]{colon}}. 
 ##'
-##' @references See \code{\link[pkg=survival]{colon}}. 
+##' @references See \code{\link[survival]{colon}}. 
 ##'
-##' @source See \code{\link[pkg=survival]{colon}}. 
+##' @source See \code{\link[survival]{colon}}. 
 ##'
 ##' @keywords datasets
 "colons"
