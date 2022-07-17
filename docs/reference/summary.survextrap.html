@@ -67,18 +67,29 @@
 
 <dt>...</dt>
 <dd><p>Other argument (currently unused).</p>
-<p><code>alpha</code></p>
-<p><code>coefs</code></p>
-<p><code>loghr</code></p>
-<p><code>hr</code></p>
-<p><code>pcure</code></p>
-<p><code>logor_cure</code></p>
-<p><code>or_cure</code></p></dd>
+<p>Document meanings of parameters</p>
+<p><code>alpha</code>: Average baseline log hazard.  If there are covariates, this describes the
+average hazard with continuous
+covariates set to zero, and factor covariates set
+to their baseline levels.</p>
+<p><code>coefs</code>: Coefficients of the M-spline basis terms.</p>
+<p><code>loghr</code>: Log hazard ratios for each covariate in the model. For cure
+models, this refers to covariates on survival for uncured people.</p>
+<p><code>hr</code>: Hazard ratios (the exponentials of <code>loghr</code>).</p>
+<p><code>pcure</code>: Probability of cure (for cure models only).   If there are covariates
+on cure, this parameter describes the probability of cure with continuous
+covariates set to zero, and factor covariates set
+to their baseline levels.</p>
+<p><code>logor_cure</code>: Log odds ratio of cure for each covariate on cure.</p>
+<p><code>or_cure</code>: Odds ratios of cure (the exponentials of <code>logor_cure</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Suggestions for what else to add to this are welcome.  Convergence diagnostics?</p>
+    <p>Suggestions for what else to add to this are welcome.  Convergence diagnostics?
+Mode for optim method.  Mean?
+At least document how to get other arbitrary posterior summaries using
+the posterior package.  Could even allow as an argument to this.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

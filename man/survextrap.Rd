@@ -11,7 +11,11 @@ survextrap(
   smooth_sd = "bayes",
   coefs_mean = NULL,
   cure = FALSE,
-  cure_prior = c(1, 1),
+  prior_loghaz = p_normal(0, 20),
+  prior_loghr = NULL,
+  prior_smooth = p_gamma(2, 1),
+  prior_cure = p_beta(1, 1),
+  prior_logor_cure = NULL,
   basehaz_ops = NULL,
   modelid = "mspline",
   fit_method = "mcmc",
@@ -20,8 +24,11 @@ survextrap(
 )
 }
 \arguments{
-\item{formula}{A survival formula in standard R formula syntax.  Covariates included
-on the right hand side of the formula with be modelled with proportional hazards.}
+\item{formula}{A survival formula in standard R formula syntax, with a call to \code{Surv()}
+on the left hand side.
+
+Covariates included on the right hand side of the formula with be modelled with
+proportional hazards.}
 
 \item{data}{Data frame containing variables in \code{formula}.}
 
@@ -52,20 +59,56 @@ default, these are set to values that define a constant hazard function.}
 
 \item{cure}{If \code{TRUE}, a mixture cure model is used.}
 
-\item{cure_prior}{Beta shape parameters for the cure probability (vector of two).}
+\item{prior_loghaz}{Prior for the baseline log hazard.
+This should be a call to a prior constructor function, such as
+\code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
+are normal (parameters mean and SD) and t distributions (parameters
+location, scale and degrees of freedom).  The default is \code{normal(0, 20)}.
+
+"Baseline" is defined
+by the continuous covariates taking a value of zero and factor covariates taking their
+reference level.  To use a different baseline, the data should be transformed
+appropriately beforehand, so that a value of zero has a different meaning.
+
+For continuous covariates, it helps for both computation and interpretation to define the value of zero to
+denote a typical value in the data, e.g. the mean.}
+
+\item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
+\code{normal()} or \code{student_t}.  A list of calls can also be provided, to give
+different priors to different coefficients, where the name
+of each list component matches the name of the coefficient, e.g.
+list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3)).
+
+The default is \code{normal(0,2.5)} for all coefficients.}
+
+\item{prior_smooth}{Gamma prior for the smoothing standard deviation, in
+models where this is estimated.  This should be a call to \code{p_gamma()}.  The
+default is \code{p_gamma(2,1)}.}
+
+\item{prior_cure}{Prior for the baseline cure probability.  This should be a
+call to \code{p_beta()}.  The default is a uniform prior, \code{p_beta(1,1)}.
+Baseline is defined by the mean of continuous covariates and the reference
+level of factor covariates.}
+
+\item{prior_logor_cure}{Priors for log odds ratios on cure probabilities.
+This should be a call to \code{p_normal()} or \code{p_t}.  The default is
+\code{p_normal(0,2.5)}.}
 
 \item{basehaz_ops}{A list of control parameters defining the spline model.
 
-\code{iknots}: Internal knots.  If this is not supplied, then the number of knots is taken from \code{df},
-and their location is taken from equally-spaced quantiles of the observed event times (concatenated
-with the distinct follow-up times in the external data).
+\code{iknots}: Internal knots.  If this is not supplied, then the number of
+knots is taken from \code{df}, and their location is taken from equally-spaced
+quantiles of the observed event times (concatenated with the distinct
+follow-up times in the external data).
 
-\code{bknots}: Boundary knots.  If this is not supplied, the boundary knots are set to zero and the
-maximum event time (including the follow-up times in the external data).
+\code{bknots}: Boundary knots.  If this is not supplied, the boundary knots are
+set to zero and the maximum event time (including the follow-up times in
+the external data).
 
-\code{df}: Degrees of freedom, i.e. the number of parameters (or basis terms) that define the hazard
-as a spline function of time.  Defaults to 10.  Note this does not necessarily overfit because
-the function is smoothed through the prior.
+\code{df}: Degrees of freedom, i.e. the number of parameters (or basis terms)
+that define the hazard as a spline function of time.  Defaults to 10.  Note
+this does not necessarily overfit because the function is smoothed through
+the prior.
 
 \code{degree}: Polynomial degree used for the basis function. The default is 3, giving a cubic.}
 
@@ -82,7 +125,7 @@ sampling, via \pkg{rstan}'s \code{\link[rstan:stanmodel-method-sampling]{rstan::
 This is the default.  It is the most accurate but the slowest method.
 
 If \code{fit_method="opt"}, then instead of an MCMC sample from the posterior,
-\code{disbayes} returns the posterior mode calculated using optimisation, via
+\code{survextrap} returns the posterior mode calculated using optimisation, via
 \pkg{rstan}'s \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} function.
 A sample from a normal approximation to the (real-line-transformed)
 posterior distribution is drawn in order to obtain credible intervals.
@@ -90,15 +133,15 @@ posterior distribution is drawn in order to obtain credible intervals.
 If \code{fit_method="vb"}, then variational Bayes methods are used, via \pkg{rstan}'s
 \code{\link[rstan:stanmodel-method-vb]{rstan::vb()}} function.  This is labelled as "experimental" by
 \pkg{rstan}.  It might give a better approximation to the posterior
-than \code{fit_method="opt"}, but has not been investigated much for \code{disbayes} models.}
+than \code{fit_method="opt"}, but has not been investigated in depth for these models.}
 
-\item{loo}{Compute leave-one-out cross-validation statistics.  This is done by default for MCMC fits,
-and not for optimisation or VB fits. Set to \code{FALSE} to save a bit of run time.
+\item{loo}{Compute leave-one-out cross-validation statistics.  This is done by default. Set to
+\code{FALSE} to save a bit of run time.
 If these statistics are computed, then they are returned in the \code{loo} component of the
 object returned by \code{survextrap}.}
 
 \item{...}{Additional arguments to supply to control the Stan fit, passed to the appropriate
-\pkg{rstan} function.}
+\pkg{rstan} function, depending on which is chosen through the \code{fit_method} argument.}
 }
 \description{
 survextrap

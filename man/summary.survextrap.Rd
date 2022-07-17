@@ -11,23 +11,35 @@
 
 \item{...}{Other argument (currently unused).
 
-\code{alpha}
+Document meanings of parameters
 
-\code{coefs}
+\code{alpha}: Average baseline log hazard.  If there are covariates, this describes the
+average hazard with continuous
+covariates set to zero, and factor covariates set
+to their baseline levels.
 
-\code{loghr}
+\code{coefs}: Coefficients of the M-spline basis terms.
 
-\code{hr}
+\code{loghr}: Log hazard ratios for each covariate in the model. For cure
+models, this refers to covariates on survival for uncured people.
 
-\code{pcure}
+\code{hr}: Hazard ratios (the exponentials of \code{loghr}).
 
-\code{logor_cure}
+\code{pcure}: Probability of cure (for cure models only).   If there are covariates
+on cure, this parameter describes the probability of cure with continuous
+covariates set to zero, and factor covariates set
+to their baseline levels.
 
-\code{or_cure}}
+\code{logor_cure}: Log odds ratio of cure for each covariate on cure.
+
+\code{or_cure}: Odds ratios of cure (the exponentials of \code{logor_cure}).}
 }
 \description{
 The intervals are 95\\% credible intervals.
 }
 \details{
 Suggestions for what else to add to this are welcome.  Convergence diagnostics?
+Mode for optim method.  Mean?
+At least document how to get other arbitrary posterior summaries using
+the posterior package.  Could even allow as an argument to this.
 }

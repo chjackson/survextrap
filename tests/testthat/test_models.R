@@ -1,12 +1,3 @@
-### TODO
-### Not full MCMC.  Optimisation will do
-### Though need at least one test of postest with MCMC and VB
-### Use small samples to run mean, RMST, survival and hazard after each one.
-### postest_test() function for all if they will look the same
-
-### Purpose of this is to test postest with different model forms
-### Neednt do it for everything, only where necessary
-### Could be additional tests for features of output functions
 postest_test <- function(x, newdata=NULL){
     niter <- 10
     t <- c(1, 5)
@@ -18,28 +9,43 @@ postest_test <- function(x, newdata=NULL){
     invisible()
 }
 
-### Basic spline model, no covariates
-mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt")
-postest_test(mod)
+test_median <- function(mod, vname, value, tol=1e-01){
+    expect_equal(summary(mod) %>% filter(variable==vname) %>% pull(median),
+                 value, tol=tol)
+}
 
-### Basic spline model, with covariates
-mod <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt")
 nd <- data.frame(rx = c("Obs", "Lev+5FU"))
-postest_test(mod, nd)
 
-### Weibull model, no covariates
-mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt", modelid="weibull")
-postest_test(mod)
+test_that("Basic spline model, no covariates",{
+    mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt")
+    test_median(mod, "alpha", -0.578)
+    postest_test(mod)
+    ## MCMC fit - small sample will give warnings of low ESS etc
+    suppressWarnings(modm <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="mcmc",
+                                        chains=2, iter=1000, seed=1))
+    expect_equal(coef(mod)["alpha"], coef(modm)["alpha"], tol=1e-01)
+    ## VB fit. LOO warning
+    suppressWarnings(modv <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="vb", loo=FALSE))
+    expect_equal(coef(modv)["alpha"], coef(modm)["alpha"], tol=1e-01)
+})
 
-### Weibull model, covariates
-mod <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt", modelid="weibull")
-postest_test(mod, nd)
-# flexsurv::flexsurvreg(Surv(years, status) ~ rx, data=colons, dist="weibull")
+test_that("Basic spline model, with covariates",{
+    mod <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt")
+    test_median(mod, "alpha", -0.265)
+    postest_test(mod)
+    postest_test(mod, nd)
+})
 
-## Weibull, MCMC fit
-mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="mcmc",
-                  modelid="weibull", chains=1, iter=1000)
-postest_test(mod, nd)
+test_that("Weibull model",{
+    mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt", modelid="weibull")
+    test_median(mod, "alpha", 1.6575)
+    postest_test(mod)
+    mod <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt", modelid="weibull")
+    test_median(mod, "alpha", 1.32)
+    postest_test(mod, nd)
+    sr <- survival::survreg(Surv(years, status) ~ rx, data=colons, dist="weibull")
+    expect_equivalent(coef(sr)["rxLev"], coef(mod)["loghr_rxLev"], tol=1e-01)
+})
 
 
 ### Changing various settings in basic model
@@ -47,34 +53,42 @@ postest_test(mod, nd)
 ### Spline prior mean
 ### EB for smooth variance
 ### Fixed smooth variance
-
 ### With external data
 
-### Fitting method
-### VB
 
-### SIMULATE DATA FOR CURE MODEL
-### TODO remove dependence, since that sucks in flexsurvcure, or do in Suggests.
-### It's the imports we want to keep slim
-set.seed(1)
-x <- rep(c(0,1), each=100)
-logor_cure <- 0.5
-cure_prob <- plogis(qlogis(0.5) + logor_cure * x)
-t <- numeric(200)
-for (i in 1:200)
-    t[i] <- flexsurvcure::rmixsurv(qweibull, n=1, theta=cure_prob[i], shape=1.5, scale=1.2)
-censtime <- 10
-cure_df <- data.frame(t = pmin(t, censtime), status = as.numeric(t < censtime), x=x)
-nd <- data.frame(x=c(0,1))
 
-### Cure model, no covariates on anything
-cmod0 <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, cure=TRUE, iter=1000, fit_method="opt")
-postest_test(cmod0)
+ndc <- data.frame(x=c(0,1))
 
-### Cure model, covariates on noncured model
-cmod1 <- survextrap(Surv(t, status) ~ x, data=cure_df, chains=1, cure=TRUE, iter=1000, fit_method="opt")
-postest_test(cmod1, newdata=nd)
+test_that("Cure model, no covariates on anything",{
+    cmod0 <- survextrap(Surv(t, status) ~ 1, data=curedata, cure=TRUE, fit_method="opt")
+    test_median(cmod0, "pcure", 0.574)
+    postest_test(cmod0)
+})
 
-### Cure model, covariates on cured fraction
-cmod2 <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, cure=~x, iter=1000, fit_method="opt")
-postest_test(cmod2, newdata=nd)
+test_that("Cure model, covariates on noncured model",{
+    cmod1 <- survextrap(Surv(t, status) ~ x, data=curedata, cure=TRUE, fit_method="opt")
+    test_median(cmod1, "loghr", 0.325)
+    postest_test(cmod1, newdata=ndc)
+})
+
+test_that("Cure model, covariates on cured fraction",{
+    cmod2 <- survextrap(Surv(t, status) ~ 1, data=curedata, cure=~x, fit_method="opt")
+    test_median(cmod2, "logor_cure", 0.775)
+    postest_test(cmod2, newdata=ndc)
+    curedata$x2 <- factor(curedata$x)
+    cmod3 <- survextrap(Surv(t, status) ~ 1, data=curedata, cure=~x2, fit_method="opt")
+    expect_equal(coef(cmod2)["logor_cure"], coef(cmod3)["logor_cure"], tol=1e-01)
+})
+
+test_that("Non-standard model formulae",{
+    mod1 <- survextrap(Surv(t, status) ~ 1, data=curedata, cure=~factor(x), fit_method="opt")
+    test_median(mod1, "alpha", 2.45)
+    survextrap(Surv(t, status) ~ 1, data=curedata, cure=~I(x+1), fit_method="opt")
+    survextrap(Surv(t, status) ~ 1, data=curedata, cure=~sqrt(x), fit_method="opt")
+    survextrap(Surv(t, status) ~ 1, data=curedata, cure=~splines::bs(x), fit_method="opt")
+})
+
+## TODO test error handling for if wrong covariate names supplied in newdata
+## And a lot more errors
+
+## Specific tests for post estimation functions

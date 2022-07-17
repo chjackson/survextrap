@@ -75,7 +75,7 @@ The priors should then be chosen to give a low probability that the hazard varie
 
 But note that it is only necessary to extrapolate in this way, using knots and default priors, if there is **no substantive information** about the long term hazard!
 
-In many practical situations of extrapolation in time-to-event models, we do have information.   For human survival, we at least know that people do not tend to live longer than 100 years.  There are usually data from national agencies about mortality of general populations. 
+In many practical situations of extrapolation in time-to-event models, we do have information.   For human survival, we at least know that people do not tend to live much longer than 100 years.  There are usually data from national agencies about mortality of general populations. 
 
 The idea of the package is to make this external information as explicit as possible - ideally in the form of data. 
 
@@ -224,46 +224,30 @@ plot_hazard(rxphe_mod, niter=100, tmax=20)
 
 ## Cure models
 
-Generate a dataset with an obvious cure fraction
+The package provides a simulated dataset `curedata` with an obvious cure fraction.
+
+The probability of cure for `x=0` is 0.5, and for `x=1` 0.622 (so the log odds ratio is 0.5).   The uncured fraction follows a Weibull(1.5, 1.2) survival distribution.
 
 ```{r,results="hide",cache=TRUE}
-library(flexsurvcure)
-set.seed(1)
-t <- rmixsurv(qweibull, n=200, theta=0.5, shape=1.5, scale=1.2)
-censtime <- 10
-cure_df <- data.frame(t = pmin(t, censtime), status = as.numeric(t < censtime)) 
-plot(survfit(Surv(t, status) ~ 1, data=cure_df))
+plot(survfit(Surv(t, status) ~ 1, data=curedata))
 
-noncure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, 
+noncure_mod <- survextrap(Surv(t, status) ~ 1, data=curedata, chains=1, 
                           cure=FALSE)
 plot(noncure_mod) # doesn't quite capture the curve
 
-cure_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, cure=TRUE, iter=1000)
+cure_mod <- survextrap(Surv(t, status) ~ 1, data=curedata, chains=1, cure=TRUE, iter=1000)
 plot(cure_mod, tmax=10, niter=20) 
 ```
 
-Covariates on the cure fraction can be supplied by putting a formula in the `cure` argument. 
-These will be modelled using logistic regression. 
-
-Demonstrate this by simulating some data with a log odds ratio for cure of 0.5:
+Covariates on the cure fraction can be supplied by putting a formula in the `cure` argument.   These will be modelled using logistic regression. 
 
 ```{r}
-x <- rep(c(0,1), each=500)
-logor_cure <- 0.5
-cure_prob <- plogis(qlogis(0.5) + logor_cure * x)
-t <- numeric(1000)
-set.seed(1)
-for (i in 1:1000)
-    t[i] <- flexsurvcure::rmixsurv(qweibull, n=1, theta=cure_prob[i], shape=1.5, scale=1.2)
-censtime <- 10
-cure_df <- data.frame(t = pmin(t, censtime), status = as.numeric(t < censtime), x=x) 
-curec_mod <- survextrap(Surv(t, status) ~ 1, data=cure_df, chains=1, cure=~x, iter=1000,
-                        fit_method="opt")
+curec_mod <- survextrap(Surv(t, status) ~ 1, data=curedata, cure=~x, fit_method="opt")
 summary(curec_mod) %>% 
     filter(variable %in% c("pcure", "logor_cure", "or_cure"))
 ```
 
-
+In this summary,  `pcure` is the probability of cure at a value of 0 for the covariate `x.`
 
 
 # Relative survival 

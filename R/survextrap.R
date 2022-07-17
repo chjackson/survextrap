@@ -4,8 +4,11 @@
 
 #' survextrap
 #'
-#' @param formula  A survival formula in standard R formula syntax.  Covariates included
-#' on the right hand side of the formula with be modelled with proportional hazards.
+#' @param formula  A survival formula in standard R formula syntax, with a call to `Surv()`
+#' on the left hand side.
+#'
+#' Covariates included on the right hand side of the formula with be modelled with
+#' proportional hazards.
 #'
 #' @param data Data frame containing variables in `formula`.
 #'
@@ -36,20 +39,56 @@
 #'
 #' @param cure If `TRUE`, a mixture cure model is used.
 #'
-#' @param cure_prior Beta shape parameters for the cure probability (vector of two).
+#' @param prior_loghaz Prior for the baseline log hazard.
+#'   This should be a call to a prior constructor function, such as
+#'   `p_normal(0,1)` or `p_t(0,2,2)`.   Supported prior distribution families
+#'   are normal (parameters mean and SD) and t distributions (parameters
+#' location, scale and degrees of freedom).  The default is `normal(0, 20)`.
+#'
+#' "Baseline" is defined
+#'   by the continuous covariates taking a value of zero and factor covariates taking their
+#'   reference level.  To use a different baseline, the data should be transformed
+#'   appropriately beforehand, so that a value of zero has a different meaning. 
+#' 
+#' For continuous covariates, it helps for both computation and interpretation to define the value of zero to
+#' denote a typical value in the data, e.g. the mean.
+#'
+#' @param prior_loghr Priors for log hazard ratios.  This should be a call to
+#'   `normal()` or `student_t`.  A list of calls can also be provided, to give
+#'   different priors to different coefficients, where the name
+#'   of each list component matches the name of the coefficient, e.g.
+#'   list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3)).
+#'
+#'   The default is `normal(0,2.5)` for all coefficients.
+#'
+#' @param prior_smooth Gamma prior for the smoothing standard deviation, in
+#'   models where this is estimated.  This should be a call to `p_gamma()`.  The
+#'   default is `p_gamma(2,1)`.
+#'
+#' @param prior_cure Prior for the baseline cure probability.  This should be a
+#'   call to `p_beta()`.  The default is a uniform prior, `p_beta(1,1)`.
+#'   Baseline is defined by the mean of continuous covariates and the reference
+#'   level of factor covariates.
+#'
+#' @param prior_logor_cure Priors for log odds ratios on cure probabilities.
+#'   This should be a call to `p_normal()` or `p_t`.  The default is
+#'   `p_normal(0,2.5)`.
 #'
 #' @param basehaz_ops A list of control parameters defining the spline model.
 #'
-#' `iknots`: Internal knots.  If this is not supplied, then the number of knots is taken from `df`,
-#' and their location is taken from equally-spaced quantiles of the observed event times (concatenated
-#' with the distinct follow-up times in the external data).
+#'   `iknots`: Internal knots.  If this is not supplied, then the number of
+#'   knots is taken from `df`, and their location is taken from equally-spaced
+#'   quantiles of the observed event times (concatenated with the distinct
+#'   follow-up times in the external data).
 #'
-#' `bknots`: Boundary knots.  If this is not supplied, the boundary knots are set to zero and the
-#' maximum event time (including the follow-up times in the external data).
+#'   `bknots`: Boundary knots.  If this is not supplied, the boundary knots are
+#'   set to zero and the maximum event time (including the follow-up times in
+#'   the external data).
 #'
-#' `df`: Degrees of freedom, i.e. the number of parameters (or basis terms) that define the hazard
-#' as a spline function of time.  Defaults to 10.  Note this does not necessarily overfit because
-#' the function is smoothed through the prior.
+#'   `df`: Degrees of freedom, i.e. the number of parameters (or basis terms)
+#'   that define the hazard as a spline function of time.  Defaults to 10.  Note
+#'   this does not necessarily overfit because the function is smoothed through
+#'   the prior.
 #'
 #' `degree`: Polynomial degree used for the basis function. The default is 3, giving a cubic.
 #'
@@ -66,7 +105,7 @@
 ##' This is the default.  It is the most accurate but the slowest method.
 ##'
 ##'   If \code{fit_method="opt"}, then instead of an MCMC sample from the posterior,
-##'   `disbayes` returns the posterior mode calculated using optimisation, via
+##'   `survextrap` returns the posterior mode calculated using optimisation, via
 ##'   \pkg{rstan}'s \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} function.
 ##'   A sample from a normal approximation to the (real-line-transformed)
 ##'   posterior distribution is drawn in order to obtain credible intervals.
@@ -74,15 +113,15 @@
 ##'   If \code{fit_method="vb"}, then variational Bayes methods are used, via \pkg{rstan}'s
 ##'   \code{\link[rstan:stanmodel-method-vb]{rstan::vb()}} function.  This is labelled as "experimental" by
 ##'   \pkg{rstan}.  It might give a better approximation to the posterior
-##'   than \code{fit_method="opt"}, but has not been investigated much for `disbayes` models.
+##'   than \code{fit_method="opt"}, but has not been investigated in depth for these models.
 ##'
-##' @param loo Compute leave-one-out cross-validation statistics.  This is done by default for MCMC fits,
-##' and not for optimisation or VB fits. Set to \code{FALSE} to save a bit of run time.
+##' @param loo Compute leave-one-out cross-validation statistics.  This is done by default. Set to
+##' \code{FALSE} to save a bit of run time.
 ##' If these statistics are computed, then they are returned in the \code{loo} component of the
 ##' object returned by \code{survextrap}.
 ##'
 #' @param ... Additional arguments to supply to control the Stan fit, passed to the appropriate
-#' \pkg{rstan} function.
+#' \pkg{rstan} function, depending on which is chosen through the `fit_method` argument.
 #'
 #'
 #' @export
@@ -92,17 +131,18 @@ survextrap <- function(formula,
                        smooth_sd = "bayes",
                        coefs_mean = NULL,
                        cure = FALSE,
-                       cure_prior = c(1,1),
+                       prior_loghaz = p_normal(0,20),
+                       prior_loghr = NULL,
+                       prior_smooth = p_gamma(2,1),
+                       prior_cure = p_beta(1,1),
+                       prior_logor_cure = NULL,
                        basehaz_ops = NULL,
                        modelid = "mspline",
                        fit_method = "mcmc",
                        loo = (fit_method=="mcmc"),
                        ...)
 {
-
-    Terms <- terms(formula) # no random effects for now
-    mf <- stats::model.frame(Terms, data)
-
+    mf <- stats::model.frame(terms(formula), data)
     t_beg <- make_t(mf, type = "beg") # entry time
     t_end <- make_t(mf, type = "end") # exit  time
     t_upp <- make_t(mf, type = "upp") # upper time for interval censoring [ not implemented yet ]
@@ -114,17 +154,17 @@ survextrap <- function(formula,
     ind_event <- which(status==1)
     ind_rcens <- which(status==0)
 
-    x <- make_x(formula, mf)
+    x <- make_x(formula,data)
     ncovs <- x$ncovs
-    x_event <- x$x_centered[ind_event, , drop = FALSE]
-    x_rcens <- x$x_centered[ind_rcens, , drop = FALSE]
+    x_event <- x$X[ind_event, , drop = FALSE]
+    x_rcens <- x$X[ind_rcens, , drop = FALSE]
 
     xcure <- make_xcure(cure,data=data)
     cure <- xcure$cure
     cure_formula <- xcure$cure_formula
     ncurecovs <- xcure$ncovs
-    xcure_event <- xcure$x_centered[ind_event, , drop = FALSE]
-    xcure_rcens <- xcure$x_centered[ind_rcens, , drop = FALSE]
+    xcure_event <- xcure$X[ind_event, , drop = FALSE]
+    xcure_rcens <- xcure$X[ind_rcens, , drop = FALSE]
 
     t_tmp <- sum(rowMeans(cbind(t_end, t_upp), na.rm = TRUE) - t_beg)
     d_tmp <- sum(!status == 0)
@@ -132,15 +172,14 @@ survextrap <- function(formula,
     if (is.infinite(log_crude_event_rate))
         log_crude_event_rate <- 0 # avoids error when there are zero events
 
-    external <- parse_external(external, formula, ncovs, xlevs=x$xlevs, xbar=x$xbar,
-                               cure_formula, ncurecovs, xcure$xlevs, xcure$xbar)
+    external <- parse_external(external, formula, x, xcure, cure_formula)
     t_ext_stop <- aa(external$stop)
     t_ext_start <- aa(external$start)
     r_ext <- aa(external$r)
     n_ext <- aa(external$n)
     nextern <- external$nextern
-    x_ext <- external$x_centered
-    xcure_ext <- external$xcure_centered
+    x_ext <- external$X
+    xcure_ext <- external$Xcure
     tmax <- max(c(t_end,t_upp,external$tmax), na.rm = TRUE)
 
     basehaz <- make_basehaz(basehaz_ops    = basehaz_ops,
@@ -180,6 +219,9 @@ survextrap <- function(formula,
     ibasis_ext_stop <- if (nextern>0) make_basis(t_ext_stop, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
     ibasis_ext_start <- if (nextern>0) make_basis(t_ext_start, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
 
+    priors <- get_priors(prior_loghaz, prior_loghr, prior_smooth, prior_cure, prior_logor_cure,
+                         x, xcure, est_smooth)
+
     standata <- nlist(nevent, nrcens, nvars, nextern, ncovs,
                       log_crude_event_rate,
                       basis_event, ibasis_event, ibasis_rcens,
@@ -190,7 +232,18 @@ survextrap <- function(formula,
                       beta_mean,
                       est_smooth,
                       cure,
-                      cure_shape = cure_prior, ## TODO standardise name, mean+ESS param
+                      prior_loghaz_dist = priors$loghaz$distid,
+                      prior_loghaz = as.numeric(unlist(priors$loghaz[c("location","scale","df")])),
+                      prior_loghr_dist = aa(priors$loghr$distid),
+                      prior_loghr_location = aa(priors$loghr$location),
+                      prior_loghr_scale = aa(priors$loghr$scale),
+                      prior_loghr_df = aa(priors$loghr$df),
+                      prior_logor_cure_dist = aa(priors$logor_cure$distid),
+                      prior_logor_cure_location = aa(priors$logor_cure$location),
+                      prior_logor_cure_scale = aa(priors$logor_cure$scale),
+                      prior_logor_cure_df = aa(priors$logor_cure$df),
+                      prior_smooth = as.numeric(unlist(priors$smooth[c("shape","rate")])),
+                      prior_cure = as.numeric(unlist(priors$cure[c("shape1","shape2")])),
                       modelid = modelid_num
                       )
     pcure_init <- if (cure) 0.5 else numeric()
@@ -204,30 +257,48 @@ survextrap <- function(formula,
     }
     standata$smooth_sd_fixed <- if (est_smooth) aa(numeric()) else aa(smooth_sd)
 
+    stan_optimizing_ops <- function(...){
+        ops <- list(...)
+        if (is.null(ops$hessian)) ops$hessian <- TRUE
+        if (is.null(ops$draws)) ops$draws <- 2000
+        ops
+    }
+    stan_sampling_ops <- function(...){
+        ops <- list(...)
+        ops
+    }
+    stan_vb_ops <- function(...){
+        ops <- list(...)
+        ops
+    }
+
     if (fit_method=="opt")
-        fits <- rstan::optimizing(stanmodels$survextrap, data=standata, init=staninit,
-                                  hessian=TRUE, draws=1000) # TODO defaults
+        fits <- do.call(rstan::optimizing,
+                        c(list(object=stanmodels$survextrap, data=standata, init=staninit),
+                          stan_optimizing_ops(...)))
     else if (fit_method=="mcmc")
-        fits <- rstan::sampling(stanmodels$survextrap, data=standata,
-                                pars = "beta", include=FALSE,
-                                ...)
+        fits <- do.call(rstan::sampling,
+                        c(list(object=stanmodels$survextrap, data=standata,
+                               pars = "beta", include=FALSE), stan_sampling_ops(...)))
     else if (fit_method=="vb")
-        fits <- rstan::vb(stanmodels$survextrap, data=standata,
-                          pars = "beta", include=FALSE,
-                          ...)
+        fits <- do.call(rstan::vb,
+                        c(list(object=stanmodels$survextrap, data=standata,
+                               pars = "beta", include=FALSE), stan_vb_ops(...)))
     else stop(sprintf("Unknown fit_method: %s",fit_method))
 
     km <- survminer::surv_summary(survfit(formula, data=data), data=data)
 
     misc_keep <- nlist(formula, stanfit=fits, fit_method, cure_formula)
     standata_keep <- standata[c("nvars","ncovs","log_crude_event_rate","ncurecovs")]
-    model_keep <- nlist(cure, modelid)
+    model_keep <- nlist(cure, modelid, est_smooth)
     spline_keep <- nlist(basehaz)
     covinfo_names <- c("xnames","xlevs","xinds","xbar","mfbase","mfzero")
     x <- list(x = x[covinfo_names])
     xcure <- list(xcure = xcure[covinfo_names])
-    prior_keep <- nlist(coefs_mean, smooth_sd)
-    res <- c(misc_keep, standata_keep, model_keep, spline_keep, x, xcure, prior_keep, nlist(km))
+    prior_keep <- list(priors=priors)
+    prioretc_keep <- nlist(coefs_mean, smooth_sd)
+    res <- c(misc_keep, standata_keep, model_keep, spline_keep, x, xcure,
+             prior_keep, prioretc_keep, nlist(km))
 
     class(res) <- "survextrap"
     if (loo) res$loo <- loo_survextrap(res, standata)
@@ -235,38 +306,37 @@ survextrap <- function(formula,
 }
 
 
-make_x <- function(formula, mf, xlevs=NULL){
-    x <- model.matrix(formula, mf, xlev = xlevs)
-    x <- drop_intercept(x)
-    ncovs <- NCOL(x)
-    xbar <- aa(colMeans(x))
-    x_centered <- sweep(x, 2, xbar, FUN = "-")
-    xnames <- colnames(x)
+## No centering is done here.  It assumes that any covariates are pre-centered
+## around a meaningful value.   This corresponds to the intercept that the prior is placed on
 
-    has_response <- attr(terms(mf), "response") != 0
-    if (has_response)
-        mf <- mf[-attr(terms(mf), "response")]
-    if (ncol(mf) > 0){
-        xinds <- list(
-            factor = which(sapply(mf, is.factor)),
-            numeric = which(sapply(mf, is.numeric))
-        )
-        xlevs <- lapply(mf[xinds$factor], levels)
-        if ((length(xinds$factor)==1) && (length(xinds$numeric)==0)){
+make_x <- function(formula, data, xlevs=NULL){
+    ## model frame containing x not factor(x), log(x) etc
+    mforig <- get_all_vars(delete.response(terms(formula)), data)
+    if (ncol(mforig) > 0){
+        factors <- names(mforig)[sapply(mforig, is.factor)]
+        numerics <- names(mforig)[sapply(mforig, is.numeric)]
+        xlevs <- lapply(mforig[factors], levels)
+        if ((length(factors)==1) && (length(numerics)==0)){
+            ref_levs <- lapply(xlevs, function(x)x[1])
             base_levs <- xlevs
         }
-        else if (length(xinds$factor) > 0)
-            base_levs <- lapply(xlevs, function(x)x[1])
-        else base_levs <- NULL
-        numeric_means <- lapply(mf[xinds$numeric], mean)
-        numeric_zeros <- lapply(mf[xinds$numeric], function(x)0)
-        mfbase <- as.data.frame(c(numeric_means, base_levs))
-        mfzero <- as.data.frame(c(numeric_zeros, base_levs))
-    } else xlevs <- xinds <- mfbase <- mfzero <- NULL
+        else if (length(factors) > 0){
+            ref_levs <- lapply(xlevs, function(x)x[1])
+            base_levs <- ref_levs
+        } else base_levs <- ref_levs <- NULL
+        numeric_zeros <- lapply(mforig[numerics], function(x)0)
+        mfbase <- as.data.frame(c(numeric_zeros, base_levs))
+    } else factors <- numerics <- xlevs <- mfbase <- NULL
 
-    nlist(x, x_centered, xbar, N = NROW(x),
-          ncovs = NCOL(x), xnames,
-          xlevs, xinds, mfbase, mfzero)
+    ## model frame containing  factor(x), log(x) etc not x
+    mf <- stats::model.frame(formula, data)
+    X <- model.matrix(formula, mf, xlev = xlevs)
+    X <- drop_intercept(X)
+    ncovs <- NCOL(X)
+    xnames <- colnames(X)
+
+    nlist(X, N = NROW(X),
+          ncovs = NCOL(X), xnames, factors, numerics, xlevs, mfbase)
 }
 
 
@@ -368,34 +438,31 @@ make_d <- function(model_frame) {
          stop(err))
 }
 
-parse_external <- function(external, formula, ncovs, xlevs=NULL, xbar,
-                           cure_formula=NULL, ncurecovs=NULL, xlevs_cure=NULL, xbar_cure=NULL){
+parse_external <- function(external, formula, x, xcure, cure_formula){
     ## TODO validate here.
     if (is.null(external))
-        external <- list(nextern=0, stop=numeric(), start=numeric(),
-                         r=integer(), n=integer(), tmax=0)
+        extl <- list(nextern=0, stop=numeric(), start=numeric(),
+                     r=integer(), n=integer(), tmax=0)
     else {
-        external <- c(as.list(external), nextern=nrow(external),
-                      tmax=max(external$stop))
-        if (ncovs>0){
+        extl <- c(as.list(external), nextern=nrow(external),
+                  tmax=max(external$stop))
+        if (x$ncovs>0){
             form <- delete.response(terms(formula))
-            x <- model.matrix(form, external, xlev = xlevs)
-            x <- drop_intercept(x)
-            x_centered <- sweep(x, 2, xbar, FUN = "-")
+            X <- model.matrix(form, external, xlev = x$xlevs)
+            X <- drop_intercept(X)
         }
-        if (ncurecovs>0){
+        if (xcure$ncovs>0){
             form <- delete.response(terms(cure_formula))
-            xcure <- model.matrix(cure_formula, external, xlev = xlevs_cure)
-            xcure <- drop_intercept(xcure)
-            xcure_centered <- sweep(xcure, 2, xbar_cure, FUN = "-")
+            Xcure <- model.matrix(form, external, xlev = xcure$xlevs)
+            Xcure <- drop_intercept(Xcure)
         }
     }
-    if ((external$nextern==0) || (ncovs==0))
-        x_centered <- array(dim=c(external$nextern, ncovs))
-    if ((external$nextern==0) || (ncurecovs==0))
-        xcure_centered <- array(dim=c(external$nextern, ncurecovs))
-    external <- c(external, nlist(x_centered), nlist(xcure_centered))
-    external
+    if ((extl$nextern==0) || (x$ncovs==0))
+        X <- array(dim=c(extl$nextern, x$ncovs))
+    if ((extl$nextern==0) || (xcure$ncovs==0))
+        Xcure <- array(dim=c(extl$nextern, xcure$ncovs))
+    extl <- c(extl, nlist(X), nlist(Xcure))
+    extl
 }
 
 make_basis <- function(times, basehaz, integrate = FALSE) {
@@ -492,12 +559,11 @@ make_xcure <- function(cure, data){
     } else stop("`cure` must either be TRUE, FALSE or a model formula")
     if (!is.null(cure_formula)){
         Terms <- terms(cure_formula)
-        mf <- stats::model.frame(Terms, data)
-        xcure <- make_x(cure_formula, mf)
+        xcure <- make_x(cure_formula, data)
         cure <- TRUE
     } else {
         xcure <- list(ncovs = 0,
-                      x_centered = matrix(nrow=nrow(data), ncol=0))
+                      X = matrix(nrow=nrow(data), ncol=0))
     }
     c(nlist(cure, cure_formula), xcure)
 }

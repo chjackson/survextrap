@@ -58,6 +58,7 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
 plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter=NULL,
                           ci=NULL, xlab="Time", ylab="Survival", line_size=1.5, ci_alpha=0.2){
     lower <- upper <- NULL
+    if (is.null(km)) km <- one_factor_cov(x)
     newdata <- default_newdata(x, newdata)
     surv <- survival(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
     knots <- x$basehaz$knots[x$basehaz$knots <= max(surv$times)]
@@ -79,7 +80,6 @@ plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter
         g <- g +
             geom_ribbon(aes(ymin=lower, ymax=upper), alpha=ci_alpha)
 
-    if (is.null(km)) km <- one_factor_cov(x)
     if (km){
         aes <- list(x="time", y="surv")
         if (one_factor_cov(x)) {
@@ -93,8 +93,8 @@ plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter
 }
 
 one_factor_cov <- function(x){
-    (length(x$xinds$factor)<=1) &&
-        (length(x$xinds$numeric)==0) && 
+    (length(x$x$factors)<=1) &&
+        (length(x$x$numerics)==0) && 
         (x$ncurecovs == 0)
     ## if there are cure covs, make people choose for themselves what curves to draw
 }

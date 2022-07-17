@@ -42,7 +42,8 @@ Suggests:
     rmarkdown,
     testthat,
     SHELF,
-    flexsurvcure
+    flexsurvcure,
+    splines
 VignetteBuilder: knitr
 URL: https://github.com/chjackson/survextrap,
     https://chjackson.github.io/survextrap/

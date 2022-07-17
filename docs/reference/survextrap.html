@@ -62,7 +62,11 @@
 <span>  smooth_sd <span class="op">=</span> <span class="st">"bayes"</span>,</span>
 <span>  coefs_mean <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cure <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  cure_prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  prior_loghaz <span class="op">=</span> <span class="fu"><a href="priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span><span class="op">)</span>,</span>
+<span>  prior_loghr <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  prior_smooth <span class="op">=</span> <span class="fu"><a href="priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  prior_cure <span class="op">=</span> <span class="fu"><a href="priors.html">p_beta</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  prior_logor_cure <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  basehaz_ops <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  modelid <span class="op">=</span> <span class="st">"mspline"</span>,</span>
 <span>  fit_method <span class="op">=</span> <span class="st">"mcmc"</span>,</span>
@@ -74,8 +78,10 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>formula</dt>
-<dd><p>A survival formula in standard R formula syntax.  Covariates included
-on the right hand side of the formula with be modelled with proportional hazards.</p></dd>
+<dd><p>A survival formula in standard R formula syntax, with a call to <code>Surv()</code>
+on the left hand side.</p>
+<p>Covariates included on the right hand side of the formula with be modelled with
+proportional hazards.</p></dd>
 
 
 <dt>data</dt>
@@ -109,20 +115,61 @@ default, these are set to values that define a constant hazard function.</p></dd
 <dd><p>If <code>TRUE</code>, a mixture cure model is used.</p></dd>
 
 
-<dt>cure_prior</dt>
-<dd><p>Beta shape parameters for the cure probability (vector of two).</p></dd>
+<dt>prior_loghaz</dt>
+<dd><p>Prior for the baseline log hazard.
+This should be a call to a prior constructor function, such as
+<code>p_normal(0,1)</code> or <code>p_t(0,2,2)</code>.   Supported prior distribution families
+are normal (parameters mean and SD) and t distributions (parameters
+location, scale and degrees of freedom).  The default is <code>normal(0, 20)</code>.</p>
+<p>"Baseline" is defined
+by the continuous covariates taking a value of zero and factor covariates taking their
+reference level.  To use a different baseline, the data should be transformed
+appropriately beforehand, so that a value of zero has a different meaning.</p>
+<p>For continuous covariates, it helps for both computation and interpretation to define the value of zero to
+denote a typical value in the data, e.g. the mean.</p></dd>
+
+
+<dt>prior_loghr</dt>
+<dd><p>Priors for log hazard ratios.  This should be a call to
+<code>normal()</code> or <code>student_t</code>.  A list of calls can also be provided, to give
+different priors to different coefficients, where the name
+of each list component matches the name of the coefficient, e.g.
+list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3)).</p>
+<p>The default is <code>normal(0,2.5)</code> for all coefficients.</p></dd>
+
+
+<dt>prior_smooth</dt>
+<dd><p>Gamma prior for the smoothing standard deviation, in
+models where this is estimated.  This should be a call to <code><a href="priors.html">p_gamma()</a></code>.  The
+default is <code>p_gamma(2,1)</code>.</p></dd>
+
+
+<dt>prior_cure</dt>
+<dd><p>Prior for the baseline cure probability.  This should be a
+call to <code><a href="priors.html">p_beta()</a></code>.  The default is a uniform prior, <code>p_beta(1,1)</code>.
+Baseline is defined by the mean of continuous covariates and the reference
+level of factor covariates.</p></dd>
+
+
+<dt>prior_logor_cure</dt>
+<dd><p>Priors for log odds ratios on cure probabilities.
+This should be a call to <code><a href="priors.html">p_normal()</a></code> or <code>p_t</code>.  The default is
+<code>p_normal(0,2.5)</code>.</p></dd>
 
 
 <dt>basehaz_ops</dt>
 <dd><p>A list of control parameters defining the spline model.</p>
-<p><code>iknots</code>: Internal knots.  If this is not supplied, then the number of knots is taken from <code>df</code>,
-and their location is taken from equally-spaced quantiles of the observed event times (concatenated
-with the distinct follow-up times in the external data).</p>
-<p><code>bknots</code>: Boundary knots.  If this is not supplied, the boundary knots are set to zero and the
-maximum event time (including the follow-up times in the external data).</p>
-<p><code>df</code>: Degrees of freedom, i.e. the number of parameters (or basis terms) that define the hazard
-as a spline function of time.  Defaults to 10.  Note this does not necessarily overfit because
-the function is smoothed through the prior.</p>
+<p><code>iknots</code>: Internal knots.  If this is not supplied, then the number of
+knots is taken from <code>df</code>, and their location is taken from equally-spaced
+quantiles of the observed event times (concatenated with the distinct
+follow-up times in the external data).</p>
+<p><code>bknots</code>: Boundary knots.  If this is not supplied, the boundary knots are
+set to zero and the maximum event time (including the follow-up times in
+the external data).</p>
+<p><code>df</code>: Degrees of freedom, i.e. the number of parameters (or basis terms)
+that define the hazard as a spline function of time.  Defaults to 10.  Note
+this does not necessarily overfit because the function is smoothed through
+the prior.</p>
 <p><code>degree</code>: Polynomial degree used for the basis function. The default is 3, giving a cubic.</p></dd>
 
 
@@ -139,26 +186,26 @@ practice for survival extrapolation.</p></dd>
 sampling, via <span class="pkg">rstan</span>'s <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html" class="external-link">rstan::sampling()</a></code> function.
 This is the default.  It is the most accurate but the slowest method.</p>
 <p>If <code>fit_method="opt"</code>, then instead of an MCMC sample from the posterior,
-<code>disbayes</code> returns the posterior mode calculated using optimisation, via
+<code>survextrap</code> returns the posterior mode calculated using optimisation, via
 <span class="pkg">rstan</span>'s <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html" class="external-link">rstan::optimizing()</a></code> function.
 A sample from a normal approximation to the (real-line-transformed)
 posterior distribution is drawn in order to obtain credible intervals.</p>
 <p>If <code>fit_method="vb"</code>, then variational Bayes methods are used, via <span class="pkg">rstan</span>'s
 <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-vb.html" class="external-link">rstan::vb()</a></code> function.  This is labelled as "experimental" by
 <span class="pkg">rstan</span>.  It might give a better approximation to the posterior
-than <code>fit_method="opt"</code>, but has not been investigated much for <code>disbayes</code> models.</p></dd>
+than <code>fit_method="opt"</code>, but has not been investigated in depth for these models.</p></dd>
 
 
 <dt>loo</dt>
-<dd><p>Compute leave-one-out cross-validation statistics.  This is done by default for MCMC fits,
-and not for optimisation or VB fits. Set to <code>FALSE</code> to save a bit of run time.
+<dd><p>Compute leave-one-out cross-validation statistics.  This is done by default. Set to
+<code>FALSE</code> to save a bit of run time.
 If these statistics are computed, then they are returned in the <code>loo</code> component of the
 object returned by <code>survextrap</code>.</p></dd>
 
 
 <dt>...</dt>
 <dd><p>Additional arguments to supply to control the Stan fit, passed to the appropriate
-<span class="pkg">rstan</span> function.</p></dd>
+<span class="pkg">rstan</span> function, depending on which is chosen through the <code>fit_method</code> argument.</p></dd>
 
 </dl></div>
 

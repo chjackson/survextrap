@@ -13,9 +13,6 @@
 ##' is computed at the mean of each numeric covariate in the original data, and at the
 ##' baseline level of each factor covariate.
 ##'
-##' For cure models, then if there are covariates on the cure fraction and the uncured
-##' survival, then the covariates on the cure fraction are used by default. 
-##'
 ##' @param niter Number of MCMC iterations to use to compute credible
 ##' intervals.  Set to a low value to make this function quicker, at the cost of
 ##' some approximation error (which may not be important for plotting).
@@ -31,11 +28,16 @@ mean.survextrap <- function(x, newdata=NULL, niter=NULL, ...){
 }
 
 default_newdata <- function(x, newdata){
-    if (is.null(newdata)){
-        if (x$ncurecovs > 0)
-            newdata <- x$xcure$mfbase
-        else if (x$ncovs > 0)
-            newdata <- x$x$mfbase
+    all_covs <- union(names(x$x$mfbase), names(x$xcure$mfbase))
+    if (is.null(newdata) && ((x$ncovs>0) || (x$ncurecovs>0))){
+        newdata <- as.data.frame(c(x$x$mfbase, x$xcure$mfbase))[all_covs]
+    }  else {
+        missing_covs <- all_covs[!(all_covs %in% names(newdata))]
+        if (length(missing_covs) > 0){
+            plural <- if (length(missing_covs) > 1) "s" else ""
+            stop(sprintf("Values of covariate%s %s not included in `newdata`",
+                         plural, paste(missing_covs, collapse=",")))
+        }
     }
     newdata
 }
@@ -99,10 +101,10 @@ newdata_to_X <- function(newdata, x, formula=NULL, xlevs=NULL){
 
 get_alpha_bycovs <- function(x, stanmat, newdata=NULL, niter=NULL){
     if (is.null(newdata) && (x$ncovs > 0)) newdata <- x$x$mfbase
+    if (is.null(niter)) niter <- nrow(stanmat)
     if (NROW(newdata) > 0){
         X <- newdata_to_X(newdata, x, x$formula, x$x$xlevs) # nvals x npars
         X <- drop_intercept(X)
-        X <- sweep(X, 2, x$x$xbar, FUN = "-")
     } else X <- NULL
     X <- cbind("(Intercept)"=1, X)
     if (is.null(niter)) niter <- nrow(stanmat)
@@ -113,11 +115,11 @@ get_alpha_bycovs <- function(x, stanmat, newdata=NULL, niter=NULL){
 
 get_cureprob_bycovs <- function(x, stanmat, newdata=NULL, niter=NULL){
     if (is.null(newdata)) newdata <- x$xcure$mfbase
+    if (is.null(niter)) niter <- nrow(stanmat)
     pcure <- if (x$cure) stanmat[1:niter, "pcure[1]"] else NULL
     if (x$ncurecovs > 0){
-        X <- newdata_to_X(newdata, x, x$cure_formula, x$xcure$xlevs) #
+        X <- newdata_to_X(newdata, x, x$cure_formula, x$xcure$xlevs)
         X <- drop_intercept(X)
-        X <- sweep(X, 2, x$xcure$xbar, FUN = "-")
         X <- cbind("(Intercept)"=1, X)
         if (is.null(niter)) niter <- nrow(stanmat)
         logor_names <- grep("logor_cure", colnames(stanmat), value=TRUE)
@@ -130,6 +132,24 @@ get_cureprob_bycovs <- function(x, stanmat, newdata=NULL, niter=NULL){
 
 ### TODO eta is inconsistently named in the code, log scale in stan, natural in vignette
 
+## Form a matrix of posterior draws in "posterior" package draws_matrix format
+## Include intercepts at covariate values of zero, as well as at baseline
+## (mean for continuous variables and reference levels for factors)
+
+get_draws <- function(x){
+    if (x$fit_method %in% c("mcmc","vb"))
+        fit <- x$stanfit
+    else if (x$fit_method=="opt")
+        fit <- x$stanfit$theta_tilde
+    else fit <- NULL
+    stanmat <- posterior::as_draws_matrix(fit)
+    stanmat <- posterior::merge_chains(stanmat)
+    stanmat
+}
+
+## Form a list of posterior draws that includes intercept parameters for a series of
+## user-specific covariate values
+
 get_pars <- function(x, newdata=NULL, niter=NULL){
     stanmat <- get_draws(x)
     if (length(stanmat)==0) stop("Stan model does not contain samples")
@@ -140,21 +160,17 @@ get_pars <- function(x, newdata=NULL, niter=NULL){
     ms_coef_names <- sprintf("coefs[%s]",seq(x$nvars))
     coefs      <- stanmat[1:niter, ms_coef_names,  drop = FALSE]
 
-    ## cure probs for centered covariate values
+    ## cure probs for zero covariate values
     pcure <- if (x$cure) stanmat[1:niter, "pcure[1]"] else NULL
     ## cure probs for user-specified covariate values
     cureprob_user <- get_cureprob_bycovs(x=x, stanmat=stanmat, newdata=newdata, niter=niter)
-    ## cure prob at covariate values of zero
-    pcure0 <- get_cureprob_bycovs(x=x, stanmat=stanmat, newdata=x$xcure$mfzero, niter=niter)
 
-    ## log intercept at centered covariate values (including centered factor contrasts)
+    ## log intercept at zero covariate values (including centered factor contrasts)
     alpha    <- stanmat[1:niter, "alpha",  drop = FALSE]
     ## log intercept for user-specified covariate values
     alpha_user <- get_alpha_bycovs(x=x, stanmat=stanmat, newdata=newdata, niter=niter)
-    ## log intercept at covariate values of zero
-    alpha0 <- get_alpha_bycovs(x=x, stanmat=stanmat, newdata=x$x$mfzero, niter=niter)
 
-    res <- nlist(alpha, alpha_user, alpha0, gamma, loghr, coefs, pcure, cureprob_user, pcure0)
+    res <- nlist(alpha, alpha_user, gamma, loghr, coefs, pcure, cureprob_user)
     attr(res, "niter") <- niter
     res
 }

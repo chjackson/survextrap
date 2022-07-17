@@ -48,7 +48,84 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="fitting-models">Fitting models<a class="anchor" aria-label="anchor" href="#fitting-models"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="survextrap.html">survextrap()</a></code> 
+        </dt>
+        <dd>survextrap</dd>
+      </dl><dl><dt>
+          
+          <code><a href="priors.html">p_normal()</a></code> <code><a href="priors.html">p_t()</a></code> <code><a href="priors.html">p_beta()</a></code> <code><a href="priors.html">p_gamma()</a></code> 
+        </dt>
+        <dd>Prior distributions and options</dd>
+      </dl></div><div class="section level2">
+      <h2 id="getting-results-from-fitted-models">Getting results from fitted models<a class="anchor" aria-label="anchor" href="#getting-results-from-fitted-models"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="print.survextrap.html">print(<i>&lt;survextrap&gt;</i>)</a></code> 
+        </dt>
+        <dd>Print a fitted survextrap model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="summary.survextrap.html">summary(<i>&lt;survextrap&gt;</i>)</a></code> 
+        </dt>
+        <dd>Posterior summary statistics for parameters of survextrap models</dd>
+      </dl><dl><dt>
+          
+          <code><a href="survival.html">survival()</a></code> 
+        </dt>
+        <dd>Estimates of survival from a survextrap model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="hazard.html">hazard()</a></code> 
+        </dt>
+        <dd>Estimates of hazard from a survextrap model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="plot_survival.html">plot_survival()</a></code> 
+        </dt>
+        <dd>Plot survival curves from a survextrap model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="plot_hazard.html">plot_hazard()</a></code> 
+        </dt>
+        <dd>Plot hazard curves from a survextrap model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="plot.survextrap.html">plot(<i>&lt;survextrap&gt;</i>)</a></code> 
+        </dt>
+        <dd>Plot method for survextrap model objects</dd>
+      </dl><dl><dt>
+          
+          <code><a href="mean.survextrap.html">mean(<i>&lt;survextrap&gt;</i>)</a></code> 
+        </dt>
+        <dd>Mean survival time</dd>
+      </dl><dl><dt>
+          
+          <code><a href="rmst.html">rmst()</a></code> 
+        </dt>
+        <dd>Restricted mean survival time</dd>
+      </dl></div><div class="section level2">
+      <h2 id="datasets">Datasets<a class="anchor" aria-label="anchor" href="#datasets"></a></h2>
       
       
 
@@ -65,14 +142,25 @@
         <dd>Colon cancer survival data</dd>
       </dl><dl><dt>
           
-          <code><a href="hazard.html">hazard()</a></code> 
+          <code><a href="curedata.html">curedata</a></code> 
         </dt>
-        <dd>Estimates of hazard from a survextrap model</dd>
-      </dl><dl><dt>
+        <dd>Simulated data for testing cure models</dd>
+      </dl></div><div class="section level2">
+      <h2 id="m-spline-utilities">M-spline utilities<a class="anchor" aria-label="anchor" href="#m-spline-utilities"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
           
-          <code><a href="mean.survextrap.html">mean(<i>&lt;survextrap&gt;</i>)</a></code> 
+          <code><a href="Survmspline.html">psurvmspline()</a></code> <code><a href="Survmspline.html">Hsurvmspline()</a></code> <code><a href="Survmspline.html">hsurvmspline()</a></code> <code><a href="Survmspline.html">dsurvmspline()</a></code> <code><a href="Survmspline.html">qsurvmspline()</a></code> <code><a href="Survmspline.html">rsurvmspline()</a></code> <code><a href="Survmspline.html">rmst_survmspline()</a></code> <code><a href="Survmspline.html">mean_survmspline()</a></code> 
         </dt>
-        <dd>Mean survival time</dd>
+        <dd>M-spline survival distribution</dd>
       </dl><dl><dt>
           
           <code><a href="mspline_basis.html">mspline_basis()</a></code> 
@@ -90,16 +178,6 @@
         <dd>Estimate M-spline basis weights which give a constant function.</dd>
       </dl><dl><dt>
           
-          <code><a href="plot.survextrap.html">plot(<i>&lt;survextrap&gt;</i>)</a></code> 
-        </dt>
-        <dd>Plot method for survextrap model objects</dd>
-      </dl><dl><dt>
-          
-          <code><a href="plot_hazard.html">plot_hazard()</a></code> 
-        </dt>
-        <dd>Plot hazard curves from a survextrap model</dd>
-      </dl><dl><dt>
-          
           <code><a href="plot_mspline.html">plot_mspline()</a></code> 
         </dt>
         <dd>Plot a M-spline function, showing how it is built up from its basis</dd>
@@ -109,48 +187,25 @@
         </dt>
         <dd>Generate a sample from the prior distribution of M-spline hazard curves implied by
 a particular mean and variance for the baseline curve and scale parameter.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="plot_survival.html">plot_survival()</a></code> 
-        </dt>
-        <dd>Plot survival curves from a survextrap model</dd>
-      </dl><dl><dt>
-          
-          <code><a href="print.survextrap.html">print(<i>&lt;survextrap&gt;</i>)</a></code> 
-        </dt>
-        <dd>Print a fitted survextrap model</dd>
-      </dl><dl><dt>
-          
-          <code><a href="rmst.html">rmst()</a></code> 
-        </dt>
-        <dd>Restricted mean survival time</dd>
-      </dl><dl><dt>
-          
-          <code><a href="summary.survextrap.html">summary(<i>&lt;survextrap&gt;</i>)</a></code> 
-        </dt>
-        <dd>Posterior summary statistics for parameters of survextrap models</dd>
-      </dl><dl><dt>
+      </dl></div><div class="section level2">
+      <h2 id="package-overview">Package overview<a class="anchor" aria-label="anchor" href="#package-overview"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
           
           <code><a href="survextrap-package.html">survextrap-package</a></code> 
         </dt>
         <dd>The 'survextrap' package.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="survextrap.html">survextrap()</a></code> 
-        </dt>
-        <dd>survextrap</dd>
-      </dl><dl><dt>
-          
-          <code><a href="survival.html">survival()</a></code> 
-        </dt>
-        <dd>Estimates of survival from a survextrap model</dd>
-      </dl><dl><dt>
-          
-          <code><a href="Survmspline.html">psurvmspline()</a></code> <code><a href="Survmspline.html">Hsurvmspline()</a></code> <code><a href="Survmspline.html">hsurvmspline()</a></code> <code><a href="Survmspline.html">dsurvmspline()</a></code> <code><a href="Survmspline.html">qsurvmspline()</a></code> <code><a href="Survmspline.html">rsurvmspline()</a></code> <code><a href="Survmspline.html">rmst_survmspline()</a></code> <code><a href="Survmspline.html">mean_survmspline()</a></code> 
-        </dt>
-        <dd>M-spline survival distribution</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

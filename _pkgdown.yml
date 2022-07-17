@@ -1,4 +1,34 @@
 url: https://chjackson.github.io/survextrap/
 template:
   bootstrap: 5
-
+reference:
+- title: Fitting models
+- contents:
+  - survextrap
+  - priors
+- title: Getting results from fitted models
+- contents:
+  - print.survextrap
+  - summary.survextrap
+  - survival
+  - hazard
+  - plot_survival
+  - plot_hazard
+  - plot.survextrap
+  - mean.survextrap
+  - rmst
+- title: Datasets
+- contents:
+  - colons
+  - curedata
+- title: M-spline utilities
+- contents:
+  - Survmspline
+  - mspline_basis
+  - mspline_plotsetup
+  - mspline_uniform_weights
+  - plot_mspline
+  - plot_mspline_priorpred
+- title: Package overview
+- contents:
+  - survextrap-package
