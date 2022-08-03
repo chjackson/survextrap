@@ -40,7 +40,8 @@ functions {
     }
 
     vector log_surv(vector eta, matrix ibasis, vector coefs,
-		    data int cure, vector pcure, data int modelid) {
+		    data int cure, vector pcure,
+		    data int modelid) {
         vector[rows(eta)] res;
         vector[rows(eta)] base_logsurv;
         if (modelid==1){
@@ -62,11 +63,12 @@ functions {
 
     vector log_haz(vector eta, matrix basis, vector coefs,
 		   data int cure, vector pcure, matrix ibasis,
-		   data int modelid) {
+		   data int modelid, data int relative,
+		   vector backhaz) {
         vector[rows(eta)] res;
         vector[rows(eta)] base_logdens;
         vector[rows(eta)] base_loghaz;
-        vector[rows(eta)] base_logsurv;
+        vector[rows(eta)] logsurv;
         if (cure) {
             if (modelid==1){
                 base_logdens = mspline_log_dens(eta, basis, ibasis, coefs);
@@ -75,9 +77,9 @@ functions {
                     base_logdens[i] = weibull_lpdf(basis[i,1] | coefs[1], exp(eta[i]));
                 }
             }
-            base_logsurv = log_surv(eta, ibasis, coefs, cure, pcure, modelid);
+            logsurv = log_surv(eta, ibasis, coefs, cure, pcure, modelid); // includes cure 
             for (i in 1:rows(eta)){
-                res[i] = log(1 - pcure[i]) + base_logdens[i] - base_logsurv[i];
+                res[i] = log(1 - pcure[i]) + base_logdens[i] - logsurv[i];
             }
         } else {
             if (modelid==1){
@@ -90,15 +92,21 @@ functions {
             }
             res = base_loghaz;
         }
+	if (relative) {
+	    for (i in 1:rows(eta)){
+		res[i] = log(backhaz[i] + exp(res[i]));
+	    }
+	}
         return res;
     }
 
     vector log_dens(vector eta, matrix basis, vector coefs,
 		    data int cure, vector pcure, matrix ibasis,
-		    data int modelid){
+		    data int modelid,
+		    data int relative, vector backhaz){
         vector[rows(eta)] res;
-        res = log_haz(eta, basis, coefs, cure, pcure, ibasis, modelid) +
-        log_surv(eta, ibasis, coefs, cure, pcure, modelid);
+        res = log_haz(eta, basis, coefs, cure, pcure, ibasis, modelid, relative, backhaz) +
+	    log_surv(eta, ibasis, coefs, cure, pcure, modelid);
         return res;
     }
 
@@ -168,6 +176,12 @@ data {
     vector<lower=0>[1-est_smooth] smooth_sd_fixed;
 
     int cure;
+
+    int relative; 
+    vector[nevent] backhaz_event; 
+    vector[nextern] backsurv_ext_start; 
+    vector[nextern] backsurv_ext_stop; 
+
     int prior_loghaz_dist;
     vector<lower=0>[3] prior_loghaz;
     vector<lower=0>[2] prior_cure;
@@ -255,12 +269,16 @@ model {
         if (nextern > 0) pcure_extern = inv_logit(logit(pcure_extern) + xcure_ext * logor_cure);
     }
 
-    if (nevent > 0) target +=  log_dens(eta_event,  basis_event, coefs, cure, pcure_event, ibasis_event, modelid);
-    if (nrcens > 0) target +=  log_surv(eta_rcens, ibasis_rcens, coefs, cure, pcure_rcens, modelid);
+    if (nevent > 0) target +=  log_dens(eta_event,  basis_event, coefs, cure, pcure_event,
+					ibasis_event, modelid, relative, backhaz_event);
+    if (nrcens > 0) target +=  log_surv(eta_rcens, ibasis_rcens, coefs, cure, pcure_rcens,
+					modelid);
 
     if (nextern > 0) {
-        p_ext_stop = exp(log_surv(eta_extern, ibasis_ext_stop, coefs, cure, pcure_extern, modelid));
-        p_ext_start = exp(log_surv(eta_extern, ibasis_ext_start, coefs, cure, pcure_extern, modelid));
+        p_ext_stop = exp(log_surv(eta_extern, ibasis_ext_stop, coefs, cure, pcure_extern,
+				  modelid) .* backsurv_ext_stop);
+        p_ext_start = exp(log_surv(eta_extern, ibasis_ext_start, coefs, cure, pcure_extern,
+				   modelid) .* backsurv_ext_start);
         target += binomial_lpmf(r_ext | n_ext, p_ext_stop ./ p_ext_start);
     }
 

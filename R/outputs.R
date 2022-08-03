@@ -1,3 +1,7 @@
+## TODO
+## should newdata be called new_data? is this the tidymodels convention
+
+
 ##' Mean survival time
 ##'
 ##' @inheritParams print.survextrap
@@ -275,4 +279,12 @@ hazard_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter,
     }
     haz_sam <- exp(loghaz_sam)
     haz_sam
+}
+
+deconstruct_mspline <- function(x, scale=1, tmax=NULL){
+  sm <- summary(x)
+  cf <- sm[sm$variable=="coefs", ]$median
+  scale <- exp(sm[sm$variable=="alpha", ]$median)
+  bh <- x$basehaz
+  mspline_plotdata(bh$iknots, bh$bknots, bh$df, bh$degree, cf, scale=10, tmax=tmax)
 }

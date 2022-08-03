@@ -250,8 +250,28 @@ summary(curec_mod) %>%
 In this summary,  `pcure` is the probability of cure at a value of 0 for the covariate `x.`
 
 
-# Relative survival 
+## Relative survival models
 
-Not implemented yet.  Could easily support a constant background hazard in a conventional additive hazard model.  
+To implement the standard "additive hazards" model for relative survival, the background hazard can be supplied as a fixed constant alongside the data.     The model used is a variant of the model by [Nelson et al](https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.3064) and should give similar results.  The only difference is that the model in `survextrap` is Bayesian, and a different kind of spline is used.
 
-Could also use the proportional hazards model, as above, supplying background survival as external count data and estimating the hazard ratio.
+As an example, suppose the background hazard is 0.05 at all times.  This is appended to the data as an extra column.  The name of this column is supplied (unquoted) as the `backhaz` argument to `survextrap`.
+
+```{r,results="hide"}
+colonsb <- colons
+colonsb$bh <- rep(0.05, nrow(colons))
+modb <- survextrap(Surv(years, status) ~ 1, data=colonsb, backhaz=bh, chains=1)
+```
+
+The parameter estimates in the fitted model, and the fitted survival or hazard, then describe the excess hazard for the study population.  That is, the overall hazard minus the background hazard.  
+
+In the example below, the excess hazard from the relative hazard model (with constant background 0.05) is shown in blue below the fitted overall hazard from a model with no background adjustment.  As expected, the excess hazard is around 0.05 less than the overall hazard.
+
+```{r,results="hide"}
+mod <- survextrap(Surv(years, status) ~ 1, data=colonsb, chains=1)
+library(ggplot2)
+plot_hazard(mod) + 
+    geom_line(data=hazard(modb), col="blue")
+```
+
+
+An alternative approach to modelling a study population and a background population in `survextrap` would be to estimate the background hazard from external aggregate data supplied as an `external` argument.   If a binary covariate is included which takes a different value between the external data and the study data, then the hazards would be assumed to be proportional between the study population and external population.   The advantage of this approach would be that it could account for uncertainty about the background hazard.   However the assumption of proportional hazards is restrictive.   If the background hazard is not uncertain, then the relative survival model would be preferable, as the excess hazard is modelled flexibly. 

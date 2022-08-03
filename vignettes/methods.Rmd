@@ -50,12 +50,12 @@ library(survextrap)
 library(ggplot2)
 p_naive <- rep(1/13, 13)
 p_const <- mspline_uniform_weights(iknots=1:9, bknots=c(0,10))
-haz_unif <- plot_mspline(df=13, scale=10, coefs = p_const, plot=FALSE)$hazard 
+haz_unif <- mspline_plotdata(df=13, scale=10, coefs = p_const)
 plot_mspline(df=13, scale=10, coefs = p_naive, tmax=10) + 
     geom_line(aes(x=time, y=haz), data=haz_unif, color="red", lwd=1.5, inherit.aes = FALSE) + 
     annotate(geom="text", x=2, y=1.5, color="red", label="h(t): weights `p_const`") +
     annotate(geom="text", x=1.5, y=2.5, color="blue", label="h(t): weights `p_naive`") + 
-    xlab("Time t") + ylab("Hazard rate") + ylim(0,3) 
+    xlab("Time t") + ylab("Hazard rate")
 ```
 
 

@@ -88,6 +88,25 @@ test_that("Non-standard model formulae",{
     survextrap(Surv(t, status) ~ 1, data=curedata, cure=~splines::bs(x), fit_method="opt")
 })
 
+test_that("Relative survival",{
+    colonse <- colons
+    colonse$bh <- rep(0.01, nrow(colons))
+    mod1 <- survextrap(Surv(years, status) ~ 1, data=colonse, backhaz=bh, fit_method="opt")
+    colonse$bh <- rep(0.02, nrow(colons))
+    mod2 <- survextrap(Surv(years, status) ~ 1, data=colonse, backhaz=bh, fit_method="opt")
+    expect_lt(coef(mod2)["alpha"], coef(mod1)["alpha"])
+
+    ext <- data.frame(start=5, stop=10, n=30, r=5,
+                      backsurv_start = 0.4, backsurv_stop = 0.3)
+    mod1 <- survextrap(Surv(years, status) ~ 1, data=colonse, external=ext, backhaz=bh, fit_method = "opt")
+
+    ext <- data.frame(start=5, stop=10, n=30, r=10,
+                      backsurv_start = 0.4, backsurv_stop = 0.3)
+    mod2 <- survextrap(Surv(years, status) ~ 1, data=colonse, external=ext, backhaz=bh, fit_method = "opt")
+    expect_lt(coef(mod2)["alpha"], coef(mod1)["alpha"])
+})
+
+
 ## TODO test error handling for if wrong covariate names supplied in newdata
 ## And a lot more errors
 

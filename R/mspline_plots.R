@@ -11,7 +11,7 @@
 #' @param tmin Minimum plotting time.  Defaults to lower boundary knot.
 #'
 #' @param tmax Maximum plotting time.  Defaults to upper boundary knot.
-#' 
+#'
 #' @param degree Spline polynomial degree.
 #'
 #' @param df Desired number of basis terms, or "degrees of freedom" in the spline.
@@ -39,7 +39,7 @@ mspline_plotsetup <- function(iknots, bknots=c(0,10),
         timeb[timeb>bknots[2]] <- bknots[2]
         timeb[timeb<bknots[1]] <- bknots[1]
     }
-    ## could also use basis_matrix for this, but allow alternative extrapolation method 
+    ## could also use basis_matrix for this, but allow alternative extrapolation method
     basis <- splines2::mSpline(timeb, knots = iknots, Boundary.knots = bknots,
                                degree = degree, intercept = TRUE)
     nlist(time, basis, iknots, bknots)
@@ -61,9 +61,31 @@ mspline_sum_basis <- function(basis, coefs=NULL, scale=1, time) {
 
 #' Plot a M-spline function, showing how it is built up from its basis
 #'
+#' @inheritParams mspline_plotdata
+#'
+#' @export
+plot_mspline <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs=NULL, scale=1,
+                         tmin=0, tmax=10){
+  haz <- term <- value <- NULL
+    bdf <- mspline_plotdata(iknots=iknots, bknots=bknots, df=df, degree=degree, coefs=coefs,
+                            scale=scale, tmin=tmin, tmax=tmax)
+    knots <- c(attr(bdf,"iknots"), attr(bdf,"bknots"))
+    ggplot(bdf, aes(x=time, y=value, group=term)) +
+        geom_line() +
+        geom_line(aes(x=time, y=haz), col="blue", inherit.aes = FALSE, lwd=1.5) +
+        xlab("") +
+        ylab("") +
+        theme_minimal() +
+        theme(panel.grid.minor = element_blank()) +
+        scale_x_continuous(breaks=knots, limits=range(knots)) +
+        scale_y_continuous(breaks=knots, limits=c(0, max(c(bdf$value, bdf$haz)))) +
+        geom_vline(xintercept=knots, col="blue", lwd=0.6, alpha=0.3)
+}
+
+#' Data for plotting an M-spline function, showing how it is built up from its basis
 #'
 #' @inheritParams mspline_plotsetup
-#' 
+#'
 #' @param coefs Coefficients of the spline basis terms.  These are normalised internally to sum to 1,
 #' if they do not already sum to 1.
 #'
@@ -71,13 +93,9 @@ mspline_sum_basis <- function(basis, coefs=NULL, scale=1, time) {
 #' terms, the function is multiplied by \code{scale}.   The log of the scale is the parameter called
 #' \code{alpha} in the results of a `survextrap` model, the intercept of the linear model on the log hazard.
 #'
-#' @param plot If \code{TRUE} then a `ggplot2` plot object is returned.  If \code{FALSE} then the
-#' underlying data are returned and no plot is done.
-#'
 #' @export
-plot_mspline <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs=NULL, scale=1, 
-                         tmin=0, tmax=10, plot=TRUE){
-
+mspline_plotdata <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs=NULL, scale=1,
+                             tmin=0, tmax=10){
     value <- term <- haz <- NULL
     s <- mspline_plotsetup(iknots=iknots, bknots=bknots, tmin=tmin, tmax=tmax, degree=degree, df=df)
     time <- s$time; basis <- s$basis
@@ -88,19 +106,10 @@ plot_mspline <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs=NUL
     bdf <- as.data.frame(basis) %>%
         cbind(time=time) %>%
         pivot_longer(cols=all_of(1:ncol(basis)), names_to="term") %>%
-        left_join(hazdf, by="time")
-
-    if (plot)
-        ggplot(bdf, aes(x=time, y=value, group=term)) +
-            geom_line() +
-            geom_line(data=hazdf, aes(x=time, y=haz), col="blue", inherit.aes = FALSE, lwd=1.5) +
-            xlab("") +
-            ylab("") +
-            theme_minimal() +
-            theme(panel.grid.minor = element_blank()) +
-            scale_x_continuous(breaks=c(s$iknots, s$bknots)) +
-            geom_vline(xintercept=c(s$iknots, s$bknots), col="blue", lwd=0.6, alpha=0.3)
-    else list(basis=bdf, hazard=hazdf)
+      left_join(hazdf, by="time")
+    attr(bdf,"iknots") <- s$iknots
+    attr(bdf,"bknots") <- s$bknots
+    bdf
 }
 
 
@@ -142,7 +151,7 @@ mspline_priorpred_df <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3,
 ##' Generate a sample from the prior distribution of M-spline hazard curves implied by
 ##' a particular mean and variance for the baseline curve and scale parameter.
 ##'
-##' See `vignette("methods")` for more information on this model. 
+##' See `vignette("methods")` for more information on this model.
 ##'
 ##' @inheritParams mspline_plotsetup
 ##'
@@ -191,7 +200,7 @@ plot_mspline_priorpred <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3,
 ##' variance between log hazard values at different time points.
 ##' It is used in \code{\link{survextrap}} to choose the default prior mean
 ##' for the hazard function.
-##' 
+##'
 ##' @param iknots Internal knots.
 ##'
 ##' @param bknots Boundary knots.

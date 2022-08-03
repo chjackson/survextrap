@@ -48,8 +48,8 @@
 #' "Baseline" is defined
 #'   by the continuous covariates taking a value of zero and factor covariates taking their
 #'   reference level.  To use a different baseline, the data should be transformed
-#'   appropriately beforehand, so that a value of zero has a different meaning. 
-#' 
+#'   appropriately beforehand, so that a value of zero has a different meaning.
+#'
 #' For continuous covariates, it helps for both computation and interpretation to define the value of zero to
 #' denote a typical value in the data, e.g. the mean.
 #'
@@ -73,6 +73,16 @@
 #' @param prior_logor_cure Priors for log odds ratios on cure probabilities.
 #'   This should be a call to `p_normal()` or `p_t`.  The default is
 #'   `p_normal(0,2.5)`.
+#'
+#' @param backhaz Name of a variable in the data giving the background hazard
+#' in relative survival models.  For censored cases the exact value does not matter.
+#' The parameter estimates and any other results for these models will then describe
+#' the excess hazard or survival on top of this background.
+#'
+#' If there is external data and `backhaz` is supplied, then the user should also supply the background
+#' survival at the start and stop points in columns of the external data named `"backsurv_start"` and
+#' `"backsurv_stop"`.  This should describe same reference population
+#' as `backhaz`, though the package does not check for consistency between these.
 #'
 #' @param basehaz_ops A list of control parameters defining the spline model.
 #'
@@ -136,6 +146,7 @@ survextrap <- function(formula,
                        prior_smooth = p_gamma(2,1),
                        prior_cure = p_beta(1,1),
                        prior_logor_cure = NULL,
+                       backhaz = NULL,
                        basehaz_ops = NULL,
                        modelid = "mspline",
                        fit_method = "mcmc",
@@ -143,6 +154,8 @@ survextrap <- function(formula,
                        ...)
 {
     mf <- stats::model.frame(terms(formula), data)
+    backhaz <- eval(substitute(backhaz), data, parent.frame())
+    relative <- !is.null(backhaz)
     t_beg <- make_t(mf, type = "beg") # entry time
     t_end <- make_t(mf, type = "end") # exit  time
     t_upp <- make_t(mf, type = "upp") # upper time for interval censoring [ not implemented yet ]
@@ -172,7 +185,7 @@ survextrap <- function(formula,
     if (is.infinite(log_crude_event_rate))
         log_crude_event_rate <- 0 # avoids error when there are zero events
 
-    external <- parse_external(external, formula, x, xcure, cure_formula)
+    external <- parse_external(external, formula, x, xcure, cure_formula, relative)
     t_ext_stop <- aa(external$stop)
     t_ext_start <- aa(external$start)
     r_ext <- aa(external$r)
@@ -219,6 +232,10 @@ survextrap <- function(formula,
     ibasis_ext_stop <- if (nextern>0) make_basis(t_ext_stop, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
     ibasis_ext_start <- if (nextern>0) make_basis(t_ext_start, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
 
+    backhaz_event <- if (relative) aa(backhaz[ind_event]) else aa(numeric(nevent))
+    backsurv_ext_stop <- aa(external$backsurv_stop)
+    backsurv_ext_start <- aa(external$backsurv_start)
+
     priors <- get_priors(prior_loghaz, prior_loghr, prior_smooth, prior_cure, prior_logor_cure,
                          x, xcure, est_smooth)
 
@@ -232,6 +249,8 @@ survextrap <- function(formula,
                       beta_mean,
                       est_smooth,
                       cure,
+                      relative, backhaz_event,
+                      backsurv_ext_stop, backsurv_ext_start,
                       prior_loghaz_dist = priors$loghaz$distid,
                       prior_loghaz = as.numeric(unlist(priors$loghaz[c("location","scale","df")])),
                       prior_loghr_dist = aa(priors$loghr$distid),
@@ -438,31 +457,63 @@ make_d <- function(model_frame) {
          stop(err))
 }
 
-parse_external <- function(external, formula, x, xcure, cure_formula){
-    ## TODO validate here.
-    if (is.null(external))
-        extl <- list(nextern=0, stop=numeric(), start=numeric(),
-                     r=integer(), n=integer(), tmax=0)
-    else {
-        extl <- c(as.list(external), nextern=nrow(external),
-                  tmax=max(external$stop))
-        if (x$ncovs>0){
-            form <- delete.response(terms(formula))
-            X <- model.matrix(form, external, xlev = x$xlevs)
-            X <- drop_intercept(X)
-        }
-        if (xcure$ncovs>0){
-            form <- delete.response(terms(cure_formula))
-            Xcure <- model.matrix(form, external, xlev = xcure$xlevs)
-            Xcure <- drop_intercept(Xcure)
-        }
+parse_external <- function(external, formula, x, xcure, cure_formula, relative=FALSE){
+  if (is.null(external))
+    extl <- list(nextern=0, stop=numeric(), start=numeric(), 
+                 r=integer(), n=integer(),
+                 backsurv_stop=numeric(), backsurv_start=numeric(),
+                 tmax=0)
+  else {
+    validate_external(external, x, xcure, relative)
+    extl <- c(as.list(external), nextern=nrow(external),
+              tmax=max(external$stop))
+    if (!relative) {
+      extl$backsurv_stop <- extl$backsurv_start <- rep(1, extl$nextern)
     }
-    if ((extl$nextern==0) || (x$ncovs==0))
-        X <- array(dim=c(extl$nextern, x$ncovs))
-    if ((extl$nextern==0) || (xcure$ncovs==0))
-        Xcure <- array(dim=c(extl$nextern, xcure$ncovs))
-    extl <- c(extl, nlist(X), nlist(Xcure))
-    extl
+    if (x$ncovs>0){
+      form <- delete.response(terms(formula))
+      X <- model.matrix(form, external, xlev = x$xlevs)
+      X <- drop_intercept(X)
+    }
+    if (xcure$ncovs>0){
+      form <- delete.response(terms(cure_formula))
+      Xcure <- model.matrix(form, external, xlev = xcure$xlevs)
+      Xcure <- drop_intercept(Xcure)
+    }
+  }
+  if ((extl$nextern==0) || (x$ncovs==0))
+    X <- array(dim=c(extl$nextern, x$ncovs))
+  if ((extl$nextern==0) || (xcure$ncovs==0))
+    Xcure <- array(dim=c(extl$nextern, xcure$ncovs))
+  extl <- c(extl, nlist(X), nlist(Xcure))
+  extl
+}
+
+validate_external <- function(external, x, xcure, relative=FALSE){
+  reqd_cols <- c("start","stop","r","n")
+  missing_cols <- setdiff(reqd_cols, names(external))
+  if (length(missing_cols) > 0) {
+    mstr <- paste(paste0("\"",missing_cols,"\"", collapse=","))
+    plural <- if (length(missing_cols) > 1) "s" else ""
+    stop(sprintf("Column%s %s not found in `external`",plural,mstr))
+  }
+  covnames <- union(names(x$mfbase), names(xcure$mfbase))
+  missing_cols <- setdiff(covnames, names(external))
+  if (length(missing_cols) > 0) {
+      mstr <- paste(paste0("\"",missing_cols,"\"", collapse=","))
+      plural <- if (length(missing_cols) > 1) "s" else ""
+      stop(sprintf("Covariate%s %s not found in `external`",plural,mstr))
+  }
+  if (relative) {
+    reqd_cols <- c("backsurv_start","backsurv_stop")
+    missing_cols <- setdiff(reqd_cols, names(external))
+    if (length(missing_cols) > 0) {
+      mstr <- paste(paste0("\"",missing_cols,"\"", collapse=","))
+      plural <- if (length(missing_cols) > 1) "s" else ""
+      stop(sprintf("Column%s %s not found in `external`. These are required for relative survival models.",
+                   plural,mstr))
+    }
+  }
 }
 
 make_basis <- function(times, basehaz, integrate = FALSE) {

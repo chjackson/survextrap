@@ -7,7 +7,7 @@
 \description{
 For an intro and overview of the \code{survextrap} package, see
 
-\code{\url{https://chjackson.github.io/survextrap}}
+\url{https://chjackson.github.io/survextrap}
 }
 \references{
 Stan Development Team (NA). RStan: the R interface to Stan. R package version 2.26.11. https://mc-stan.org

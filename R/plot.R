@@ -15,7 +15,8 @@
 ##'
 ##' @export
 plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
-                        ci=NULL, xlab="Time", ylab="Hazard", line_size=1.5, ci_alpha=0.2){
+                        ci=NULL, xlab="Time", ylab="Hazard",
+                        line_size=1.5, ci_alpha=0.2){
     lower <- upper <- NULL # TODO do strings work
     newdata <- default_newdata(x, newdata)
     haz <- hazard(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
@@ -30,7 +31,7 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
         geom_ylab + geom_xlab +
         theme_minimal() +
         theme(panel.grid.minor = element_blank()) +
-        geom_vline(xintercept=knots, col="blue", lwd=0.6, alpha=0.3) +
+        geom_vline(xintercept=knots, col="blue", lwd=0.4*line_size, alpha=0.3) +
         geom_line(size=line_size)
     if (is.null(ci)) ci <- (attr(haz,"nvals")==1)
     if (ci)
@@ -56,7 +57,8 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
 ##'
 ##' @export
 plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter=NULL,
-                          ci=NULL, xlab="Time", ylab="Survival", line_size=1.5, ci_alpha=0.2){
+                          ci=NULL, xlab="Time", ylab="Survival",
+                          line_size=1.5, ci_alpha=0.2){
     lower <- upper <- NULL
     if (is.null(km)) km <- one_factor_cov(x)
     newdata <- default_newdata(x, newdata)
@@ -73,7 +75,7 @@ plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter
         geom_ylab + geom_xlab +
         theme_minimal() +
         theme(panel.grid.minor = element_blank()) +
-        geom_vline(xintercept=knots, col="blue", lwd=0.6, alpha=0.3) +
+        geom_vline(xintercept=knots, col="blue", lwd=0.4*line_size, alpha=0.3) +
         geom_step(size=line_size)
     if (is.null(ci)) ci <- (attr(surv,"nvals")==1)
     if (ci)

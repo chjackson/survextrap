@@ -67,6 +67,7 @@
 <span>  prior_smooth <span class="op">=</span> <span class="fu"><a href="priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  prior_cure <span class="op">=</span> <span class="fu"><a href="priors.html">p_beta</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  prior_logor_cure <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  basehaz_ops <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  modelid <span class="op">=</span> <span class="st">"mspline"</span>,</span>
 <span>  fit_method <span class="op">=</span> <span class="st">"mcmc"</span>,</span>
@@ -155,6 +156,17 @@ level of factor covariates.</p></dd>
 <dd><p>Priors for log odds ratios on cure probabilities.
 This should be a call to <code><a href="priors.html">p_normal()</a></code> or <code>p_t</code>.  The default is
 <code>p_normal(0,2.5)</code>.</p></dd>
+
+
+<dt>backhaz</dt>
+<dd><p>Name of a variable in the data giving the background hazard
+in relative survival models.  For censored cases the exact value does not matter.
+The parameter estimates and any other results for these models will then describe
+the excess hazard or survival on top of this background.</p>
+<p>If there is external data and <code>backhaz</code> is supplied, then the user should also supply the background
+survival at the start and stop points in columns of the external data named <code>"backsurv_start"</code> and
+<code>"backsurv_stop"</code>.  This should describe same reference population
+as <code>backhaz</code>, though the package does not check for consistency between these.</p></dd>
 
 
 <dt>basehaz_ops</dt>

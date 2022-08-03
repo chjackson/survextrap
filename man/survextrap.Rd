@@ -16,6 +16,7 @@ survextrap(
   prior_smooth = p_gamma(2, 1),
   prior_cure = p_beta(1, 1),
   prior_logor_cure = NULL,
+  backhaz = NULL,
   basehaz_ops = NULL,
   modelid = "mspline",
   fit_method = "mcmc",
@@ -93,6 +94,16 @@ level of factor covariates.}
 \item{prior_logor_cure}{Priors for log odds ratios on cure probabilities.
 This should be a call to \code{p_normal()} or \code{p_t}.  The default is
 \code{p_normal(0,2.5)}.}
+
+\item{backhaz}{Name of a variable in the data giving the background hazard
+in relative survival models.  For censored cases the exact value does not matter.
+The parameter estimates and any other results for these models will then describe
+the excess hazard or survival on top of this background.
+
+If there is external data and \code{backhaz} is supplied, then the user should also supply the background
+survival at the start and stop points in columns of the external data named \code{"backsurv_start"} and
+\code{"backsurv_stop"}.  This should describe same reference population
+as \code{backhaz}, though the package does not check for consistency between these.}
 
 \item{basehaz_ops}{A list of control parameters defining the spline model.
 

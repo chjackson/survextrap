@@ -1,3 +1,5 @@
+## TODO indicate data used in print output, eg whether external 
+
 ##' Print a fitted survextrap model
 ##'
 ##' @param x A fitted model object as returned by \code{\link{survextrap}}

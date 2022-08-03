@@ -83,19 +83,15 @@ The package is in active development.  It can currently fit a large range of use
 
 Major things to do are:
 
-* Relative survival / additive hazards models.
-	- Will be easy to implement the typical model with a fixed known background hazard as additive offset to a flexibly modelled excess hazard.
-	- Any interest in situations where background is uncertain, e.g. as modelled external data with a different hazard from the trial data?  Package can already express this as a proportional hazards model, but what about additive hazards models, or time-varying hazard ratios or differences?
-
-* Thoughtful default priors for hazard changes without external data, e.g. in terms of orders of magnitude.
-
-* Better thought-out knot choice, particularly with external data.
+* Thoughtful default priors for hazard changes without external data, e.g. in terms of orders of magnitude.  Better thought-out knot choice, particularly with external data.  Empirical work to show the impact of priors and knot choice.
 
 * More experience and examples of using it with real external data, including a vignette that lists how to implement all previously-suggested approaches for extrapolation with external data.
 
-* Explain relation to dynamic GLMs as used by [Kearns et al](https://doi.org/10.1177%2F0272989X19873661) and related papers. Can "random walk" principles used in their dynamic model inspire a sensible prior for hazard changes?
+* Recommendations for how to use cure and relative survival together, and consider whether these need to be extended.  For example, uncertainty in the background hazard, with non-proportional hazards with study population (additive or more flexible?)
 
 * Non-proportional hazards models.  This is expected to be computationally difficult, and I'm not sure of the best approach.  Would it be easier in the GLM formulation (at the cost of a discrete-time approximation)?
+
+* Explain relation to dynamic GLMs as used by [Kearns et al](https://doi.org/10.1177%2F0272989X19873661) and related papers. Can "random walk" principles used in their dynamic model inspire a sensible prior for hazard changes?
 
 * Thorough testing, documentation and error handling.
 

@@ -175,18 +175,11 @@ etc…
 <p>The package is in active development. It can currently fit a large range of useful models, but it is not finished and is subject to be changed without warning.</p>
 <p>Major things to do are:</p>
 <ul>
-<li>
-<p>Relative survival / additive hazards models.</p>
-<ul>
-<li>Will be easy to implement the typical model with a fixed known background hazard as additive offset to a flexibly modelled excess hazard.</li>
-<li>Any interest in situations where background is uncertain, e.g. as modelled external data with a different hazard from the trial data? Package can already express this as a proportional hazards model, but what about additive hazards models, or time-varying hazard ratios or differences?</li>
-</ul>
-</li>
-<li><p>Thoughtful default priors for hazard changes without external data, e.g. in terms of orders of magnitude.</p></li>
-<li><p>Better thought-out knot choice, particularly with external data.</p></li>
+<li><p>Thoughtful default priors for hazard changes without external data, e.g. in terms of orders of magnitude. Better thought-out knot choice, particularly with external data. Empirical work to show the impact of priors and knot choice.</p></li>
 <li><p>More experience and examples of using it with real external data, including a vignette that lists how to implement all previously-suggested approaches for extrapolation with external data.</p></li>
-<li><p>Explain relation to dynamic GLMs as used by <a href="https://doi.org/10.1177%2F0272989X19873661" class="external-link">Kearns et al</a> and related papers. Can “random walk” principles used in their dynamic model inspire a sensible prior for hazard changes?</p></li>
+<li><p>Recommendations for how to use cure and relative survival together, and consider whether these need to be extended. For example, uncertainty in the background hazard, with non-proportional hazards with study population (additive or more flexible?)</p></li>
 <li><p>Non-proportional hazards models. This is expected to be computationally difficult, and I’m not sure of the best approach. Would it be easier in the GLM formulation (at the cost of a discrete-time approximation)?</p></li>
+<li><p>Explain relation to dynamic GLMs as used by <a href="https://doi.org/10.1177%2F0272989X19873661" class="external-link">Kearns et al</a> and related papers. Can “random walk” principles used in their dynamic model inspire a sensible prior for hazard changes?</p></li>
 <li><p>Thorough testing, documentation and error handling.</p></li>
 </ul>
 <p>If you want to try it out - feel free to install the development version as:</p>

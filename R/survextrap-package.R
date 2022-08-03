@@ -2,7 +2,7 @@
 #'
 #' @description For an intro and overview of the `survextrap` package, see
 #'
-#' \code{\url{https://chjackson.github.io/survextrap}}
+#' \url{https://chjackson.github.io/survextrap}
 #' 
 #' @docType package
 #' @name survextrap-package
