@@ -58,7 +58,7 @@ The package has been developed under the expectation that many forms of external
 
 * A proportional hazards model or a flexible non-proportional hazards model can be used to describe the relation of survival to predictors. 
 
-* Mixture cure models are supported.
+* Mixture cure and relative survival models are supported.
 
 * It has an R interface, designed to be friendly to those familiar with standard R modelling functions.
 
