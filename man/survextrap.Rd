@@ -2,7 +2,7 @@
 % Please edit documentation in R/survextrap.R
 \name{survextrap}
 \alias{survextrap}
-\title{survextrap}
+\title{Flexible Bayesian parametric survival models}
 \usage{
 survextrap(
   formula,
@@ -11,11 +11,13 @@ survextrap(
   smooth_sd = "bayes",
   coefs_mean = NULL,
   cure = FALSE,
+  nonprop = FALSE,
   prior_loghaz = p_normal(0, 20),
   prior_loghr = NULL,
   prior_smooth = p_gamma(2, 1),
   prior_cure = p_beta(1, 1),
   prior_logor_cure = NULL,
+  prior_sdnp = p_gamma(2, 1),
   backhaz = NULL,
   basehaz_ops = NULL,
   modelid = "mspline",
@@ -56,9 +58,16 @@ about conditional survival}
 Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number.}
 
 \item{coefs_mean}{Spline basis coefficients that define the prior mean for the hazard function. By
-default, these are set to values that define a constant hazard function.}
+default, these are set to values that define a constant hazard function.  They are normalised to
+sum to 1 internally (if they do not already).}
 
 \item{cure}{If \code{TRUE}, a mixture cure model is used.}
+
+\item{nonprop}{If \code{TRUE} then a non-proportional hazards model is fitted.
+This is achieved by modelling the spline basis weights in terms of the covariates.  See
+the "methods" vignette for more details.   In models with multiple covariates, currently
+there is no way to assume that some covariates have proportional hazards but others don't -
+it is all or none.}
 
 \item{prior_loghaz}{Prior for the baseline log hazard.
 This should be a call to a prior constructor function, such as
@@ -75,12 +84,12 @@ For continuous covariates, it helps for both computation and interpretation to d
 denote a typical value in the data, e.g. the mean.}
 
 \item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
-\code{normal()} or \code{student_t}.  A list of calls can also be provided, to give
+\code{p_normal()} or \code{p_t()}.  A list of calls can also be provided, to give
 different priors to different coefficients, where the name
 of each list component matches the name of the coefficient, e.g.
 list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3)).
 
-The default is \code{normal(0,2.5)} for all coefficients.}
+The default is \code{p_normal(0,2.5)} for all coefficients.}
 
 \item{prior_smooth}{Gamma prior for the smoothing standard deviation, in
 models where this is estimated.  This should be a call to \code{p_gamma()}.  The
@@ -92,8 +101,12 @@ Baseline is defined by the mean of continuous covariates and the reference
 level of factor covariates.}
 
 \item{prior_logor_cure}{Priors for log odds ratios on cure probabilities.
-This should be a call to \code{p_normal()} or \code{p_t}.  The default is
+This should be a call to \code{p_normal()} or \code{p_t()}.  The default is
 \code{p_normal(0,2.5)}.}
+
+\item{prior_sdnp}{Prior for the standard deviation parameters that smooth the non-proportionality
+effects over time in non-proportional hazards models.  This should be a call to \code{p_gamma()}
+or a list of calls to \code{p_gamma()} with one component per covariate, as in \code{prior_loghr}.}
 
 \item{backhaz}{Name of a variable in the data giving the background hazard
 in relative survival models.  For censored cases the exact value does not matter.
@@ -125,8 +138,9 @@ the prior.
 
 \item{modelid}{\code{"mspline"} for the default M-spline model.
 
-Only current alternative is \code{"weibull"} for a Weibull accelerated failure time model.
-Just included for the purpose of package testing. Not fully tested, and not recommended for use in
+The only current alternative is \code{"weibull"} for a Weibull accelerated failure time model.
+This is just included for the purpose of package testing.  It is not fully implemented, and is
+not recommended for use in
 practice for survival extrapolation.}
 
 \item{fit_method}{Method from \pkg{rstan} used to fit the model.  Defaults to MCMC.
@@ -147,13 +161,16 @@ If \code{fit_method="vb"}, then variational Bayes methods are used, via \pkg{rst
 than \code{fit_method="opt"}, but has not been investigated in depth for these models.}
 
 \item{loo}{Compute leave-one-out cross-validation statistics.  This is done by default. Set to
-\code{FALSE} to save a bit of run time.
+\code{FALSE} to not compute them.
 If these statistics are computed, then they are returned in the \code{loo} component of the
-object returned by \code{survextrap}.}
+object returned by \code{survextrap}.  See the \code{"examples"} vignette for some explanation
+of these.}
 
 \item{...}{Additional arguments to supply to control the Stan fit, passed to the appropriate
 \pkg{rstan} function, depending on which is chosen through the \code{fit_method} argument.}
 }
 \description{
-survextrap
+Flexible Bayesian parametric survival models.  Individual data are represented using M-splines
+and a proportional hazards or flexible non-proportional hazards model.   Extrapolations
+can be enhanced by including external aggregate data.
 }

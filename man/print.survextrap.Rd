@@ -9,7 +9,9 @@
 \arguments{
 \item{x}{A fitted model object as returned by \code{\link{survextrap}}}
 
-\item{...}{Other arguments (currently unused).}
+\item{...}{Other arguments (currently unused).
+
+This currently prints a statement of the fitted model, the prior distributions, and a table of summary statistics of the posterior distributions of the model parameters.  For descriptions of the parameters in this summary table, see \code{\link{summary.survextrap}}.}
 }
 \description{
 Print a fitted survextrap model

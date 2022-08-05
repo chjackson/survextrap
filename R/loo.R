@@ -14,6 +14,9 @@ loo_survextrap <- function(x, standata){
 
 loglik_ipd <- function(x, standata){
     pars <- get_pars(x, newdata=NULL)
+    coefs_event <- get_coefs_bycovs(x, get_draws(x), X=standata$x_event)
+    coefs_rcens <- get_coefs_bycovs(x, get_draws(x), X=standata$x_rcens)
+
     if (standata$ncovs>0){
         if (standata$nevent > 0) eta_event <- pars$loghr %*% t(standata$x_event)
         if (standata$nrcens > 0) eta_rcens <- pars$loghr %*% t(standata$x_rcens)
@@ -30,10 +33,10 @@ loglik_ipd <- function(x, standata){
     eta_rcens <- unclass(eta_rcens)
     pcure <- as.numeric(pars$pcure)
     ll_event <- log_dens(eta_event,  standata$basis_event,
-                         pars$coefs, standata$cure, pcure,
+                         coefs_event, standata$cure, pcure,
                          standata$ibasis_event, standata$modelid)
     ll_rcens <- log_surv(eta_rcens, standata$ibasis_rcens,
-                         pars$coefs, standata$cure, pcure,
+                         coefs_rcens, standata$cure, pcure,
                          standata$modelid)
     cbind(ll_event, ll_rcens)
 }
@@ -43,12 +46,22 @@ log_dens <- function(eta, basis, coefs, cure, pcure, ibasis, modelid){
         log_surv(eta, ibasis, coefs, cure, pcure, modelid)
 }
 
-mspline_log_surv <- function(eta, ibasis, coefs) {
-    - (coefs %*% t(ibasis)) * exp(eta);
+mspline_log_surv <- function(eta,
+                             ibasis, # nobs x df
+                             coefs # niter x nobs x df
+                             ) {
+    ibasis_arr <- array(ibasis, dim=c(1, dim(ibasis)))[rep(1,dim(coefs)[1]),,] # niter x nobs x df
+    coefs_x_ibasis <- apply(coefs * ibasis_arr, c(1,2), sum)
+    - (coefs_x_ibasis) * exp(eta) # niter x nobs
 }
 
-mspline_log_haz <- function(eta, basis, coefs) {
-    log(coefs %*% t(basis)) + eta
+mspline_log_haz <- function(eta,
+                            basis, # nobs x df
+                            coefs # niter x nobs x df
+                            ) {
+    basis_arr <- array(basis, dim=c(1, dim(basis)))[rep(1,dim(coefs)[1]),,] # niter x nobs x df
+    coefs_x_basis <- apply(coefs * basis_arr, c(1,2), sum)
+    log(coefs_x_basis) + eta # niter x nobs
 }
 
 log_haz <- function(eta, basis, coefs, cure, pcure, ibasis, modelid){

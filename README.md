@@ -54,9 +54,9 @@ The package has been developed under the expectation that many forms of external
 
 * Bayesian multiparameter evidence synthesis is used to jointly model all sources of data and judgements.
 
-* An M-spline is used to represent how the hazard changes through time (as in [rstanarm](https://arxiv.org/abs/2002.09633)).  The Bayesian fitting method automatically chooses the optimal level of smoothness and flexibility.  Spline "knots" should span the period covered by the data, and any future period where there is a chance that the hazard may vary.
+* An M-spline is used to represent how the hazard changes through time (as in [rstanarm](https://arxiv.org/abs/2002.09633)).  The Bayesian fitting method automatically chooses the optimal level of smoothness and flexibility.  Spline "knots" should span the period covered by the data, and any future period where there is a chance that the hazard may vary.  Then if there is no data in the future period, the uncertainty will be acknowledged and the predicted hazards will have wide credible intervals.
 
-* A proportional hazards model is used to describe the relation of survival to predictors. 
+* A proportional hazards model or a flexible non-proportional hazards model can be used to describe the relation of survival to predictors. 
 
 * Mixture cure models are supported.
 
@@ -88,8 +88,6 @@ Major things to do are:
 * More experience and examples of using it with real external data, including a vignette that lists how to implement all previously-suggested approaches for extrapolation with external data.
 
 * Recommendations for how to use cure and relative survival together, and consider whether these need to be extended.  For example, uncertainty in the background hazard, with non-proportional hazards with study population (additive or more flexible?)
-
-* Non-proportional hazards models.  This is expected to be computationally difficult, and I'm not sure of the best approach.  Would it be easier in the GLM formulation (at the cost of a discrete-time approximation)?
 
 * Explain relation to dynamic GLMs as used by [Kearns et al](https://doi.org/10.1177%2F0272989X19873661) and related papers. Can "random walk" principles used in their dynamic model inspire a sensible prior for hazard changes?
 

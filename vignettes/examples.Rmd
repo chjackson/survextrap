@@ -23,7 +23,7 @@ knitr::opts_chunk$set(eval=TRUE, message=FALSE, warning=FALSE)
 
 ```{r,echo=FALSE,message=FALSE}
 rstan::rstan_options(auto_write = TRUE)
-options(mc.cores = parallel::detectCores())
+# options(mc.cores = parallel::detectCores()) # CRAN check limits to 2 cores
 ```
 
 This vignette gives examples of how to run `survextrap` to fit survival models.
@@ -137,7 +137,7 @@ Information about long term survival could be elicited from experts.  To use thi
 
 For example, we ask the expert to consider a set of people who have survived for 10 years.  How many of them would they expect to survive a further 5 years?  Through some kind of formal elicitation process, they supply a best guess (median) of 30%, and a 95\% credible interval of 10\% to 50\%.  
 
-Using standard techniques from elicitation ([SHELF](http://www.jeremy-oakley.staff.shef.ac.uk/shelf/)) we can interpret that as a $Beta(6.6, 15.0)$ prior distribution for the survival probability.  
+Using standard techniques from elicitation ([SHELF](https://shelf.sites.sheffield.ac.uk/)) we can interpret that as a $Beta(6.6, 15.0)$ prior distribution for the survival probability.  
 
 ```{r}
 SHELF::fitdist(vals=c(0.1, 0.3, 0.5), probs=c(0.025, 0.5, 0.975),
@@ -185,7 +185,7 @@ This approach might be extended to include elicited values from multiple time po
 
 ## Covariates
 
-`survextrap` uses a proportional hazards model to represent covariates.    In the example here, we model survival by treatment group `rx`, which is a factor with three levels.  First fit a standard Cox model: 
+`survextrap` uses a proportional hazards model to represent covariates by default.    In the example here, we model survival by treatment group `rx`, which is a factor with three levels.  First fit a standard Cox model: 
 
 ```{r}
 coxph(Surv(years, status) ~ rx, data=colons)
@@ -220,6 +220,45 @@ plot(rxphe_mod, niter=100, tmax=5)
 plot_hazard(rxphe_mod, niter=100, tmax=20)
 ```
 
+
+### Non-proportional hazards model
+
+The flexible non-proportional hazards model described in the [methods vignette](methods.html#nonprop) can be specified with `nonprop=TRUE`.
+
+```{r,results="hide"}
+rxnph_mod <- survextrap(Surv(years, status) ~ rx, data=colons, nonprop=TRUE, chains=1)
+plot(rxnph_mod)
+```
+
+Note the non-constant separation between the posterior median hazard curves from the three treatment groups.
+
+In this example, the sample size in each treatment group and time period is small, so this model is probably overfitted.  While the posterior median survival seems to fit poorly to the Kaplan-Meier estimates in some regions, there is large uncertainty around these estimates that isn't shown in these plots. 
+
+The non-proportional hazards model is experimental. In theory, it can be "tuned" by changing the number of spline basis terms and the knot positions (through the `basehaz_ops` argument to `survextrap`), or by changing the prior on the parameter $\sigma^{(np)}_s$ that controls the smoothness of the departures from proportional hazards (`prior_sdnp` argument).   But this has not been tested much in practice. 
+
+If a plot of the posterior hazard ratio against time is desired, this might be constructed by extracting samples from the posterior of the hazard for different covariate values by using `hazard(..., sample=TRUE)`, converting to samples from the hazard ratio, and then summarising and plotting. 
+
+
+## Model comparison 
+
+The leave-one-out cross-validation method of the [`loo`](http://mc-stan.org/loo/) package is automatically implemented for every model fitted with `survextrap`, unless `survextrap(..., loo=FALSE)` is used.
+
+The cross-validation results are returned in the `loo` component of the fitted model object.  See [the loo vignettes](https://mc-stan.org/loo/articles/loo2-example.html) for some information about how to interpret these.
+
+Roughly, lower values of the `looic` statistic indicate models with better predictive ability.  This is demonstrated here by comparing the proportional hazards model with the non-proportional hazards model.  `looic` is lower for the proportional hazards model, suggesting that the non-proportional hazards model is worse for prediction.  It is likely to be excessively complicated for the data. 
+
+```{r}
+rxph_mod$loo
+```
+
+```{r}
+rxnph_mod$loo
+```
+
+If the warning message `"Some Pareto k diagnostic values are too high"` appears after calling `survextrap`, it was produced by the `loo` package.   The fitted model is still valid, but the cross-validation statistics may not be.  See [the loo vignette] and the references from there for more explanation.  This happens for the non-proportional hazards model here - cross-validation failed for 2 out of the 191 observations in the data.
+
+For models with external data, the cross-validation statistics describe the fit to the individual level ("internal") data.  Therefore, models with and without external data may be compared statistically on the basis of their fit to the individual-level data.  Though a model that does better by this measure is not necessarily better at representing survival outside the period covered by that data. 
+    
 
 
 ## Cure models
@@ -274,4 +313,7 @@ plot_hazard(mod) +
 ```
 
 
-An alternative approach to modelling a study population and a background population in `survextrap` would be to estimate the background hazard from external aggregate data supplied as an `external` argument.   If a binary covariate is included which takes a different value between the external data and the study data, then the hazards would be assumed to be proportional between the study population and external population.   The advantage of this approach would be that it could account for uncertainty about the background hazard.   However the assumption of proportional hazards is restrictive.   If the background hazard is not uncertain, then the relative survival model would be preferable, as the excess hazard is modelled flexibly. 
+An alternative approach to modelling a study population and a background population in `survextrap` would be to estimate the background hazard from external aggregate data supplied as an `external` argument.   A covariate would be included which takes a different value between the external data and the study data.   By default, the hazards would then be assumed to be proportional between the study population and external population.  Proportional hazards would be a restrictive assumption, however.  The flexible nonproportional hazards model might be preferable.
+
+The advantage of this alternative approach would be to account for uncertainty about the background hazard.  If the background hazard is not uncertain, however, then the standard relative survival model would be adequate, as the excess hazard is modelled flexibly.   
+

@@ -1,10 +1,12 @@
-## TODO indicate data used in print output, eg whether external 
+## TODO indicate data used in print output, eg whether external
 
 ##' Print a fitted survextrap model
 ##'
 ##' @param x A fitted model object as returned by \code{\link{survextrap}}
 ##'
 ##' @param ... Other arguments (currently unused).
+##'
+##' This currently prints a statement of the fitted model, the prior distributions, and a table of summary statistics of the posterior distributions of the model parameters.  For descriptions of the parameters in this summary table, see \code{\link{summary.survextrap}}.
 ##'
 ##' @export
 print.survextrap <- function(x, ...){
@@ -55,7 +57,7 @@ print_priors <- function(x){
 
 ##' Posterior summary statistics for parameters of survextrap models
 ##'
-##' The intervals are 95\% credible intervals.
+##' The intervals are 95% credible intervals.
 ##'
 ##' Suggestions for what else to add to this are welcome.  Convergence diagnostics?
 ##' Mode for optim method.  Mean?
@@ -64,19 +66,25 @@ print_priors <- function(x){
 ##'
 ##' @param object A fitted model object as returned by \code{\link{survextrap}}
 ##'
-##' @param ... Other argument (currently unused).
+##' @param ... Other arguments (currently unused).
 ##'
-##' Document meanings of parameters
+##' A data frame of summary statistics for the model parameters is returned.
+##'
+##' The parameters, as indicated in the `variable` column, are:
 ##'
 ##' `alpha`: Average baseline log hazard.  If there are covariates, this describes the
 ##' average hazard with continuous
 ##' covariates set to zero, and factor covariates set
 ##' to their baseline levels.
 ##'
-##' `coefs`: Coefficients of the M-spline basis terms.
+##' `coefs`: Coefficients of the M-spline basis terms.  If a non-proportional hazards model
+##' was fitted, these are with covariates set to zero or baseline levels. 
 ##'
 ##' `loghr`: Log hazard ratios for each covariate in the model. For cure
-##' models, this refers to covariates on survival for uncured people.
+##' models, this refers to covariates on survival for uncured people.  For non-proportional hazards
+##' models, these are the effects of covariates on the scale parameter `eta` and represent
+##' "average" hazard ratios, from which departures are modelled (see the "methods"
+##' vignette for a full description of this model).
 ##'
 ##' `hr`: Hazard ratios (the exponentials of `loghr`).
 ##'
@@ -89,12 +97,15 @@ print_priors <- function(x){
 ##'
 ##' `or_cure`: Odds ratios of cure (the exponentials of `logor_cure`).
 ##'
+##' `nperr`: Standardised departures from proportional hazards in the non-proportional hazards model, defined as \eqn{b^{(np)}_{ks} / \sigma^{(np)}_s} (see the "methods" vignette for definitions of these).
+##'
+##' `sd_np`: Smoothness standard deviations \eqn{\sigma^{(np)}_s} for the non-proportionality effects.
+##'
 ##' @export
 summary.survextrap <- function(object, ...){
-    i <- .value <- .variable <- variable <- term <- .lower <- .upper <- logor_cure <- NULL
+    i <- .value <- .variable <- variable <- term <- .lower <- .upper <- logor_cure <- basis_num <- NULL
     sam <- get_draws(object)
     alpha <- tidybayes::gather_rvars(sam, alpha)
-    coefs <- tidybayes::gather_rvars(sam, coefs[i])
     summ <- alpha %>% mutate(i=NA)
     if (object$cure){
         pcure <- tidybayes::gather_rvars(sam, pcure)
@@ -124,19 +135,31 @@ summary.survextrap <- function(object, ...){
         smooth_sd <- tidybayes::gather_rvars(sam, smooth_sd)
         summ <- summ %>% full_join(smooth_sd, by=c(".variable",".value"))
     }
+    coefs <- tidybayes::gather_rvars(sam, coefs[basis_num])
     summ <- summ %>%
-        full_join(coefs, by=c(".variable",".value","i")) %>%
+      full_join(coefs, by=c(".variable",".value"))
+    if (object$nonprop){
+      nperr <- tidybayes::gather_rvars(sam, nperr[i,basis_num]) %>%
+          mutate(basis_num = basis_num + 1,
+                 term = object$x$xnames[.data$i])
+      sd_np <- tidybayes::gather_rvars(sam, sd_np[i]) %>%
+          mutate(term=object$x$xnames)
+      summ <- summ %>%
+        full_join(nperr, by=c(".variable",".value","term","basis_num")) %>%
+        full_join(sd_np, by=c(".variable",".value","term"))
+    }
+    summ <- summ %>%
         mutate(sd = posterior::sd(.value)) %>%
         tidybayes::median_qi(.value) %>%
         rename(variable=.variable,
                median=.value) %>%
         select(variable, term, median,
-               lower=.lower, upper=.upper, sd, i)
+               lower=.lower, upper=.upper, sd, basis_num)
     if (object$modelid == "weibull"){
         ## TODO should change the parameter names to something more sensible if we
         ## keep the Weibull model in.  Shape, scale, consistently with dweibull
         summ <- summ %>%
-            dplyr::filter(!(variable=="coefs" & i==2))
+            dplyr::filter(!(variable=="coefs" & basis_num==2))
         if (object$ncovs==0) {
             summ <- summ %>% dplyr::select(-i)
             summ$variable[summ$variable=="loghr"] <- "logtaf"

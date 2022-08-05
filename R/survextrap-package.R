@@ -1,8 +1,8 @@
 #' The 'survextrap' package.
 #'
-#' @description For an intro and overview of the `survextrap` package, see
+#' @description For an introduction to and an overview of the `survextrap` package, see
 #'
-#' \url{https://chjackson.github.io/survextrap}
+#' \url{https://chjackson.github.io/survextrap/}
 #' 
 #' @docType package
 #' @name survextrap-package

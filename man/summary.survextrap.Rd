@@ -9,19 +9,25 @@
 \arguments{
 \item{object}{A fitted model object as returned by \code{\link{survextrap}}}
 
-\item{...}{Other argument (currently unused).
+\item{...}{Other arguments (currently unused).
 
-Document meanings of parameters
+A data frame of summary statistics for the model parameters is returned.
+
+The parameters, as indicated in the \code{variable} column, are:
 
 \code{alpha}: Average baseline log hazard.  If there are covariates, this describes the
 average hazard with continuous
 covariates set to zero, and factor covariates set
 to their baseline levels.
 
-\code{coefs}: Coefficients of the M-spline basis terms.
+\code{coefs}: Coefficients of the M-spline basis terms.  If a non-proportional hazards model
+was fitted, these are with covariates set to zero or baseline levels.
 
 \code{loghr}: Log hazard ratios for each covariate in the model. For cure
-models, this refers to covariates on survival for uncured people.
+models, this refers to covariates on survival for uncured people.  For non-proportional hazards
+models, these are the effects of covariates on the scale parameter \code{eta} and represent
+"average" hazard ratios, from which departures are modelled (see the "methods"
+vignette for a full description of this model).
 
 \code{hr}: Hazard ratios (the exponentials of \code{loghr}).
 
@@ -32,10 +38,14 @@ to their baseline levels.
 
 \code{logor_cure}: Log odds ratio of cure for each covariate on cure.
 
-\code{or_cure}: Odds ratios of cure (the exponentials of \code{logor_cure}).}
+\code{or_cure}: Odds ratios of cure (the exponentials of \code{logor_cure}).
+
+\code{nperr}: Standardised departures from proportional hazards in the non-proportional hazards model, defined as \eqn{b^{(np)}_{ks} / \sigma^{(np)}_s} (see the "methods" vignette for definitions of these).
+
+\code{sd_np}: Smoothness standard deviations \eqn{\sigma^{(np)}_s} for the non-proportionality effects.}
 }
 \description{
-The intervals are 95\\% credible intervals.
+The intervals are 95\% credible intervals.
 }
 \details{
 Suggestions for what else to add to this are welcome.  Convergence diagnostics?

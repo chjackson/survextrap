@@ -68,9 +68,9 @@ rmst <- function(x, t, newdata=NULL, niter=NULL){
         colnames(resmat) <- t
         for (i in 1:nt){
             if (x$modelid=="mspline")
-                resmat[,i] <- rmst_survmspline(t[i], pars$alpha_user[,j], pars$coefs, x$basehaz$knots, x$basehaz$degree)
+                resmat[,i] <- rmst_survmspline(t[i], pars$alpha_user[,j], pars$coefs[,j,], x$basehaz$knots, x$basehaz$degree)
             else if (x$modelid=="weibull")
-                resmat[,i] <- rmst_generic(pweibull, t[i], start=0, shape=pars$coefs[,1], scale=exp(pars$alpha_user[,j]))
+                resmat[,i] <- rmst_generic(pweibull, t[i], start=0, shape=pars$coefs[,1,1], scale=exp(pars$alpha_user[,j]))
             else stop("unknown modelid")
             if (x$cure){
                 cureprob_mat <- matrix(rep(pars$cureprob_user, nt), nrow=niter*nvals, ncol=nt)
@@ -103,32 +103,28 @@ newdata_to_X <- function(newdata, x, formula=NULL, xlevs=NULL){
     X
 }
 
-get_alpha_bycovs <- function(x, stanmat, newdata=NULL, niter=NULL){
+get_alpha_bycovs <- function(x, stanmat, newdata=NULL){
     if (is.null(newdata) && (x$ncovs > 0)) newdata <- x$x$mfbase
-    if (is.null(niter)) niter <- nrow(stanmat)
     if (NROW(newdata) > 0){
         X <- newdata_to_X(newdata, x, x$formula, x$x$xlevs) # nvals x npars
         X <- drop_intercept(X)
     } else X <- NULL
     X <- cbind("(Intercept)"=1, X)
-    if (is.null(niter)) niter <- nrow(stanmat)
     loghr_names <- grep("loghr", colnames(stanmat), value=TRUE)
-    beta <- stanmat[1:niter, c("alpha", loghr_names)]
+    beta <- stanmat[, c("alpha", loghr_names)]
     beta %*% t(X) # niter x nvals
 }
 
-get_cureprob_bycovs <- function(x, stanmat, newdata=NULL, niter=NULL){
+get_cureprob_bycovs <- function(x, stanmat, newdata=NULL){
     if (is.null(newdata)) newdata <- x$xcure$mfbase
-    if (is.null(niter)) niter <- nrow(stanmat)
-    pcure <- if (x$cure) stanmat[1:niter, "pcure[1]"] else NULL
+    pcure <- if (x$cure) stanmat[, "pcure[1]"] else NULL
     if (x$ncurecovs > 0){
         X <- newdata_to_X(newdata, x, x$cure_formula, x$xcure$xlevs)
         X <- drop_intercept(X)
         X <- cbind("(Intercept)"=1, X)
-        if (is.null(niter)) niter <- nrow(stanmat)
         logor_names <- grep("logor_cure", colnames(stanmat), value=TRUE)
         logit_intercept <- qlogis(pcure)
-        beta <- cbind(logit_intercept, stanmat[1:niter, c(logor_names)])
+        beta <- cbind(logit_intercept, stanmat[, c(logor_names)])
         pcure <- plogis(beta %*% t(X))
     }
     pcure
@@ -158,21 +154,21 @@ get_pars <- function(x, newdata=NULL, niter=NULL){
     stanmat <- get_draws(x)
     if (length(stanmat)==0) stop("Stan model does not contain samples")
     if (is.null(niter)) niter <- nrow(stanmat)
-    gamma <- stanmat[1:niter, "gamma[1]", drop=FALSE]
+    else stanmat <- stanmat[1:niter,,drop=FALSE]
+    gamma <- stanmat[, "gamma[1]", drop=FALSE]
     loghr_names <- sprintf("loghr[%s]",seq(x$ncovs))
-    loghr <- if (x$ncovs>0) stanmat[1:niter, loghr_names, drop=FALSE] else NULL
-    ms_coef_names <- sprintf("coefs[%s]",seq(x$nvars))
-    coefs      <- stanmat[1:niter, ms_coef_names,  drop = FALSE]
+    loghr <- if (x$ncovs>0) stanmat[, loghr_names, drop=FALSE] else NULL
+    coefs <- get_coefs_bycovs(x, stanmat, newdata)
 
     ## cure probs for zero covariate values
-    pcure <- if (x$cure) stanmat[1:niter, "pcure[1]"] else NULL
+    pcure <- if (x$cure) stanmat[, "pcure[1]"] else NULL
     ## cure probs for user-specified covariate values
-    cureprob_user <- get_cureprob_bycovs(x=x, stanmat=stanmat, newdata=newdata, niter=niter)
+    cureprob_user <- get_cureprob_bycovs(x=x, stanmat=stanmat, newdata=newdata)
 
     ## log intercept at zero covariate values (including centered factor contrasts)
-    alpha    <- stanmat[1:niter, "alpha",  drop = FALSE]
+    alpha    <- stanmat[, "alpha",  drop = FALSE]
     ## log intercept for user-specified covariate values
-    alpha_user <- get_alpha_bycovs(x=x, stanmat=stanmat, newdata=newdata, niter=niter)
+    alpha_user <- get_alpha_bycovs(x=x, stanmat=stanmat, newdata=newdata)
 
     res <- nlist(alpha, alpha_user, gamma, loghr, coefs, pcure, cureprob_user)
     attr(res, "niter") <- niter
@@ -244,41 +240,41 @@ timedep_output <- function(x, output="survival", newdata=NULL, times=NULL, tmax=
 }
 
 survival_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
-    if (x$modelid=="mspline"){
-        coefs_mat <- pars$coefs[rep(rep(1:niter, each=nt),nvals),] # only for spline
-        surv_sam <- psurvmspline(times_arr, alpha_user_arr, coefs_mat,
-                                 x$basehaz$knots, x$basehaz$degree, lower.tail=FALSE)
-    } else if (x$modelid=="weibull") {
-        surv_sam <- pweibull(times_arr, shape=pars$coefs[,1],
-                               scale=exp(alpha_user_arr), lower.tail=FALSE)
-    }
-    if (x$cure)  {
-        surv_sam <- cureprob_arr + (1 - cureprob_arr)*surv_sam
-    }
-    surv_sam
+  if (x$modelid=="mspline"){
+    coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+    surv_sam <- psurvmspline(times_arr, alpha_user_arr, coefs_mat,
+                             x$basehaz$knots, x$basehaz$degree, lower.tail=FALSE)
+  } else if (x$modelid=="weibull") {
+    surv_sam <- pweibull(times_arr, shape=pars$coefs[,1,1],
+                         scale=exp(alpha_user_arr), lower.tail=FALSE)
+  }
+  if (x$cure)  {
+    surv_sam <- cureprob_arr + (1 - cureprob_arr)*surv_sam
+  }
+  surv_sam
 }
 
 hazard_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
-    if (x$modelid=="mspline"){
-        coefs_arr <- pars$coefs[rep(rep(1:niter, each=nt),nvals),]
-        if (x$cure)
-            logdens_sam <- dsurvmspline(times_arr, alpha_user_arr, coefs_arr,
-                                        x$basehaz$knots, x$basehaz$degree, log=TRUE)
-        loghaz_sam <- hsurvmspline(times_arr, alpha_user_arr, coefs_arr,
-                                   x$basehaz$knots, x$basehaz$degree, log=TRUE)
-    } else if (x$modelid=="weibull") {
-        logdens_sam <- stats::dweibull(times_arr, shape=pars$coefs[,1],
-                                       scale=exp(alpha_user_arr), log=TRUE)
-        loghaz_sam <- logdens_sam -
-            stats::pweibull(times_arr, shape=pars$coefs[,1], scale=exp(pars$alpha),
-                            lower.tail=FALSE, log.p=TRUE)
-    }
-    if (x$cure)  {
-        loghaz_sam <- log(1 - cureprob_arr) +  logdens_sam -
-            log(survival_core(x, pars, times_arr, alpha_user_arr, niter, nvals, nt))
-    }
-    haz_sam <- exp(loghaz_sam)
-    haz_sam
+  if (x$modelid=="mspline"){
+    coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+    if (x$cure)
+      logdens_sam <- dsurvmspline(times_arr, alpha_user_arr, coefs_mat,
+                                  x$basehaz$knots, x$basehaz$degree, log=TRUE)
+    loghaz_sam <- hsurvmspline(times_arr, alpha_user_arr, coefs_mat,
+                               x$basehaz$knots, x$basehaz$degree, log=TRUE)
+  } else if (x$modelid=="weibull") {
+    logdens_sam <- stats::dweibull(times_arr, shape=pars$coefs[,1,1],
+                                   scale=exp(alpha_user_arr), log=TRUE)
+    loghaz_sam <- logdens_sam -
+      stats::pweibull(times_arr, shape=pars$coefs[,1,1], scale=exp(pars$alpha),
+                      lower.tail=FALSE, log.p=TRUE)
+  }
+  if (x$cure)  {
+    loghaz_sam <- log(1 - cureprob_arr) +  logdens_sam -
+      log(survival_core(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt))
+  }
+  haz_sam <- exp(loghaz_sam)
+  haz_sam
 }
 
 deconstruct_mspline <- function(x, scale=1, tmax=NULL){
@@ -287,4 +283,45 @@ deconstruct_mspline <- function(x, scale=1, tmax=NULL){
   scale <- exp(sm[sm$variable=="alpha", ]$median)
   bh <- x$basehaz
   mspline_plotdata(bh$iknots, bh$bknots, bh$df, bh$degree, cf, scale=10, tmax=tmax)
+}
+
+get_coefs_bycovs <- function(x, stanmat, newdata=NULL, X=NULL){
+  if (is.null(X)){
+    if (is.null(newdata) && (x$ncovs > 0)) newdata <- x$x$mfbase
+    if (NROW(newdata) > 0){
+      X <- newdata_to_X(newdata, x, x$formula, x$x$xlevs) # nvals x npars
+      X <- drop_intercept(X)
+    } else X <- NULL
+  } # no check is done on X
+  X <- cbind("(Intercept)"=1, X)
+  niter <- nrow(stanmat)
+  nvals <- nrow(X)
+
+  if (x$nonprop){
+    b_np_names <- grep("b_np", colnames(stanmat), value=TRUE)
+    nvars <- x$basehaz$nvars
+    b_np <- array(stanmat[,b_np_names], dim=c(niter, x$ncovs, nvars-1))
+
+    b_mean <- log(x$coefs_mean[-1] / x$coefs_mean[1])
+    b_mean_mat <- matrix(rep(b_mean, niter), nrow=niter, byrow=TRUE)
+    b_err_names <- grep("b_err", colnames(stanmat), value=TRUE) # ncovs x nvars
+    ssd_names <- grep("ssd", colnames(stanmat), value=TRUE)
+    b_err <- array(stanmat[,b_err_names], dim=c(niter, nvars-1))
+    ssd <- as.numeric(stanmat[,ssd_names])
+
+    coefs <- array(dim=c(niter, nvals, nvars))
+    for (i in 1:nvals){
+      locoefs <- array(0, dim=c(niter, nvars-1))
+      for (j in 1:x$ncovs){
+        locoefs <- locoefs + b_mean_mat + b_np[,j,] * X[i,j] + b_err*ssd
+      }
+      ocoefs <- exp(cbind(0, locoefs))
+      coefs[,i,] <- ocoefs / rowSums(ocoefs)
+    }
+  } else {
+    ms_coef_names <- sprintf("coefs[%s]",seq(x$nvars))
+    coefs      <- stanmat[, ms_coef_names,  drop = FALSE]
+    coefs <- array(coefs, dim=c(niter, 1, x$nvars))[,rep(1,nvals),,drop=FALSE]
+  }
+  coefs
 }

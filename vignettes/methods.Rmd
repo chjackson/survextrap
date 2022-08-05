@@ -16,18 +16,18 @@ editor_options:
   chunk_output_type: console
 ---
 
+\newcommand{\x}{\boldsymbol{x}}
+
 ```{r,echo=FALSE,message=FALSE}
 knitr::opts_chunk$set(eval=TRUE)
 ```
-
-# Technical details of the model
 
 See the [README](../index.html) for the design principles of the package, and the [examples vignette](examples.html) for examples of how to fit models.
 
 It is work in progress, so it will be sketchy in some places.
 
 
-## M-splines 
+# M-splines 
 
 The axis of time is split into a set of regions defined by _knots_.  In the example below, the knots are located at the integers from 0 to 10, as shown by the grid lines.
 
@@ -59,7 +59,7 @@ plot_mspline(df=13, scale=10, coefs = p_naive, tmax=10) +
 ```
 
 
-## Using M-splines to represent particular hazard shapes
+# Using M-splines to represent particular hazard shapes
 
 The weights $p_k$ define how the hazard changes through time.   If knots are equally spaced, then $p_k$ are nearly proportional to the hazard in the $k$th region, so that if all $p_k$ are equal, then the hazard is nearly constant (red line `p_equal` in the figure).   It is not exactly constant because of the influence of the regions at either end of the space, whose polynomial functions have a skewed shape.  
 
@@ -82,7 +82,7 @@ plot_mspline(iknots=c(1,3,5), bknots=c(0, 7),
 ```
 
 
-#### Why not other kinds of spline?
+## Why not other kinds of spline?
 
 * The Royston/Parmar model (e.g. in flexsurv) uses a natural cubic spline for the log cumulative hazard function.  A cumulative hazard is defined to be a non-decreasing function, but the spline is not constrained.   The constraint is handled during fitting the model - spline coefficients which imply non-increasing cumulative hazard functions are rejected.  This is inefficient.  A worse problem, perhaps, is that it is unclear how to specify priors - a meaningful joint prior on the coefficients would have to rule out invalid combinations.
 
@@ -95,7 +95,7 @@ plot_mspline(iknots=c(1,3,5), bknots=c(0, 7),
 * I'd assume there is no difference between different kinds of arbitrarily-flexible model (fractional polynomials, particular kinds of spline) in terms of how well they tend to fit observed data, because they are all designed to do that job very well.  The difference I think will be in their computational efficiency, and how easily we can devise clearly-understandable priors on their parameters.  Priors will be influential in the places where there are no data.  For extrapolation, we don't want to rely on opaque nuances of the functional forms used in specific model families.
 
 
-## Bayesian model specification 
+# Bayesian model specification 
 
 The _parameters_ of the model, $p_k$ and $\eta$, are estimated from data using Bayesian inference.
 
@@ -114,11 +114,11 @@ The default approach taken by `survextrap` is to choose a large number of knots 
 This is a smoother, Bayesian analogue of the common approach to spline model selection based on choosing $K$ to give the model with the lowest AIC.  It also similar in principle to the "penalised likelihood" methods implemented in e.g. the `mgcv` and `rstpm2` packages.
 
 
-## Prior distribution for the hazard curve
+# Prior distribution for the hazard curve
 
 A log-normal prior is used for the scale $\eta$.   Currently this is set to the log crude event rate plus normal(0, 20) (inspired by [rstanarm](https://arxiv.org/pdf/2002.09633.pdf)) - but this will be customisable in a future version.
 
-A multinomial logistic distribution defines the prior for the coefficients $p_k$ that define the mass of the hazard in each region: $log(p_k / p_1) = \beta_k$, with $\beta_1=0$ and $\beta_k \sim Logistic(\mu_k, \sigma)$ for $k = 2, \ldots, K$.  This prior is defined by:
+A multinomial logistic distribution defines the prior for the coefficients $p_k$ that define the mass of the hazard in each region: $log(p_k / p_1) = b_k$, with $b_1=0$ and $b_k \sim Logistic(\mu_k, \sigma)$ for $k = 2, \ldots, K$.  This prior is defined by:
 
 (a) **Prior mean**: $\boldsymbol{\mu} = (\mu_2,\ldots,\mu_K)$.  By default, this is determined from the special set of $p_k$ that result in a _constant hazard_ $h(t)$, REF graph above.
 
@@ -163,7 +163,7 @@ Either way, these procedures still need to be tested empirically to see whether 
 A sensible route to resolving these uncertainties might be use cross-validation to assess and choose between model specifications.  The package provides an interface to the [LOO-CV](https://mc-stan.org/users/interfaces/loo) method for Bayesian cross-validation - though note that this only assesses fit to the individual-level data, using the same principle as AIC.
 
 
-## Choice of knots when modelling data
+# Choice of knots when modelling data
 
 By default, internal knots are placed at the quantiles of the vector comprising the uncensored survival times in the individual level data and the distinct follow-up times in the external data. (Smarter suggestions are welcome for this).
 
@@ -178,3 +178,34 @@ The priors should then be chosen to give a low probability that the hazard varie
 Currently, the number of knots does not depend on the absolute amount of data - should it?   With small datasets, there will be lots of knots and very few data points between them - and we will be relying more strongly on the prior to do the smoothing.  We could assess whether this matters by using cross-validation. 
 
 With external data, we want a choice of knots outside the data which we can defend as allowing a reasonable range of shapes for the hazard function, prior to observing the data.
+
+
+# Effect of covariates on the hazard
+
+In `survextrap`, the hazard may also depend on a vector of covariates $\boldsymbol{x}$ as well as time $t$, and we write the hazard as $h(t,\x)$.
+
+
+## Proportional hazards model
+
+The default model fitted is a _proportional hazards model_, where the scale parameter $\eta(\x)$ is defined as a log-linear function of a vector of covariates $\x$.  
+
+\[ \eta(\x) = exp(\boldsymbol{\beta}^T \x) \]
+
+In this model, the ratio between the hazards $h(t,\x)$ at two different values of $\x$ is constant with respect to time $t$.  The _hazard ratios_ (i.e. between a value of 1 and 0 for each $\x$) are $exp(\boldsymbol{\beta})$.
+
+
+## Flexible, non-proportional hazards model {#nonprop}
+
+An alternative _non-proportional hazards_ model is available.  This is achieved by also modelling the spline coefficients $p_k$ as functions of covariates, in addition to the log-linear model on $\eta$.
+
+\[log(p_k(\x) / p_1(\x)) = b_k(\boldsymbol{x)} \]
+
+\[ b_k(\boldsymbol{x)} \sim Logistic(\mu_k + \boldsymbol{b}^{(np)T}_k \x, \sigma) \quad (k=2,...,K), \quad b_1 = 0 \]
+
+The $s$th element of the vector $\boldsymbol{b}^{(np)}_k$ describes the departure from proportional hazards for the $s\mbox{th}$ covariate in the region of time associated with the $k$th spline basis term.   With all $\boldsymbol{b}^{(np)}_k = 0$ the model will be the proportional hazards model.  (Currently in the package, either all covariates or none have to have proportional hazards).
+
+For each covariate $s$, a hierarchical model is used for the non-proportionality effects $b^{(np)}_{ks}$.  This model "partially pools" the effects from different regions of time $k$.
+
+\[ b^{(np)}_{ks} \sim Normal(0, \sigma^{(np)}_s) \] 
+
+In the non-proportional hazards model, the ratio between the hazards $h(t,\x)$ at different covariate values $\x$ is a function of time $t$.  Since the $\boldsymbol{b}^{(np)}_k$ may be arbirtarily different in each region of time $k$, the hazard ratio can be an arbitrarily-flexible function of time.  The amount and shape of non-proportionality is estimated from the data, while the hierarchical model protects against overfitting.

@@ -2,7 +2,11 @@
 ## use capital X for covariates not x
 ## Document / error that variables should be in data frame not in working env
 
-#' survextrap
+#' Flexible Bayesian parametric survival models
+#'
+#' Flexible Bayesian parametric survival models.  Individual data are represented using M-splines
+#' and a proportional hazards or flexible non-proportional hazards model.   Extrapolations
+#' can be enhanced by including external aggregate data.
 #'
 #' @param formula  A survival formula in standard R formula syntax, with a call to `Surv()`
 #' on the left hand side.
@@ -35,9 +39,16 @@
 #' Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number.
 #'
 #' @param coefs_mean Spline basis coefficients that define the prior mean for the hazard function. By
-#' default, these are set to values that define a constant hazard function.
+#' default, these are set to values that define a constant hazard function.  They are normalised to
+#' sum to 1 internally (if they do not already).
 #'
 #' @param cure If `TRUE`, a mixture cure model is used.
+#'
+#' @param nonprop If \code{TRUE} then a non-proportional hazards model is fitted.
+#' This is achieved by modelling the spline basis weights in terms of the covariates.  See
+#' the "methods" vignette for more details.   In models with multiple covariates, currently
+#' there is no way to assume that some covariates have proportional hazards but others don't -
+#' it is all or none.
 #'
 #' @param prior_loghaz Prior for the baseline log hazard.
 #'   This should be a call to a prior constructor function, such as
@@ -54,12 +65,12 @@
 #' denote a typical value in the data, e.g. the mean.
 #'
 #' @param prior_loghr Priors for log hazard ratios.  This should be a call to
-#'   `normal()` or `student_t`.  A list of calls can also be provided, to give
+#'   `p_normal()` or `p_t()`.  A list of calls can also be provided, to give
 #'   different priors to different coefficients, where the name
 #'   of each list component matches the name of the coefficient, e.g.
 #'   list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3)).
 #'
-#'   The default is `normal(0,2.5)` for all coefficients.
+#'   The default is `p_normal(0,2.5)` for all coefficients.
 #'
 #' @param prior_smooth Gamma prior for the smoothing standard deviation, in
 #'   models where this is estimated.  This should be a call to `p_gamma()`.  The
@@ -71,8 +82,12 @@
 #'   level of factor covariates.
 #'
 #' @param prior_logor_cure Priors for log odds ratios on cure probabilities.
-#'   This should be a call to `p_normal()` or `p_t`.  The default is
+#'   This should be a call to `p_normal()` or `p_t()`.  The default is
 #'   `p_normal(0,2.5)`.
+#'
+#' @param prior_sdnp Prior for the standard deviation parameters that smooth the non-proportionality
+#' effects over time in non-proportional hazards models.  This should be a call to `p_gamma()`
+#' or a list of calls to `p_gamma()` with one component per covariate, as in `prior_loghr`.
 #'
 #' @param backhaz Name of a variable in the data giving the background hazard
 #' in relative survival models.  For censored cases the exact value does not matter.
@@ -104,8 +119,9 @@
 #'
 #' @param modelid \code{"mspline"} for the default M-spline model.
 #'
-#' Only current alternative is \code{"weibull"} for a Weibull accelerated failure time model.
-#' Just included for the purpose of package testing. Not fully tested, and not recommended for use in
+#' The only current alternative is \code{"weibull"} for a Weibull accelerated failure time model.
+#' This is just included for the purpose of package testing.  It is not fully implemented, and is
+#' not recommended for use in
 #' practice for survival extrapolation.
 #'
 #' @param fit_method Method from \pkg{rstan} used to fit the model.  Defaults to MCMC.
@@ -126,9 +142,10 @@
 ##'   than \code{fit_method="opt"}, but has not been investigated in depth for these models.
 ##'
 ##' @param loo Compute leave-one-out cross-validation statistics.  This is done by default. Set to
-##' \code{FALSE} to save a bit of run time.
+##' \code{FALSE} to not compute them. 
 ##' If these statistics are computed, then they are returned in the \code{loo} component of the
-##' object returned by \code{survextrap}.
+##' object returned by \code{survextrap}.  See the \code{"examples"} vignette for some explanation
+##' of these. 
 ##'
 #' @param ... Additional arguments to supply to control the Stan fit, passed to the appropriate
 #' \pkg{rstan} function, depending on which is chosen through the `fit_method` argument.
@@ -141,11 +158,13 @@ survextrap <- function(formula,
                        smooth_sd = "bayes",
                        coefs_mean = NULL,
                        cure = FALSE,
+                       nonprop = FALSE,
                        prior_loghaz = p_normal(0,20),
                        prior_loghr = NULL,
                        prior_smooth = p_gamma(2,1),
                        prior_cure = p_beta(1,1),
                        prior_logor_cure = NULL,
+                       prior_sdnp = p_gamma(2,1),
                        backhaz = NULL,
                        basehaz_ops = NULL,
                        modelid = "mspline",
@@ -210,9 +229,9 @@ survextrap <- function(formula,
     if (is.null(coefs_mean)){
         coefs_mean <- mspline_uniform_weights(iknots = basehaz$iknots, bknots=basehaz$bknots)
     } else {
-        ## TODO validate
+      coefs_mean <- validate_coefs_mean(coefs_mean)
     }
-    beta_mean <- log(coefs_mean[-1] / coefs_mean[1])
+    b_mean <- log(coefs_mean[-1] / coefs_mean[1])
     modelids <- c("mspline", "weibull")
     if (!(modelid %in% modelids)) stop("modelid should be mspline or weibull")
     modelid_num <- match(modelid, modelids)
@@ -226,7 +245,7 @@ survextrap <- function(formula,
         basis_event <- array(t_event, dim=c(length(t_event), 2)) # just first col of these used.
         ibasis_event <- array(t_event, dim=c(length(t_event), 2))
         ibasis_rcens <- array(t_rcens, dim=c(length(t_rcens), 2))
-        beta_mean <- aa(1) # prior mean for log shape parameter. shape is coefs[1], log scale is eta[1]
+        b_mean <- aa(1) # prior mean for log shape parameter. shape is coefs[1], log scale is eta[1]
         est_smooth <- FALSE
     }
     ibasis_ext_stop <- if (nextern>0) make_basis(t_ext_stop, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
@@ -236,8 +255,18 @@ survextrap <- function(formula,
     backsurv_ext_stop <- aa(external$backsurv_stop)
     backsurv_ext_start <- aa(external$backsurv_start)
 
+    stanmod <- if (nonprop) "nonprophaz" else "survextrap"
+    if (nonprop) {
+      if (modelid=="weibull") stop("Non-proportional hazards models not implemented with the Weibull")
+      if (ncovs==0) {
+        warning("Ignoring non-proportional hazards model specification, since no covariates in model. ")
+        stanmod <- "survextrap"
+        nonprop <- FALSE
+      }
+    }
+
     priors <- get_priors(prior_loghaz, prior_loghr, prior_smooth, prior_cure, prior_logor_cure,
-                         x, xcure, est_smooth)
+                         x, xcure, est_smooth, nonprop, prior_sdnp)
 
     standata <- nlist(nevent, nrcens, nvars, nextern, ncovs,
                       log_crude_event_rate,
@@ -246,7 +275,7 @@ survextrap <- function(formula,
                       x_event, x_rcens,
                       r_ext, n_ext, x_ext,
                       ncurecovs, xcure_event, xcure_rcens, xcure_ext,
-                      beta_mean,
+                      b_mean,
                       est_smooth,
                       cure,
                       relative, backhaz_event,
@@ -263,7 +292,8 @@ survextrap <- function(formula,
                       prior_logor_cure_df = aa(priors$logor_cure$df),
                       prior_smooth = as.numeric(unlist(priors$smooth[c("shape","rate")])),
                       prior_cure = as.numeric(unlist(priors$cure[c("shape1","shape2")])),
-                      modelid = modelid_num
+                      modelid = modelid_num,
+                      prior_sdnp = priors$sdnp
                       )
     pcure_init <- if (cure) 0.5 else numeric()
     staninit <- list(gamma = aa(0),
@@ -293,15 +323,15 @@ survextrap <- function(formula,
 
     if (fit_method=="opt")
         fits <- do.call(rstan::optimizing,
-                        c(list(object=stanmodels$survextrap, data=standata, init=staninit),
+                        c(list(object=stanmodels[[stanmod]], data=standata, init=staninit),
                           stan_optimizing_ops(...)))
     else if (fit_method=="mcmc")
         fits <- do.call(rstan::sampling,
-                        c(list(object=stanmodels$survextrap, data=standata,
+                        c(list(object=stanmodels[[stanmod]], data=standata,
                                pars = "beta", include=FALSE), stan_sampling_ops(...)))
     else if (fit_method=="vb")
         fits <- do.call(rstan::vb,
-                        c(list(object=stanmodels$survextrap, data=standata,
+                        c(list(object=stanmodels[[stanmod]], data=standata,
                                pars = "beta", include=FALSE), stan_vb_ops(...)))
     else stop(sprintf("Unknown fit_method: %s",fit_method))
 
@@ -309,7 +339,7 @@ survextrap <- function(formula,
 
     misc_keep <- nlist(formula, stanfit=fits, fit_method, cure_formula)
     standata_keep <- standata[c("nvars","ncovs","log_crude_event_rate","ncurecovs")]
-    model_keep <- nlist(cure, modelid, est_smooth)
+    model_keep <- nlist(cure, modelid, est_smooth, nonprop)
     spline_keep <- nlist(basehaz)
     covinfo_names <- c("xnames","xlevs","xinds","xbar","mfbase","mfzero")
     x <- list(x = x[covinfo_names])
@@ -428,6 +458,7 @@ make_t <- function(model_frame, type = c("beg", "end", "gap", "upp")) {
     t_end <- switch(surv,
                     "right"     = as.vector(resp[, "time"]),
                     stop(err))
+    if (any(t_end<0)) stop("Some survival times are negative")
 
     t_upp <- switch(surv,
                     "right"     = rep(NaN, nrow(model_frame)),
@@ -459,7 +490,7 @@ make_d <- function(model_frame) {
 
 parse_external <- function(external, formula, x, xcure, cure_formula, relative=FALSE){
   if (is.null(external))
-    extl <- list(nextern=0, stop=numeric(), start=numeric(), 
+    extl <- list(nextern=0, stop=numeric(), start=numeric(),
                  r=integer(), n=integer(),
                  backsurv_stop=numeric(), backsurv_start=numeric(),
                  tmax=0)
@@ -530,13 +561,13 @@ aa <- function(x, ...) as.array(x,...)
 
 
 make_basehaz <- function(basehaz_ops,
-                                times,
-                                times_ext,
-                                status,
-                                tmin, tmax){
+                         times,
+                         times_ext,
+                         status,
+                         tmin, tmax){
     df     <- basehaz_ops$df
     iknots <- basehaz_ops$iknots
-    bknots <- basehaz_ops$bknots # TODO validate
+    bknots <- basehaz_ops$bknots
     degree <- basehaz_ops$degree
     if (is.null(df))
         df <- 10L
@@ -548,20 +579,37 @@ make_basehaz <- function(basehaz_ops,
                  "be used to evaluate default knot locations for splines.")
         tt <- times
     }
-    ## TODO validate iknots and bknots here.  Want to allow them outside data
-    if (!is.null(iknots)) {
-    }
     if (is.null(bknots)){
         bknots <- c(0, tmax)
+    } else {
+      validate_knots(bknots, "bknots")
+      bknots <- sort(bknots)  # No restriction on boundary knots being outside the data, as we can use constant hazard outside the boundary knots.
+#      if (bknots[1] > tmin) stop(sprintf("lower boundary knot (%s) should be <= minimum entry time (%s)", bknots[1], tmin))
+#      if (bknots[2] < tmax) stop(sprintf("upper boundary knot (%s) should be >= maximum follow up time (%s)", bknots[2], tmax)) # unnecessary should it? can't we have a constant hazard?
+    }
+    if (!is.null(iknots)) {
+      validate_knots(iknots, "iknots")
+      if (!all(iknots > bknots[1])) stop(sprintf("`iknots` should all be greater than lower boundary knot (%s)", bknots[1]))
+      if (!all(iknots < bknots[2])) stop(sprintf("`iknots` should all be less than upper boundary knot (%s)", bknots[2]))
     }
     names(bknots) <- c("lower","upper")
     ttk <- unique(c(tt, times_ext))
     iknots <- get_iknots(ttk, df = df, iknots = iknots, degree = degree, intercept = TRUE)
-    if (any(times<0)) stop("Some survival times are negative") # TODO should do this validation somewhere else
 
     nvars  <- df
     knots <- c(bknots[1], iknots, bknots[2])
     nlist(nvars, iknots, bknots, degree, df, knots)
+}
+
+validate_knots <- function(knots, name){
+  if (!is.numeric(knots)) stop(sprintf("`%s` must be numeric", name))
+  if (!all(knots >= 0)) stop(sprintf("`%s` must all be >= 0", name))
+}
+
+validate_coefs_mean <- function(coefs){
+  if (!is.numeric(coefs)) stop("`coefs_mean` must be numeric")
+  if (!all(coefs > 0)) stop("`coefs_mean` must all be > 0")
+  coefs / sum(coefs)
 }
 
 # Return a vector with internal knots for 'x', based on evenly spaced quantiles

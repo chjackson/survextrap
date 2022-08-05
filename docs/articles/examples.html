@@ -74,7 +74,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2022-08-03</h4>
+            <h4 data-toc-skip class="date">2022-08-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/examples.Rmd" class="external-link"><code>vignettes/examples.Rmd</code></a></small>
       <div class="d-none name"><code>examples.Rmd</code></div>
@@ -188,9 +188,9 @@ enough iterations to get summaries with the amount of precision yoy want
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
 <span><span class="co">##   variable     t median `2.5%` `97.5%`</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> rmst         3   2.21   2.03    2.33</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> rmst        10   5.20   3.55    6.28</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> rmst      <span style="text-decoration: underline;">1</span>000   9.10   3.63  298.</span></span></code></pre>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> rmst         3   2.21   2.10    2.32</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> rmst        10   5.46   3.78    6.38</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> rmst      <span style="text-decoration: underline;">1</span>000  12.7    3.99  539.</span></span></code></pre>
 <p>We do not really believe that the mean survival for this population
 can be this large.</p>
 <p>This is evidence that the fitted model is unrealistic, and we should
@@ -221,15 +221,15 @@ data are shown here).</p>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
 <span><span class="co">##   variable median `2.5%` `97.5%`</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> mean       5.86   4.90    6.71</span></span></code></pre>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> mean       5.89   5.21    6.67</span></span></code></pre>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/rmst.html">rmst</a></span><span class="op">(</span><span class="va">nde_mod</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">10</span>, <span class="fl">1000</span><span class="op">)</span>, niter<span class="op">=</span><span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
 <span><span class="co">##   variable     t median `2.5%` `97.5%`</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> rmst         3   2.19   2.07    2.33</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> rmst        10   4.82   4.21    5.31</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> rmst      <span style="text-decoration: underline;">1</span>000   5.86   4.90    6.71</span></span></code></pre>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> rmst         3   2.19   2.05    2.30</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> rmst        10   4.78   4.26    5.32</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> rmst      <span style="text-decoration: underline;">1</span>000   5.89   5.21    6.67</span></span></code></pre>
 <p>Including the external data gives a more confident extrapolation. The
 mean is finite. RMST converges to the mean as it is supposed to.</p>
 <p>At present, not much thought has gone into choice of knot locations
@@ -250,9 +250,9 @@ survived for 10 years. How many of them would they expect to survive a
 further 5 years? Through some kind of formal elicitation process, they
 supply a best guess (median) of 30%, and a 95% credible interval of 10%
 to 50%.</p>
-<p>Using standard techniques from elicitation (<a href="http://www.jeremy-oakley.staff.shef.ac.uk/shelf/" class="external-link">SHELF</a>) we
-can interpret that as a <span class="math inline">\(Beta(6.6,
-15.0)\)</span> prior distribution for the survival probability.</p>
+<p>Using standard techniques from elicitation (<a href="https://shelf.sites.sheffield.ac.uk/" class="external-link">SHELF</a>) we can interpret
+that as a <span class="math inline">\(Beta(6.6, 15.0)\)</span> prior
+distribution for the survival probability.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">SHELF</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SHELF/man/fitdist.html" class="external-link">fitdist</a></span><span class="op">(</span>vals<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span><span class="op">)</span>, probs<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span><span class="op">)</span>,</span>
 <span>               lower<span class="op">=</span><span class="fl">0</span>, upper<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">Beta</span></span></code></pre></div>
@@ -314,7 +314,7 @@ Still alive at <span class="math inline">\(u\)</span>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
 <span><span class="co">##   variable median `2.5%` `97.5%`</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> mean       5.99   4.72    9.53</span></span></code></pre>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> mean       6.19   4.54    13.8</span></span></code></pre>
 <p>There is still substantial uncertainty about the mean, even with this
 level of information, but comparing to the second model above
 (<code>nd_mod2</code>), it is better than no information at all. More
@@ -329,8 +329,8 @@ aggregate table for use in <code>survextrap</code>.</p>
 <h3 id="covariates">Covariates<a class="anchor" aria-label="anchor" href="#covariates"></a>
 </h3>
 <p><code>survextrap</code> uses a proportional hazards model to
-represent covariates. In the example here, we model survival by
-treatment group <code>rx</code>, which is a factor with three levels.
+represent covariates by default. In the example here, we model survival
+by treatment group <code>rx</code>, which is a factor with three levels.
 First fit a standard Cox model:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">rx</span>, data<span class="op">=</span><span class="va">colons</span><span class="op">)</span></span></code></pre></div>
@@ -352,10 +352,10 @@ function.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">rxph_mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">variable</span><span class="op">==</span><span class="st">"loghr"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 2 × 7</span></span></span>
-<span><span class="co">##   variable term      median  lower  upper    sd     i</span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> loghr    rxLev     -<span style="color: #BB0000;">0.417</span> -<span style="color: #BB0000;">0.922</span>  0.107 0.261     1</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> loghr    rxLev+5FU -<span style="color: #BB0000;">0.693</span> -<span style="color: #BB0000;">1.25</span>  -<span style="color: #BB0000;">0.149</span> 0.281     2</span></span></code></pre>
+<span><span class="co">##   variable term      median  lower   upper    sd basis_num</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> loghr    rxLev     -<span style="color: #BB0000;">0.410</span> -<span style="color: #BB0000;">0.891</span>  0.068<span style="text-decoration: underline;">6</span> 0.254        <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> loghr    rxLev+5FU -<span style="color: #BB0000;">0.675</span> -<span style="color: #BB0000;">1.24</span>  -<span style="color: #BB0000;">0.131</span>  0.276        <span style="color: #BB0000;">NA</span></span></span></code></pre>
 <p>The posterior median survival curves (thick lines) agree with the
 subgroup-specific Kaplan-Meier estimates (thin lines).</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -381,15 +381,109 @@ survival as the control group of the trial (corresponding to a value of
 <span>                      chains<span class="op">=</span><span class="fl">1</span>, external <span class="op">=</span> <span class="va">extdat</span>, refresh<span class="op">=</span><span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/rmst.html">rmst</a></span><span class="op">(</span><span class="va">rxphe_mod</span>, niter<span class="op">=</span><span class="fl">100</span>, t<span class="op">=</span><span class="fl">20</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##        rx variable  t   median     2.5%     97.5%</span></span>
-<span><span class="co">## 1     Obs     rmst 20 4.697354 3.680399  6.207514</span></span>
-<span><span class="co">## 2     Lev     rmst 20 7.089074 5.001547  9.271521</span></span>
-<span><span class="co">## 3 Lev+5FU     rmst 20 9.017560 5.815111 11.757114</span></span></code></pre>
+<span><span class="co">## 1     Obs     rmst 20 4.888264 3.624333  6.858613</span></span>
+<span><span class="co">## 2     Lev     rmst 20 6.516998 4.836383 10.025824</span></span>
+<span><span class="co">## 3 Lev+5FU     rmst 20 8.657890 5.631123 11.720342</span></span></code></pre>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rxphe_mod</span>, niter<span class="op">=</span><span class="fl">100</span>, tmax<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></code></pre></div>
 <p><img src="examples_files/figure-html/unnamed-chunk-15-1.png" width="700"></p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_hazard.html">plot_hazard</a></span><span class="op">(</span><span class="va">rxphe_mod</span>, niter<span class="op">=</span><span class="fl">100</span>, tmax<span class="op">=</span><span class="fl">20</span><span class="op">)</span></span></code></pre></div>
 <p><img src="examples_files/figure-html/unnamed-chunk-15-2.png" width="700"></p>
+<div class="section level4">
+<h4 id="non-proportional-hazards-model">Non-proportional hazards model<a class="anchor" aria-label="anchor" href="#non-proportional-hazards-model"></a>
+</h4>
+<p>The flexible non-proportional hazards model described in the <a href="methods.html#nonprop">methods vignette</a> can be specified with
+<code>nonprop=TRUE</code>.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rxnph_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">rx</span>, data<span class="op">=</span><span class="va">colons</span>, nonprop<span class="op">=</span><span class="cn">TRUE</span>, chains<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rxnph_mod</span><span class="op">)</span></span></code></pre></div>
+<p><img src="examples_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
+<p>Note the non-constant separation between the posterior median hazard
+curves from the three treatment groups.</p>
+<p>In this example, the sample size in each treatment group and time
+period is small, so this model is probably overfitted. While the
+posterior median survival seems to fit poorly to the Kaplan-Meier
+estimates in some regions, there is large uncertainty around these
+estimates that isn’t shown in these plots.</p>
+<p>The non-proportional hazards model is experimental. In theory, it can
+be “tuned” by changing the number of spline basis terms and the knot
+positions (through the <code>basehaz_ops</code> argument to
+<code>survextrap</code>), or by changing the prior on the parameter
+<span class="math inline">\(\sigma^{(np)}_s\)</span> that controls the
+smoothness of the departures from proportional hazards
+(<code>prior_sdnp</code> argument). But this has not been tested much in
+practice.</p>
+<p>If a plot of the posterior hazard ratio against time is desired, this
+might be constructed by extracting samples from the posterior of the
+hazard for different covariate values by using
+<code>hazard(..., sample=TRUE)</code>, converting to samples from the
+hazard ratio, and then summarising and plotting.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="model-comparison">Model comparison<a class="anchor" aria-label="anchor" href="#model-comparison"></a>
+</h3>
+<p>The leave-one-out cross-validation method of the <a href="http://mc-stan.org/loo/" class="external-link"><code>loo</code></a> package is
+automatically implemented for every model fitted with
+<code>survextrap</code>, unless <code>survextrap(..., loo=FALSE)</code>
+is used.</p>
+<p>The cross-validation results are returned in the <code>loo</code>
+component of the fitted model object. See <a href="https://mc-stan.org/loo/articles/loo2-example.html" class="external-link">the loo
+vignettes</a> for some information about how to interpret these.</p>
+<p>Roughly, lower values of the <code>looic</code> statistic indicate
+models with better predictive ability. This is demonstrated here by
+comparing the proportional hazards model with the non-proportional
+hazards model. <code>looic</code> is lower for the proportional hazards
+model, suggesting that the non-proportional hazards model is worse for
+prediction. It is likely to be excessively complicated for the data.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rxph_mod</span><span class="op">$</span><span class="va">loo</span></span></code></pre></div>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">## Computed from 1000 by 191 log-likelihood matrix</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##          Estimate   SE</span></span>
+<span><span class="co">## elpd_loo   -211.9 10.1</span></span>
+<span><span class="co">## p_loo         8.5  0.8</span></span>
+<span><span class="co">## looic       423.7 20.2</span></span>
+<span><span class="co">## ------</span></span>
+<span><span class="co">## Monte Carlo SE of elpd_loo is 0.1.</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## All Pareto k estimates are good (k &lt; 0.5).</span></span>
+<span><span class="co">## See help('pareto-k-diagnostic') for details.</span></span></code></pre>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rxnph_mod</span><span class="op">$</span><span class="va">loo</span></span></code></pre></div>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">## Computed from 1000 by 191 log-likelihood matrix</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##          Estimate   SE</span></span>
+<span><span class="co">## elpd_loo   -241.8 13.1</span></span>
+<span><span class="co">## p_loo        36.5  3.9</span></span>
+<span><span class="co">## looic       483.6 26.3</span></span>
+<span><span class="co">## ------</span></span>
+<span><span class="co">## Monte Carlo SE of elpd_loo is NA.</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Pareto k diagnostic values:</span></span>
+<span><span class="co">##                          Count Pct.    Min. n_eff</span></span>
+<span><span class="co">## (-Inf, 0.5]   (good)     168   88.0%   377       </span></span>
+<span><span class="co">##  (0.5, 0.7]   (ok)        18    9.4%   196       </span></span>
+<span><span class="co">##    (0.7, 1]   (bad)        5    2.6%   48        </span></span>
+<span><span class="co">##    (1, Inf)   (very bad)   0    0.0%   &lt;NA&gt;      </span></span>
+<span><span class="co">## See help('pareto-k-diagnostic') for details.</span></span></code></pre>
+<p>If the warning message
+<code>"Some Pareto k diagnostic values are too high"</code> appears
+after calling <code>survextrap</code>, it was produced by the
+<code>loo</code> package. The fitted model is still valid, but the
+cross-validation statistics may not be. See [the loo vignette] and the
+references from there for more explanation. This happens for the
+non-proportional hazards model here - cross-validation failed for 2 out
+of the 191 observations in the data.</p>
+<p>For models with external data, the cross-validation statistics
+describe the fit to the individual level (“internal”) data. Therefore,
+models with and without external data may be compared statistically on
+the basis of their fit to the individual-level data. Though a model that
+does better by this measure is not necessarily better at representing
+survival outside the period covered by that data.</p>
 </div>
 <div class="section level3">
 <h3 id="cure-models">Cure models<a class="anchor" aria-label="anchor" href="#cure-models"></a>
@@ -399,31 +493,31 @@ an obvious cure fraction.</p>
 <p>The probability of cure for <code>x=0</code> is 0.5, and for
 <code>x=1</code> 0.622 (so the log odds ratio is 0.5). The uncured
 fraction follows a Weibull(1.5, 1.2) survival distribution.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survfit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">t</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">curedata</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="examples_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<p><img src="examples_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">noncure_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">t</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">curedata</span>, chains<span class="op">=</span><span class="fl">1</span>, </span>
 <span>                          cure<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">noncure_mod</span><span class="op">)</span> <span class="co"># doesn't quite capture the curve</span></span></code></pre></div>
-<p><img src="examples_files/figure-html/unnamed-chunk-16-2.png" width="700"></p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<p><img src="examples_files/figure-html/unnamed-chunk-19-2.png" width="700"></p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cure_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">t</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">curedata</span>, chains<span class="op">=</span><span class="fl">1</span>, cure<span class="op">=</span><span class="cn">TRUE</span>, iter<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cure_mod</span>, tmax<span class="op">=</span><span class="fl">10</span>, niter<span class="op">=</span><span class="fl">20</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="examples_files/figure-html/unnamed-chunk-16-3.png" width="700"></p>
+<p><img src="examples_files/figure-html/unnamed-chunk-19-3.png" width="700"></p>
 <p>Covariates on the cure fraction can be supplied by putting a formula
 in the <code>cure</code> argument. These will be modelled using logistic
 regression.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">curec_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">t</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">curedata</span>, cure<span class="op">=</span><span class="op">~</span><span class="va">x</span>, fit_method<span class="op">=</span><span class="st">"opt"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">curec_mod</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">variable</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pcure"</span>, <span class="st">"logor_cure"</span>, <span class="st">"or_cure"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 3 × 7</span></span></span>
-<span><span class="co">##   variable   term  median lower upper     sd     i</span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> pcure      <span style="color: #BB0000;">NA</span>     0.482 0.389 0.579 0.049<span style="text-decoration: underline;">3</span>    <span style="color: #BB0000;">NA</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> logor_cure x      0.769 0.203 1.33  0.289      1</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> or_cure    x      2.16  1.22  3.77  0.661      1</span></span></code></pre>
+<span><span class="co">##   variable   term  median lower upper     sd basis_num</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> pcure      <span style="color: #BB0000;">NA</span>     0.482 0.380 0.577 0.050<span style="text-decoration: underline;">8</span>        <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> logor_cure x      0.780 0.207 1.33  0.288         <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> or_cure    x      2.18  1.23  3.77  0.668         <span style="color: #BB0000;">NA</span></span></span></code></pre>
 <p>In this summary, <code>pcure</code> is the probability of cure at a
 value of 0 for the covariate <code>x.</code></p>
 </div>
@@ -440,7 +534,7 @@ of spline is used.</p>
 This is appended to the data as an extra column. The name of this column
 is supplied (unquoted) as the <code>backhaz</code> argument to
 <code>survextrap</code>.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">colonsb</span> <span class="op">&lt;-</span> <span class="va">colons</span></span>
 <span><span class="va">colonsb</span><span class="op">$</span><span class="va">bh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">colons</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">modb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colonsb</span>, backhaz<span class="op">=</span><span class="va">bh</span>, chains<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
@@ -451,23 +545,25 @@ That is, the overall hazard minus the background hazard.</p>
 model (with constant background 0.05) is shown in blue below the fitted
 overall hazard from a model with no background adjustment. As expected,
 the excess hazard is around 0.05 less than the overall hazard.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colonsb</span>, chains<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_hazard.html">plot_hazard</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data<span class="op">=</span><span class="fu"><a href="../reference/hazard.html">hazard</a></span><span class="op">(</span><span class="va">modb</span><span class="op">)</span>, col<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="examples_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
+<p><img src="examples_files/figure-html/unnamed-chunk-22-1.png" width="700"></p>
 <p>An alternative approach to modelling a study population and a
 background population in <code>survextrap</code> would be to estimate
 the background hazard from external aggregate data supplied as an
-<code>external</code> argument. If a binary covariate is included which
-takes a different value between the external data and the study data,
-then the hazards would be assumed to be proportional between the study
-population and external population. The advantage of this approach would
-be that it could account for uncertainty about the background hazard.
-However the assumption of proportional hazards is restrictive. If the
-background hazard is not uncertain, then the relative survival model
-would be preferable, as the excess hazard is modelled flexibly.</p>
+<code>external</code> argument. A covariate would be included which
+takes a different value between the external data and the study data. By
+default, the hazards would then be assumed to be proportional between
+the study population and external population. Proportional hazards would
+be a restrictive assumption, however. The flexible nonproportional
+hazards model might be preferable.</p>
+<p>The advantage of this alternative approach would be to account for
+uncertainty about the background hazard. If the background hazard is not
+uncertain, however, then the standard relative survival model would be
+adequate, as the excess hazard is modelled flexibly.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

@@ -74,7 +74,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2022-08-03</h4>
+            <h4 data-toc-skip class="date">2022-08-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -82,16 +82,13 @@ Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jac
 
     
     
-<div class="section level2">
-<h2 id="technical-details-of-the-model">Technical details of the model<a class="anchor" aria-label="anchor" href="#technical-details-of-the-model"></a>
-</h2>
 <p>See the <a href="../index.html">README</a> for the design principles
 of the package, and the <a href="examples.html">examples vignette</a>
 for examples of how to fit models.</p>
 <p>It is work in progress, so it will be sketchy in some places.</p>
-<div class="section level3">
-<h3 id="m-splines">M-splines<a class="anchor" aria-label="anchor" href="#m-splines"></a>
-</h3>
+<div class="section level2">
+<h2 id="m-splines">M-splines<a class="anchor" aria-label="anchor" href="#m-splines"></a>
+</h2>
 <p>The axis of time is split into a set of regions defined by
 <em>knots</em>. In the example below, the knots are located at the
 integers from 0 to 10, as shown by the grid lines.</p>
@@ -128,9 +125,9 @@ the hazard.</p></li>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Time t"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Hazard rate"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="methods_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
 </div>
-<div class="section level3">
-<h3 id="using-m-splines-to-represent-particular-hazard-shapes">Using M-splines to represent particular hazard shapes<a class="anchor" aria-label="anchor" href="#using-m-splines-to-represent-particular-hazard-shapes"></a>
-</h3>
+<div class="section level2">
+<h2 id="using-m-splines-to-represent-particular-hazard-shapes">Using M-splines to represent particular hazard shapes<a class="anchor" aria-label="anchor" href="#using-m-splines-to-represent-particular-hazard-shapes"></a>
+</h2>
 <p>The weights <span class="math inline">\(p_k\)</span> define how the
 hazard changes through time. If knots are equally spaced, then <span class="math inline">\(p_k\)</span> are nearly proportional to the hazard
 in the <span class="math inline">\(k\)</span>th region, so that if all
@@ -173,9 +170,9 @@ given in <code><a href="../articles/examples.html">vignette("examples")</a></cod
 <pre><code><span><span class="co">## Warning: Removed 3731 row(s) containing missing values (geom_path).</span></span>
 <span><span class="co">## Removed 3731 row(s) containing missing values (geom_path).</span></span></code></pre>
 <p><img src="methods_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
-<div class="section level5">
-<h5 id="why-not-other-kinds-of-spline">Why not other kinds of spline?<a class="anchor" aria-label="anchor" href="#why-not-other-kinds-of-spline"></a>
-</h5>
+<div class="section level3">
+<h3 id="why-not-other-kinds-of-spline">Why not other kinds of spline?<a class="anchor" aria-label="anchor" href="#why-not-other-kinds-of-spline"></a>
+</h3>
 <ul>
 <li><p>The Royston/Parmar model (e.g. in flexsurv) uses a natural cubic
 spline for the log cumulative hazard function. A cumulative hazard is
@@ -212,9 +209,9 @@ specific model families.</p></li>
 </ul>
 </div>
 </div>
-<div class="section level3">
-<h3 id="bayesian-model-specification">Bayesian model specification<a class="anchor" aria-label="anchor" href="#bayesian-model-specification"></a>
-</h3>
+<div class="section level2">
+<h2 id="bayesian-model-specification">Bayesian model specification<a class="anchor" aria-label="anchor" href="#bayesian-model-specification"></a>
+</h2>
 <p>The <em>parameters</em> of the model, <span class="math inline">\(p_k\)</span> and <span class="math inline">\(\eta\)</span>, are estimated from data using
 Bayesian inference.</p>
 <p>The <em>flexibility</em> of the fitted model is determined by two
@@ -242,17 +239,18 @@ It also similar in principle to the “penalised likelihood” methods
 implemented in e.g. the <code>mgcv</code> and <code>rstpm2</code>
 packages.</p>
 </div>
-<div class="section level3">
-<h3 id="prior-distribution-for-the-hazard-curve">Prior distribution for the hazard curve<a class="anchor" aria-label="anchor" href="#prior-distribution-for-the-hazard-curve"></a>
-</h3>
+<div class="section level2">
+<h2 id="prior-distribution-for-the-hazard-curve">Prior distribution for the hazard curve<a class="anchor" aria-label="anchor" href="#prior-distribution-for-the-hazard-curve"></a>
+</h2>
 <p>A log-normal prior is used for the scale <span class="math inline">\(\eta\)</span>. Currently this is set to the log
 crude event rate plus normal(0, 20) (inspired by <a href="https://arxiv.org/pdf/2002.09633.pdf" class="external-link">rstanarm</a>) - but this
 will be customisable in a future version.</p>
 <p>A multinomial logistic distribution defines the prior for the
 coefficients <span class="math inline">\(p_k\)</span> that define the
 mass of the hazard in each region: <span class="math inline">\(log(p_k /
-p_1) = \beta_k\)</span>, with <span class="math inline">\(\beta_1=0\)</span> and <span class="math inline">\(\beta_k \sim Logistic(\mu_k, \sigma)\)</span> for
-<span class="math inline">\(k = 2, \ldots, K\)</span>. This prior is
+p_1) = b_k\)</span>, with <span class="math inline">\(b_1=0\)</span> and
+<span class="math inline">\(b_k \sim Logistic(\mu_k, \sigma)\)</span>
+for <span class="math inline">\(k = 2, \ldots, K\)</span>. This prior is
 defined by:</p>
 <ol style="list-style-type: lower-alpha">
 <li><p><strong>Prior mean</strong>: <span class="math inline">\(\boldsymbol{\mu} = (\mu_2,\ldots,\mu_K)\)</span>.
@@ -326,9 +324,9 @@ package provides an interface to the <a href="https://mc-stan.org/users/interfac
 Bayesian cross-validation - though note that this only assesses fit to
 the individual-level data, using the same principle as AIC.</p>
 </div>
-<div class="section level3">
-<h3 id="choice-of-knots-when-modelling-data">Choice of knots when modelling data<a class="anchor" aria-label="anchor" href="#choice-of-knots-when-modelling-data"></a>
-</h3>
+<div class="section level2">
+<h2 id="choice-of-knots-when-modelling-data">Choice of knots when modelling data<a class="anchor" aria-label="anchor" href="#choice-of-knots-when-modelling-data"></a>
+</h2>
 <p>By default, internal knots are placed at the quantiles of the vector
 comprising the uncensored survival times in the individual level data
 and the distinct follow-up times in the external data. (Smarter
@@ -356,6 +354,61 @@ matters by using cross-validation.</p>
 <p>With external data, we want a choice of knots outside the data which
 we can defend as allowing a reasonable range of shapes for the hazard
 function, prior to observing the data.</p>
+</div>
+<div class="section level2">
+<h2 id="effect-of-covariates-on-the-hazard">Effect of covariates on the hazard<a class="anchor" aria-label="anchor" href="#effect-of-covariates-on-the-hazard"></a>
+</h2>
+<p>In <code>survextrap</code>, the hazard may also depend on a vector of
+covariates <span class="math inline">\(\boldsymbol{x}\)</span> as well
+as time <span class="math inline">\(t\)</span>, and we write the hazard
+as <span class="math inline">\(h(t,\boldsymbol{x})\)</span>.</p>
+<div class="section level3">
+<h3 id="proportional-hazards-model">Proportional hazards model<a class="anchor" aria-label="anchor" href="#proportional-hazards-model"></a>
+</h3>
+<p>The default model fitted is a <em>proportional hazards model</em>,
+where the scale parameter <span class="math inline">\(\eta(\boldsymbol{x})\)</span> is defined as a
+log-linear function of a vector of covariates <span class="math inline">\(\boldsymbol{x}\)</span>.</p>
+<p><span class="math display">\[ \eta(\boldsymbol{x}) =
+exp(\boldsymbol{\beta}^T \boldsymbol{x}) \]</span></p>
+<p>In this model, the ratio between the hazards <span class="math inline">\(h(t,\boldsymbol{x})\)</span> at two different
+values of <span class="math inline">\(\boldsymbol{x}\)</span> is
+constant with respect to time <span class="math inline">\(t\)</span>.
+The <em>hazard ratios</em> (i.e. between a value of 1 and 0 for each
+<span class="math inline">\(\boldsymbol{x}\)</span>) are <span class="math inline">\(exp(\boldsymbol{\beta})\)</span>.</p>
+</div>
+<div class="section level3">
+<h3 id="nonprop">Flexible, non-proportional hazards model<a class="anchor" aria-label="anchor" href="#nonprop"></a>
+</h3>
+<p>An alternative <em>non-proportional hazards</em> model is available.
+This is achieved by also modelling the spline coefficients <span class="math inline">\(p_k\)</span> as functions of covariates, in
+addition to the log-linear model on <span class="math inline">\(\eta\)</span>.</p>
+<p><span class="math display">\[log(p_k(\boldsymbol{x}) /
+p_1(\boldsymbol{x})) = b_k(\boldsymbol{x)} \]</span></p>
+<p><span class="math display">\[ b_k(\boldsymbol{x)} \sim Logistic(\mu_k
++ \boldsymbol{b}^{(np)T}_k \boldsymbol{x}, \sigma) \quad (k=2,...,K),
+\quad b_1 = 0 \]</span></p>
+<p>The <span class="math inline">\(s\)</span>th element of the vector
+<span class="math inline">\(\boldsymbol{b}^{(np)}_k\)</span> describes
+the departure from proportional hazards for the <span class="math inline">\(s\mbox{th}\)</span> covariate in the region of
+time associated with the <span class="math inline">\(k\)</span>th spline
+basis term. With all <span class="math inline">\(\boldsymbol{b}^{(np)}_k
+= 0\)</span> the model will be the proportional hazards model.
+(Currently in the package, either all covariates or none have to have
+proportional hazards).</p>
+<p>For each covariate <span class="math inline">\(s\)</span>, a
+hierarchical model is used for the non-proportionality effects <span class="math inline">\(b^{(np)}_{ks}\)</span>. This model “partially
+pools” the effects from different regions of time <span class="math inline">\(k\)</span>.</p>
+<p><span class="math display">\[ b^{(np)}_{ks} \sim Normal(0,
+\sigma^{(np)}_s) \]</span></p>
+<p>In the non-proportional hazards model, the ratio between the hazards
+<span class="math inline">\(h(t,\boldsymbol{x})\)</span> at different
+covariate values <span class="math inline">\(\boldsymbol{x}\)</span> is
+a function of time <span class="math inline">\(t\)</span>. Since the
+<span class="math inline">\(\boldsymbol{b}^{(np)}_k\)</span> may be
+arbirtarily different in each region of time <span class="math inline">\(k\)</span>, the hazard ratio can be an
+arbitrarily-flexible function of time. The amount and shape of
+non-proportionality is estimated from the data, while the hierarchical
+model protects against overfitting.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
