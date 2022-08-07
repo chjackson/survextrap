@@ -142,10 +142,10 @@
 ##'   than \code{fit_method="opt"}, but has not been investigated in depth for these models.
 ##'
 ##' @param loo Compute leave-one-out cross-validation statistics.  This is done by default. Set to
-##' \code{FALSE} to not compute them. 
+##' \code{FALSE} to not compute them.
 ##' If these statistics are computed, then they are returned in the \code{loo} component of the
 ##' object returned by \code{survextrap}.  See the \code{"examples"} vignette for some explanation
-##' of these. 
+##' of these.
 ##'
 #' @param ... Additional arguments to supply to control the Stan fit, passed to the appropriate
 #' \pkg{rstan} function, depending on which is chosen through the `fit_method` argument.
@@ -364,6 +364,10 @@ make_x <- function(formula, data, xlevs=NULL){
     if (ncol(mforig) > 0){
         factors <- names(mforig)[sapply(mforig, is.factor)]
         numerics <- names(mforig)[sapply(mforig, is.numeric)]
+        tofactors <- names(mforig)[sapply(mforig, function(x){is.character(x)|is.logical(x)})]
+        for (i in tofactors)
+          mforig[[i]] <- factor(mforig[[i]])
+        factors <- c(factors, tofactors)
         xlevs <- lapply(mforig[factors], levels)
         if ((length(factors)==1) && (length(numerics)==0)){
             ref_levs <- lapply(xlevs, function(x)x[1])

@@ -12,8 +12,10 @@ reference:
   - summary.survextrap
   - survival
   - hazard
+  - hazard_ratio
   - plot_survival
   - plot_hazard
+  - plot_hazard_ratio
   - plot.survextrap
   - mean.survextrap
   - rmst

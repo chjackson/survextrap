@@ -38,6 +38,7 @@ For these examples, we use a dataset of trial of chemotherapy for colon cancer, 
 
 ```{r}
 library(survextrap)
+library(ggplot2)
 library(dplyr)
 survminer::ggsurvplot(survfit(Surv(years, status) ~ 1, data=colons), data=colons)
 ```
@@ -236,7 +237,17 @@ In this example, the sample size in each treatment group and time period is smal
 
 The non-proportional hazards model is experimental. In theory, it can be "tuned" by changing the number of spline basis terms and the knot positions (through the `basehaz_ops` argument to `survextrap`), or by changing the prior on the parameter $\sigma^{(np)}_s$ that controls the smoothness of the departures from proportional hazards (`prior_sdnp` argument).   But this has not been tested much in practice. 
 
-If a plot of the posterior hazard ratio against time is desired, this might be constructed by extracting samples from the posterior of the hazard for different covariate values by using `hazard(..., sample=TRUE)`, converting to samples from the hazard ratio, and then summarising and plotting. 
+If a plot of the posterior hazard ratio against time is desired, this might be constructed by extracting samples from the posterior of the hazard for different covariate values by using `hazard(..., sample=TRUE)`, converting to samples from the hazard ratio, and then summarising and plotting.   
+
+The functions `hazard_ratio()` and `plot_hazard_ratio()` can be used to calculate or plot the ratio of hazards between two covariate values, as a function of time.  The covariate values are supplied in a data frame with two rows - all covariates in the model should be included here (there is currently no facility for standardised effect estimation).
+
+```{r}
+nd <- data.frame(rx = c("Lev+5FU","Lev"))
+plot_hazard_ratio(rxnph_mod, newdata=nd) + 
+  coord_cartesian(ylim=c(0,5)) 
+```
+
+In this example, the credible interval for the Lev+5FU / Lev hazard ratio is wide, and does not suggest that the hazard ratio is time-varying.  This model is probably overfitted around time 0.5 to 1.  Fewer knots may be preferable.
 
 
 ## Model comparison 
@@ -307,7 +318,6 @@ In the example below, the excess hazard from the relative hazard model (with con
 
 ```{r,results="hide"}
 mod <- survextrap(Surv(years, status) ~ 1, data=colonsb, chains=1)
-library(ggplot2)
 plot_hazard(mod) + 
     geom_line(data=hazard(modb), col="blue")
 ```

@@ -1,3 +1,5 @@
+## TODO more modularised plot options/defaults
+
 ##' Plot hazard curves from a survextrap model
 ##'
 ##' @inheritParams survival
@@ -130,4 +132,37 @@ plot_hazsurv <- function(x, newdata=NULL, ...){
     ps <- plot_survival(x, newdata=newdata, ...)
     ph <- plot_hazard(x, newdata=newdata, ...)
     gridExtra::grid.arrange(ps, ph, nrow=1)
+}
+
+
+##' Plot hazard ratio against time from a survextrap model
+##'
+##' Intended for use with non-proportional hazards models (\code{survextrap(...,nonprop=TRUE)}).
+##'
+##'
+##' @inheritParams hazard_ratio
+##' @inheritParams plot_hazard
+##'
+##' @export
+plot_hazard_ratio <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
+                              ci=TRUE, xlab="Time", ylab="Hazard ratio",
+                              line_size=1.5, ci_alpha=0.2){
+    lower <- upper <- NULL
+    hr <- hazard_ratio(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
+    knots <- x$basehaz$knots[x$basehaz$knots <= max(hr$times)]
+    aes <- list(x="times", y="median")
+    geom_maps <- do.call("aes_string", aes)
+    geom_ylab <- ggplot2::ylab(ylab)
+    geom_xlab <- ggplot2::xlab(xlab)
+    p <- ggplot(hr, mapping=geom_maps) +
+        geom_ylab + geom_xlab +
+        theme_minimal() +
+        theme(panel.grid.minor = element_blank()) +
+        geom_vline(xintercept=knots, col="blue", lwd=0.4*line_size, alpha=0.3) +
+        geom_hline(yintercept=1, col="gray30") +
+        geom_line(size=line_size)
+    if (ci)
+        p <- p +
+            geom_ribbon(aes(ymin=lower, ymax=upper), alpha=ci_alpha)
+    p
 }

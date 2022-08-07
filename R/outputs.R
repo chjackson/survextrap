@@ -32,18 +32,21 @@ mean.survextrap <- function(x, newdata=NULL, niter=NULL, ...){
 }
 
 default_newdata <- function(x, newdata){
-    all_covs <- union(names(x$x$mfbase), names(x$xcure$mfbase))
-    if (is.null(newdata) && ((x$ncovs>0) || (x$ncurecovs>0))){
-        newdata <- as.data.frame(c(x$x$mfbase, x$xcure$mfbase))[all_covs]
-    }  else {
-        missing_covs <- all_covs[!(all_covs %in% names(newdata))]
-        if (length(missing_covs) > 0){
-            plural <- if (length(missing_covs) > 1) "s" else ""
-            stop(sprintf("Values of covariate%s %s not included in `newdata`",
-                         plural, paste(missing_covs, collapse=",")))
-        }
+  all_covs <- union(names(x$x$mfbase), names(x$xcure$mfbase))
+  has_covs <- (x$ncovs>0) || (x$ncurecovs>0)
+  if (is.null(newdata) && has_covs){
+    newdata <- as.data.frame(c(x$x$mfbase, x$xcure$mfbase))[all_covs]
+  }  else {
+    if (has_covs && !(is.data.frame(newdata) || is.list(newdata)))
+      stop("`newdata` should be a data frame or list") # TODO test lists
+    missing_covs <- all_covs[!(all_covs %in% names(newdata))]
+    if (length(missing_covs) > 0){
+      plural <- if (length(missing_covs) > 1) "s" else ""
+      stop(sprintf("Values of covariate%s %s not included in `newdata`",
+                   plural, paste(missing_covs, collapse=",")))
     }
-    newdata
+  }
+  newdata
 }
 
 ##' Restricted mean survival time
@@ -111,7 +114,7 @@ get_alpha_bycovs <- function(x, stanmat, newdata=NULL){
     } else X <- NULL
     X <- cbind("(Intercept)"=1, X)
     loghr_names <- grep("loghr", colnames(stanmat), value=TRUE)
-    beta <- stanmat[, c("alpha", loghr_names)]
+    beta <- stanmat[, c("alpha", loghr_names), drop=FALSE]
     beta %*% t(X) # niter x nvals
 }
 
@@ -204,7 +207,46 @@ survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=
 ##'
 ##' @export
 hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE) {
-    timedep_output(x, output="hazard", newdata=newdata, times=times, tmax=tmax, niter=niter, sample=sample)
+  timedep_output(x, output="hazard", newdata=newdata, times=times, tmax=tmax, niter=niter, sample=sample)
+}
+
+default_newdata_hr <- function(x, newdata){
+  if (x$ncovs==0 && x$ncurecovs==0)
+    stop("No covariates are in the model, so can't compute a hazard ratio")
+  if (!is.null(newdata))
+    if (!is.data.frame(newdata) || (nrow(newdata) != 2))
+      stop("`newdata` should be a data frame with two rows")
+  nd <- default_newdata(x, newdata)
+  if (!is.null(nd) && is.data.frame(nd) && (nrow(nd) == 2))
+    return(nd)
+  else {
+    stop("`newdata` should be supplied explicitly, as a data frame with two rows, unless the only covariate in the model is a factor with two levels")
+  }
+}
+
+#' Hazard ratio against time in a survextrap model
+#' 
+#' Intended for use with non-proportional hazards models (\code{survextrap(...,nonprop=TRUE)}).
+#'
+#' @param newdata A data frame with two rows.  The hazard ratio will be defined as hazard(first row)
+#' divided by hazard(second row).
+#'
+#' @inheritParams hazard
+#'
+#' @export
+hazard_ratio <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE) {
+  newdata <- default_newdata_hr(x, newdata)
+  if (is.null(times)) times <- default_plottimes(x, tmax)
+  haz1 <- hazard(x, newdata=newdata[1,,drop=FALSE], times=times, tmax=tmax, niter=niter, sample=TRUE)[,,1]
+  haz2 <- hazard(x, newdata=newdata[2,,drop=FALSE], times=times, tmax=tmax, niter=niter, sample=TRUE)[,,1]
+  hr_sam <- haz1 / haz2
+  if (!sample){
+    res <- apply(hr_sam, 1, function(y)quantile(y, probs=c(0.5, 0.025, 0.975), na.rm=TRUE))
+    res <- as.data.frame(t(res))
+    names(res) <- c("median","lower","upper")
+    res <- cbind(times = times, res)
+  } else res <- hr_sam
+  res
 }
 
 timedep_output <- function(x, output="survival", newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE){
@@ -289,14 +331,13 @@ get_coefs_bycovs <- function(x, stanmat, newdata=NULL, X=NULL){
   if (is.null(X)){
     if (is.null(newdata) && (x$ncovs > 0)) newdata <- x$x$mfbase
     if (NROW(newdata) > 0){
-      X <- newdata_to_X(newdata, x, x$formula, x$x$xlevs) # nvals x npars
+      X <- newdata_to_X(newdata, x, x$formula, x$x$xlevs) # nvals x ncovs
       X <- drop_intercept(X)
     } else X <- NULL
-  } # no check is done on X
-  X <- cbind("(Intercept)"=1, X)
+  } 
   niter <- nrow(stanmat)
-  nvals <- nrow(X)
-
+  nvals <- if (is.null(X)) 1 else nrow(X)
+  
   if (x$nonprop){
     b_np_names <- grep("b_np", colnames(stanmat), value=TRUE)
     nvars <- x$basehaz$nvars

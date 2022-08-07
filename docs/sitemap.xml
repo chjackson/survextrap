@@ -31,6 +31,9 @@
     <loc>https://chjackson.github.io/survextrap/reference/hazard.html</loc>
   </url>
   <url>
+    <loc>https://chjackson.github.io/survextrap/reference/hazard_ratio.html</loc>
+  </url>
+  <url>
     <loc>https://chjackson.github.io/survextrap/reference/hazard_survextrap.html</loc>
   </url>
   <url>
@@ -59,6 +62,9 @@
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/plot_hazard.html</loc>
+  </url>
+  <url>
+    <loc>https://chjackson.github.io/survextrap/reference/plot_hazard_ratio.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/plot_mspline.html</loc>
