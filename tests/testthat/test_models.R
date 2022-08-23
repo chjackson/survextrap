@@ -48,13 +48,45 @@ test_that("Weibull model",{
 })
 
 
-### Changing various settings in basic model
-### Internal knots, boundary knots
-### Spline prior mean
-### EB for smooth variance
-### Fixed smooth variance
-### With external data
+test_that("Changing the spline specification",{
+  expect_error(survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
+                    basehaz_ops = list(df=4)), "df - degree should be >= 2")
+  mod2 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
+                     basehaz_ops = list(degree=4))
+  mod1 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
+                      basehaz_ops = list(degree=1))
+  mod0 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
+                      basehaz_ops = list(degree=0))
+  expect_error(survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
+                      basehaz_ops = list(degree=-1)), "must be a nonnegative")
+  mod0 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
+                      basehaz_ops = list(degree=0, df=2, iknots=1.5))
+  expect_equivalent(mod0$basehaz$iknots, 1.5)
+})
 
+test_that("Spline prior mean",{
+  coef1 <- function(x){summary(x)[summary(x)$variable=="coefs",]$median[1]}
+  mod0 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
+                      basehaz_ops = list(degree=0, df=2, bknots=c(0.1, 4)))
+  expect_equivalent(mod0$basehaz$bknots, c(0.1, 4))
+  mod01 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
+                       basehaz_ops = list(degree=0, df=2, bknots=c(0.1, 4)),
+                       coefs_mean = c(0.5, 0.5))
+  expect_gt(coef1(mod01), coef1(mod0))
+})
+
+
+test_that("Smoothing standard deviation specifications",{
+  mod0 <-  survextrap(Surv(years, status) ~ 1, data=colons, smooth_sd="eb", fit_method="opt",
+                      basehaz_ops = list(degree=0, df=2))
+  expect_true(mod0$smooth_sd != 1)
+  mod1 <-  survextrap(Surv(years, status) ~ 1, data=colons, smooth_sd="bayes", fit_method="opt",
+                      basehaz_ops = list(degree=0, df=2))
+  expect_equal(mod1$smooth_sd, "bayes")
+  mod2 <-  survextrap(Surv(years, status) ~ 1, data=colons, smooth_sd=2, fit_method="opt",
+                      basehaz_ops = list(degree=0, df=2))
+  expect_equal(mod2$smooth_sd, 2)
+})
 
 
 ndc <- data.frame(x=c(0,1))
@@ -105,9 +137,3 @@ test_that("Relative survival",{
     mod2 <- survextrap(Surv(years, status) ~ 1, data=colonse, external=ext, backhaz=bh, fit_method = "opt")
     expect_lt(coef(mod2)["alpha"], coef(mod1)["alpha"])
 })
-
-
-## TODO test error handling for if wrong covariate names supplied in newdata
-## And a lot more errors
-
-## Specific tests for post estimation functions

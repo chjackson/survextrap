@@ -169,6 +169,9 @@ of these.}
 \item{...}{Additional arguments to supply to control the Stan fit, passed to the appropriate
 \pkg{rstan} function, depending on which is chosen through the \code{fit_method} argument.}
 }
+\value{
+TODO document return list
+}
 \description{
 Flexible Bayesian parametric survival models.  Individual data are represented using M-splines
 and a proportional hazards or flexible non-proportional hazards model.   Extrapolations

@@ -1,7 +1,3 @@
-## TODO
-## should newdata be called new_data? is this the tidymodels convention
-
-
 ##' Mean survival time
 ##'
 ##' @inheritParams print.survextrap
@@ -37,12 +33,12 @@ default_newdata <- function(x, newdata){
   if (is.null(newdata) && has_covs){
     newdata <- as.data.frame(c(x$x$mfbase, x$xcure$mfbase))[all_covs]
   }  else {
-    if (has_covs && !(is.data.frame(newdata) || is.list(newdata)))
-      stop("`newdata` should be a data frame or list") # TODO test lists
+    if (has_covs && !(is.data.frame(newdata)))
+      stop("`newdata` should be a data frame")
     missing_covs <- all_covs[!(all_covs %in% names(newdata))]
     if (length(missing_covs) > 0){
       plural <- if (length(missing_covs) > 1) "s" else ""
-      stop(sprintf("Values of covariate%s %s not included in `newdata`",
+      stop(sprintf("Values of covariate%s `%s` not included in `newdata`",
                    plural, paste(missing_covs, collapse=",")))
     }
   }
@@ -96,14 +92,15 @@ rmst <- function(x, t, newdata=NULL, niter=NULL){
 }
 
 newdata_to_X <- function(newdata, x, formula=NULL, xlevs=NULL){
-    if (is.null(xlevs)) xlevs <- x$x$xlevs
-    if (is.null(formula)) formula <- x$formula
-    form <- delete.response(terms(formula))
-    if (is.null(newdata))
-        X <- matrix(1, nrow=1, ncol=1)
-    else
-        X <- model.matrix(form, newdata, xlev=xlevs)
-    X
+  if (is.null(xlevs)) xlevs <- x$x$xlevs
+  if (is.null(formula)) formula <- x$formula
+  form <- delete.response(terms(formula))
+  if (is.null(newdata))
+    X <- matrix(1, nrow=1, ncol=1)
+  else {
+    X <- model.matrix(form, newdata, xlev=xlevs)
+  }
+  X
 }
 
 get_alpha_bycovs <- function(x, stanmat, newdata=NULL){

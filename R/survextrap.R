@@ -150,7 +150,8 @@
 #' @param ... Additional arguments to supply to control the Stan fit, passed to the appropriate
 #' \pkg{rstan} function, depending on which is chosen through the `fit_method` argument.
 #'
-#'
+#' @return TODO document return list
+#' 
 #' @export
 survextrap <- function(formula,
                        data,
@@ -227,17 +228,17 @@ survextrap <- function(formula,
     nvars <- basehaz$nvars
 
     if (is.null(coefs_mean)){
-        coefs_mean <- mspline_uniform_weights(iknots = basehaz$iknots, bknots=basehaz$bknots)
+        coefs_mean <- mspline_uniform_weights(iknots = basehaz$iknots, bknots=basehaz$bknots, degree=basehaz$degree)
     } else {
       coefs_mean <- validate_coefs_mean(coefs_mean)
     }
-    b_mean <- log(coefs_mean[-1] / coefs_mean[1])
+    b_mean <- aa(log(coefs_mean[-1] / coefs_mean[1]))
     modelids <- c("mspline", "weibull")
     if (!(modelid %in% modelids)) stop("modelid should be mspline or weibull")
     modelid_num <- match(modelid, modelids)
 
     est_smooth <- (smooth_sd == "bayes")
-    if (est_smooth) smooth_sd <- 1
+    if (est_smooth) smooth_sd_init <- 1
 
     if (modelid=="weibull"){
         ## Weibull model.
@@ -299,12 +300,12 @@ survextrap <- function(formula,
     staninit <- list(gamma = aa(0),
                      loghr = aa(rep(0, standata$ncovs)),
                      beta_err = aa(rep(0, standata$nvars-1)),
-                     smooth_sd = aa(if(standata$est_smooth) smooth_sd else numeric()),
+                     smooth_sd = aa(if(standata$est_smooth) smooth_sd_init else numeric()),
                      pcure = aa(pcure_init))
     if (identical(smooth_sd, "eb")){
-        smooth_sd <- eb_smoothness(standata, staninit)
+        smooth_sd <- eb_smoothness(standata, staninit, prior_smooth)
     }
-    standata$smooth_sd_fixed <- if (est_smooth) aa(numeric()) else aa(smooth_sd)
+    standata$smooth_sd_fixed <- if (est_smooth) aa(numeric()) else if (modelid=="weibull") aa(1) else aa(smooth_sd)
 
     stan_optimizing_ops <- function(...){
         ops <- list(...)
@@ -393,9 +394,12 @@ make_x <- function(formula, data, xlevs=NULL){
 }
 
 
-eb_smoothness <- function(standata, staninit){
+eb_smoothness <- function(standata, staninit, prior_smooth){
     standata$est_smooth <- 1
     standata$smooth_sd_fixed  <- aa(numeric()) # dummy
+    prior <- get_prior_smooth(prior_smooth, est_smooth=TRUE)
+    standata$prior_smooth <- as.numeric(unlist(prior[c("shape","rate")]))
+    staninit$smooth_sd <- aa(1)
     fits <- rstan::optimizing(stanmodels$survextrap, data=standata, init=staninit, hessian=FALSE, verbose=TRUE)
     if (fits$return_code==0){
         smooth_sd <- fits$par["smooth_sd[1]"]
@@ -574,9 +578,11 @@ make_basehaz <- function(basehaz_ops,
     bknots <- basehaz_ops$bknots
     degree <- basehaz_ops$degree
     if (is.null(df))
-        df <- 10L
+      df <- 10L
     if (is.null(degree))
-        degree <- 3L # cubic splines
+      degree <- 3L # cubic splines
+    if (df < degree + 2)
+      stop(sprintf("df = %s and degree = %s, but df - degree should be >= 2", df, degree))
     tt <- times[status == 1] # uncensored event times
     if (is.null(iknots) && !length(tt)) {
         warning2("No observed events found in the data. Censoring times will ",

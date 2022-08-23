@@ -94,7 +94,6 @@ get_priors <- function(loghaz, loghr, smooth, cure, logor_cure, x, xcure, est_sm
                        nonprop, prior_sdnp){
     validate_prior(loghaz)
     loghr <- get_prior_coveffs(loghr, x, "loghr") 
-    validate_prior(smooth)
     smooth <- get_prior_smooth(smooth, est_smooth)
     validate_prior(cure)
     logor_cure <- get_prior_coveffs(logor_cure, xcure, "logor_cure")
@@ -127,6 +126,7 @@ validate_prior <- function(prior, priorname=NULL, element=NULL){
 }
 
 get_prior_smooth <- function(prior, est_smooth){
+    validate_prior(prior, "smooth")
     if (!est_smooth) return(list(shape=aa(numeric()), rate=aa(numeric())))
     prior
 }

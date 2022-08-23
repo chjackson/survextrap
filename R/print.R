@@ -10,16 +10,19 @@
 ##'
 ##' @export
 print.survextrap <- function(x, ...){
+  if (x$modelid=="spline"){
     cat("M-spline survival model\n")
     cat(sprintf("%s knots, degree %s, %s basis terms.\n", length(x$basehaz$knots), x$basehaz$degree, x$basehaz$nvars))
     cat(sprintf("Smoothness SD: %s\n", if(x$est_smooth) "full Bayes" else round(x$smooth_sd, 2)))
 
     print_priors(x)
-    cat("Posterior summary:\n")
-## TODO convergence diagnostics
-    print(summary(x))
+  } else if (x$modelid=="weibull"){
+    cat("Weibull survival model\n")
+  }
+  cat("Posterior summary:\n")
+  ## TODO convergence diagnostics
+  print(summary(x))
 }
-
 
 form_prior_str <- function(prior){
     pars_db <- list(normal = c("location","scale"),
