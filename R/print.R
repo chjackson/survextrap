@@ -10,7 +10,7 @@
 ##'
 ##' @export
 print.survextrap <- function(x, ...){
-  if (x$modelid=="spline"){
+  if (x$modelid=="mspline"){
     cat("M-spline survival model\n")
     cat(sprintf("%s knots, degree %s, %s basis terms.\n", length(x$basehaz$knots), x$basehaz$degree, x$basehaz$nvars))
     cat(sprintf("Smoothness SD: %s\n", if(x$est_smooth) "full Bayes" else round(x$smooth_sd, 2)))
