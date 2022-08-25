@@ -9,9 +9,13 @@
 \arguments{
 \item{object}{A fitted model object as returned by \code{\link{survextrap}}}
 
-\item{...}{Other arguments (currently unused).
-
-A data frame of summary statistics for the model parameters is returned.
+\item{...}{Other functions to compute a summary statistic from a vector
+of posterior samples can be supplied here.   Many useful such functions are
+provided with the \pkg{posterior} package. If the arguments are named,
+then these are used to name the returned data frame.  See the examples below.}
+}
+\value{
+A data frame (actually a tibble) of summary statistics for the model parameters is returned.
 
 The parameters, as indicated in the \code{variable} column, are:
 
@@ -42,14 +46,21 @@ to their baseline levels.
 
 \code{nperr}: Standardised departures from proportional hazards in the non-proportional hazards model, defined as \eqn{b^{(np)}_{ks} / \sigma^{(np)}_s} (see the "methods" vignette for definitions of these).
 
-\code{sd_np}: Smoothness standard deviations \eqn{\sigma^{(np)}_s} for the non-proportionality effects.}
+\code{sd_np}: Smoothness standard deviations \eqn{\sigma^{(np)}_s} for the non-proportionality effects.
 }
 \description{
-The intervals are 95\% credible intervals.
+By default, a median and 95\% credible intervals are presented, alongside
+the Rhat convergence diagnostic and the bulk effective sample size (see the \pkg{posterior} package).  For models
+fitted by optimisation rather than MCMC, the posterior mode is also returned.
 }
 \details{
-Suggestions for what else to add to this are welcome.  Convergence diagnostics?
-Mode for optim method.  Mean?
-At least document how to get other arbitrary posterior summaries using
-the posterior package.  Could even allow as an argument to this.
+Any other posterior summary can be computed if the appropriate function to compute it
+is supplied here.
+}
+\examples{
+mod <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt")
+summary(mod)
+summary(mod, mean)
+summary(mod, mean, ess_tail=posterior::ess_tail)
+
 }

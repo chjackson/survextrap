@@ -33,7 +33,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_nonprophaz");
-    reader.add_event(342, 340, "end", "model_nonprophaz");
+    reader.add_event(344, 342, "end", "model_nonprophaz");
     return reader;
 }
 template <typename T0__, typename T1__, typename T2__>
@@ -1747,6 +1747,8 @@ public:
         names__.push_back("b_np");
         names__.push_back("ssd");
         names__.push_back("alpha");
+        names__.push_back("hr");
+        names__.push_back("or_cure");
     }
     void get_dims(std::vector<std::vector<size_t> >& dimss__) const {
         dimss__.resize(0);
@@ -1813,6 +1815,12 @@ public:
         dims__.resize(0);
         dimss__.push_back(dims__);
         dims__.resize(0);
+        dimss__.push_back(dims__);
+        dims__.resize(0);
+        dims__.push_back(ncovs);
+        dimss__.push_back(dims__);
+        dims__.resize(0);
+        dims__.push_back(ncurecovs);
         dimss__.push_back(dims__);
     }
     template <typename RNG>
@@ -2108,9 +2116,31 @@ public:
             stan::math::initialize(alpha, DUMMY_VAR__);
             stan::math::fill(alpha, DUMMY_VAR__);
             stan::math::assign(alpha,(log_crude_event_rate + get_base1(gamma, 1, "gamma", 1)));
+            current_statement_begin__ = 340;
+            validate_non_negative_index("hr", "ncovs", ncovs);
+            Eigen::Matrix<double, Eigen::Dynamic, 1> hr(ncovs);
+            stan::math::initialize(hr, DUMMY_VAR__);
+            stan::math::fill(hr, DUMMY_VAR__);
+            stan::math::assign(hr,stan::math::exp(loghr));
+            current_statement_begin__ = 341;
+            validate_non_negative_index("or_cure", "ncurecovs", ncurecovs);
+            Eigen::Matrix<double, Eigen::Dynamic, 1> or_cure(ncurecovs);
+            stan::math::initialize(or_cure, DUMMY_VAR__);
+            stan::math::fill(or_cure, DUMMY_VAR__);
+            stan::math::assign(or_cure,stan::math::exp(logor_cure));
             // validate, write generated quantities
             current_statement_begin__ = 339;
             vars__.push_back(alpha);
+            current_statement_begin__ = 340;
+            size_t hr_j_1_max__ = ncovs;
+            for (size_t j_1__ = 0; j_1__ < hr_j_1_max__; ++j_1__) {
+                vars__.push_back(hr(j_1__));
+            }
+            current_statement_begin__ = 341;
+            size_t or_cure_j_1_max__ = ncurecovs;
+            for (size_t j_1__ = 0; j_1__ < or_cure_j_1_max__; ++j_1__) {
+                vars__.push_back(or_cure(j_1__));
+            }
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
             // Next line prevents compiler griping about no return
@@ -2277,6 +2307,18 @@ public:
         param_name_stream__.str(std::string());
         param_name_stream__ << "alpha";
         param_names__.push_back(param_name_stream__.str());
+        size_t hr_j_1_max__ = ncovs;
+        for (size_t j_1__ = 0; j_1__ < hr_j_1_max__; ++j_1__) {
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "hr" << '.' << j_1__ + 1;
+            param_names__.push_back(param_name_stream__.str());
+        }
+        size_t or_cure_j_1_max__ = ncurecovs;
+        for (size_t j_1__ = 0; j_1__ < or_cure_j_1_max__; ++j_1__) {
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "or_cure" << '.' << j_1__ + 1;
+            param_names__.push_back(param_name_stream__.str());
+        }
     }
     void unconstrained_param_names(std::vector<std::string>& param_names__,
                                    bool include_tparams__ = true,
@@ -2418,6 +2460,18 @@ public:
         param_name_stream__.str(std::string());
         param_name_stream__ << "alpha";
         param_names__.push_back(param_name_stream__.str());
+        size_t hr_j_1_max__ = ncovs;
+        for (size_t j_1__ = 0; j_1__ < hr_j_1_max__; ++j_1__) {
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "hr" << '.' << j_1__ + 1;
+            param_names__.push_back(param_name_stream__.str());
+        }
+        size_t or_cure_j_1_max__ = ncurecovs;
+        for (size_t j_1__ = 0; j_1__ < or_cure_j_1_max__; ++j_1__) {
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "or_cure" << '.' << j_1__ + 1;
+            param_names__.push_back(param_name_stream__.str());
+        }
     }
 }; // model
 }  // namespace

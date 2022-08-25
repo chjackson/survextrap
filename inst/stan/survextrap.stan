@@ -313,4 +313,6 @@ model {
 generated quantities {
     // transformed intercept.  TODO Why not call this eta?  Or just loghaz cos it is log of eta in the methods vig
     real alpha = log_crude_event_rate + gamma[1];
+    vector[ncovs] hr = exp(loghr);
+    vector[ncurecovs] or_cure = exp(logor_cure);
 }

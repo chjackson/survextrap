@@ -36,15 +36,22 @@ test_that("Basic spline model, with covariates",{
     postest_test(mod, nd)
 })
 
+test_that("Basic spline model, non-proportional hazards",{
+  modnp <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt",
+                      nonprop=TRUE, basehaz_ops = list(df=4,degree=2))
+  test_median(modnp, "alpha", -0.251)
+})
+
+
 test_that("Weibull model",{
     mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt", modelid="weibull")
-    test_median(mod, "alpha", 1.6575)
+    test_median(mod, "logscale", 1.6575)
     postest_test(mod)
     mod <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt", modelid="weibull")
-    test_median(mod, "alpha", 1.32)
+    test_median(mod, "logscale", 1.32)
     postest_test(mod, nd)
     sr <- survival::survreg(Surv(years, status) ~ rx, data=colons, dist="weibull")
-    expect_equivalent(coef(sr)["rxLev"], coef(mod)["loghr_rxLev"], tol=1e-01)
+    expect_equivalent(coef(sr)["rxLev"], coef(mod)["logtaf_rxLev"], tol=1e-01)
 })
 
 

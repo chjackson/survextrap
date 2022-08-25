@@ -48,9 +48,9 @@ test_that("Priors on cure prob behave",{
                       prior_cure = p_beta(1, 10))
     nd3 <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt", cure=TRUE,
                       prior_cure = p_beta(100, 1)) # dominated by data
-    m1 <- summary(nd1) %>% filter(variable=="pcure") %>% pull(median)
-    m2 <- summary(nd2) %>% filter(variable=="pcure") %>% pull(median)
-    m3 <- summary(nd3) %>% filter(variable=="pcure") %>% pull(median)
+    m1 <- summary(nd1) %>% filter(variable=="pcure") %>% pull(mode)
+    m2 <- summary(nd2) %>% filter(variable=="pcure") %>% pull(mode)
+    m3 <- summary(nd3) %>% filter(variable=="pcure") %>% pull(mode)
     expect_gt(m1, m2)
     expect_gt(m3, m1)
 })

@@ -26,7 +26,7 @@ Imports:
     rstpm2,
     splines2,
     survminer,
-    tidybayes,
+    tibble,
     loo
 LinkingTo: 
     BH (>= 1.66.0),

@@ -20,7 +20,6 @@ print.survextrap <- function(x, ...){
     cat("Weibull survival model\n")
   }
   cat("Posterior summary:\n")
-  ## TODO convergence diagnostics
   print(summary(x))
 }
 
@@ -58,20 +57,102 @@ print_priors <- function(x){
     }
 }
 
+
+# List of parameters in survextrap models that summary statistics are calculated for
+.parlist <- list(
+  list(name="alpha", dimnames=NULL),
+  list(name="coefs", dimnames="basis_num"),
+  list(name="pcure", dimnames=NULL),
+  list(name="loghr", dimnames="term"),
+  list(name="hr", dimnames="term"),
+  list(name="logor_cure", dimnames="term"),
+  list(name="or_cure", dimnames="term"),
+  list(name="smooth_sd", dimnames=NULL),
+  list(name="nperr", dimnames=c("term","basis_num")),
+  list(name="sd_np", dimnames="term")
+)
+# This is a data frame, whose second component ("dimnames") is in list column format
+.parlist <- list2DF(list(name = sapply(.parlist, function(x)x[[1]]),
+                         dimnames = sapply(.parlist, function(x)x[[2]]),
+                         ndims = sapply(.parlist, function(x)length(x[[2]]))))
+
+# Return a character vector with names of variables (including indices) in a Stan model
+# These were stored in different places according to whether optimizing() or sampling() was used
+get_parnames <- function(stanfit){
+  if (inherits(stanfit,"stanfit"))
+    names(stanfit)
+  else names(stanfit$par)
+}
+
+# Get a regex pattern matching a Stan variable name of any dimension
+# such as myname[1,3,2], myname[4,1], myname
+# ndims is the number of dimensions
+# The index into each dimension is captured to store separately
+varname_pattern <- function(ndims){
+  patt <- "^.+"
+  if (ndims > 0)
+    patt <- paste0(patt,
+                   paste0("\\[",
+                          paste(rep("(.+)", ndims), collapse=","), "\\]"))
+  paste0(patt, "$")
+}
+
+# Build a data frame of parameter names and indices from a Stan model
+# Indices with different meanings are stored in different variables
+# Currently-used indices include
+#  "basis_num" (for spline coefficient)
+#  "term" (covariate described by a covariate effect)
+parnames_to_df <- function(x){
+  parname <- get_parnames(x$stanfit)
+  pardf <- data.frame(parname)
+  pardf$variable <- gsub("^(.+)\\[.+\\]$", "\\1", pardf$parname)
+  udn <- unique(unlist(.parlist$dimnames))
+  for (i in udn){
+    pardf[[i]] <- NA
+  }
+  pardf <- pardf[pardf$variable %in% .parlist$name,]
+  for (i in seq_len(nrow(.parlist))){
+    thispar <- pardf$variable==.parlist$name[i]
+    dn <- unlist(.parlist$dimnames[i])
+    for (j in seq_along(dn)){
+      index_name <- dn[j]
+      pardf[[index_name]][thispar] <-
+        as.numeric(
+          gsub(varname_pattern(.parlist$ndims[i]), sprintf("\\%s",j),
+               pardf$parname[thispar])
+        )
+    }
+  }
+  for (i in udn){
+    if (all(is.na(pardf[[i]]))) pardf[[i]] <- NULL
+  }
+  has_xterm <- pardf$variable %in% c("loghr", "hr", "nperr", "sd_np")
+  pardf$term[has_xterm] <- x$x$xnames[pardf$term[has_xterm]]
+  pardf$term[pardf$variable %in% c("logor_cure","or_cure")] <- x$xcure$xnames
+  pardf$basis_num[pardf$variable=="nperr"] <- pardf$basis_num[pardf$variable=="nperr"] + 1
+  pardf$variable <- factor(pardf$variable, levels=.parlist$name)
+  pardf <- pardf[order(pardf$variable),]
+  pardf$variable <- as.character(pardf$variable)
+  pardf
+}
+
 ##' Posterior summary statistics for parameters of survextrap models
 ##'
-##' The intervals are 95% credible intervals.
+##' By default, a median and 95% credible intervals are presented, alongside
+##' the Rhat convergence diagnostic and the bulk effective sample size (see the \pkg{posterior} package).  For models
+##' fitted by optimisation rather than MCMC, the posterior mode is also returned.
 ##'
-##' Suggestions for what else to add to this are welcome.  Convergence diagnostics?
-##' Mode for optim method.  Mean?
-##' At least document how to get other arbitrary posterior summaries using
-##' the posterior package.  Could even allow as an argument to this.
+##' Any other posterior summary can be computed if the appropriate function to compute it
+##' is supplied here. 
 ##'
 ##' @param object A fitted model object as returned by \code{\link{survextrap}}
 ##'
-##' @param ... Other arguments (currently unused).
+##' @param ... Other functions to compute a summary statistic from a vector
+##' of posterior samples can be supplied here.   Many useful such functions are
+##' provided with the \pkg{posterior} package. If the arguments are named,
+##' then these are used to name the returned data frame.  See the examples below.
 ##'
-##' A data frame of summary statistics for the model parameters is returned.
+##' @return A data frame (actually a tibble) of summary statistics for the model parameters is returned.
 ##'
 ##' The parameters, as indicated in the `variable` column, are:
 ##'
@@ -81,7 +162,7 @@ print_priors <- function(x){
 ##' to their baseline levels.
 ##'
 ##' `coefs`: Coefficients of the M-spline basis terms.  If a non-proportional hazards model
-##' was fitted, these are with covariates set to zero or baseline levels. 
+##' was fitted, these are with covariates set to zero or baseline levels.
 ##'
 ##' `loghr`: Log hazard ratios for each covariate in the model. For cure
 ##' models, this refers to covariates on survival for uncured people.  For non-proportional hazards
@@ -104,73 +185,47 @@ print_priors <- function(x){
 ##'
 ##' `sd_np`: Smoothness standard deviations \eqn{\sigma^{(np)}_s} for the non-proportionality effects.
 ##'
+##' @examples
+##' mod <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt")
+##' summary(mod)
+##' summary(mod, mean)
+##' summary(mod, mean, ess_tail=posterior::ess_tail)
+##'
 ##' @export
 summary.survextrap <- function(object, ...){
-    i <- .value <- .variable <- variable <- term <- .lower <- .upper <- logor_cure <- basis_num <- NULL
-    sam <- get_draws(object)
-    alpha <- tidybayes::gather_rvars(sam, alpha)
-    summ <- alpha %>% mutate(i=NA)
-    if (object$cure){
-        pcure <- tidybayes::gather_rvars(sam, pcure)
-        summ <- summ %>% full_join(pcure, by=c(".variable",".value"))
-    }
-    if (object$ncovs>0){
-        loghr <- tidybayes::gather_rvars(sam, loghr[i]) %>%
-            mutate(term=object$x$xnames)
-        hr <- loghr %>%
-            mutate(.value = exp(.value),
-                   .variable = "hr")
-        summ <- summ %>%
-            full_join(loghr, by=c(".variable",".value","i")) %>%
-            full_join(hr, by=c(".variable",".value","i","term"))
-    }
-    if (object$ncurecovs>0){
-        logor <- tidybayes::gather_rvars(sam, logor_cure[i]) %>%
-            mutate(term=object$xcure$xnames)
-        or <- logor %>%
-            mutate(.value = exp(.value),
-                   .variable = "or_cure")
-        summ <- summ %>%
-            full_join(logor, by=c(".variable",".value","i")) %>%
-            full_join(or, by=c(".variable",".value","i","term"))
-    }
-    if (object$est_smooth){
-        smooth_sd <- tidybayes::gather_rvars(sam, smooth_sd)
-        summ <- summ %>% full_join(smooth_sd, by=c(".variable",".value"))
-    }
-    coefs <- tidybayes::gather_rvars(sam, coefs[basis_num])
-    summ <- summ %>%
-      full_join(coefs, by=c(".variable",".value"))
-    if (object$nonprop){
-      nperr <- tidybayes::gather_rvars(sam, nperr[i,basis_num]) %>%
-          mutate(basis_num = basis_num + 1,
-                 term = object$x$xnames[.data$i])
-      sd_np <- tidybayes::gather_rvars(sam, sd_np[i]) %>%
-          mutate(term=object$x$xnames)
-      summ <- summ %>%
-        full_join(nperr, by=c(".variable",".value","term","basis_num")) %>%
-        full_join(sd_np, by=c(".variable",".value","term"))
-    }
-    summ <- summ %>%
-        mutate(sd = posterior::sd(.value)) %>%
-        tidybayes::median_qi(.value) %>%
-        rename(variable=.variable,
-               median=.value) %>%
-        select(variable, term, median,
-               lower=.lower, upper=.upper, sd, basis_num)
-    if (object$modelid == "weibull"){
-        ## TODO should change the parameter names to something more sensible if we
-        ## keep the Weibull model in.  Shape, scale, consistently with dweibull
-        summ <- summ %>%
-            dplyr::filter(!(variable=="coefs" & basis_num==2))
-        if (object$ncovs==0) {
-            summ <- summ %>% dplyr::select(-i)
-            summ$variable[summ$variable=="loghr"] <- "logtaf"
-            summ$variable[summ$variable=="hr"] <- "taf"
-        }
-    }
-    summ
+  summ <- parnames_to_df(object)
+  if (object$fit_method=="opt")
+    summ$mode <- object$stanfit$par[summ$parname]
+  sam <- get_draws(object)
+  sam <- sam[,summ$parname,drop=FALSE]
+
+  mcmc_summ <- posterior::summarise_draws(sam,
+                                          median,
+                                          ~quantile(.x, probs=c(0.025, 0.975)),
+                                          sd,
+                                          rhat = posterior::rhat,
+                                          ess_bulk = posterior::ess_bulk,
+                                          ...)
+  names(mcmc_summ)[names(mcmc_summ) == "variable"] <- "parname"
+  names(mcmc_summ)[names(mcmc_summ) %in% c("2.5%","97.5%")] <- c("lower","upper")
+
+  summ <- merge(summ, mcmc_summ, by="parname", sort=FALSE)
+  summ$parname <- summ$index <- NULL
+
+  if (object$modelid=="weibull"){
+    summ <- summ[!(summ$variable=="coefs" & summ$basis_num==2),]
+    summ$basis_num <- NULL
+    summ$variable[summ$variable=="coefs"] <- "shape"
+    summ$variable[summ$variable=="alpha"] <- "logscale"
+    summ$variable[summ$variable=="loghr"] <- "logtaf"
+    summ$variable[summ$variable=="hr"] <- "taf"
+  }
+
+  tibble::as_tibble(summ)
 }
+
+
+
 
 ## TODO Other info rstanarm does in print or summary
 ## Model Info:
