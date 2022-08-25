@@ -18,9 +18,6 @@ Imports:
     Rcpp (>= 0.12.0),
     rstan (>= 2.18.1),
     posterior,
-    magrittr,
-    dplyr,
-    tidyr,
     ggplot2,
     gridExtra,
     rstpm2,
@@ -43,7 +40,8 @@ Suggests:
     testthat,
     SHELF,
     flexsurvcure,
-    splines
+    splines,
+    dplyr
 VignetteBuilder: knitr
 URL: https://github.com/chjackson/survextrap,
     https://chjackson.github.io/survextrap/

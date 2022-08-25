@@ -241,8 +241,8 @@ summary.survextrap <- function(object, ...){
 #' @export
 coef.survextrap <- function(object, ...){
     variable <- NULL
-    summ <- summary(object) %>%
-        filter(!variable %in% c("hr", "or", "coefs", "smooth_sd"))
+    summ <- summary(object)
+    summ <- summ[!(summ$variable %in% c("hr", "or", "coefs", "smooth_sd")), ]
     coefs <- summ$median
     term <- if ("term" %in% names(summ)) ifelse(is.na(summ$term), "", paste0("_", summ$term)) else ""
     names(coefs) <- paste0(summ$variable, term)

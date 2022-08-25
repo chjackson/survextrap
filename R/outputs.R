@@ -78,11 +78,11 @@ rmst <- function(x, t, newdata=NULL, niter=NULL){
             }
         }
         sample <- posterior::as_draws(resmat)
-        res[[j]] <- summary(sample, median, ~quantile(.x, probs=c(0.025, 0.975))) %>%
-            dplyr::rename(t = variable) %>%
-            dplyr::mutate(t = as.numeric(t)) %>%
-            dplyr::mutate(variable = "rmst") %>%
-            dplyr::relocate(variable, .before=t)
+        res[[j]] <- summary(sample, median, ~quantile(.x, probs=c(0.025, 0.975)))
+        names(res[[j]])[names(res[[j]]) == "variable"] <- "t"
+        res[[j]]$t <- as.numeric(res[[j]]$t)
+        res[[j]]$variable <- "rmst"
+        res[[j]] <- res[[j]][,c("variable", setdiff(names(res[[j]]), "variable"))]
     }
     res <- do.call("rbind", res)
     if (!is.null(newdata))

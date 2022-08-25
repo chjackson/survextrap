@@ -103,10 +103,18 @@ mspline_plotdata <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs
     ## TODO validate p length
     hazdf <- mspline_sum_basis(basis, coefs, scale, time)
 
-    bdf <- as.data.frame(basis) %>%
-        cbind(time=time) %>%
-        pivot_longer(cols=all_of(1:ncol(basis)), names_to="term") %>%
-      left_join(hazdf, by="time")
+    bdf <- as.data.frame(basis)
+    bdf$time <- time
+    ## base r equiv of
+    ## pivot_longer(cols=all_of(1:ncol(basis)), names_to="term") %>%
+    bdf <- reshape(bdf, direction = "long",
+                   varying = list(as.character(1:ncol(basis))),
+                   v.names = "value",
+                   timevar = "term")
+    bdf <- bdf[order(bdf$id, bdf$term),]
+    bdf$id <- NULL
+    bdf <- merge(bdf, hazdf, by="time")
+
     attr(bdf,"iknots") <- s$iknots
     attr(bdf,"bknots") <- s$bknots
     bdf
