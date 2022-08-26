@@ -101,7 +101,6 @@ install.packages("survextrap", repos=c('https://chjackson.r-universe.dev', 'http
 
 Please give feedback and suggestions if you do.  These can be posted on [github issues](https://github.com/chjackson/survextrap/issues), or [email](mailto:chris.jackson@mrc-bsu.cam.ac.uk).
 
-
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/chjackson/survextrap/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/chjackson/survextrap/actions/workflows/R-CMD-check.yaml)
 [![test-coverage](https://github.com/chjackson/survextrap/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/chjackson/survextrap/actions/workflows/test-coverage.yaml)
