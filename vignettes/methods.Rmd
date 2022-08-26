@@ -84,7 +84,7 @@ plot_mspline(iknots=c(1,3,5), bknots=c(0, 7),
 
 ## Why not other kinds of spline?
 
-* The Royston/Parmar model (e.g. in flexsurv) uses a natural cubic spline for the log cumulative hazard function.  A cumulative hazard is defined to be a non-decreasing function, but the spline is not constrained.   The constraint is handled during fitting the model - spline coefficients which imply non-increasing cumulative hazard functions are rejected.  This is inefficient.  A worse problem, perhaps, is that it is unclear how to specify priors - a meaningful joint prior on the coefficients would have to rule out invalid combinations.
+* The Royston/Parmar model (e.g. in flexsurv) uses a natural cubic spline for the log cumulative hazard function.  A cumulative hazard is defined to be a non-decreasing function, but the spline is not constrained.   The constraint is handled during fitting the model - spline coefficients which imply decreasing cumulative hazard functions are rejected.  This is inefficient.  A worse problem for Bayesian analysis of this model is that it is unclear how to specify priors - a meaningful joint prior on the coefficients would have to rule out invalid combinations.
 
 * We could also have placed an unrestricted spline, of any kind, on the log hazard.   The disadvantage with this is that the cumulative hazard (required to obtain the likelihood for censored data) then has to be evaluated by numerical integration, which is slow.  
 
@@ -116,7 +116,7 @@ This is a smoother, Bayesian analogue of the common approach to spline model sel
 
 # Prior distribution for the hazard curve
 
-A log-normal prior is used for the scale $\eta$.   Currently this is set to the log crude event rate plus normal(0, 20) (inspired by [rstanarm](https://arxiv.org/pdf/2002.09633.pdf)) - but this will be customisable in a future version.
+A log-normal prior is used for the scale $\eta$.   The default in the package is set to to the log crude event rate plus normal(0, 20) (inspired by [rstanarm](https://arxiv.org/pdf/2002.09633.pdf)) - but this can be changed by the user. 
 
 A multinomial logistic distribution defines the prior for the coefficients $p_k$ that define the mass of the hazard in each region: $log(p_k / p_1) = b_k$, with $b_1=0$ and $b_k \sim Logistic(\mu_k, \sigma)$ for $k = 2, \ldots, K$.  This prior is defined by:
 

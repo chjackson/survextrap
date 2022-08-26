@@ -18,7 +18,7 @@
 #' @importFrom splines2 mSpline iSpline
 #' @importFrom survminer surv_summary
 #' 
-#' @importFrom stats as.formula delete.response dweibull integrate median model.matrix model.response optim predict pweibull quantile reformulate rlogis rnorm runif sd terms time var formula model.frame na.pass plogis qlogis get_all_vars reshape
+#' @importFrom stats as.formula delete.response dweibull integrate median model.matrix model.response optim predict pweibull quantile rlogis rnorm runif sd terms time var formula model.frame na.pass plogis qlogis get_all_vars reshape
 #'
 #' @references
 #' Stan Development Team (NA). RStan: the R interface to Stan. R package version 2.26.11. https://mc-stan.org

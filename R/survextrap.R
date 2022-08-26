@@ -50,7 +50,8 @@
 #' there is no way to assume that some covariates have proportional hazards but others don't -
 #' it is all or none.
 #'
-#' @param prior_loghaz Prior for the baseline log hazard.
+#' @param prior_loghaz Prior for the baseline log hazard, after centering around the log
+#' crude event rate in the data.
 #'   This should be a call to a prior constructor function, such as
 #'   `p_normal(0,1)` or `p_t(0,2,2)`.   Supported prior distribution families
 #'   are normal (parameters mean and SD) and t distributions (parameters
@@ -436,7 +437,7 @@ validate_surv <- function(x, ok_types = c("right", "counting",
   if (!inherits(x, "Surv"))
     stop2("LHS of 'formula' must be a 'Surv' object.")
   if (!attr(x, "type") %in% ok_types)
-    stop2("Surv object type must be one of: ", comma(ok_types))
+    stop2("Surv object type must be one of: ", paste(ok_types, collapse=","))
   x
 }
 
@@ -650,10 +651,8 @@ get_iknots <- function(x, df = 5L, degree = 3L, iknots = NULL, intercept = FALSE
   }
   # obtain default knot locations if necessary
   if (is.null(iknots)) {
-    iknots <- qtile(x, nq = nk + 1) # evenly spaced percentiles
+    iknots <- quantile(x, probs=seq(1, nk)/(nk + 1)) # evenly spaced percentiles
   }
-  # return internal knot locations, ensuring they are positive
-  validate_positive_scalar(iknots)
 
   return(iknots)
 }

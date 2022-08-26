@@ -74,7 +74,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2022-08-25</h4>
+            <h4 data-toc-skip class="date">2022-08-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -178,10 +178,11 @@ given in <code><a href="../articles/examples.html">vignette("examples")</a></cod
 spline for the log cumulative hazard function. A cumulative hazard is
 defined to be a non-decreasing function, but the spline is not
 constrained. The constraint is handled during fitting the model - spline
-coefficients which imply non-increasing cumulative hazard functions are
-rejected. This is inefficient. A worse problem, perhaps, is that it is
-unclear how to specify priors - a meaningful joint prior on the
-coefficients would have to rule out invalid combinations.</p></li>
+coefficients which imply decreasing cumulative hazard functions are
+rejected. This is inefficient. A worse problem for Bayesian analysis of
+this model is that it is unclear how to specify priors - a meaningful
+joint prior on the coefficients would have to rule out invalid
+combinations.</p></li>
 <li><p>We could also have placed an unrestricted spline, of any kind, on
 the log hazard. The disadvantage with this is that the cumulative hazard
 (required to obtain the likelihood for censored data) then has to be
@@ -242,9 +243,9 @@ packages.</p>
 <div class="section level2">
 <h2 id="prior-distribution-for-the-hazard-curve">Prior distribution for the hazard curve<a class="anchor" aria-label="anchor" href="#prior-distribution-for-the-hazard-curve"></a>
 </h2>
-<p>A log-normal prior is used for the scale <span class="math inline">\(\eta\)</span>. Currently this is set to the log
-crude event rate plus normal(0, 20) (inspired by <a href="https://arxiv.org/pdf/2002.09633.pdf" class="external-link">rstanarm</a>) - but this
-will be customisable in a future version.</p>
+<p>A log-normal prior is used for the scale <span class="math inline">\(\eta\)</span>. The default in the package is set
+to to the log crude event rate plus normal(0, 20) (inspired by <a href="https://arxiv.org/pdf/2002.09633.pdf" class="external-link">rstanarm</a>) - but this can
+be changed by the user.</p>
 <p>A multinomial logistic distribution defines the prior for the
 coefficients <span class="math inline">\(p_k\)</span> that define the
 mass of the hazard in each region: <span class="math inline">\(log(p_k /
