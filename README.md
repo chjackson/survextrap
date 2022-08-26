@@ -104,4 +104,5 @@ Please give feedback and suggestions if you do.  These can be posted on [github 
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/chjackson/survextrap/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/chjackson/survextrap/actions/workflows/R-CMD-check.yaml)
+[![test-coverage](https://github.com/chjackson/survextrap/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/chjackson/survextrap/actions/workflows/test-coverage.yaml)
 <!-- badges: end -->
