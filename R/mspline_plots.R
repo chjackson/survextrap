@@ -52,7 +52,7 @@ mspline_sum_basis <- function(basis, coefs=NULL, scale=1, time) {
     nvars <- ncol(basis)
     if (is.null(coefs)){
         coefs <- rep(1, nvars)
-    } else if (length(coefs) != nvars) stop(sprintf("length of coefs is %s, should be %s", length(coefs), nvars))
+    } else if (length(coefs) != nvars) stop(sprintf("length of `coefs` is %s, should be %s", length(coefs), nvars))
     coefs <- coefs/sum(coefs)
     haz <- rowSums(basis * rep(coefs, each=nrow(basis))) * scale
     hazdf <- data.frame(haz=haz, time=time)
@@ -99,14 +99,11 @@ mspline_plotdata <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs
     value <- term <- haz <- NULL
     s <- mspline_plotsetup(iknots=iknots, bknots=bknots, tmin=tmin, tmax=tmax, degree=degree, df=df)
     time <- s$time; basis <- s$basis
-
-    ## TODO validate p length
     hazdf <- mspline_sum_basis(basis, coefs, scale, time)
-
     bdf <- as.data.frame(basis)
     bdf$time <- time
-    ## base r equiv of
-    ## pivot_longer(cols=all_of(1:ncol(basis)), names_to="term") %>%
+
+    ## base R equivalent of pivot_longer(cols=all_of(1:ncol(basis)), names_to="term")
     bdf <- reshape(bdf, direction = "long",
                    varying = list(as.character(1:ncol(basis))),
                    v.names = "value",
@@ -131,7 +128,6 @@ mspline_priorpred_df <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3,
                                  prior_mean, prior_sd=1, scale=1, scale_sd=1,
                                  tmin=0, tmax=10,
                                  nsim=10){
-    ## TODO validate knots vs prior mean
     np <- length(prior_mean) + 1
     beta <- matrix(nrow=nsim, ncol=np)
     beta[,1] <- 0
@@ -191,7 +187,7 @@ plot_mspline_priorpred <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3,
     iknots <- attr(hazdf, "iknots")
     bknots <- attr(hazdf, "bknots")
     if (plot)
-    ggplot(hazdf, aes(x=time, y=haz, group=rep)) +
+      ggplot(hazdf, aes(x=time, y=haz, group=rep)) +
         geom_line(alpha=0.5) +
         scale_x_continuous(breaks=c(iknots, bknots)) +
         theme_minimal() +
