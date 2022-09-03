@@ -55,7 +55,8 @@
 #'   This should be a call to a prior constructor function, such as
 #'   `p_normal(0,1)` or `p_t(0,2,2)`.   Supported prior distribution families
 #'   are normal (parameters mean and SD) and t distributions (parameters
-#' location, scale and degrees of freedom).  The default is `normal(0, 20)`.
+#' location, scale and degrees of freedom).  The default is a normal distribution with
+#' a mean defined by the log crude event rate in the data, and a standard deviation in the data. 
 #'
 #' "Baseline" is defined
 #'   by the continuous covariates taking a value of zero and factor covariates taking their
@@ -161,7 +162,7 @@ survextrap <- function(formula,
                        coefs_mean = NULL,
                        cure = FALSE,
                        nonprop = FALSE,
-                       prior_loghaz = p_normal(0,20),
+                       prior_loghaz = NULL,
                        prior_loghr = NULL,
                        prior_smooth = p_gamma(2,1),
                        prior_cure = p_beta(1,1),
@@ -268,10 +269,9 @@ survextrap <- function(formula,
     }
 
     priors <- get_priors(prior_loghaz, prior_loghr, prior_smooth, prior_cure, prior_logor_cure,
-                         x, xcure, est_smooth, nonprop, prior_sdnp)
+                         x, xcure, est_smooth, nonprop, prior_sdnp, log_crude_event_rate)
 
     standata <- nlist(nevent, nrcens, nvars, nextern, ncovs,
-                      log_crude_event_rate,
                       basis_event, ibasis_event, ibasis_rcens,
                       ibasis_ext_stop, ibasis_ext_start,
                       x_event, x_rcens,
@@ -578,6 +578,13 @@ make_basehaz <- function(basehaz_ops,
     iknots <- basehaz_ops$iknots
     bknots <- basehaz_ops$bknots
     degree <- basehaz_ops$degree
+    bh_names <- c("df","iknots","bknots","degree")
+    bad_names <- setdiff(names(basehaz_ops), bh_names)
+    if (length(bad_names) > 0) {
+      blist <- paste(bad_names, collapse=",")
+      plural <- if (bad_names > 1) "s" else ""
+      warning(sprintf("Element%s `%s` of `basehaz_ops` is unused. Ignoring.", plural, blist))
+    }
     if (is.null(df))
       df <- 10L
     if (is.null(degree))
@@ -610,11 +617,6 @@ make_basehaz <- function(basehaz_ops,
     nvars  <- df
     knots <- c(bknots[1], iknots, bknots[2])
     nlist(nvars, iknots, bknots, degree, df, knots)
-}
-
-validate_knots <- function(knots, name){
-  if (!is.numeric(knots)) stop(sprintf("`%s` must be numeric", name))
-  if (!all(knots >= 0)) stop(sprintf("`%s` must all be >= 0", name))
 }
 
 validate_coefs_mean <- function(coefs){

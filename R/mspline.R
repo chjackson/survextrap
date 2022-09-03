@@ -328,3 +328,41 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, scalarargs=NULL, ...)
   if (any(is.nan(ret))) warning("NaNs produced")
   ret
 }
+
+##' Estimate M-spline basis weights which give a constant function.
+##'
+##' This works by choosing the basis coefficients that minimise the
+##' variance between log hazard values at different time points.
+##' It is used in \code{\link{survextrap}} to choose the default prior mean
+##' for the hazard function.
+##'
+##' @param iknots Internal knots.
+##'
+##' @param bknots Boundary knots.
+##'
+##' @param times Times to use to construct the numerical calculation.
+##' By default, this is 20 equally-spaced times between the boundary knots.
+##'
+##' @param degree Spline polynomial degree.
+##'
+##' @param logit If \code{TRUE} then the multinomial logit transform of the coefficients
+##' is returned.  This is a vector of length one less than the number of coefficients,
+##' with the rth element defined by \eqn{log(coefs[r+1] / coefs[1])}.
+##'
+##' @export
+mspline_uniform_weights <- function(iknots, bknots, times=NULL, degree=3, logit=FALSE){
+    if (is.null(times)) times <- seq(bknots[1], bknots[2], length.out=20)
+    basis <- splines2::mSpline(times, knots = iknots, Boundary.knots = bknots,
+                               degree = degree, intercept = TRUE)
+    nvars <- ncol(basis)
+    varloghaz <- function(logp){
+        p <- exp(logp)
+        haz <- rowSums(basis * rep(p, each=nrow(basis)))
+        var(log(haz))
+    }
+    logp0 <- rep(0, nvars)
+    opt <- optim(logp0, varloghaz, control=list(maxit=10000))
+    res <- exp(opt$par)
+    p <- res / sum(res)
+    if (logit) log(p[-1]/p[1]) else p
+}

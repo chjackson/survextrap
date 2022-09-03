@@ -9,35 +9,35 @@
 
 functions {
 
-    vector mspline_log_haz(vector eta, matrix basis, matrix coefs) {
-        return log(rows_dot_product(basis, coefs)) + eta;
+    vector mspline_log_haz(vector alpha, matrix basis, matrix coefs) {
+        return log(rows_dot_product(basis, coefs)) + alpha;
     }
 
-    vector mspline_log_surv(vector eta, matrix ibasis, matrix coefs) {
-        vector[rows(eta)] res;
-        res = - (rows_dot_product(ibasis, coefs)) .* exp(eta);
+    vector mspline_log_surv(vector alpha, matrix ibasis, matrix coefs) {
+        vector[rows(alpha)] res;
+        res = - (rows_dot_product(ibasis, coefs)) .* exp(alpha);
         if (exp(res[1]) > 1) {
             reject("Probability > 1 computed. Not your fault - report a bug to the developer.");
         }
         return res;
     }
 
-    vector mspline_log_dens(vector eta, matrix basis, matrix ibasis, matrix coefs) {
-        vector[rows(eta)] res;
+    vector mspline_log_dens(vector alpha, matrix basis, matrix ibasis, matrix coefs) {
+        vector[rows(alpha)] res;
         /* haz = dens / surv , loghaz = logdens - logsurv , logdens = loghaz + logsurv  */
-        res = mspline_log_haz(eta, basis, coefs)  +
-        mspline_log_surv(eta, ibasis, coefs);
+        res = mspline_log_haz(alpha, basis, coefs)  +
+        mspline_log_surv(alpha, ibasis, coefs);
         return res;
     }
 
-    vector log_surv(vector eta, matrix ibasis, matrix coefs,
+    vector log_surv(vector alpha, matrix ibasis, matrix coefs,
 		    data int cure, vector pcure,
 		    data int modelid) {
-        vector[rows(eta)] res;
-        vector[rows(eta)] base_logsurv;
-	base_logsurv = mspline_log_surv(eta, ibasis, coefs);
+        vector[rows(alpha)] res;
+        vector[rows(alpha)] base_logsurv;
+	base_logsurv = mspline_log_surv(alpha, ibasis, coefs);
         if (cure) {
-            for (i in 1:rows(eta)) {
+            for (i in 1:rows(alpha)) {
                 res[i] = log(pcure[i] + (1 - pcure[i])*exp(base_logsurv[i]));
             }
         } else {
@@ -46,39 +46,39 @@ functions {
         return res;
     }
 
-    vector log_haz(vector eta, matrix basis, matrix coefs,
+    vector log_haz(vector alpha, matrix basis, matrix coefs,
 		   data int cure, vector pcure, matrix ibasis,
 		   data int modelid, data int relative,
 		   vector backhaz) {
-        vector[rows(eta)] res;
-        vector[rows(eta)] base_logdens;
-        vector[rows(eta)] base_loghaz;
-        vector[rows(eta)] logsurv;
+        vector[rows(alpha)] res;
+        vector[rows(alpha)] base_logdens;
+        vector[rows(alpha)] base_loghaz;
+        vector[rows(alpha)] logsurv;
         if (cure) {
-	    base_logdens = mspline_log_dens(eta, basis, ibasis, coefs);
-            logsurv = log_surv(eta, ibasis, coefs, cure, pcure, modelid); // includes cure 
-            for (i in 1:rows(eta)){
+	    base_logdens = mspline_log_dens(alpha, basis, ibasis, coefs);
+            logsurv = log_surv(alpha, ibasis, coefs, cure, pcure, modelid); // includes cure 
+            for (i in 1:rows(alpha)){
                 res[i] = log(1 - pcure[i]) + base_logdens[i] - logsurv[i];
             }
         } else {
-	    base_loghaz = mspline_log_haz(eta, basis, coefs);
+	    base_loghaz = mspline_log_haz(alpha, basis, coefs);
             res = base_loghaz;
         }
 	if (relative) {
-	    for (i in 1:rows(eta)){
+	    for (i in 1:rows(alpha)){
 		res[i] = log(backhaz[i] + exp(res[i]));
 	    }
 	}
         return res;
     }
 
-    vector log_dens(vector eta, matrix basis, matrix coefs,
+    vector log_dens(vector alpha, matrix basis, matrix coefs,
 		    data int cure, vector pcure, matrix ibasis,
 		    data int modelid,
 		    data int relative, vector backhaz){
-        vector[rows(eta)] res;
-        res = log_haz(eta, basis, coefs, cure, pcure, ibasis, modelid, relative, backhaz) +
-	    log_surv(eta, ibasis, coefs, cure, pcure, modelid);
+        vector[rows(alpha)] res;
+        res = log_haz(alpha, basis, coefs, cure, pcure, ibasis, modelid, relative, backhaz) +
+	    log_surv(alpha, ibasis, coefs, cure, pcure, modelid);
         return res;
     }
 
@@ -122,9 +122,6 @@ data {
     int<lower=0> ncovs;      // number of covariate effects on the hazard
     int<lower=0> ncurecovs;      // number of covariate effects on the cure probability
 
-    // log crude event rate / time (for centering linear predictor)
-    real log_crude_event_rate;
-
     // basis matrices for M-splines / I-splines, without quadrature
     matrix[nevent,nvars] basis_event;  // at event time
     matrix[nevent,nvars] ibasis_event; // at event time
@@ -155,7 +152,7 @@ data {
     vector[nextern] backsurv_ext_stop; 
 
     int prior_loghaz_dist;
-    vector<lower=0>[3] prior_loghaz;
+    vector[3] prior_loghaz;
     vector<lower=0>[2] prior_cure;
     vector<lower=0>[2*est_smooth] prior_smooth;
     int<lower=0> prior_loghr_dist[ncovs];
@@ -244,9 +241,9 @@ transformed parameters {
 }
 
 model {
-    vector[nevent] eta_event; // for events
-    vector[nrcens] eta_rcens; // for right censored
-    vector[nextern] eta_extern; // for external data
+    vector[nevent] alpha_event; // for events
+    vector[nrcens] alpha_rcens; // for right censored
+    vector[nextern] alpha_extern; // for external data
     real dummy;
     real cp;
     vector[nextern] p_ext_stop; // unconditional survival prob at external time points
@@ -255,26 +252,16 @@ model {
     vector[nrcens] pcure_rcens; //
     vector[nextern] pcure_extern; //
 
+    if (nevent > 0) alpha_event = rep_vector(prior_loghaz[1] + gamma[1], nevent);
+    if (nrcens > 0) alpha_rcens = rep_vector(prior_loghaz[1] + gamma[1], nrcens);
+    if (nextern > 0) alpha_extern = rep_vector(prior_loghaz[1] + gamma[1], nextern);
+
     if (ncovs > 0) {
-        // does x * beta,    matrix[n,K] * vector[K] is this a matrix product
-        if (nevent > 0) eta_event = x_event * loghr;
-        if (nrcens > 0) eta_rcens = x_rcens * loghr;
-        if (nextern > 0) eta_extern = x_ext * loghr;
-    } else {
-        if (nevent > 0) eta_event = rep_vector(0.0, nevent);
-        if (nrcens > 0) eta_rcens = rep_vector(0.0, nrcens);
-        if (nextern > 0) eta_extern = rep_vector(0.0, nextern);
-    }
-
-    // add on log crude event rate / time (helps to center intercept)
-    if (nevent > 0) eta_event += log_crude_event_rate;
-    if (nrcens > 0) eta_rcens += log_crude_event_rate;
-    if (nextern > 0) eta_extern += log_crude_event_rate;
-
-    // add on intercept to linear predictor
-    if (nevent > 0) eta_event += gamma[1];
-    if (nrcens > 0) eta_rcens += gamma[1];
-    if (nextern > 0) eta_extern += gamma[1];
+        // does x * beta,    matrix[n,K] * vector[K], matrix product
+        if (nevent > 0) alpha_event += x_event * loghr;
+        if (nrcens > 0) alpha_rcens += x_rcens * loghr;
+        if (nextern > 0) alpha_extern += x_ext * loghr;
+    } 
 
     if (cure) cp = pcure[1]; else cp = 0;
     pcure_event = rep_vector(cp, nevent);
@@ -287,21 +274,21 @@ model {
         if (nextern > 0) pcure_extern = inv_logit(logit(pcure_extern) + xcure_ext * logor_cure);
     }
 
-    if (nevent > 0) target +=  log_dens(eta_event,  basis_event, coefs_event, cure, pcure_event,
+    if (nevent > 0) target +=  log_dens(alpha_event,  basis_event, coefs_event, cure, pcure_event,
 					ibasis_event, modelid, relative, backhaz_event);
-    if (nrcens > 0) target +=  log_surv(eta_rcens, ibasis_rcens, coefs_rcens, cure, pcure_rcens,
+    if (nrcens > 0) target +=  log_surv(alpha_rcens, ibasis_rcens, coefs_rcens, cure, pcure_rcens,
 					modelid);
 
     if (nextern > 0) {
-        p_ext_stop = exp(log_surv(eta_extern, ibasis_ext_stop, coefs_extern, cure, pcure_extern,
+        p_ext_stop = exp(log_surv(alpha_extern, ibasis_ext_stop, coefs_extern, cure, pcure_extern,
 				  modelid) .* backsurv_ext_stop);
-        p_ext_start = exp(log_surv(eta_extern, ibasis_ext_start, coefs_extern, cure, pcure_extern,
+        p_ext_start = exp(log_surv(alpha_extern, ibasis_ext_start, coefs_extern, cure, pcure_extern,
 				   modelid) .* backsurv_ext_start);
         target += binomial_lpmf(r_ext | n_ext, p_ext_stop ./ p_ext_start);
     }
 
     // log prior for baseline log hazard
-    dummy = loghaz_lp(gamma[1], prior_loghaz_dist, prior_loghaz[1],
+    dummy = loghaz_lp(gamma[1], prior_loghaz_dist, 0, 
 		      prior_loghaz[2], prior_loghaz[3]);
 
     // log prior for covariates on the log hazard
@@ -335,8 +322,7 @@ model {
 }
 
 generated quantities {
-    // transformed intercept.  TODO Why not call this eta?  Or just loghaz cos it is log of eta in the methods vig
-    real alpha = log_crude_event_rate + gamma[1];
+    real alpha = prior_loghaz[1] + gamma[1]; // log hazard, intercept, log(eta) in the docs
     vector[ncovs] hr = exp(loghr);
     vector[ncurecovs] or_cure = exp(logor_cure);
 }
