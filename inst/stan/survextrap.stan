@@ -1,37 +1,20 @@
-/* Some of this code is from rstanarm (Sam Brilleman) */
 
 functions {
 
-    /**
-    * Log hazard for M-spline model
-    *
-    * @param alpha Vector, linear predictor
-    * @param t Vector, event or censoring times
-    * @param coefs Vector, M-spline coefficients
-    * @return A vector
-    */
-    vector mspline_log_haz(vector alpha, matrix basis, vector coefs) {
-        return log(basis * coefs) + alpha;
+    vector mspline_log_haz(vector alpha, matrix basis, matrix coefs) {
+        return log(rows_dot_product(basis, coefs)) + alpha;
     }
 
-    /**
-    * Log survival and log CDF for M-spline model
-    *
-    * @param alpha Vector, linear predictor
-    * @param t Vector, event or censoring times
-    * @param coefs Vector, M-spline coefficients
-    * @return A vector
-    */
-    vector mspline_log_surv(vector alpha, matrix ibasis, vector coefs) {
+    vector mspline_log_surv(vector alpha, matrix ibasis, matrix coefs) {
         vector[rows(alpha)] res;
-        res = - (ibasis * coefs) .* exp(alpha);
+        res = - (rows_dot_product(ibasis, coefs)) .* exp(alpha);
         if (exp(res[1]) > 1) {
             reject("Probability > 1 computed. Not your fault - report a bug to the developer.");
         }
         return res;
     }
 
-    vector mspline_log_dens(vector alpha, matrix basis, matrix ibasis, vector coefs) {
+    vector mspline_log_dens(vector alpha, matrix basis, matrix ibasis, matrix coefs) {
         vector[rows(alpha)] res;
         /* haz = dens / surv , loghaz = logdens - logsurv , logdens = loghaz + logsurv  */
         res = mspline_log_haz(alpha, basis, coefs)  +
@@ -39,18 +22,12 @@ functions {
         return res;
     }
 
-    vector log_surv(vector alpha, matrix ibasis, vector coefs,
+    vector log_surv(vector alpha, matrix ibasis, matrix coefs,
 		    data int cure, vector pcure,
 		    data int modelid) {
         vector[rows(alpha)] res;
         vector[rows(alpha)] base_logsurv;
-        if (modelid==1){
-            base_logsurv = mspline_log_surv(alpha, ibasis, coefs);
-        } else if (modelid==2) {
-            for (i in 1:rows(alpha)) {
-                base_logsurv[i] = weibull_lccdf(ibasis[i,1] | coefs[1], exp(alpha[i]));
-            }
-        }
+	base_logsurv = mspline_log_surv(alpha, ibasis, coefs);
         if (cure) {
             for (i in 1:rows(alpha)) {
                 res[i] = log(pcure[i] + (1 - pcure[i])*exp(base_logsurv[i]));
@@ -61,7 +38,7 @@ functions {
         return res;
     }
 
-    vector log_haz(vector alpha, matrix basis, vector coefs,
+    vector log_haz(vector alpha, matrix basis, matrix coefs,
 		   data int cure, vector pcure, matrix ibasis,
 		   data int modelid, data int relative,
 		   vector backhaz) {
@@ -70,26 +47,13 @@ functions {
         vector[rows(alpha)] base_loghaz;
         vector[rows(alpha)] logsurv;
         if (cure) {
-            if (modelid==1){
-                base_logdens = mspline_log_dens(alpha, basis, ibasis, coefs);
-            } else {
-                for (i in 1:rows(alpha)){
-                    base_logdens[i] = weibull_lpdf(basis[i,1] | coefs[1], exp(alpha[i]));
-                }
-            }
+	    base_logdens = mspline_log_dens(alpha, basis, ibasis, coefs);
             logsurv = log_surv(alpha, ibasis, coefs, cure, pcure, modelid); // includes cure 
             for (i in 1:rows(alpha)){
                 res[i] = log(1 - pcure[i]) + base_logdens[i] - logsurv[i];
             }
         } else {
-            if (modelid==1){
-                base_loghaz = mspline_log_haz(alpha, basis, coefs);
-            } else {
-                for (i in 1:rows(alpha)){
-                    base_loghaz[i] = weibull_lpdf(basis[i,1] | coefs[1], exp(alpha[i])) -
-                    weibull_lccdf(ibasis[i,1] | coefs[1], exp(alpha[i]));
-                }
-            }
+	    base_loghaz = mspline_log_haz(alpha, basis, coefs);
             res = base_loghaz;
         }
 	if (relative) {
@@ -100,7 +64,7 @@ functions {
         return res;
     }
 
-    vector log_dens(vector alpha, matrix basis, vector coefs,
+    vector log_dens(vector alpha, matrix basis, matrix coefs,
 		    data int cure, vector pcure, matrix ibasis,
 		    data int modelid,
 		    data int relative, vector backhaz){
@@ -193,6 +157,10 @@ data {
     vector[ncurecovs] prior_logor_cure_df;
 
     int modelid;
+    int nonprop;
+
+    // EXTRA FOR NONPROP HAZ MODEL 
+    matrix[ncovs*nonprop,2] prior_sdnp;
 }
 
 parameters {
@@ -202,24 +170,85 @@ parameters {
     vector<lower=0>[est_smooth] smooth_sd;
     vector<lower=0,upper=1>[cure] pcure;
     vector[ncurecovs] logor_cure;
-}
 
+    // STUFF FOR NON PROP HAZ MODEL 
+    vector<lower=0>[ncovs*nonprop] sd_np;  // NP shrinkage SD for each cov
+    matrix[ncovs*nonprop,nvars-1] nperr;  // standard normal for departure from PH
+}
 
 transformed parameters {
     vector[nvars] b;
-    vector[nvars] coefs; // constrained coefs for M-splines
+    vector[nvars] coefs; // with covariates = zero 
 
-    if (est_smooth)
-    b = append_row(0, b_mean + b_err*smooth_sd[1]);
-    else
-    b = append_row(0, b_mean + b_err*smooth_sd_fixed[1]);
-    if (modelid==1){
-        coefs = softmax(b);
+    matrix[nevent,nvars] coefs_event; // was coefs vector[nvars]
+    matrix[nrcens,nvars] coefs_rcens;
+    matrix[nextern,nvars] coefs_extern;
+
+    if (nonprop) { 
+	matrix[nevent,nvars] b_event; // was vector[nvars]
+	matrix[nrcens,nvars] b_rcens; 
+	matrix[nextern,nvars] b_extern; 
+	matrix[ncovs,nvars-1] b_np; // nonproportionality cov effect. should be centred around 0. no intercept
+	real ssd;
+	for (r in 1:ncovs){
+	    b_np[r,1:(nvars-1)] = sd_np[r]*nperr[r,1:(nvars-1)];
+	}
+	if (est_smooth) {
+	    ssd = smooth_sd[1];
+	} else {
+	    ssd = smooth_sd_fixed[1];
+	}
+	b = append_row(0, b_mean + b_err*ssd);
+	coefs = softmax(b);
+	if (nevent > 0) {
+	    b_event[1:nevent,1] = rep_vector(0,nevent);
+	    for (j in 1:(nvars-1)) {
+		b_event[1:nevent,j+1] = b_mean[j] + x_event*b_np[,j] + b_err[j]*ssd;
+	    }
+	    for (i in 1:nevent){
+		coefs_event[i,1:nvars] = to_row_vector(softmax(to_vector(b_event[i,1:nvars])));
+	    }
+	}
+	if (nrcens > 0) {
+	    b_rcens[1:nrcens,1] = rep_vector(0,nrcens);
+	    for (j in 1:(nvars-1)) {
+		b_rcens[1:nrcens,j+1] = b_mean[j] + x_rcens*b_np[,j] + b_err[j]*ssd;
+	    }
+	    for (i in 1:nrcens){
+		coefs_rcens[i,1:nvars] = to_row_vector(softmax(to_vector(b_rcens[i,1:nvars])));
+	    }
+	}
+	if (nextern > 0) {
+	    b_extern[1:nextern,1] = rep_vector(0,nextern);
+	    for (j in 1:(nvars-1)) {
+		b_extern[1:nextern,j+1] = b_mean[j] + x_ext*b_np[,j] + b_err[j]*ssd;
+	    }
+	    for (i in 1:nextern){
+		coefs_extern[i,1:nvars] = to_row_vector(softmax(to_vector(b_extern[i,1:nvars])));
+	    }
+	}
     } else {
-        coefs[1] = exp(b_err[1]);
-        coefs[2] = 0; // dummy, unused
+	if (est_smooth)
+	    b = append_row(0, b_mean + b_err*smooth_sd[1]);
+	else
+	    b = append_row(0, b_mean + b_err*smooth_sd_fixed[1]);
+	coefs = softmax(b);
+	if (nevent > 0) {
+	    for (i in 1:nevent){
+		coefs_event[i,1:nvars] = to_row_vector(coefs);
+	    }
+	}
+	if (nrcens > 0) {
+	    for (i in 1:nrcens){
+		coefs_rcens[i,1:nvars] = to_row_vector(coefs);
+	    }
+	}
+	if (nextern > 0) {
+	    for (i in 1:nextern){
+		coefs_extern[i,1:nvars] = to_row_vector(coefs);
+	    }
+	}
     }
-
 }
 
 model {
@@ -256,22 +285,20 @@ model {
         if (nextern > 0) pcure_extern = inv_logit(logit(pcure_extern) + xcure_ext * logor_cure);
     }
 
-    if (nevent > 0) target +=  log_dens(alpha_event,  basis_event, coefs, cure, pcure_event,
+    if (nevent > 0) target +=  log_dens(alpha_event,  basis_event, coefs_event, cure, pcure_event,
 					ibasis_event, modelid, relative, backhaz_event);
-    if (nrcens > 0) target +=  log_surv(alpha_rcens, ibasis_rcens, coefs, cure, pcure_rcens,
+    if (nrcens > 0) target +=  log_surv(alpha_rcens, ibasis_rcens, coefs_rcens, cure, pcure_rcens,
 					modelid);
 
     if (nextern > 0) {
-        p_ext_stop = exp(log_surv(alpha_extern, ibasis_ext_stop, coefs, cure, pcure_extern,
+        p_ext_stop = exp(log_surv(alpha_extern, ibasis_ext_stop, coefs_extern, cure, pcure_extern,
 				  modelid) .* backsurv_ext_stop);
-        p_ext_start = exp(log_surv(alpha_extern, ibasis_ext_start, coefs, cure, pcure_extern,
+        p_ext_start = exp(log_surv(alpha_extern, ibasis_ext_start, coefs_extern, cure, pcure_extern,
 				   modelid) .* backsurv_ext_start);
         target += binomial_lpmf(r_ext | n_ext, p_ext_stop ./ p_ext_start);
     }
 
-    // Log prior for baseline log hazard (loghaz) is centered around the location parameter, which defaults
-    // to the log crude event rate in the data.  So the prior here is for the difference (gamma[1])
-    // between loghaz and the location parameter prior_loghaz[1]
+    // log prior for baseline log hazard
     dummy = loghaz_lp(gamma[1], prior_loghaz_dist, 0, 
 		      prior_loghaz[2], prior_loghaz[3]);
 
@@ -280,9 +307,7 @@ model {
         		     prior_loghr_scale, prior_loghr_df);
 
     // prior for spline coefficient random effect term
-    if (modelid==1){
-        b_err ~ logistic(0, 1);
-    }
+    b_err ~ logistic(0, 1);
 
     // prior for cure fraction
     if (cure) {
@@ -296,6 +321,14 @@ model {
     
     if (est_smooth){
         smooth_sd ~ gamma(prior_smooth[1], prior_smooth[2]);
+    }
+
+    // Non-proportional haz model
+    if (nonprop) { 
+	sd_np ~ gamma(prior_sdnp[,1], prior_sdnp[,2]);
+	for (i in 1:ncovs){
+	    nperr[i,1:(nvars-1)] ~ std_normal();
+	}
     }
 }
 

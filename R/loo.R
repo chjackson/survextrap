@@ -34,10 +34,10 @@ loglik_ipd <- function(x, standata){
     pcure <- as.numeric(pars$pcure)
     ll_event <- log_dens(alpha_event,  standata$basis_event,
                          coefs_event, standata$cure, pcure,
-                         standata$ibasis_event, standata$modelid)
+                         standata$ibasis_event, modelid=1)
     ll_rcens <- log_surv(alpha_rcens, standata$ibasis_rcens,
                          coefs_rcens, standata$cure, pcure,
-                         standata$modelid)
+                         modelid=1)
     cbind(ll_event, ll_rcens)
 }
 
@@ -65,35 +65,22 @@ mspline_log_haz <- function(alpha,
 }
 
 log_haz <- function(alpha, basis, coefs, cure, pcure, ibasis, modelid){
-    if (cure){
-        if (modelid==1){
-            base_logdens <- mspline_log_haz(alpha, basis, coefs) + mspline_log_surv(alpha, ibasis, coefs);
-        } else  {
-            base_logdens <- dweibull(basis, shape=coefs[,1], scale=exp(alpha), log=TRUE)
-        }
-        res <- log(1 - pcure) + base_logdens -
-            log_surv(alpha, ibasis, coefs, cure, pcure, modelid)
-    } else {
-        if (modelid==1)
-            res <- mspline_log_haz(alpha, basis, coefs)
-        else if (modelid==2)
-            res <- dweibull(basis, shape=coefs[,1], scale=exp(alpha), log=TRUE) -
-                pweibull(ibasis, shape=coefs[,1], scale=exp(alpha), log.p=TRUE, lower.tail=FALSE)
-        else stop("unknown modelid")
-    }
-    res
+  if (cure){
+    base_logdens <- mspline_log_haz(alpha, basis, coefs) + mspline_log_surv(alpha, ibasis, coefs);
+    res <- log(1 - pcure) + base_logdens -
+      log_surv(alpha, ibasis, coefs, cure, pcure, modelid)
+  } else {
+    res <- mspline_log_haz(alpha, basis, coefs)
+  }
+  res
 }
 
 log_surv <- function(alpha, ibasis, coefs, cure, pcure, modelid){
-    if (modelid==1)
-        base_logsurv <- mspline_log_surv(alpha, ibasis, coefs)
-    else if (modelid==2)
-        base_logsurv <- pweibull(ibasis, shape=coefs[,1], scale=exp(alpha), log.p=TRUE, lower.tail=FALSE)
-    else stop("unknown modelid")
-    if (cure){
-        res <- log(pcure + (1 - pcure)*exp(base_logsurv))
-    } else {
-        res <- base_logsurv
-    }
-    res
+  base_logsurv <- mspline_log_surv(alpha, ibasis, coefs)
+  if (cure){
+    res <- log(pcure + (1 - pcure)*exp(base_logsurv))
+  } else {
+    res <- base_logsurv
+  }
+  res
 }

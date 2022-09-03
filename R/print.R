@@ -10,15 +10,11 @@
 ##'
 ##' @export
 print.survextrap <- function(x, ...){
-  if (x$modelid=="mspline"){
-    cat("M-spline survival model\n")
-    cat(sprintf("%s knots, degree %s, %s basis terms.\n", length(x$basehaz$knots), x$basehaz$degree, x$basehaz$nvars))
-    cat(sprintf("Smoothness SD: %s\n", if(x$est_smooth) "full Bayes" else round(x$smooth_sd, 2)))
+  cat("M-spline survival model\n")
+  cat(sprintf("%s knots, degree %s, %s basis terms.\n", length(x$basehaz$knots), x$basehaz$degree, x$basehaz$nvars))
+  cat(sprintf("Smoothness SD: %s\n", if(x$est_smooth) "full Bayes" else round(x$smooth_sd, 2)))
 
-    print_priors(x)
-  } else if (x$modelid=="weibull"){
-    cat("Weibull survival model\n")
-  }
+  print_priors(x)
   cat("Posterior summary:\n")
   print(summary(x))
 }
@@ -211,15 +207,6 @@ summary.survextrap <- function(object, ...){
 
   summ <- merge(summ, mcmc_summ, by="parname", sort=FALSE)
   summ$parname <- summ$index <- NULL
-
-  if (object$modelid=="weibull"){
-    summ <- summ[!(summ$variable=="coefs" & summ$basis_num==2),]
-    summ$basis_num <- NULL
-    summ$variable[summ$variable=="coefs"] <- "shape"
-    summ$variable[summ$variable=="alpha"] <- "logscale"
-    summ$variable[summ$variable=="loghr"] <- "logtaf"
-    summ$variable[summ$variable=="hr"] <- "taf"
-  }
 
   tibble::as_tibble(summ)
 }

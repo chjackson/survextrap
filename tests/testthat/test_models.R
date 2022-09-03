@@ -43,18 +43,6 @@ test_that("Basic spline model, non-proportional hazards",{
 })
 
 
-test_that("Weibull model",{
-    mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt", modelid="weibull")
-    test_median(mod, "logscale", 1.6575)
-    postest_test(mod)
-    mod <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt", modelid="weibull")
-    test_median(mod, "logscale", 1.32)
-    postest_test(mod, nd)
-    sr <- survival::survreg(Surv(years, status) ~ rx, data=colons, dist="weibull")
-    expect_equivalent(coef(sr)["rxLev"], coef(mod)["logtaf_rxLev"], tol=1e-01)
-})
-
-
 test_that("Changing the spline specification",{
   expect_error(survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
                     basehaz_ops = list(df=4)), "df - degree should be >= 2")

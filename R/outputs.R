@@ -66,16 +66,12 @@ rmst <- function(x, t, newdata=NULL, niter=NULL){
         resmat <- matrix(nrow=niter*nvals, ncol=nt)
         colnames(resmat) <- t
         for (i in 1:nt){
-            if (x$modelid=="mspline")
-                resmat[,i] <- rmst_survmspline(t[i], pars$alpha_user[,j], pars$coefs[,j,], x$basehaz$knots, x$basehaz$degree)
-            else if (x$modelid=="weibull")
-                resmat[,i] <- rmst_generic(pweibull, t[i], start=0, shape=pars$coefs[,1,1], scale=exp(pars$alpha_user[,j]))
-            else stop("unknown modelid")
-            if (x$cure){
-                cureprob_mat <- matrix(rep(pars$cureprob_user, nt), nrow=niter*nvals, ncol=nt)
-                tmat <- matrix(t, nrow=niter*nvals, ncol=nt, byrow=TRUE)
+          resmat[,i] <- rmst_survmspline(t[i], pars$alpha_user[,j], pars$coefs[,j,], x$basehaz$knots, x$basehaz$degree)
+          if (x$cure){
+            cureprob_mat <- matrix(rep(pars$cureprob_user, nt), nrow=niter*nvals, ncol=nt)
+            tmat <- matrix(t, nrow=niter*nvals, ncol=nt, byrow=TRUE)
                 resmat <- cureprob_mat*tmat + (1 - cureprob_mat)*resmat
-            }
+          }
         }
         sample <- posterior::as_draws(resmat)
         res[[j]] <- summary(sample, median, ~quantile(.x, probs=c(0.025, 0.975)))
@@ -279,14 +275,9 @@ timedep_output <- function(x, output="survival", newdata=NULL, times=NULL, tmax=
 }
 
 survival_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
-  if (x$modelid=="mspline"){
-    coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
-    surv_sam <- psurvmspline(times_arr, alpha_user_arr, coefs_mat,
-                             x$basehaz$knots, x$basehaz$degree, lower.tail=FALSE)
-  } else if (x$modelid=="weibull") {
-    surv_sam <- pweibull(times_arr, shape=pars$coefs[,1,1],
-                         scale=exp(alpha_user_arr), lower.tail=FALSE)
-  }
+  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+  surv_sam <- psurvmspline(times_arr, alpha_user_arr, coefs_mat,
+                           x$basehaz$knots, x$basehaz$degree, lower.tail=FALSE)
   if (x$cure)  {
     surv_sam <- cureprob_arr + (1 - cureprob_arr)*surv_sam
   }
@@ -294,20 +285,12 @@ survival_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, nite
 }
 
 hazard_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
-  if (x$modelid=="mspline"){
-    coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
-    if (x$cure)
-      logdens_sam <- dsurvmspline(times_arr, alpha_user_arr, coefs_mat,
-                                  x$basehaz$knots, x$basehaz$degree, log=TRUE)
-    loghaz_sam <- hsurvmspline(times_arr, alpha_user_arr, coefs_mat,
-                               x$basehaz$knots, x$basehaz$degree, log=TRUE)
-  } else if (x$modelid=="weibull") {
-    logdens_sam <- stats::dweibull(times_arr, shape=pars$coefs[,1,1],
-                                   scale=exp(alpha_user_arr), log=TRUE)
-    loghaz_sam <- logdens_sam -
-      stats::pweibull(times_arr, shape=pars$coefs[,1,1], scale=exp(pars$alpha),
-                      lower.tail=FALSE, log.p=TRUE)
-  }
+  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+  if (x$cure)
+    logdens_sam <- dsurvmspline(times_arr, alpha_user_arr, coefs_mat,
+                                x$basehaz$knots, x$basehaz$degree, log=TRUE)
+  loghaz_sam <- hsurvmspline(times_arr, alpha_user_arr, coefs_mat,
+                             x$basehaz$knots, x$basehaz$degree, log=TRUE)
   if (x$cure)  {
     loghaz_sam <- log(1 - cureprob_arr) +  logdens_sam -
       log(survival_core(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt))

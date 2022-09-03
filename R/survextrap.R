@@ -119,13 +119,6 @@
 #'
 #' `degree`: Polynomial degree used for the basis function. The default is 3, giving a cubic.
 #'
-#' @param modelid \code{"mspline"} for the default M-spline model.
-#'
-#' The only current alternative is \code{"weibull"} for a Weibull accelerated failure time model.
-#' This is just included for the purpose of package testing.  It is not fully implemented, and is
-#' not recommended for use in
-#' practice for survival extrapolation.
-#'
 #' @param fit_method Method from \pkg{rstan} used to fit the model.  Defaults to MCMC.
 #'
 #'  If \code{fit_method="mcmc"} then a sample from the posterior is drawn using Markov Chain Monte Carlo
@@ -170,7 +163,6 @@ survextrap <- function(formula,
                        prior_sdnp = p_gamma(2,1),
                        backhaz = NULL,
                        basehaz_ops = NULL,
-                       modelid = "mspline",
                        fit_method = "mcmc",
                        loo = (fit_method=="mcmc"),
                        ...)
@@ -235,22 +227,10 @@ survextrap <- function(formula,
       coefs_mean <- validate_coefs_mean(coefs_mean)
     }
     b_mean <- aa(log(coefs_mean[-1] / coefs_mean[1]))
-    modelids <- c("mspline", "weibull")
-    if (!(modelid %in% modelids)) stop("modelid should be mspline or weibull")
-    modelid_num <- match(modelid, modelids)
 
     est_smooth <- (smooth_sd == "bayes")
     if (est_smooth) smooth_sd_init <- 1
 
-    if (modelid=="weibull"){
-        ## Weibull model.
-        nvars <- 2 # Number of free parameters, consistent with M-spline.  M-spline model has an extra "1 minus sum of rest" parameter
-        basis_event <- array(t_event, dim=c(length(t_event), 2)) # just first col of these used.
-        ibasis_event <- array(t_event, dim=c(length(t_event), 2))
-        ibasis_rcens <- array(t_rcens, dim=c(length(t_rcens), 2))
-        b_mean <- aa(1) # prior mean for log shape parameter. shape is coefs[1], log scale is eta[1]
-        est_smooth <- FALSE
-    }
     ibasis_ext_stop <- if (nextern>0) make_basis(t_ext_stop, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
     ibasis_ext_start <- if (nextern>0) make_basis(t_ext_start, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
 
@@ -258,12 +238,9 @@ survextrap <- function(formula,
     backsurv_ext_stop <- aa(external$backsurv_stop)
     backsurv_ext_start <- aa(external$backsurv_start)
 
-    stanmod <- if (nonprop) "nonprophaz" else "survextrap"
     if (nonprop) {
-      if (modelid=="weibull") stop("Non-proportional hazards models not implemented with the Weibull")
       if (ncovs==0) {
         warning("Ignoring non-proportional hazards model specification, since no covariates in model. ")
-        stanmod <- "survextrap"
         nonprop <- FALSE
       }
     }
@@ -294,7 +271,8 @@ survextrap <- function(formula,
                       prior_logor_cure_df = aa(priors$logor_cure$df),
                       prior_smooth = as.numeric(unlist(priors$smooth[c("shape","rate")])),
                       prior_cure = as.numeric(unlist(priors$cure[c("shape1","shape2")])),
-                      modelid = modelid_num,
+                      modelid = 1,
+                      nonprop, 
                       prior_sdnp = priors$sdnp
                       )
     pcure_init <- if (cure) 0.5 else numeric()
@@ -306,7 +284,7 @@ survextrap <- function(formula,
     if (identical(smooth_sd, "eb")){
         smooth_sd <- eb_smoothness(standata, staninit, prior_smooth)
     }
-    standata$smooth_sd_fixed <- if (est_smooth) aa(numeric()) else if (modelid=="weibull") aa(1) else aa(smooth_sd)
+    standata$smooth_sd_fixed <- if (est_smooth) aa(numeric()) else aa(smooth_sd)
 
     stan_optimizing_ops <- function(...){
         ops <- list(...)
@@ -323,6 +301,7 @@ survextrap <- function(formula,
         ops
     }
 
+    stanmod <- "survextrap"
     if (fit_method=="opt")
         fits <- do.call(rstan::optimizing,
                         c(list(object=stanmodels[[stanmod]], data=standata, init=staninit),
@@ -341,7 +320,7 @@ survextrap <- function(formula,
 
     misc_keep <- nlist(formula, stanfit=fits, fit_method, cure_formula)
     standata_keep <- standata[c("nvars","ncovs","log_crude_event_rate","ncurecovs")]
-    model_keep <- nlist(cure, modelid, est_smooth, nonprop)
+    model_keep <- nlist(cure, est_smooth, nonprop)
     spline_keep <- nlist(basehaz)
     covinfo_names <- c("xnames","xlevs","xinds","xbar","mfbase","mfzero")
     x <- list(x = x[covinfo_names])

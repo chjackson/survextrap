@@ -20,7 +20,6 @@ survextrap(
   prior_sdnp = p_gamma(2, 1),
   backhaz = NULL,
   basehaz_ops = NULL,
-  modelid = "mspline",
   fit_method = "mcmc",
   loo = (fit_method == "mcmc"),
   ...
@@ -137,13 +136,6 @@ this does not necessarily overfit because the function is smoothed through
 the prior.
 
 \code{degree}: Polynomial degree used for the basis function. The default is 3, giving a cubic.}
-
-\item{modelid}{\code{"mspline"} for the default M-spline model.
-
-The only current alternative is \code{"weibull"} for a Weibull accelerated failure time model.
-This is just included for the purpose of package testing.  It is not fully implemented, and is
-not recommended for use in
-practice for survival extrapolation.}
 
 \item{fit_method}{Method from \pkg{rstan} used to fit the model.  Defaults to MCMC.
 

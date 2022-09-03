@@ -187,7 +187,7 @@ validate_prior_bycov <- function(prior, x, priorname){
 }
 
 get_prior_sdnp <- function(prior, x, nonprop){
-  if (!nonprop) return(NULL)
+  if (!nonprop) return(array(dim=c(0,2)))
   if (is.null(prior)) prior <- p_gamma(2, 1)
   prior_list <- validate_prior_bycov(prior, x, priorname="prior_sdnp")
   for (i in seq_len(x$ncovs)){

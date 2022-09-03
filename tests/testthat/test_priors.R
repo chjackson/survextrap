@@ -67,9 +67,9 @@ test_that("Priors on cure prob covariates behave",{
 
 test_that("Priors on smoothing SD behave",{
     nd1 <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                      prior_smooth = p_gamma(2, 2))
+                      prior_smooth = p_gamma(1, 2))
     nd2 <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                      prior_smooth = p_gamma(0.6, 2))
+                      prior_smooth = p_gamma(0.8, 2))
     m1 <- summary(nd1) %>% filter(variable=="smooth_sd") %>% pull(median)
     m2 <- summary(nd2) %>% filter(variable=="smooth_sd") %>% pull(median)
     expect_lt(m2, m1)
