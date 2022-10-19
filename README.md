@@ -77,6 +77,11 @@ See `vignette("methods")`
 See `vignette("examples")`
 
 
+### Slides from presentations about survextrap
+
+* [Exeter, October 2022](https://chjackson.github.io/survextrap/cjackson_survextrap_exeter.pdf)
+
+
 ## Development 
 
 The package is in active development.  It can currently fit a large range of useful models, but it is not finished and is subject to be changed without warning.
