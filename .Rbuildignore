@@ -7,3 +7,4 @@
 ^\.github$
 data-raw
 man-roxygen
+tests/simulation

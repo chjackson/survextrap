@@ -62,7 +62,7 @@ The package has been developed under the expectation that many forms of external
 
 * It has an R interface, designed to be friendly to those familiar with standard R modelling functions.
 
-* Stan is used under the surface to do MCMC (Hamiltonian Monte Carlo) sampling from the posterior distribution, in a similar fashion to [rstanarm](https://mc-stan.org/rstanarm/) and [survHE](https://CRAN.R-project.org/package=survHE). 
+* [Stan](https://mc-stan.org/) is used under the surface to do MCMC (Hamiltonian Monte Carlo) sampling from the posterior distribution, in a similar fashion to [rstanarm](https://mc-stan.org/rstanarm/) and [survHE](https://CRAN.R-project.org/package=survHE). 
 
 * Estimates and posterior credible intervals / samples for survival, hazard, mean and restricted mean survival can easily be extracted.
 
