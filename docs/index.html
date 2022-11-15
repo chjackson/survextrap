@@ -69,8 +69,50 @@
 </h1></div>
 <p><code>survextrap</code> is an R package under development, to model survival from a combination of</p>
 <ol style="list-style-type: decimal">
-<li><p>A standard individual-level, right-censored survival dataset</p></li>
-<li><p>“External” data sources in the following aggregate “count” form:</p></li>
+<li>A standard individual-level, right-censored survival dataset, e.g.</li>
+</ol>
+<table class="table">
+<tr>
+<th>
+Survival time
+</th>
+<th>
+Death
+</th>
+<th>
+Predictors…
+</th>
+</tr>
+<tr>
+<td>
+2 years
+</td>
+<td>
+Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+5 years
+</td>
+<td>
+No
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+etc…
+</td>
+<td>
+</td>
+</tr>
+</table>
+<ol start="2" style="list-style-type: decimal">
+<li>“External” data sources in the following aggregate “count” form:</li>
 </ol>
 <table class="table">
 <tr>
@@ -79,6 +121,9 @@ Follow-up period
 </th>
 <th colspan="2">
 Number
+</th>
+<th>
+Predictors…
 </th>
 </tr>
 <tr>
@@ -94,6 +139,8 @@ Alive at <span class="math inline"><em>t</em></span>
 <th>
 Still alive at <span class="math inline"><em>u</em></span>
 </th>
+<th>
+</th>
 </tr>
 <tr>
 <td>
@@ -107,6 +154,8 @@ Still alive at <span class="math inline"><em>u</em></span>
 </td>
 <td>
 <span class="math inline"><em>r</em><sub>1</sub></span>
+</td>
+<td>
 </td>
 </tr>
 <tr>
@@ -122,10 +171,14 @@ Still alive at <span class="math inline"><em>u</em></span>
 <td>
 <span class="math inline"><em>r</em><sub>2</sub></span>
 </td>
+<td>
+</td>
 </tr>
 <tr>
 <td>
 etc…
+</td>
+<td>
 </td>
 <td>
 </td>
@@ -182,10 +235,16 @@ etc…
 <p>The package is in active development. It can currently fit a large range of useful models, but it is not finished and is subject to be changed without warning.</p>
 <p>Major things to do are:</p>
 <ul>
-<li><p>Thoughtful default priors for hazard changes without external data, e.g. in terms of orders of magnitude. Better thought-out knot choice, particularly with external data. Empirical work to show the impact of priors and knot choice.</p></li>
+<li><p>Empirical work to show the impact of priors and knot choice. Can we derive more practically-meaningful default priors for changes in hazard through time, e.g. in terms of orders of magnitude? How much does knot choice matter in particular with external data?</p></li>
 <li><p>More experience and examples of using it with real external data, including a vignette that lists how to implement all previously-suggested approaches for extrapolation with external data.</p></li>
-<li><p>Recommendations for how to use cure and relative survival together, and consider whether these need to be extended. For example, uncertainty in the background hazard, with non-proportional hazards with study population (additive or more flexible?)</p></li>
-<li><p>Explain relation to dynamic GLMs as used by <a href="https://doi.org/10.1177%2F0272989X19873661" class="external-link">Kearns et al</a> and related papers. Can “random walk” principles used in their dynamic model inspire a sensible prior for hazard changes?</p></li>
+<li>
+<p>Background hazard / relative survival models:</p>
+<ul>
+<li><p>Ability to supply background hazard at any arbitrary times, including in the long term, in the manner of an external dataset.</p></li>
+<li><p>Ability to include background hazard during prediction. Currently, predictions from relative survival models exclude all other causes.</p></li>
+<li><p>Consider if they should be extended to include uncertainty in the background hazard, with non-proportional hazards with study population (additive or more flexible?)</p></li>
+</ul>
+</li>
 <li><p>Thorough testing, documentation and error handling.</p></li>
 </ul>
 <p>If you want to try it out - feel free to install the development version as:</p>

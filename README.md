@@ -2,7 +2,33 @@
 
 `survextrap` is an R package under development, to model survival from a combination of 
 
-1. A standard individual-level, right-censored survival dataset
+1. A standard individual-level, right-censored survival dataset, e.g.
+
+<table> 
+<tr>
+<th>Survival time</th>
+<th>Death</th>
+<th>Predictors...</th>
+</tr> 
+
+<tr>
+<td> 2 years </td>
+<td> Yes </td>
+<td></td>
+</tr>
+
+<tr>
+<td> 5 years </td>
+<td> No </td>
+<td></td>
+</tr>
+
+<tr>
+<td>etc...</td>
+<td></td>
+</tr>
+
+</table>
 
 2. "External" data sources in the following aggregate "count" form:
 
@@ -10,14 +36,19 @@
 <tr>
 <th colspan="2">Follow-up period </th>
 <th colspan="2">Number</th>
+<th>Predictors...</th>
+
 </tr> 
-<tr><th>Start time $t$</th><th>End time $u$</th><th>Alive at $t$</th><th>Still alive at $u$</th></tr>
+<tr><th>Start time $t$</th><th>End time $u$</th><th>Alive at $t$</th><th>Still alive at $u$</th>
+<th></th>
+</tr>
 
 <tr>
 <td> $t_{1}$ </td>
 <td> $u_{1}$ </td>
 <td> $n_{1}$ </td>
 <td> $r_{1}$ </td>
+<td></td>
 </tr>
 
 <tr>
@@ -25,10 +56,12 @@
 <td> $u_{2}$ </td>
 <td> $n_{2}$ </td>
 <td> $r_{2}$ </td>
+<td></td>
 </tr>
 
 <tr>
 <td>etc...</td>
+<td></td>
 <td></td>
 <td></td>
 <td></td>
@@ -88,13 +121,17 @@ The package is in active development.  It can currently fit a large range of use
 
 Major things to do are:
 
-* Thoughtful default priors for hazard changes without external data, e.g. in terms of orders of magnitude.  Better thought-out knot choice, particularly with external data.  Empirical work to show the impact of priors and knot choice.
+* Empirical work to show the impact of priors and knot choice.  Can we derive more practically-meaningful default priors for changes in hazard through time, e.g. in terms of orders of magnitude?  How much does knot choice matter in particular with external data?
 
 * More experience and examples of using it with real external data, including a vignette that lists how to implement all previously-suggested approaches for extrapolation with external data.
 
-* Recommendations for how to use cure and relative survival together, and consider whether these need to be extended.  For example, uncertainty in the background hazard, with non-proportional hazards with study population (additive or more flexible?)
+* Background hazard / relative survival models:
 
-* Explain relation to dynamic GLMs as used by [Kearns et al](https://doi.org/10.1177%2F0272989X19873661) and related papers. Can "random walk" principles used in their dynamic model inspire a sensible prior for hazard changes?
+	* Ability to supply background hazard at any arbitrary times, including in the long term, in the manner of an external dataset.
+
+	* Ability to include background hazard during prediction. Currently, predictions from relative survival models exclude all other causes.
+
+	* Consider if they should be extended to include uncertainty in the background hazard, with non-proportional hazards with study population (additive or more flexible?)
 
 * Thorough testing, documentation and error handling.
 
