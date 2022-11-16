@@ -60,7 +60,8 @@ Alternatively, if a number is supplied here, then the smoothing parameter is fix
 default, these are set to values that define a constant hazard function.  They are normalised to
 sum to 1 internally (if they do not already).}
 
-\item{cure}{If \code{TRUE}, a mixture cure model is used.}
+\item{cure}{If \code{TRUE}, a mixture cure model is used, where the "uncured" survival is defined by the
+M-spline model, and the cure probability is estimated.}
 
 \item{nonprop}{If \code{TRUE} then a non-proportional hazards model is fitted.
 This is achieved by modelling the spline basis weights in terms of the covariates.  See
@@ -88,7 +89,7 @@ denote a typical value in the data, e.g. the mean.}
 \code{p_normal()} or \code{p_t()}.  A list of calls can also be provided, to give
 different priors to different coefficients, where the name
 of each list component matches the name of the coefficient, e.g.
-list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3)).
+\code{list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3))}
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
@@ -109,15 +110,40 @@ This should be a call to \code{p_normal()} or \code{p_t()}.  The default is
 effects over time in non-proportional hazards models.  This should be a call to \code{p_gamma()}
 or a list of calls to \code{p_gamma()} with one component per covariate, as in \code{prior_loghr}.}
 
-\item{backhaz}{Name of a variable in the data giving the background hazard
-in relative survival models.  For censored cases the exact value does not matter.
-The parameter estimates and any other results for these models will then describe
-the excess hazard or survival on top of this background.
+\item{backhaz}{Background hazard, that is, for causes of death other than the
+cause of interest. This defines a "relative survival" model where the
+overall hazard is the sum of a cause-specific hazard and a background
+hazard.   The background hazard is assumed to be known, and the
+cause-specific hazard is modelled with the flexible parametric model.
 
-If there is external data and \code{backhaz} is supplied, then the user should also supply the background
-survival at the start and stop points in columns of the external data named \code{"backsurv_start"} and
-\code{"backsurv_stop"}.  This should describe same reference population
-as \code{backhaz}, though the package does not check for consistency between these.}
+The background hazard can be supplied in two forms.  The meaning of predictions
+from the model depends on which of these is used.
+
+(a) A data frame with columns \code{"hazard"} and \code{"time"}, specifying
+the "background" hazard at all times as a piecewise-constant (step) function.
+Each row gives the "background" hazard between the specified time and the
+next time.  The first element of \code{"time"} should be 0, and the final row
+specifies the hazard at all times greater than the last element of
+\code{"time"}.
+
+Predictions from the modelled fitted by \code{survextrap} will then include this
+background hazard, because it is known at all times.
+
+(b) The (quoted) name of a variable in the data giving the background
+hazard.  For censored cases, the exact value does
+not matter.  The predictions from \code{survextrap} will
+then describe the excess hazard or survival on top of this background.
+The overall hazard cannot be predicted in general, because the background hazard is
+only specified over a limited range of time.
+
+If there is external data and \code{backhaz} is supplied in form (b), then the
+user should also supply the background survival at the start and stop points
+in columns of the external data named \code{"backsurv_start"} and
+\code{"backsurv_stop"}.  This should describe the same reference population as
+\code{backhaz}, though the package does not check for consistency between these.
+
+Leave-one-out cross-validation currently does not take into account any
+background hazard (effectively assuming it to be zero).}
 
 \item{basehaz_ops}{A list of control parameters defining the spline model.
 
@@ -164,10 +190,15 @@ of these.}
 \pkg{rstan} function, depending on which is chosen through the \code{fit_method} argument.}
 }
 \value{
-TODO document return list
+A list of objects defining the fitted model.  A particularly important component is
+
+\code{stanfit}: The object returned by \code{rstan} containing samples from the fitted model.  See the \href{https://mc-stan.org/rstan/index.html}{rstan} documentation.
 }
 \description{
 Flexible Bayesian parametric survival models.  Individual data are represented using M-splines
-and a proportional hazards or flexible non-proportional hazards model.   Extrapolations
-can be enhanced by including external aggregate data.
+and a proportional hazards or flexible non-proportional hazards model.
+Optionally a mixture cure version
+of this model can be fitted.
+Extrapolations can be enhanced by including external aggregate data, or by including a fixed background hazard
+in an additive hazards (relative survival) model.
 }

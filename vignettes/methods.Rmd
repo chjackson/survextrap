@@ -209,3 +209,39 @@ For each covariate $s$, a hierarchical model is used for the non-proportionality
 \[ b^{(np)}_{ks} \sim Normal(0, \sigma^{(np)}_s) \] 
 
 In the non-proportional hazards model, the ratio between the hazards $h(t,\x)$ at different covariate values $\x$ is a function of time $t$.  Since the $\boldsymbol{b}^{(np)}_k$ may be arbirtarily different in each region of time $k$, the hazard ratio can be an arbitrarily-flexible function of time.  The amount and shape of non-proportionality is estimated from the data, while the hierarchical model protects against overfitting.
+
+
+# Cure models {#cure_methods}
+
+The `survextrap` package implements a mixture cure version of the M-spline model.
+
+In a mixture cure model, the survival is defined by $S(t | p, \boldsymbol{\theta}) = p + (1-p)S_0(t|\boldsymbol{\theta})$, where $p$ is sometimes termed the "cure probability", and $S_0(t|\boldsymbol{\theta})$ is a parametric model with parameters $\boldsymbol{\theta}$, termed the "uncured survival".  In `survextrap`, $S_0$ is the M-spline model. 
+
+This model can be interpreted in two different ways: 
+
+* as a mixture model, where a person has hazard $h_1(t)=0$ at all times $t$ with probability $p$, or hazard $h_0(t)$ at all times with probability $1-p$. 
+
+* as a model where everyone follows the same hazard function $h(t) = f(t)/S(t)$, where the PDF is $f(t) = (1-p)f_0(t)$, and $f_0(t)$ is the PDF of the "uncured" parametric model.  Hence $h(t) = f_0(t) / (p/(1-p) + S_0(t))$, which asymptotically decreases towards zero with increasing $t$ (as long as $p>0$).
+
+Since we do not observe whether a person is part of the "cured" subgroup, these interpretations are indistinguishable in practice. 
+
+
+
+# Relative survival / additive hazards models {#relsurv_methods}
+
+`survextrap` also implements a model where the overall hazard is assumed to be the sum of two components corresponding to different causes of death.  These are usually termed the "background" hazard $h_b(t)$ and the "cause-specific" or "excess" hazard $h_c(t)$, so that $h(t) = h_b(t) + h_c(t)$, where:
+
+* $h_b(t)$ is assumed to be a known, piecewise-constant (step) function, and is provided by the user in a data frame that gives the background hazard in each of a series of time periods.  See [the examples](examples.html#relsurv_examples). 
+
+* $h_c(t)$ follows the standard flexible parametric (M-spline) model used in `survextrap`.
+
+This is known as a "relative survival" model, since the additive model for the hazards implies a multiplicative model for survival: $S(t) = S_b(t)S_c(t)$.    This kind of model is often used when the background hazard is confidently known (from national statistics on general mortality) and the cause-specific hazard can be inferred from the individual-level data.
+
+The model used in `survextrap` is a variant of the model by [Nelson et al](https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.3064) and should give similar results.  The only difference is that the model in `survextrap` is Bayesian, and a different kind of spline is used.
+
+
+### Combining relative survival and cure models
+
+To use a cure model and a relative survival model together, $h_c(t)$ is defined by a mixture cure version of the M-spline model, and a background hazard data set is supplied to define $h_b(t)$.   This allows the overall hazard $h(t)$ to decrease asymptotically towards a background hazard $h_b(t)$, instead of decreasing towards zero.
+
+This model is appropriate if we are sure that people with the disease are eventually "cured", or alternatively, their risk from the disease becomes negligible compared to their risk of death from other causes, and we have good information about general mortality and when this starts to dominate.  Therefore average survival is estimated by naturally combining short-term information on disease-specific survival with long-term data on general mortality.

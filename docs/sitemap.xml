@@ -28,6 +28,9 @@
     <loc>https://chjackson.github.io/survextrap/reference/curedata.html</loc>
   </url>
   <url>
+    <loc>https://chjackson.github.io/survextrap/reference/get_cum_backhaz.html</loc>
+  </url>
+  <url>
     <loc>https://chjackson.github.io/survextrap/reference/hazard.html</loc>
   </url>
   <url>
@@ -80,6 +83,9 @@
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/priors.html</loc>
+  </url>
+  <url>
+    <loc>https://chjackson.github.io/survextrap/reference/prior_pred.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/qgeneric.html</loc>

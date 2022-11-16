@@ -52,3 +52,31 @@ test_that("rsurvmspline",{
     ran <- rsurvmspline(10, alpha, coefs, knots)
     expect_type(ran, "double")
 })
+
+test_that("offsets in distribution functions",{
+  q <- c(1.2)
+  pr1 <- psurvmspline(q, alpha, coefs, knots)
+  pr2 <- psurvmspline(q, alpha, coefs, knots, offsetH = 0.01)
+  expect_lt(pr1, pr2)
+
+  pr1 <- hsurvmspline(q, alpha, coefs, knots)
+  pr2 <- hsurvmspline(q, alpha, coefs, knots, offseth = 0.01)
+  expect_lt(pr1, pr2)
+
+  pr1 <- Hsurvmspline(q, alpha, coefs, knots)
+  pr2 <- Hsurvmspline(q, alpha, coefs, knots, offsetH = 0.01)
+  expect_lt(pr1, pr2)
+
+  pr1 <- dsurvmspline(q, alpha, coefs, knots)
+  pr2 <- dsurvmspline(q, alpha, coefs, knots, offseth=0.01, offsetH = 0.02)
+  expect_true(pr1 != pr2)
+
+  q <- c(1.2, 1.3)
+  pr1 <- psurvmspline(q, alpha, coefs, knots, offsetH = c(NA, 0.01))
+  pr2 <- psurvmspline(1.3, alpha, coefs, knots, offsetH = c(0.01))
+  expect_equal(pr1[2], pr2)
+
+  pr1 <- dsurvmspline(1.2, alpha, coefs, knots, offseth=0.01, offsetH=0.02)
+  pr2 <- dsurvmspline(1.2, alpha, coefs, knots, offseth=0.01, offsetH = c(NA,0.02))
+  expect_equal(pr1, pr2[2])
+})

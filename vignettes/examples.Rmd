@@ -44,7 +44,7 @@ survminer::ggsurvplot(survfit(Surv(years, status) ~ 1, data=colons), data=colons
 ```
 
 
-## No external data
+## Simplest model: no external data
 
 The following is the simplest, default model in the package fitted to the short-term trial data alone. No external data are supplied.  After three years (the maximum follow up time of the short term data) 
 the model assumes the hazard stays constant.   
@@ -81,6 +81,20 @@ In many practical situations of extrapolation in time-to-event models, we do hav
 The idea of the package is to make this external information as explicit as possible - ideally in the form of data. 
 
 
+### Note on computation settings 
+
+Most of the example models in this vignette have been specified using computational approximations allow the models to be fitted more quickly, but at the cost of some inaccuracy.  This has been done so that the vignettes build more quickly.   Specifically: 
+
+* `chains=1` was set in the examples above.   This defines the number of chains used in the MCMC method to estimate the model.    This option can be left out in practice - in which case, four MCMC chains are used, which is the default setting in the `rstan` engine that the package uses, and is more reliable in practice. 
+
+* Likewise, some models below are fitted using `fit.method="opt"`.  This uses an [approximation to the posterior](https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html).  This is OK for producing point estimates of the parameters (the posterior mode is used) but the uncertainty will be underestimated - so it is only recommended for quick checks and model development.
+
+* If using MCMC, make sure to check the diagnostics to ensure that the fit has _converged_ - the 
+values of `rhat` in the summary output (e.g. below) should not be more than 1.05 for each parameter ([see here](https://mc-stan.org/rstan/reference/Rhat.html) for technical details).
+
+```{r}
+head(summary(nd_mod))
+```
 
 
 ## Mean and restricted mean survival 
@@ -90,7 +104,7 @@ The functions `mean` and `rmst` calculate the mean and restricted mean survival 
 For particular combinations of parameter values, the mean under the model `nd_mod` cannot be calculated (resulting in an error message about a divergent integral), suggesting there is a substantial posterior probability that the mean is infinite.  
 
 Instead we compute the restricted mean survival time $RMST(t)$ over three alternative time limits $t$: 3, 10 and 1000 years.  The upper 95\% credible limit for $RMST(1000)$ is very large. 
-(`niter` controls how many MCMC iterations to use to summarise the distribution - this is artificially reduced here so this example runs faster. In real applications you should check there are enough iterations to get summaries with the amount of precision yoy want - this will usually be 1000 or more)
+(`niter` controls how many MCMC iterations to use to summarise the distribution - this is artificially reduced here so this example runs faster. In real applications you should check there are enough iterations to get summaries with the amount of precision you want - this will usually be 1000 or more)
 
 ```{r}
 # mean(nd_mod)
@@ -272,17 +286,17 @@ For models with external data, the cross-validation statistics describe the fit 
     
 
 
-## Cure models
+## Cure models {#cure_example}
 
-The package provides a simulated dataset `curedata` with an obvious cure fraction.
+The package provides a simulated dataset `curedata` with an obvious cure fraction.   Here we fit the cure models that are described in the [methods vignette](methods.html#cure_methods).
 
 The probability of cure for `x=0` is 0.5, and for `x=1` 0.622 (so the log odds ratio is 0.5).   The uncured fraction follows a Weibull(1.5, 1.2) survival distribution.
 
 ```{r,results="hide",cache=TRUE}
 plot(survfit(Surv(t, status) ~ 1, data=curedata))
 
-noncure_mod <- survextrap(Surv(t, status) ~ 1, data=curedata, chains=1, 
-                          cure=FALSE)
+noncure_mod <- survextrap(Surv(t, status) ~ 1, data=curedata,  
+                          cure=FALSE, fit_method = "opt")
 plot(noncure_mod) # doesn't quite capture the curve
 
 cure_mod <- survextrap(Surv(t, status) ~ 1, data=curedata, chains=1, cure=TRUE, iter=1000)
@@ -300,19 +314,64 @@ summary(curec_mod) %>%
 In this summary,  `pcure` is the probability of cure at a value of 0 for the covariate `x.`
 
 
-## Relative survival models
+## Relative survival models {#relsurv_examples}
 
-To implement the standard "additive hazards" model for relative survival, the background hazard can be supplied as a fixed constant alongside the data.     The model used is a variant of the model by [Nelson et al](https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.3064) and should give similar results.  The only difference is that the model in `survextrap` is Bayesian, and a different kind of spline is used.
+To implement an "additive hazards" ("relative survival") model (see the [methods vignette](methods.html#relsurv_methods)), the background hazard can be supplied alongside the data.  This can be done in two ways - note the meaning of the predictions from the model depends on which of these specifications was used.  
 
-As an example, suppose the background hazard is 0.05 at all times.  This is appended to the data as an extra column.  The name of this column is supplied (unquoted) as the `backhaz` argument to `survextrap`.
+
+### Background hazard defined at all times {#relsurv_example2}
+
+The recommended way is to build a data frame that defines the value of the background hazard at all times.   The hazard is assumed to be a piecewise-constant function.  The data frame has columns `"hazard"` and `"time"`, and each row defines the value of the hazard between the current time and the next time.  The first value of `"time"` should be 0, and the final row of the data defines the hazard for all times greater than the last time.  For example:
+
+```{r}
+bh <- data.frame(time=c(0, 3, 5, 10), 
+                 hazard=c(0.01, 0.05, 0.1, 0.2))
+```
+
+When supplied to `survextrap`, this defines a full model for overall hazard at any time. 
+
+In the recurring example model, suppose we have external data about the background hazard
+that we use to extrapolate survival up to 15 years. This is represented in the data frame `bh` defined above.
+
+The "cause-specific" hazard represents death from colon cancer, and the "background" hazard represents deaths from other causes.   We suppose that colon cancer deaths dominate in the shorter term covered by the individual data (0-3 years), but the risk of death from other causes increases gradually after that.  
+
+We fit one model `mod` that excludes this information, and another model that includes it. 
+
+```{r}
+mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt")
+mod_bh <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt", backhaz=bh)
+```
+
+The posterior medians of the survival and hazard functions under `mod_bh` are overlaid on the posterior distributions from `mod`.   The fitted survival and hazard in the short term agrees under both models, but the survival is worse in the long term when the increase in the background hazard at times 3, 5 and 10 is accounted for. 
+
+```{r}
+plot_survival(mod, tmax=15, niter=20) + 
+  geom_line(data=survival(mod_bh, tmax=15, niter=20), aes(y=median, x=times), col="red", lwd=1.2)
+
+plot_hazard(mod, tmax=15, niter=20) + 
+  geom_line(data=hazard(mod_bh, tmax=15, niter=20), aes(y=median, x=times), col="red", lwd=1.2)
+```
+
+
+Note that this kind of relative survival model can also be used together with a cure model. 
+If both `cure` and `backhaz` are specified, then the cure model is assumed to apply to the  cause-specific hazard.   This will define a model where the cause-specific hazard approaches zero, hence the overall hazard is increasingly dominated by the background causes of death, as time increases. 
+
+
+
+
+### Background hazard only defined at the event times {#relsurv_example1}
+
+An alternative approach is to supply the background hazard as an extra column alongside the data.  The name of this column is supplied (unquoted) as the `backhaz` argument to `survextrap`.   This relies on fewer assumptions about the background hazard, since only the hazard at the event times is used, and the background hazard outside the time spanned by the individual data is unspecified.
+
+Here the background hazard at each event time is defined in an extra column `"bh"` in the individual data.
 
 ```{r,results="hide"}
 colonsb <- colons
 colonsb$bh <- rep(0.05, nrow(colons))
-modb <- survextrap(Surv(years, status) ~ 1, data=colonsb, backhaz=bh, chains=1)
+modb <- survextrap(Surv(years, status) ~ 1, data=colonsb, backhaz="bh", chains=1)
 ```
 
-The parameter estimates in the fitted model, and the fitted survival or hazard, then describe the excess hazard for the study population.  That is, the overall hazard minus the background hazard.  
+As in the previous specification, the parameter estimates in the fitted model describe the excess or cause-specific hazard for the study population.  However, the _predictions_ from the model (e.g. fitted survival, hazard or mean survival) have a different meaning here.   Previously they described the overall hazard - we were able to do this because we defined the hazard at all times.  But now they describe the excess hazard for the study population - we cannot predict overall survival in general here, since we did not define the background hazard at all times.
 
 In the example below, the excess hazard from the relative hazard model (with constant background 0.05) is shown in blue below the fitted overall hazard from a model with no background adjustment.  As expected, the excess hazard is around 0.05 less than the overall hazard.
 
@@ -323,7 +382,11 @@ plot_hazard(mod) +
 ```
 
 
+
+
+
+### Comparison with other ways of supplying external data in survextrap
+
 An alternative approach to modelling a study population and a background population in `survextrap` would be to estimate the background hazard from external aggregate data supplied as an `external` argument.   A covariate would be included which takes a different value between the external data and the study data.   By default, the hazards would then be assumed to be proportional between the study population and external population.  Proportional hazards would be a restrictive assumption, however.  The flexible nonproportional hazards model might be preferable.
 
-The advantage of this alternative approach would be to account for uncertainty about the background hazard.  If the background hazard is not uncertain, however, then the standard relative survival model would be adequate, as the excess hazard is modelled flexibly.   
-
+The advantage of this alternative approach would be to account for uncertainty about the background hazard.  If the background hazard is not uncertain, however, then the standard relative survival model would be adequate, as the excess hazard is modelled flexibly.   In theory, another way to account for uncertainty in `backhaz` would be to place independent priors on each of the `backhaz` terms (without modelling `backhaz` as a parametric function of time) though this is not currently implemented.

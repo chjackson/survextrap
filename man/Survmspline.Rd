@@ -19,14 +19,48 @@ psurvmspline(
   knots,
   degree = 3,
   lower.tail = TRUE,
-  log.p = FALSE
+  log.p = FALSE,
+  pcure = 0,
+  offsetH = 0,
+  backhaz = NULL
 )
 
-Hsurvmspline(x, alpha, coefs, knots, degree = 3, log = FALSE)
+Hsurvmspline(
+  x,
+  alpha,
+  coefs,
+  knots,
+  degree = 3,
+  log = FALSE,
+  pcure = 0,
+  offsetH = 0,
+  backhaz = NULL
+)
 
-hsurvmspline(x, alpha, coefs, knots, degree = 3, log = FALSE)
+hsurvmspline(
+  x,
+  alpha,
+  coefs,
+  knots,
+  degree = 3,
+  log = FALSE,
+  pcure = 0,
+  offseth = 0,
+  backhaz = NULL
+)
 
-dsurvmspline(x, alpha, coefs, knots, degree = 3, log = FALSE)
+dsurvmspline(
+  x,
+  alpha,
+  coefs,
+  knots,
+  degree = 3,
+  log = FALSE,
+  pcure = 0,
+  offseth = 0,
+  offsetH = 0,
+  backhaz = NULL
+)
 
 qsurvmspline(
   p,
@@ -35,14 +69,26 @@ qsurvmspline(
   knots,
   degree = 3,
   lower.tail = TRUE,
-  log.p = FALSE
+  log.p = FALSE,
+  pcure = 0,
+  offsetH = 0,
+  backhaz = NULL
 )
 
-rsurvmspline(n, alpha, coefs, knots, degree = 3)
+rsurvmspline(
+  n,
+  alpha,
+  coefs,
+  knots,
+  degree = 3,
+  pcure = 0,
+  offsetH = 0,
+  backhaz = NULL
+)
 
-rmst_survmspline(t, alpha, coefs, knots, degree = 3)
+rmst_survmspline(t, alpha, coefs, knots, degree = 3, pcure = 0, backhaz = NULL)
 
-mean_survmspline(alpha, coefs, knots, degree = 3)
+mean_survmspline(alpha, coefs, knots, degree = 3, pcure = 0, backhaz = NULL)
 }
 \arguments{
 \item{alpha}{Log scale parameter.}
@@ -61,9 +107,22 @@ the same for all alternative times and parameter values.}
 \item{lower.tail}{logical; if TRUE (default), probabilities are \eqn{P(X
 \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}
 
+\item{pcure}{Probability of "cure", which defaults to zero.  If this is non-zero, this defines a "mixture cure" version of the M-spline model.}
+
+\item{offsetH}{Constant to be added to the cumulative hazard.}
+
+\item{backhaz}{A data frame that defines the background hazard as a piecewise-constant function of time.
+This should have two columns, named \code{"time"} and
+\code{"hazard"}. Each row gives the "background" hazard between the
+specified time and the next time. The first element of
+\code{"time"} should be 0, and the final row specifies the hazard at all
+times greater than the last element of \code{"time"}.}
+
 \item{x, q, t}{Vector of times.}
 
 \item{log, log.p}{Return log density or probability.}
+
+\item{offseth}{Constant to be added to the hazard, e.g. representing a "background" risk of death from causes other than the cause of interest.}
 
 \item{p}{Vector of probabilities.}
 
@@ -86,9 +145,28 @@ cumulative hazard, mean and restricted mean functions for the
 M-spline time-to-event model.
 }
 \details{
+This can optionally be combined with a cure probability, and / or with
+a known background hazard trajectory that is a piecewise-constant function of time.
+
 These are the same as the M-splines used to model survival data in \code{rstanarm}, except that an
 additional assumption is made that the hazard is constant beyond the boundary knots at its
 value at the boundary.   This gives a continuous but non-smooth function.
+
+The "cure" model can be interpreted in two different ways.  These result in identical probability distribution functions for the event time, hence they are indistinguishable from data:
+
+(a) a model where everyone follows the same hazard trajectory that is decreasing through time, with a higher rate of decrease for higher \code{pcure}.
+
+(b) a model where a person either has a constant zero hazard at all times, or a hazard that follows a parametric model (M-spline in this case).  The probability that a person has a zero hazard is \code{pcure}.
+This is the "mixture model" interpretation.
+
+In the "background hazard" model, the overall hazard is defined as a sum of the background hazard and
+a cause-specific hazard.   The cause-specific hazard
+is modelled with the M-spline model, and the background hazard is assumed
+to be a known piecewise-constant function defined by \code{backhaz}.
+
+If both \code{backhaz} and \code{pcure} are supplied, then the cure probablity applies only to the cause-specific hazard.
+That is, the cause-specific hazard decreases to zero, and the overall hazard converges towards
+the background hazard, as time increases.
 }
 \references{
 Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425–441.

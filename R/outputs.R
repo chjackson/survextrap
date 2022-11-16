@@ -66,12 +66,14 @@ rmst <- function(x, t, newdata=NULL, niter=NULL){
         resmat <- matrix(nrow=niter*nvals, ncol=nt)
         colnames(resmat) <- t
         for (i in 1:nt){
-          resmat[,i] <- rmst_survmspline(t[i], pars$alpha_user[,j], pars$coefs[,j,], x$basehaz$knots, x$basehaz$degree)
-          if (x$cure){
-            cureprob_mat <- matrix(rep(pars$cureprob_user, nt), nrow=niter*nvals, ncol=nt)
-            tmat <- matrix(t, nrow=niter*nvals, ncol=nt, byrow=TRUE)
-                resmat <- cureprob_mat*tmat + (1 - cureprob_mat)*resmat
-          }
+          resmat[,i] <- rmst_survmspline(t[i], pars$alpha_user[,j], pars$coefs[,j,],
+                                         x$basehaz$knots, x$basehaz$degree,
+                                         pcure = pars$cureprob_user, backhaz = x$backhaz)
+#          if (x$cure){
+#            cureprob_mat <- matrix(rep(pars$cureprob_user, nt), nrow=niter*nvals, ncol=nt)
+#            tmat <- matrix(t, nrow=niter*nvals, ncol=nt, byrow=TRUE)
+#                resmat <- cureprob_mat*tmat + (1 - cureprob_mat)*resmat
+#          }
         }
         sample <- posterior::as_draws(resmat)
         res[[j]] <- summary(sample, median, ~quantile(.x, probs=c(0.025, 0.975)))
@@ -218,7 +220,7 @@ default_newdata_hr <- function(x, newdata){
 }
 
 #' Hazard ratio against time in a survextrap model
-#' 
+#'
 #' Intended for use with non-proportional hazards models (\code{survextrap(...,nonprop=TRUE)}).
 #'
 #' @param newdata A data frame with two rows.  The hazard ratio will be defined as hazard(first row)
@@ -263,7 +265,7 @@ timedep_output <- function(x, output="survival", newdata=NULL, times=NULL, tmax=
     dimnames(res_sam) <- list(time=1:nt, iteration=1:niter, value=1:nvals)
 
     if (!sample){
-        res <- apply(res_sam, c(1,3), function(y)quantile(y, probs=c(0.5, 0.025, 0.975)))
+        res <- apply(res_sam, c(1,3), function(y)quantile(y, probs=c(0.5, 0.025, 0.975), na.rm=TRUE))
         res <- as.data.frame(matrix(res, nrow=nt*nvals, ncol=3, byrow=TRUE))
         names(res) <- c("median","lower","upper")
         res <- cbind(times = rep(times, nvals), res)
@@ -277,24 +279,26 @@ timedep_output <- function(x, output="survival", newdata=NULL, times=NULL, tmax=
 survival_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
   coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
   surv_sam <- psurvmspline(times_arr, alpha_user_arr, coefs_mat,
-                           x$basehaz$knots, x$basehaz$degree, lower.tail=FALSE)
-  if (x$cure)  {
-    surv_sam <- cureprob_arr + (1 - cureprob_arr)*surv_sam
-  }
+                           x$basehaz$knots, x$basehaz$degree, lower.tail=FALSE,
+                           pcure=cureprob_arr, backhaz=x$backhaz)
+#  if (x$cure)  {
+#    surv_sam <- cureprob_arr + (1 - cureprob_arr)*surv_sam
+#  }
   surv_sam
 }
 
 hazard_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
   coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
-  if (x$cure)
-    logdens_sam <- dsurvmspline(times_arr, alpha_user_arr, coefs_mat,
-                                x$basehaz$knots, x$basehaz$degree, log=TRUE)
+#  if (x$cure)
+#    logdens_sam <- dsurvmspline(times_arr, alpha_user_arr, coefs_mat,
+#                                x$basehaz$knots, x$basehaz$degree, log=TRUE, backhaz=x$backhaz)
   loghaz_sam <- hsurvmspline(times_arr, alpha_user_arr, coefs_mat,
-                             x$basehaz$knots, x$basehaz$degree, log=TRUE)
-  if (x$cure)  {
-    loghaz_sam <- log(1 - cureprob_arr) +  logdens_sam -
-      log(survival_core(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt))
-  }
+                             x$basehaz$knots, x$basehaz$degree, log=TRUE,
+                             pcure=cureprob_arr, backhaz=x$backhaz)
+#  if (x$cure)  {
+#    loghaz_sam <- log(1 - cureprob_arr) +  logdens_sam -
+#      log(survival_core(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt))
+#  }
   haz_sam <- exp(loghaz_sam)
   haz_sam
 }
@@ -314,10 +318,10 @@ get_coefs_bycovs <- function(x, stanmat, newdata=NULL, X=NULL){
       X <- newdata_to_X(newdata, x, x$formula, x$x$xlevs) # nvals x ncovs
       X <- drop_intercept(X)
     } else X <- NULL
-  } 
+  }
   niter <- nrow(stanmat)
   nvals <- if (is.null(X)) 1 else nrow(X)
-  
+
   if (x$nonprop){
     b_np_names <- grep("b_np", colnames(stanmat), value=TRUE)
     nvars <- x$basehaz$nvars

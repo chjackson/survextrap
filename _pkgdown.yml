@@ -19,6 +19,7 @@ reference:
   - plot.survextrap
   - mean.survextrap
   - rmst
+  - get_cum_backhaz
 - title: Datasets
 - contents:
   - colons
@@ -32,6 +33,7 @@ reference:
   - mspline_plotdata
   - plot_mspline
   - plot_mspline_priorpred
+  - prior_pred
 - title: Package overview
 - contents:
   - survextrap-package

@@ -17,7 +17,7 @@ test_that("Errors in external data",{
     colonse$bh <- rep(0.01, nrow(colons))
     ext <- data.frame(start=5, stop=10, n=30, r=5)
     expect_error(
-        survextrap(Surv(years, status) ~ 1, data=colonse, external=ext, backhaz=bh),
+        survextrap(Surv(years, status) ~ 1, data=colonse, external=ext, backhaz="bh"),
         "Columns \"backsurv_start\"")
 
 })

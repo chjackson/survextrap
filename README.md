@@ -121,17 +121,11 @@ The package is in active development.  It can currently fit a large range of use
 
 Major things to do are:
 
+* Treatment effect waning: implemented after inference, by mixing the predictions for treated and untreated groups, with mixing weight decreasing with time.
+
 * Empirical work to show the impact of priors and knot choice.  Can we derive more practically-meaningful default priors for changes in hazard through time, e.g. in terms of orders of magnitude?  How much does knot choice matter in particular with external data?
 
 * More experience and examples of using it with real external data, including a vignette that lists how to implement all previously-suggested approaches for extrapolation with external data.
-
-* Background hazard / relative survival models:
-
-	* Ability to supply background hazard at any arbitrary times, including in the long term, in the manner of an external dataset.
-
-	* Ability to include background hazard during prediction. Currently, predictions from relative survival models exclude all other causes.
-
-	* Consider if they should be extended to include uncertainty in the background hazard, with non-proportional hazards with study population (additive or more flexible?)
 
 * Thorough testing, documentation and error handling.
 

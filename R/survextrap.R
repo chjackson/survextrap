@@ -5,8 +5,11 @@
 #' Flexible Bayesian parametric survival models
 #'
 #' Flexible Bayesian parametric survival models.  Individual data are represented using M-splines
-#' and a proportional hazards or flexible non-proportional hazards model.   Extrapolations
-#' can be enhanced by including external aggregate data.
+#' and a proportional hazards or flexible non-proportional hazards model.
+#'Optionally a mixture cure version
+#' of this model can be fitted. 
+#' Extrapolations can be enhanced by including external aggregate data, or by including a fixed background hazard
+#' in an additive hazards (relative survival) model. 
 #'
 #' @param formula  A survival formula in standard R formula syntax, with a call to `Surv()`
 #' on the left hand side.
@@ -42,7 +45,8 @@
 #' default, these are set to values that define a constant hazard function.  They are normalised to
 #' sum to 1 internally (if they do not already).
 #'
-#' @param cure If `TRUE`, a mixture cure model is used.
+#' @param cure If `TRUE`, a mixture cure model is used, where the "uncured" survival is defined by the
+#' M-spline model, and the cure probability is estimated. 
 #'
 #' @param nonprop If \code{TRUE} then a non-proportional hazards model is fitted.
 #' This is achieved by modelling the spline basis weights in terms of the covariates.  See
@@ -56,7 +60,7 @@
 #'   `p_normal(0,1)` or `p_t(0,2,2)`.   Supported prior distribution families
 #'   are normal (parameters mean and SD) and t distributions (parameters
 #' location, scale and degrees of freedom).  The default is a normal distribution with
-#' a mean defined by the log crude event rate in the data, and a standard deviation in the data. 
+#' a mean defined by the log crude event rate in the data, and a standard deviation in the data.
 #'
 #' "Baseline" is defined
 #'   by the continuous covariates taking a value of zero and factor covariates taking their
@@ -70,7 +74,7 @@
 #'   `p_normal()` or `p_t()`.  A list of calls can also be provided, to give
 #'   different priors to different coefficients, where the name
 #'   of each list component matches the name of the coefficient, e.g.
-#'   list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3)).
+#'   ```list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3))```
 #'
 #'   The default is `p_normal(0,2.5)` for all coefficients.
 #'
@@ -91,15 +95,40 @@
 #' effects over time in non-proportional hazards models.  This should be a call to `p_gamma()`
 #' or a list of calls to `p_gamma()` with one component per covariate, as in `prior_loghr`.
 #'
-#' @param backhaz Name of a variable in the data giving the background hazard
-#' in relative survival models.  For censored cases the exact value does not matter.
-#' The parameter estimates and any other results for these models will then describe
-#' the excess hazard or survival on top of this background.
+#' @param backhaz Background hazard, that is, for causes of death other than the
+#'   cause of interest. This defines a "relative survival" model where the
+#'   overall hazard is the sum of a cause-specific hazard and a background
+#'   hazard.   The background hazard is assumed to be known, and the
+#'   cause-specific hazard is modelled with the flexible parametric model.
 #'
-#' If there is external data and `backhaz` is supplied, then the user should also supply the background
-#' survival at the start and stop points in columns of the external data named `"backsurv_start"` and
-#' `"backsurv_stop"`.  This should describe same reference population
-#' as `backhaz`, though the package does not check for consistency between these.
+#' The background hazard can be supplied in two forms.  The meaning of predictions
+#' from the model depends on which of these is used. 
+#'
+#' (a) A data frame with columns \code{"hazard"} and \code{"time"}, specifying
+#' the "background" hazard at all times as a piecewise-constant (step) function.
+#' Each row gives the "background" hazard between the specified time and the
+#' next time.  The first element of \code{"time"} should be 0, and the final row
+#' specifies the hazard at all times greater than the last element of
+#' \code{"time"}.
+#'
+#' Predictions from the modelled fitted by `survextrap` will then include this
+#' background hazard, because it is known at all times.
+#'
+#' (b) The (quoted) name of a variable in the data giving the background
+#' hazard.  For censored cases, the exact value does
+#' not matter.  The predictions from `survextrap` will
+#' then describe the excess hazard or survival on top of this background.
+#' The overall hazard cannot be predicted in general, because the background hazard is
+#' only specified over a limited range of time.
+#'
+#' If there is external data and `backhaz` is supplied in form (b), then the
+#' user should also supply the background survival at the start and stop points
+#' in columns of the external data named `"backsurv_start"` and
+#' `"backsurv_stop"`.  This should describe the same reference population as
+#' `backhaz`, though the package does not check for consistency between these.
+#'
+#' Leave-one-out cross-validation currently does not take into account any
+#' background hazard (effectively assuming it to be zero).
 #'
 #' @param basehaz_ops A list of control parameters defining the spline model.
 #'
@@ -145,8 +174,10 @@
 #' @param ... Additional arguments to supply to control the Stan fit, passed to the appropriate
 #' \pkg{rstan} function, depending on which is chosen through the `fit_method` argument.
 #'
-#' @return TODO document return list
-#' 
+#' @return A list of objects defining the fitted model.  A particularly important component is
+#'
+#' `stanfit`: The object returned by `rstan` containing samples from the fitted model.  See the [rstan](https://mc-stan.org/rstan/index.html) documentation.
+#'
 #' @export
 survextrap <- function(formula,
                        data,
@@ -168,8 +199,7 @@ survextrap <- function(formula,
                        ...)
 {
     mf <- stats::model.frame(terms(formula), data)
-    backhaz <- eval(substitute(backhaz), data, parent.frame())
-    relative <- !is.null(backhaz)
+
     t_beg <- make_t(mf, type = "beg") # entry time
     t_end <- make_t(mf, type = "end") # exit  time
     t_upp <- make_t(mf, type = "upp") # upper time for interval censoring [ not implemented yet ]
@@ -198,6 +228,19 @@ survextrap <- function(formula,
     log_crude_event_rate <- log(d_tmp / t_tmp)
     if (is.infinite(log_crude_event_rate))
         log_crude_event_rate <- 0 # avoids error when there are zero events
+
+    if (is.data.frame(backhaz)) {
+      validate_backhaz_df(backhaz)
+      backhaz_event <- backhaz$hazard[findInterval(t_event, backhaz$time)]
+      backhaz_df <- backhaz
+    } else if (!is.null(backhaz)) {
+      if (!is.character(backhaz)) stop("`backhaz` should be a data frame or a character string giving the name of a column in the data")
+      bh <- data[[backhaz]]
+      backhaz_event <- bh[ind_event]
+      backhaz_df <- NULL
+    } else backhaz_event <- backhaz_df <- NULL
+    relative <- !is.null(backhaz_event)
+    backhaz_event <- if (relative) aa(backhaz_event) else aa(numeric(nevent))
 
     external <- parse_external(external, formula, x, xcure, cure_formula, relative)
     t_ext_stop <- aa(external$stop)
@@ -234,10 +277,13 @@ survextrap <- function(formula,
     ibasis_ext_stop <- if (nextern>0) make_basis(t_ext_stop, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
     ibasis_ext_start <- if (nextern>0) make_basis(t_ext_start, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
 
-    backhaz_event <- if (relative) aa(backhaz[ind_event]) else aa(numeric(nevent))
-    backsurv_ext_stop <- aa(external$backsurv_stop)
-    backsurv_ext_start <- aa(external$backsurv_start)
-
+    if (is.data.frame(backhaz)) {
+      backsurv_ext_stop <- exp(-get_cum_backhaz(external$t_ext_stop, backhaz))
+      backsurv_ext_start <- exp(-get_cum_backhaz(external$t_ext_start, backhaz))
+    } else {
+      backsurv_ext_stop <- aa(external$backsurv_stop)
+      backsurv_ext_start <- aa(external$backsurv_start)
+    }
     if (nonprop) {
       if (ncovs==0) {
         warning("Ignoring non-proportional hazards model specification, since no covariates in model. ")
@@ -257,7 +303,7 @@ survextrap <- function(formula,
                       b_mean,
                       est_smooth,
                       cure,
-                      relative, backhaz_event,
+                      relative, backhaz_df,
                       backsurv_ext_stop, backsurv_ext_start,
                       prior_loghaz_dist = priors$loghaz$distid,
                       prior_loghaz = as.numeric(unlist(priors$loghaz[c("location","scale","df")])),
@@ -272,7 +318,7 @@ survextrap <- function(formula,
                       prior_smooth = as.numeric(unlist(priors$smooth[c("shape","rate")])),
                       prior_cure = as.numeric(unlist(priors$cure[c("shape1","shape2")])),
                       modelid = 1,
-                      nonprop, 
+                      nonprop,
                       prior_sdnp = priors$sdnp
                       )
     pcure_init <- if (cure) 0.5 else numeric()
@@ -318,7 +364,9 @@ survextrap <- function(formula,
 
     km <- survminer::surv_summary(survfit(formula, data=data), data=data)
 
-    misc_keep <- nlist(formula, stanfit=fits, fit_method, cure_formula)
+    misc_keep <- nlist(formula, stanfit=fits,
+                       fit_method, cure_formula,
+                       backhaz=backhaz_df)
     standata_keep <- standata[c("nvars","ncovs","log_crude_event_rate","ncurecovs")]
     model_keep <- nlist(cure, est_smooth, nonprop)
     spline_keep <- nlist(basehaz)

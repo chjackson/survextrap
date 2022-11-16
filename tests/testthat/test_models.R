@@ -115,20 +115,45 @@ test_that("Non-standard model formulae",{
     survextrap(Surv(t, status) ~ 1, data=curedata, cure=~splines::bs(x), fit_method="opt")
 })
 
-test_that("Relative survival",{
+test_that("Relative survival models specified through a variable in the data",{
     colonse <- colons
     colonse$bh <- rep(0.01, nrow(colons))
-    mod1 <- survextrap(Surv(years, status) ~ 1, data=colonse, backhaz=bh, fit_method="opt")
+    mod1 <- survextrap(Surv(years, status) ~ 1, data=colonse, backhaz="bh", fit_method="opt")
     colonse$bh <- rep(0.02, nrow(colons))
-    mod2 <- survextrap(Surv(years, status) ~ 1, data=colonse, backhaz=bh, fit_method="opt")
+    mod2 <- survextrap(Surv(years, status) ~ 1, data=colonse, backhaz="bh", fit_method="opt")
     expect_lt(coef(mod2)["alpha"], coef(mod1)["alpha"])
 
     ext <- data.frame(start=5, stop=10, n=30, r=5,
                       backsurv_start = 0.4, backsurv_stop = 0.3)
-    mod1 <- survextrap(Surv(years, status) ~ 1, data=colonse, external=ext, backhaz=bh, fit_method = "opt")
+    mod1 <- survextrap(Surv(years, status) ~ 1, data=colonse, external=ext, backhaz="bh", fit_method = "opt")
 
     ext <- data.frame(start=5, stop=10, n=30, r=10,
                       backsurv_start = 0.4, backsurv_stop = 0.3)
-    mod2 <- survextrap(Surv(years, status) ~ 1, data=colonse, external=ext, backhaz=bh, fit_method = "opt")
+    mod2 <- survextrap(Surv(years, status) ~ 1, data=colonse, external=ext, backhaz="bh", fit_method = "opt")
     expect_lt(coef(mod2)["alpha"], coef(mod1)["alpha"])
+})
+
+test_that("Relative survival models specified through a background hazard data frame",{
+  bh <- data.frame(hazard = c(0.01, 0.02, 0.03), time=c(0, 5, 10))
+  mod1 <- survextrap(Surv(years, status) ~ 1, data=colons, backhaz=bh, fit_method="opt")
+  rmst(mod1, t=10, niter=10)
+  plot_hazard(mod1, niter=10, tmax=20)
+  ## extrapolation is accounting for increase in background at times 5 and 10
+  ## but uncertainty also because cause-specific hazard is being extrapolated
+  haz <- hazard(mod1, times=c(5,10))
+  expect_lt(haz$median[1], haz$median[2])
+})
+
+test_that("Cure model coupled with a background hazard data frame",{
+  cmod0 <- survextrap(Surv(t, status) ~ 1, data=curedata, cure=TRUE, fit_method="opt")
+  plot_hazard(cmod0)
+
+  ## Use cure model for short term, and background for long term
+  bh <- data.frame(hazard = c(0.01, 0.05, 0.1, 0.5), time=c(0, 5, 7, 10))
+  cmod1 <- survextrap(Surv(t, status) ~ 1, data=curedata, cure=TRUE,
+                      backhaz=bh, fit_method="opt")
+  plot_hazard(cmod1, tmax=12, niter=50) + coord_cartesian(ylim=c(0,1))
+  plot_survival(cmod1, tmax=20, niter=50)
+
+  ## TODO Check cure and offset done in right order in all dpqr
 })
