@@ -26,6 +26,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
+    <a class="dropdown-item" href="../articles/waning.html">Treatment effect waning in survextrap</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -61,6 +62,9 @@
 <span>  times <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tmax <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  niter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  newdata0 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  wane_period <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  wane_nt <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  ci <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  xlab <span class="op">=</span> <span class="st">"Time"</span>,</span>
 <span>  ylab <span class="op">=</span> <span class="st">"Hazard"</span>,</span>
@@ -103,6 +107,23 @@ in the data.</p></dd>
 <dd><p>Number of MCMC iterations to use to compute credible
 intervals.  Set to a low value to make this function quicker, at the cost of
 some approximation error (which may not be important for plotting).</p></dd>
+
+
+<dt>newdata0</dt>
+<dd><p>Data frame of covariate values defining the "untreated" group
+for use in treatment waning models, see <code><a href="Survmspline_wane.html">Survmspline_wane</a></code>.</p></dd>
+
+
+<dt>wane_period</dt>
+<dd><p>Vector of two numbers, defining the time period over which
+the hazard is interpolated between the hazard of the "treated" group (taken from <code>newdata</code>)
+and the hazard of the "untreated" group (taken from <code>newdata0</code>).  Optional - if
+not supplied then no waning is assumed.</p></dd>
+
+
+<dt>wane_nt</dt>
+<dd><p>Number of intervals defining the piecewise constant approximation
+to the hazard during the waning period.</p></dd>
 
 
 <dt>ci</dt>

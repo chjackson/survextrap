@@ -13,6 +13,9 @@
     <loc>https://chjackson.github.io/survextrap/articles/methods.html</loc>
   </url>
   <url>
+    <loc>https://chjackson.github.io/survextrap/articles/waning.html</loc>
+  </url>
+  <url>
     <loc>https://chjackson.github.io/survextrap/authors.html</loc>
   </url>
   <url>
@@ -23,6 +26,9 @@
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/colons.html</loc>
+  </url>
+  <url>
+    <loc>https://chjackson.github.io/survextrap/reference/cumhaz.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/curedata.html</loc>
@@ -110,6 +116,9 @@
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/Survmspline.html</loc>
+  </url>
+  <url>
+    <loc>https://chjackson.github.io/survextrap/reference/Survmspline_wane.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/surv_survextrap.html</loc>

@@ -17,7 +17,7 @@ editor_options:
 ---
 
 ```{r,echo=FALSE,message=FALSE}
-knitr::opts_chunk$set(eval=TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(eval=TRUE, message=FALSE, warning=FALSE, cache=TRUE)
 ```
 
 
@@ -263,6 +263,11 @@ plot_hazard_ratio(rxnph_mod, newdata=nd) +
 
 In this example, the credible interval for the Lev+5FU / Lev hazard ratio is wide, and does not suggest that the hazard ratio is time-varying.  This model is probably overfitted around time 0.5 to 1.  Fewer knots may be preferable.
 
+### Treatment effect waning models 
+
+These are described in [their own vignette](waning.html).
+
+
 
 ## Model comparison 
 
@@ -292,7 +297,7 @@ The package provides a simulated dataset `curedata` with an obvious cure fractio
 
 The probability of cure for `x=0` is 0.5, and for `x=1` 0.622 (so the log odds ratio is 0.5).   The uncured fraction follows a Weibull(1.5, 1.2) survival distribution.
 
-```{r,results="hide",cache=TRUE}
+```{r,results="hide"}
 plot(survfit(Surv(t, status) ~ 1, data=curedata))
 
 noncure_mod <- survextrap(Surv(t, status) ~ 1, data=curedata,  

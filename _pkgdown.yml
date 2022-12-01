@@ -12,6 +12,7 @@ reference:
   - summary.survextrap
   - survival
   - hazard
+  - cumhaz
   - hazard_ratio
   - plot_survival
   - plot_hazard
@@ -27,6 +28,7 @@ reference:
 - title: M-spline utilities
 - contents:
   - Survmspline
+  - Survmspline_wane
   - mspline_basis
   - mspline_uniform_weights
   - mspline_plotsetup

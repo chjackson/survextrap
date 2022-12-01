@@ -43,6 +43,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
+    <a class="dropdown-item" href="../articles/waning.html">Treatment effect waning in survextrap</a>
   </div>
 </li>
       </ul>
@@ -74,7 +75,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2022-11-16</h4>
+            <h4 data-toc-skip class="date">2022-12-01</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -92,7 +93,7 @@ for examples of how to fit models.</p>
 <p>The axis of time is split into a set of regions defined by
 <em>knots</em>. In the example below, the knots are located at the
 integers from 0 to 10, as shown by the grid lines.</p>
-<p>Each knot is associated with a <em>cubic polynomial function</em>
+<p>Each region is associated with a <em>cubic polynomial function</em>
 <span class="math inline">\(b_k(t)\)</span>, known as a <em>basis</em>
 function. M-spline basis functions are defined to be positive.</p>
 <p>In this example, there are 11 basis functions in the interior of the
@@ -167,8 +168,8 @@ given in <code><a href="../articles/examples.html">vignette("examples")</a></cod
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_mspline.html">plot_mspline</a></span><span class="op">(</span>iknots<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span>,<span class="fl">5</span><span class="op">)</span>, bknots<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">7</span><span class="op">)</span>,</span>
 <span>     coefs<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.3</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span>, tmax<span class="op">=</span><span class="fl">15</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Removed 3731 row(s) containing missing values (geom_path).</span></span>
-<span><span class="co">## Removed 3731 row(s) containing missing values (geom_path).</span></span></code></pre>
+<pre><code><span><span class="co">## Warning: Removed 3731 rows containing missing values (`geom_line()`).</span></span>
+<span><span class="co">## Removed 3731 rows containing missing values (`geom_line()`).</span></span></code></pre>
 <p><img src="methods_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
 <div class="section level3">
 <h3 id="why-not-other-kinds-of-spline">Why not other kinds of spline?<a class="anchor" aria-label="anchor" href="#why-not-other-kinds-of-spline"></a>
@@ -298,7 +299,7 @@ shapes.</p>
 <span>                       prior_mean<span class="op">=</span><span class="va">prior_mean</span>, prior_sd<span class="op">=</span><span class="fl">1</span>, scale_sd<span class="op">=</span><span class="fl">1</span>, nsim<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/bquote.html" class="external-link">bquote</a></span><span class="op">(</span><span class="va">sigma</span><span class="op">==</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">gridExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html" class="external-link">grid.arrange</a></span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Removed 999 row(s) containing missing values (geom_path).</span></span></code></pre>
+<pre><code><span><span class="co">## Warning: Removed 999 rows containing missing values (`geom_line()`).</span></span></code></pre>
 <p><img src="methods_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
 <p>By default, the package estimates <span class="math inline">\(\sigma\)</span> as part of the full Bayesian model
 (with a gamma(2,1) prior), so that uncertainty about the level of
@@ -409,6 +410,12 @@ arbirtarily different in each region of time <span class="math inline">\(k\)</sp
 arbitrarily-flexible function of time. The amount and shape of
 non-proportionality is estimated from the data, while the hierarchical
 model protects against overfitting.</p>
+</div>
+<div class="section level3">
+<h3 id="treatment-effect-waning-models">Treatment effect waning models<a class="anchor" aria-label="anchor" href="#treatment-effect-waning-models"></a>
+</h3>
+<p>These are described in <a href="waning.html">their own
+vignette</a>.</p>
 </div>
 </div>
 <div class="section level2">

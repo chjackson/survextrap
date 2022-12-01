@@ -13,6 +13,17 @@
 ##' is computed at the mean of each numeric covariate in the original data, and at the
 ##' baseline level of each factor covariate.
 ##'
+##' @param newdata0 Data frame of covariate values defining the "untreated" group
+##' for use in treatment waning models, see \code{\link{Survmspline_wane}}.
+##'
+##' @param wane_period Vector of two numbers, defining the time period over which
+##' the hazard is interpolated between the hazard of the "treated" group (taken from `newdata`)
+##' and the hazard of the "untreated" group (taken from `newdata0`).  Optional - if
+##' not supplied then no waning is assumed.
+##'
+##' @param wane_nt Number of intervals defining the piecewise constant approximation
+##' to the hazard during the waning period.
+##'
 ##' @param niter Number of MCMC iterations to use to compute credible
 ##' intervals.  Set to a low value to make this function quicker, at the cost of
 ##' some approximation error (which may not be important for plotting).
@@ -20,11 +31,14 @@
 ##' @param ... Other options (currently unused).
 ##'
 ##' @export
-mean.survextrap <- function(x, newdata=NULL, niter=NULL, ...){
-    res <- rmst(x, t=Inf, newdata=newdata, niter=niter)
-    res$variable <- "mean"
+mean.survextrap <- function(x, newdata=NULL,
+                            newdata0=NULL, wane_period=NULL, wane_nt=10,
+                            niter=NULL, ...){
+  res <- rmst(x, t=Inf, newdata=newdata, niter=niter,
+              newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt)
+  res$variable <- "mean"
     res$t <- NULL
-    res
+  res
 }
 
 default_newdata <- function(x, newdata){
@@ -53,7 +67,7 @@ default_newdata <- function(x, newdata){
 ##' will be computed.
 ##'
 ##' @export
-rmst <- function(x, t, newdata=NULL, niter=NULL){
+rmst <- function(x, t, newdata=NULL, newdata0=NULL, wane_period=NULL, wane_nt=10, niter=NULL){
     variable <- NULL
     newdata <- default_newdata(x, newdata)
     pars <- get_pars(x, newdata=newdata, niter=niter)
@@ -62,18 +76,27 @@ rmst <- function(x, t, newdata=NULL, niter=NULL){
     nvals <- if (is.null(newdata)) 1 else nrow(newdata)
     res <- vector(nvals, mode="list")
 
+    if (!is.null(newdata0)){
+      newdata0 <- default_newdata(x, newdata0)
+      pars0 <- get_pars(x, newdata=newdata0, niter=niter)
+    }
+
     for (j in 1:nvals){
         resmat <- matrix(nrow=niter*nvals, ncol=nt)
         colnames(resmat) <- t
         for (i in 1:nt){
-          resmat[,i] <- rmst_survmspline(t[i], pars$alpha_user[,j], pars$coefs[,j,],
-                                         x$basehaz$knots, x$basehaz$degree,
-                                         pcure = pars$cureprob_user, backhaz = x$backhaz)
-#          if (x$cure){
-#            cureprob_mat <- matrix(rep(pars$cureprob_user, nt), nrow=niter*nvals, ncol=nt)
-#            tmat <- matrix(t, nrow=niter*nvals, ncol=nt, byrow=TRUE)
-#                resmat <- cureprob_mat*tmat + (1 - cureprob_mat)*resmat
-#          }
+          if (is.null(newdata0))
+            resmat[,i] <- rmst_survmspline(t[i], pars$alpha_user[,j], pars$coefs[,j,],
+                                           x$basehaz$knots, x$basehaz$degree,
+                                           pcure = pars$cureprob_user, backhaz = x$backhaz)
+          else
+            resmat[,i] <- rmst_survmspline_wane(t[i],
+                                                alpha1 = pars$alpha_user[,j],
+                                                alpha0 = pars0$alpha_user[,j],
+                                                coefs = pars$coefs[,j,],
+                                                knots = x$basehaz$knots, degree = x$basehaz$degree,
+                                                pcure = pars$cureprob_user, backhaz = x$backhaz,
+                                                wane_period=wane_period, wane_nt=wane_nt)
         }
         sample <- posterior::as_draws(resmat)
         res[[j]] <- summary(sample, median, ~quantile(.x, probs=c(0.025, 0.975)))
@@ -191,8 +214,10 @@ get_pars <- function(x, newdata=NULL, niter=NULL){
 ##' of being summarised as a median and 95% credible intervals.
 ##'
 ##' @export
-survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE) {
-    timedep_output(x, output="survival", newdata=newdata, times=times, tmax=tmax, niter=niter, sample=sample)
+survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE,
+                     newdata0=NULL, wane_period=NULL, wane_nt=10) {
+  timedep_output(x, output="survival", newdata=newdata, times=times, tmax=tmax, niter=niter, sample=sample,
+                 newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt)
 }
 
 ##' Estimates of hazard from a survextrap model
@@ -201,8 +226,22 @@ survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=
 ##' @inheritParams survival
 ##'
 ##' @export
-hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE) {
-  timedep_output(x, output="hazard", newdata=newdata, times=times, tmax=tmax, niter=niter, sample=sample)
+hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE,
+                   newdata0=NULL, wane_period=NULL, wane_nt=10) {
+  timedep_output(x, output="hazard", newdata=newdata, times=times, tmax=tmax, niter=niter, sample=sample,
+                 newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt)
+}
+
+##' Estimates of cumulative hazard from a survextrap model
+##'
+##' @inheritParams print.survextrap
+##' @inheritParams survival
+##'
+##' @export
+cumhaz <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE,
+                   newdata0=NULL, wane_period=NULL, wane_nt=10) {
+  timedep_output(x, output="cumhaz", newdata=newdata, times=times, tmax=tmax, niter=niter, sample=sample,
+                 newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt)
 }
 
 default_newdata_hr <- function(x, newdata){
@@ -244,7 +283,8 @@ hazard_ratio <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sam
   res
 }
 
-timedep_output <- function(x, output="survival", newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE){
+timedep_output <- function(x, output="survival", newdata=NULL, times=NULL, tmax=NULL, niter=NULL, sample=FALSE,
+                           newdata0=NULL, wane_period=NULL, wane_nt=10){
     newdata <- default_newdata(x, newdata)
     pars <- get_pars(x, newdata=newdata, niter=niter)
     if (is.null(times)) times <- default_plottimes(x, tmax)
@@ -255,13 +295,37 @@ timedep_output <- function(x, output="survival", newdata=NULL, times=NULL, tmax=
     alpha_user_arr <- array(rep(pars$alpha_user, each=nt), dim=c(nt, niter, nvals))
     cureprob_arr <- if (x$cure) array(rep(pars$cureprob_user, each=nt), dim = c(nt, niter, nvals)) else NULL
 
-    ## TODO cumulative hazard
-    res_sam <- switch(output,
-                      "survival" = survival_core(x, pars, times_arr, alpha_user_arr,
-                                                 cureprob_arr, niter, nvals, nt),
-                      "hazard" = hazard_core(x, pars, times_arr, alpha_user_arr,
-                                             cureprob_arr, niter, nvals, nt)
-                      )
+    if (!is.null(newdata0)){
+      if (is.null(wane_period)) stop("`newdata0` supplied, but `wane_period` not supplied")
+      ## For treatment waning models
+      newdata0 <- default_newdata(x, newdata0)
+      pars0 <- get_pars(x, newdata=newdata0, niter=niter)
+      alpha_user_arr0 <- array(rep(pars0$alpha_user, each=nt), dim=c(nt, niter, nvals))
+      res_sam <- switch(output,
+                        "survival" = survival_core_wane(x, pars, times_arr,
+                                                        alpha_user_arr, alpha_user_arr0,
+                                                        cureprob_arr, niter, nvals, nt,
+                                                        wane_period, wane_nt),
+                        "hazard" = hazard_core_wane(x, pars, times_arr,
+                                                    alpha_user_arr, alpha_user_arr0,
+                                                    cureprob_arr, niter, nvals, nt,
+                                                    wane_period, wane_nt),
+                        "cumhaz" = cumhaz_core_wane(x, pars, times_arr,
+                                                    alpha_user_arr, alpha_user_arr0,
+                                                    cureprob_arr, niter, nvals, nt,
+                                                    wane_period, wane_nt)
+                        )
+    }
+    else {
+      res_sam <- switch(output,
+                        "survival" = survival_core(x, pars, times_arr, alpha_user_arr,
+                                                   cureprob_arr, niter, nvals, nt),
+                        "hazard" = hazard_core(x, pars, times_arr, alpha_user_arr,
+                                               cureprob_arr, niter, nvals, nt),
+                        "cumhaz" = cumhaz_core(x, pars, times_arr, alpha_user_arr,
+                                               cureprob_arr, niter, nvals, nt)
+                        )
+    }
     dimnames(res_sam) <- list(time=1:nt, iteration=1:niter, value=1:nvals)
 
     if (!sample){
@@ -281,26 +345,23 @@ survival_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, nite
   surv_sam <- psurvmspline(times_arr, alpha_user_arr, coefs_mat,
                            x$basehaz$knots, x$basehaz$degree, lower.tail=FALSE,
                            pcure=cureprob_arr, backhaz=x$backhaz)
-#  if (x$cure)  {
-#    surv_sam <- cureprob_arr + (1 - cureprob_arr)*surv_sam
-#  }
   surv_sam
 }
 
 hazard_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
   coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
-#  if (x$cure)
-#    logdens_sam <- dsurvmspline(times_arr, alpha_user_arr, coefs_mat,
-#                                x$basehaz$knots, x$basehaz$degree, log=TRUE, backhaz=x$backhaz)
-  loghaz_sam <- hsurvmspline(times_arr, alpha_user_arr, coefs_mat,
-                             x$basehaz$knots, x$basehaz$degree, log=TRUE,
-                             pcure=cureprob_arr, backhaz=x$backhaz)
-#  if (x$cure)  {
-#    loghaz_sam <- log(1 - cureprob_arr) +  logdens_sam -
-#      log(survival_core(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt))
-#  }
-  haz_sam <- exp(loghaz_sam)
+  haz_sam <- hsurvmspline(times_arr, alpha_user_arr, coefs_mat,
+                          x$basehaz$knots, x$basehaz$degree,
+                          pcure=cureprob_arr, backhaz=x$backhaz)
   haz_sam
+}
+
+cumhaz_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
+  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+  cumhaz_sam <- Hsurvmspline(times_arr, alpha_user_arr, coefs_mat,
+                             x$basehaz$knots, x$basehaz$degree,
+                             pcure=cureprob_arr, backhaz=x$backhaz)
+  cumhaz_sam
 }
 
 deconstruct_mspline <- function(x, scale=1, tmax=NULL){

@@ -8,3 +8,4 @@
 data-raw
 man-roxygen
 tests/simulation
+vignettes/examples_cache

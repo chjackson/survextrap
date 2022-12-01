@@ -91,7 +91,7 @@ The package has been developed under the expectation that many forms of external
 
 * A proportional hazards model or a flexible non-proportional hazards model can be used to describe the relation of survival to predictors. 
 
-* Mixture cure and relative survival models are supported.
+* Mixture cure, relative survival and treatment effect waning models are supported.
 
 * It has an R interface, designed to be friendly to those familiar with standard R modelling functions.
 
@@ -121,13 +121,13 @@ The package is in active development.  It can currently fit a large range of use
 
 Major things to do are:
 
-* Treatment effect waning: implemented after inference, by mixing the predictions for treated and untreated groups, with mixing weight decreasing with time.
+* Empirical work to show the impact of priors and knot choice.  Can we derive more practically-meaningful default priors for changes in hazard through time, e.g. in terms of orders of magnitude?  How much does knot choice matter, in particular with external data?
 
-* Empirical work to show the impact of priors and knot choice.  Can we derive more practically-meaningful default priors for changes in hazard through time, e.g. in terms of orders of magnitude?  How much does knot choice matter in particular with external data?
-
-* More experience and examples of using it with real external data, including a vignette that lists how to implement all previously-suggested approaches for extrapolation with external data.
+* More experience and examples of using it with real external data, including a vignette that lists how to implement other previously-suggested approaches for extrapolation with external data.
 
 * Thorough testing, documentation and error handling.
+
+* A paper about it.
 
 If you want to try it out - feel free to install the development version as: 
 

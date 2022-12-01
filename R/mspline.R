@@ -5,7 +5,7 @@
 ##' M-spline time-to-event model.
 ##'
 ##' This can optionally be combined with a cure probability, and / or with
-##' a known background hazard trajectory that is a piecewise-constant function of time. 
+##' a known background hazard trajectory that is a piecewise-constant function of time.
 ##'
 ##'
 ##' @aliases dsurvmspline psurvmspline qsurvmspline rsurvmspline
@@ -35,7 +35,7 @@
 ##' @param lower.tail logical; if TRUE (default), probabilities are \eqn{P(X
 ##' \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.
 ##'
-##' @param pcure Probability of "cure", which defaults to zero.  If this is non-zero, this defines a "mixture cure" version of the M-spline model.  
+##' @param pcure Probability of "cure", which defaults to zero.  If this is non-zero, this defines a "mixture cure" version of the M-spline model.
 ##'
 ##' @param offseth Constant to be added to the hazard, e.g. representing a "background" risk of death from causes other than the cause of interest.
 ##'
@@ -74,11 +74,11 @@
 ##' In the "background hazard" model, the overall hazard is defined as a sum of the background hazard and
 ##' a cause-specific hazard.   The cause-specific hazard
 ##'  is modelled with the M-spline model, and the background hazard is assumed
-##'  to be a known piecewise-constant function defined by `backhaz`. 
+##'  to be a known piecewise-constant function defined by `backhaz`.
 ##'
 ##' If both `backhaz` and `pcure` are supplied, then the cure probablity applies only to the cause-specific hazard.
 ##' That is, the cause-specific hazard decreases to zero, and the overall hazard converges towards
-##' the background hazard, as time increases. 
+##' the background hazard, as time increases.
 ##'
 ##' @references
 ##'
@@ -234,7 +234,7 @@ hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
         bknots <- knots[c(1,length(knots))]
         basis <- mspline_basis(q, iknots=iknots, bknots=bknots, degree=degree)
         loghaz <- as.vector(alpha) + log(rowSums(coefs * basis))
-        
+
         pp <- pcure>0
         logdens <- dsurvmspline(x=x[pp], alpha=alpha[pp], coefs=coefs[pp,,drop=FALSE],
                                knots=knots, degree=degree, pcure=0, log=TRUE)

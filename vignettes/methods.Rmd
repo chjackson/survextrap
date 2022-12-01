@@ -31,7 +31,7 @@ It is work in progress, so it will be sketchy in some places.
 
 The axis of time is split into a set of regions defined by _knots_.  In the example below, the knots are located at the integers from 0 to 10, as shown by the grid lines.
 
-Each knot is associated with a _cubic polynomial function_ $b_k(t)$, known as a _basis_ function.  M-spline basis functions are defined to be positive.
+Each region is associated with a _cubic polynomial function_ $b_k(t)$, known as a _basis_ function.  M-spline basis functions are defined to be positive.
 
 In this example, there are 11 basis functions in the interior of the space. Each basis function has a peak around the knot, and diminishes to zero on either side.  Two additional basis functions are used with peaks at the boundaries of the space, so there are $K=13$ basis functions in total.    See [Ramsay](https://www.jstor.org/stable/2245395) for the exact definitions of $b_k(t)$. 
 
@@ -209,6 +209,11 @@ For each covariate $s$, a hierarchical model is used for the non-proportionality
 \[ b^{(np)}_{ks} \sim Normal(0, \sigma^{(np)}_s) \] 
 
 In the non-proportional hazards model, the ratio between the hazards $h(t,\x)$ at different covariate values $\x$ is a function of time $t$.  Since the $\boldsymbol{b}^{(np)}_k$ may be arbirtarily different in each region of time $k$, the hazard ratio can be an arbitrarily-flexible function of time.  The amount and shape of non-proportionality is estimated from the data, while the hierarchical model protects against overfitting.
+
+
+## Treatment effect waning models
+
+These are described in [their own vignette](waning.html).
 
 
 # Cure models {#cure_methods}

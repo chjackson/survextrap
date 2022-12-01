@@ -4,7 +4,15 @@
 \alias{rmst}
 \title{Restricted mean survival time}
 \usage{
-rmst(x, t, newdata = NULL, niter = NULL)
+rmst(
+  x,
+  t,
+  newdata = NULL,
+  newdata0 = NULL,
+  wane_period = NULL,
+  wane_nt = 10,
+  niter = NULL
+)
 }
 \arguments{
 \item{x}{A fitted model object as returned by \code{\link{survextrap}}}
@@ -22,6 +30,17 @@ for each level of this factor.
 (b) if there are multiple covariates, or any numeric covariates, then the output
 is computed at the mean of each numeric covariate in the original data, and at the
 baseline level of each factor covariate.}
+
+\item{newdata0}{Data frame of covariate values defining the "untreated" group
+for use in treatment waning models, see \code{\link{Survmspline_wane}}.}
+
+\item{wane_period}{Vector of two numbers, defining the time period over which
+the hazard is interpolated between the hazard of the "treated" group (taken from \code{newdata})
+and the hazard of the "untreated" group (taken from \code{newdata0}).  Optional - if
+not supplied then no waning is assumed.}
+
+\item{wane_nt}{Number of intervals defining the piecewise constant approximation
+to the hazard during the waning period.}
 
 \item{niter}{Number of MCMC iterations to use to compute credible
 intervals.  Set to a low value to make this function quicker, at the cost of

@@ -145,15 +145,15 @@ test_that("Relative survival models specified through a background hazard data f
 })
 
 test_that("Cure model coupled with a background hazard data frame",{
-  cmod0 <- survextrap(Surv(t, status) ~ 1, data=curedata, cure=TRUE, fit_method="opt")
-  plot_hazard(cmod0)
+  expect_no_error({
+    cmod0 <- survextrap(Surv(t, status) ~ 1, data=curedata, cure=TRUE, fit_method="opt")
+    plot_hazard(cmod0, niter=20)
 
-  ## Use cure model for short term, and background for long term
-  bh <- data.frame(hazard = c(0.01, 0.05, 0.1, 0.5), time=c(0, 5, 7, 10))
-  cmod1 <- survextrap(Surv(t, status) ~ 1, data=curedata, cure=TRUE,
-                      backhaz=bh, fit_method="opt")
-  plot_hazard(cmod1, tmax=12, niter=50) + coord_cartesian(ylim=c(0,1))
-  plot_survival(cmod1, tmax=20, niter=50)
-
-  ## TODO Check cure and offset done in right order in all dpqr
+    ## Use cure model for short term, and background for long term
+    bh <- data.frame(hazard = c(0.01, 0.05, 0.1, 0.5), time=c(0, 5, 7, 10))
+    cmod1 <- survextrap(Surv(t, status) ~ 1, data=curedata, cure=TRUE,
+                        backhaz=bh, fit_method="opt")
+    plot_hazard(cmod1, tmax=12, niter=50) + coord_cartesian(ylim=c(0,1))
+    plot_survival(cmod1, tmax=20, niter=50)
+  })
 })

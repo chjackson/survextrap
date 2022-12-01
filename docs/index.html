@@ -43,6 +43,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="articles/methods.html">Details of methods behind survextrap</a>
+    <a class="dropdown-item" href="articles/waning.html">Treatment effect waning in survextrap</a>
   </div>
 </li>
       </ul>
@@ -206,7 +207,7 @@ etc…
 <li><p>Bayesian multiparameter evidence synthesis is used to jointly model all sources of data and judgements.</p></li>
 <li><p>An M-spline is used to represent how the hazard changes through time (as in <a href="https://arxiv.org/abs/2002.09633" class="external-link">rstanarm</a>). The Bayesian fitting method automatically chooses the optimal level of smoothness and flexibility. Spline “knots” should span the period covered by the data, and any future period where there is a chance that the hazard may vary. Then if there is no data in the future period, the uncertainty will be acknowledged and the predicted hazards will have wide credible intervals.</p></li>
 <li><p>A proportional hazards model or a flexible non-proportional hazards model can be used to describe the relation of survival to predictors.</p></li>
-<li><p>Mixture cure and relative survival models are supported.</p></li>
+<li><p>Mixture cure, relative survival and treatment effect waning models are supported.</p></li>
 <li><p>It has an R interface, designed to be friendly to those familiar with standard R modelling functions.</p></li>
 <li><p><a href="https://mc-stan.org/" class="external-link">Stan</a> is used under the surface to do MCMC (Hamiltonian Monte Carlo) sampling from the posterior distribution, in a similar fashion to <a href="https://mc-stan.org/rstanarm/" class="external-link">rstanarm</a> and <a href="https://CRAN.R-project.org/package=survHE" class="external-link">survHE</a>.</p></li>
 <li><p>Estimates and posterior credible intervals / samples for survival, hazard, mean and restricted mean survival can easily be extracted.</p></li>
@@ -235,10 +236,10 @@ etc…
 <p>The package is in active development. It can currently fit a large range of useful models, but it is not finished and is subject to be changed without warning.</p>
 <p>Major things to do are:</p>
 <ul>
-<li><p>Treatment effect waning: implemented after inference, by mixing the predictions for treated and untreated groups, with mixing weight decreasing with time.</p></li>
-<li><p>Empirical work to show the impact of priors and knot choice. Can we derive more practically-meaningful default priors for changes in hazard through time, e.g. in terms of orders of magnitude? How much does knot choice matter in particular with external data?</p></li>
-<li><p>More experience and examples of using it with real external data, including a vignette that lists how to implement all previously-suggested approaches for extrapolation with external data.</p></li>
+<li><p>Empirical work to show the impact of priors and knot choice. Can we derive more practically-meaningful default priors for changes in hazard through time, e.g. in terms of orders of magnitude? How much does knot choice matter, in particular with external data?</p></li>
+<li><p>More experience and examples of using it with real external data, including a vignette that lists how to implement other previously-suggested approaches for extrapolation with external data.</p></li>
 <li><p>Thorough testing, documentation and error handling.</p></li>
+<li><p>A paper about it.</p></li>
 </ul>
 <p>If you want to try it out - feel free to install the development version as:</p>
 <pre class="{r}"><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"survextrap"</span>, repos<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'https://chjackson.r-universe.dev'</span>, <span class="st">'https://cloud.r-project.org'</span><span class="op">)</span><span class="op">)</span></span></code></pre>

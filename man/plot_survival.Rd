@@ -11,6 +11,9 @@ plot_survival(
   tmax = NULL,
   km = NULL,
   niter = NULL,
+  newdata0 = NULL,
+  wane_period = NULL,
+  wane_nt = 10,
   ci = NULL,
   xlab = "Time",
   ylab = "Survival",
@@ -52,6 +55,17 @@ returned by \code{\link{survextrap}}, if you want to construct your own plots li
 \item{niter}{Number of MCMC iterations to use to compute credible
 intervals.  Set to a low value to make this function quicker, at the cost of
 some approximation error (which may not be important for plotting).}
+
+\item{newdata0}{Data frame of covariate values defining the "untreated" group
+for use in treatment waning models, see \code{\link{Survmspline_wane}}.}
+
+\item{wane_period}{Vector of two numbers, defining the time period over which
+the hazard is interpolated between the hazard of the "treated" group (taken from \code{newdata})
+and the hazard of the "untreated" group (taken from \code{newdata0}).  Optional - if
+not supplied then no waning is assumed.}
+
+\item{wane_nt}{Number of intervals defining the piecewise constant approximation
+to the hazard during the waning period.}
 
 \item{ci}{If \code{TRUE} then credible intervals are drawn.  Defaults to
 drawing the intervals if the plot shows the curve for only one covariate value.}

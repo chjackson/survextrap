@@ -1,0 +1,300 @@
+##' M-spline survival distribution under treatment effect waning
+##'
+##' This defines the CDF, cumulative hazard and hazard
+##' of a survival distribution defined by combining the hazards of two different
+##' groups (e.g. "treated" and "untreated") each defined by a standard M-spline
+##' model. The log hazards of one group and the other are interpolated over a defined period of time.
+##' This may be used for models where the treatment effect wanes, over a period of time, between an estimated
+##' hazard ratio and zero.
+##'
+##' This distribution is defined as follows.
+##'
+##' * Between time 0 and `wane_period[1]`, the "treated" hazard is used, as
+##' defined by an M-spline with intercept `alpha1`.
+##'
+##' * Between `wane_period[1]` ahd `wane_period[2]`, the log hazard is defined
+##' by linear interpolation.  The waning period is divided into a number
+##' of discrete pieces in which the hazard is assumed to be constant, defined by the
+##' hazard at the start of the piece.  These hazard values are obtained from
+##' the spline model, using an intercept
+##' parameter `alpha` (log scale parameter) defined by linearly interpolating between `alpha1` and
+##' `alpha0` over the waning period.   The cumulative hazard at any time can
+##' then be deduced by adding up contributions on each piece.
+##'
+##' * After `wane_period[2]`, the "untreated" hazard is used, as defined by an
+##' M-spline with intercept `alpha0`.
+##'
+##' See `vignette("waning")` for more details and examples.
+##'
+##' This can be used to predict the hazard of a person treated with a treatment
+##' whose short-term effect is estimated from shorter-term data, but we wish to
+##' extrapolate this model over a longer period where the effect is assumed to
+##' diminish.
+##'
+##' @aliases psurvmspline_wane Hsurvmspline_wane hsurvmspline_wane
+##' dsurvmspline_wane qsurvmspline_wane rsurvmspline_wane
+##' rmst_survmspline_wane mean_survmspline_wane
+##'
+##' @inheritParams Survmspline
+##'
+##' @param x,q,t Vector of times.
+##'
+##' @param alpha1 log hazard intercept before the start of the waning period ("treated")
+##'
+##' @param alpha0 log hazard intercept after the end of the waning period ("untreated")
+##'
+##' @param wane_period vector of two components giving start and stop of waning
+##'   period
+##'
+##' @param wane_nt time resolution for piecewise constant hazard approximation in the
+##'   waning period.  If this is not specified, defaults to dividing the waning period into 10 pieces.
+##'
+##'
+##' @return \code{psurvmspline_wane} gives the CDF, \code{Hsurvmspline_wane} gives the cumulative
+##' hazard, \code{hsurvmspline_wane} gives the hazard, \code{dsurvmspline_wane} gives the PDF,
+##' \code{qsurvmspline_wane} gives the quantiles, and \code{rsurvmspline_wane} generates random
+##' numbers from the distribution.
+##'
+##' @keywords distribution
+##'
+##' @name Survmspline_wane
+NULL
+
+##' @rdname Survmspline_wane
+##' @export
+Hsurvmspline_wane <- function(x, alpha1, alpha0, coefs, knots, degree=3,
+                              wane_period, wane_nt=10, pcure=0, offsetH=0, backhaz=NULL, log=FALSE){
+
+  if (!is.null(backhaz)) offsetH <- get_cum_backhaz(x, backhaz)
+    if (is.null(pcure)) pcure <- 0
+  if (length(alpha0) != length(alpha1)) stop("lengths of `alpha0` and `alpha1` should be the same")
+  att <- NULL
+  d <- survmspline_dist_setup(q=x, alpha=alpha1, coefs=coefs, knots=knots, pcure=pcure, offsetH=offsetH)
+  for (i in seq_along(d)) assign(names(d)[i], d[[i]])
+  alpha1 <- d$alpha
+  alpha0 <- rep(alpha0, length.out=length(alpha1))
+
+  if (wane_period[1] >= wane_period[2]) stop("wane_period[2] should be greater than wane_period[1]")
+  dt <- (wane_period[2] - wane_period[1]) / wane_nt
+
+
+  ret <- numeric(length(x))
+  attributes(ret) <- att
+  ## times before the waning period
+  early <- x <= wane_period[1]
+  ret[early] <- Hsurvmspline(x[early], alpha=alpha1[early], coefs=coefs[early,,drop=FALSE],
+                             knots=knots, degree=degree)
+
+  if (any(x > wane_period[1])){
+    times <- seq(wane_period[1], wane_period[2], by=dt)
+    ints <- findInterval(x, times)
+    nints <- max(ints)
+
+    ## pre-compute matrix of cumulative hazards H for every cut-point in the waning period
+    ## then pick out required one for each x (inefficient perhaps)
+    H <- h <- matrix(nrow=length(alpha1), ncol=nints)
+    H[,1] <- Hsurvmspline(wane_period[1], alpha1, coefs=coefs, knots=knots, degree=degree)
+    h[,1] <- hsurvmspline(wane_period[1], alpha1, coefs=coefs, knots=knots, degree=degree)
+
+    if (nints>1){ ## hazard interpolation needed
+      w <- (wane_period[2] - times) / (wane_period[2] - wane_period[1])
+      for (i in 2:nints){
+        ## weight for treated group in waned hazard.  w=1 is no waning, 0 is completely waned
+
+        ## linearly interpolated hazard or log hazard
+        ## alpha_mix <- log(w*exp(alpha1) * (1-w)*exp(alpha0))  # offer as alternative?
+        alpha_mix <- w[i]*alpha1 + (1-w[i])*alpha0
+
+        ## absolute waned hazard at next time
+        h[,i] <- hsurvmspline(times[i], alpha=alpha_mix[i], coefs=coefs,
+                              knots=knots, degree=degree)
+
+        ## approximate cumulative hazard between time 0 and end of this interval
+        H[,i] <- H[,i-1] + dt*h[,i-1]
+      }
+    }
+
+    ## interpolate between the final cut point and x, assuming constant hazard in this interval
+    mid <- (x > wane_period[1]) & (x < wane_period[2])
+    w <- (wane_period[2] - times[ints[mid]]) / (wane_period[2] - wane_period[1])
+    alpha_x <- w*alpha1[mid] + (1-w)*alpha0[mid]
+    h_x <- hsurvmspline(times[ints[mid]], alpha=alpha_x, coefs=coefs[mid,,drop=FALSE],
+                        knots=knots, degree=degree)
+    dh_mid <- (x[mid] - times[ints[mid]]) * h_x
+    ret[mid] <- H[cbind(which(mid), ints[mid])] + dh_mid
+
+    ## exact cumulative hazard is known for intervals after the waning period
+    late <- x >= wane_period[2]
+    dh_late  <- Hsurvmspline(x[late], alpha=alpha0[late], coefs=coefs[late,,drop=FALSE],
+                             knots=knots, degree=degree) -
+      Hsurvmspline(wane_period[2], alpha=alpha0[late], coefs=coefs[late,,drop=FALSE],
+                   knots=knots, degree=degree)
+
+    ret[late] <- H[cbind(which(late), ints[late])] + dh_late
+  }
+
+  pp <- pcure>0
+  if (any(pp)){
+    log_cumhaz <- log(ret)
+    log_cumhaz[pp] = - (pcure[pp] + (1 - pcure[pp])*(-log_cumhaz[pp])) # since surv = -log_cumhaz
+    ret <- exp(log_cumhaz)
+  }
+  ret[offsetH>0] <- ret[offsetH>0] + offsetH[offsetH>0]
+
+  ret
+}
+
+##' @rdname Survmspline_wane
+##' @export
+psurvmspline_wane <- function(q, alpha1, alpha0, coefs, knots, degree=3,
+                              wane_period, wane_nt=10, lower.tail=TRUE, pcure=0, offsetH=0, backhaz=NULL, log.p=FALSE){
+  H <- Hsurvmspline_wane(x=q, alpha1=alpha1, alpha0=alpha0, coefs=coefs, knots=knots, degree=degree,
+                         wane_period=wane_period, wane_nt=wane_nt, pcure=pcure, offsetH=offsetH, backhaz=backhaz)
+  ret <- if (lower.tail) 1 - exp(-H) else exp(-H)
+  if (log.p) log(ret) else ret
+}
+
+
+##' @rdname Survmspline_wane
+##' @export
+hsurvmspline_wane <- function(x, alpha1, alpha0, coefs, knots, degree=3,
+                              wane_period, wane_nt=10, pcure=0, offsetH=0, backhaz=NULL, log=FALSE){
+  if (!is.null(backhaz)) offseth <- backhaz$hazard[findInterval(x, backhaz$time)]
+  if (is.null(pcure)) pcure <- 0
+  if (length(alpha0) != length(alpha1)) stop("lengths of `alpha0` and `alpha1` should be the same")
+  att <- NULL
+  d <- survmspline_dist_setup(q=x, alpha=alpha1, coefs=coefs, knots=knots, pcure=pcure)
+  for (i in seq_along(d)) assign(names(d)[i], d[[i]])
+  alpha1 <- alpha
+  alpha0 <- rep(alpha0, length.out=length(alpha1))
+
+  if (wane_period[1] >= wane_period[2]) stop("wane_period[2] should be greater than wane_period[1]")
+  if (is.null(wane_nt)) wane_nt <- 10
+  dt <- (wane_period[2] - wane_period[1]) / wane_nt
+
+  ret <- numeric(length(x))
+  early <- x <= wane_period[1]
+  late <- x >= wane_period[2]
+  ret[early] <- hsurvmspline(x[early], alpha=alpha1[early], coefs=coefs[early,,drop=FALSE],
+                             knots=knots, degree=degree)
+  ret[late] <- hsurvmspline(x[late],  alpha=alpha0[late], coefs=coefs[late,,drop=FALSE],
+                            knots=knots, degree=degree)
+  mid <- x > wane_period[1] & x < wane_period[2]
+  if (any(mid)) {
+    times <- c(0, seq(wane_period[1], wane_period[2], by=dt))
+    ints <- findInterval(x[mid], times)
+    w <- (wane_period[2] - times[ints]) / (wane_period[2] - wane_period[1])
+    alpha_mix <- w*alpha1[mid] + (1-w)*alpha0[mid]
+    ret[mid] <- hsurvmspline(times[ints], alpha=alpha_mix, coefs=coefs[mid,,drop=FALSE],
+                      knots=knots, degree=degree)
+  }
+
+  pp <- pcure>0
+  if (any(pp)){
+    logdens <- dsurvmspline_wane(x=x[pp], alpha1=alpha1[pp], alpha0=alpha0[pp], coefs=coefs[pp,,drop=FALSE],
+                                 knots=knots, degree=degree, wane_period=wane_period, wane_nt=wane_nt,
+                                 pcure=0, log=TRUE)
+    logsurv <- psurvmspline_wane(q=q[pp], alpha1=alpha1[pp], alpha0=alpha0[pp], coefs=coefs[pp,,drop=FALSE],
+                                 knots=knots, degree=degree, wane_period=wane_period, wane_nt=wane_nt,
+                                 pcure=pcure[pp], log.p=TRUE)
+    loghaz[pp] <- log(1 - pcure[pp]) + logdens - logsurv
+    ret[pp] <- exp(loghaz[pp])
+  }
+  ret[offseth>0] <- ret[offseth>0] + offseth[offseth>0]
+  if (log) ret <- log(ret)
+
+  attributes(ret) <- att
+  ret
+}
+
+##' @rdname Survmspline_wane
+##' @export
+dsurvmspline_wane <- function(x, alpha1, alpha0, coefs, knots, degree=3,
+                              wane_period, wane_nt=10, pcure=0, offsetH=0, backhaz=NULL, log=FALSE){
+  haz <- hsurvmspline_wane(x=x, alpha1=alpha1, alpha0=alpha0, coefs=coefs, knots=knots, degree=degree,
+                           wane_period=wane_period, wane_nt=wane_nt, pcure=pcure, offsetH=offsetH,
+                           backhaz=backhaz)
+  surv <- psurvmspline_wane(q=x, alpha1=alpha1, alpha0=alpha0, coefs=coefs, knots=knots, degree=degree,
+                            wane_period=wane_period, wane_nt=wane_nt, pcure=pcure, offsetH=offsetH,
+                            backhaz=backhaz, lower.tail=FALSE)
+  if (log) log(haz) + log(surv) else haz * surv
+}
+
+
+##' @rdname Survmspline_wane
+##' @export
+qsurvmspline_wane <- function(p, alpha1, alpha0, coefs, knots, degree=3, lower.tail=TRUE, log.p=FALSE,
+                              pcure=0, offsetH=0, backhaz=NULL, wane_period, wane_nt=10){
+  if (log.p) p <- exp(p)
+  if (!lower.tail) p <- 1 - p
+  if (is.null(pcure)) pcure <- 0
+  qgeneric(psurvmspline_wane, p=p, matargs=c("coefs"),
+           scalarargs=c("knots","degree","backhaz","wane_period","wane_nt"),
+           alpha1=alpha1, alpha0=alpha0, coefs=coefs, knots=knots, degree=degree,
+           pcure=pcure, offsetH=offsetH, backhaz=backhaz, wane_period=wane_period, wane_nt=wane_nt)
+}
+
+##' @rdname Survmspline_wane
+##' @export
+rsurvmspline_wane <- function(n, alpha1, alpha0, coefs, knots, degree=3,
+                              pcure=0, offsetH=0, backhaz=NULL, wane_period, wane_nt=10){
+  if (length(n) > 1) n <- length(n)
+  qsurvmspline_wane(p=runif(n), alpha1=alpha1, alpha0=alpha0, coefs=coefs, knots=knots, degree=degree,
+                    pcure=pcure, offsetH=offsetH, backhaz=backhaz, wane_period=wane_period, wane_nt=wane_nt)
+}
+
+survival_core_wane <- function(x, pars, times_arr, alpha_user_arr, alpha_user_arr0,
+                               cureprob_arr, niter, nvals, nt, wane_period, wane_nt=10){
+  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+  surv_sam <- psurvmspline_wane(times_arr, alpha1=alpha_user_arr, alpha0=alpha_user_arr0,
+                                coefs=coefs_mat,
+                                knots=x$basehaz$knots, degree=x$basehaz$degree, lower.tail=FALSE,
+                                pcure=cureprob_arr, backhaz=x$backhaz, wane_period=wane_period, wane_nt=wane_nt)
+}
+
+hazard_core_wane <- function(x, pars, times_arr, alpha_user_arr, alpha_user_arr0,
+                             cureprob_arr, niter, nvals, nt, wane_period, wane_nt=10){
+  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+  haz_sam <- hsurvmspline_wane(times_arr, alpha1=alpha_user_arr, alpha0=alpha_user_arr0,
+                               coefs=coefs_mat,
+                               knots=x$basehaz$knots, degree=x$basehaz$degree,
+                               pcure=cureprob_arr, backhaz=x$backhaz,
+                               wane_period=wane_period, wane_nt=wane_nt)
+}
+
+cumhaz_core_wane <- function(x, pars, times_arr, alpha_user_arr, alpha_user_arr0,
+                             cureprob_arr, niter, nvals, nt, wane_period, wane_nt=10){
+  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+  haz_sam <- Hsurvmspline_wane(times_arr, alpha1=alpha_user_arr, alpha0=alpha_user_arr0,
+                               coefs=coefs_mat,
+                               knots=x$basehaz$knots, degree=x$basehaz$degree,
+                               pcure=cureprob_arr, backhaz=x$backhaz,
+                               wane_period=wane_period, wane_nt=wane_nt)
+}
+
+##' @rdname Survmspline_wane
+##' @export
+rmst_survmspline_wane = function(t, alpha1, alpha0, coefs, knots, degree=3, pcure=0, backhaz=NULL,
+                                 wane_period, wane_nt=10){
+  if (is.null(pcure)) pcure <- 0
+  rmst_generic(psurvmspline_wane, t, start=0,
+               matargs = c("coefs"),
+               unvectorised_args = c("knots","degree","backhaz","wane_period","wane_nt"),
+               alpha1=alpha1, alpha0=alpha0, coefs=coefs, knots=knots, degree=degree,
+               wane_period=wane_period, wane_nt=wane_nt,
+               pcure=pcure, backhaz=backhaz)
+}
+
+##' @rdname Survmspline_wane
+##' @export
+mean_survmspline_wane = function(alpha1, alpha0, coefs, knots, degree=3, pcure=0, backhaz=NULL,
+                                 wane_period, wane_nt=10){
+  if (is.null(pcure)) pcure <- 0
+  nt <- if (is.matrix(coefs)) nrow(coefs) else 1
+  rmst_generic(psurvmspline_wane, rep(Inf,nt), start=0,
+               matargs = c("coefs"),
+               unvectorised_args = c("knots","degree","backhaz","wane_period","wane_nt"),
+               alpha1=alpha1, alpha0=alpha0, coefs=coefs, knots=knots, degree=degree,
+               wane_period=wane_period, wane_nt=wane_nt,
+               pcure=pcure, backhaz=backhaz)
+}

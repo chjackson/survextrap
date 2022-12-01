@@ -10,7 +10,10 @@ hazard(
   times = NULL,
   tmax = NULL,
   niter = NULL,
-  sample = FALSE
+  sample = FALSE,
+  newdata0 = NULL,
+  wane_period = NULL,
+  wane_nt = 10
 )
 }
 \arguments{
@@ -42,6 +45,17 @@ some approximation error (which may not be important for plotting).}
 
 \item{sample}{If \code{TRUE} then the MCMC samples are returned instead
 of being summarised as a median and 95\% credible intervals.}
+
+\item{newdata0}{Data frame of covariate values defining the "untreated" group
+for use in treatment waning models, see \code{\link{Survmspline_wane}}.}
+
+\item{wane_period}{Vector of two numbers, defining the time period over which
+the hazard is interpolated between the hazard of the "treated" group (taken from \code{newdata})
+and the hazard of the "untreated" group (taken from \code{newdata0}).  Optional - if
+not supplied then no waning is assumed.}
+
+\item{wane_nt}{Number of intervals defining the piecewise constant approximation
+to the hazard during the waning period.}
 }
 \description{
 Estimates of hazard from a survextrap model

@@ -17,24 +17,25 @@
 ##'
 ##' @export
 plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
+                        newdata0=NULL, wane_period=NULL, wane_nt=10,                        
                         ci=NULL, xlab="Time", ylab="Hazard",
                         line_size=1.5, ci_alpha=0.2){
-    lower <- upper <- NULL # TODO do strings work
+    lower <- upper <- NULL
     newdata <- default_newdata(x, newdata)
-    haz <- hazard(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
+    haz <- hazard(x, newdata=newdata, times=times, tmax=tmax, niter=niter,
+                  newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt)
     knots <- x$basehaz$knots[x$basehaz$knots <= max(haz$times)]
-    aes <- list(x="times", y="median")
+    aes_list <- list(x=sym("times"), y=sym("median"))
     if (attr(haz, "nvals") > 1)
-        aes <- c(aes, list(col = names(newdata), group = names(newdata)))
-    geom_maps <- do.call("aes_string", aes)
+        aes_list <- c(aes_list, list(col = sym(names(newdata)), group = sym(names(newdata))))
     geom_ylab <- ggplot2::ylab(ylab)
     geom_xlab <- ggplot2::xlab(xlab)
-    p <- ggplot(haz, mapping=geom_maps) +
+    p <- ggplot(haz, mapping=aes(!!!aes_list)) +
         geom_ylab + geom_xlab +
         theme_minimal() +
         theme(panel.grid.minor = element_blank()) +
-        geom_vline(xintercept=knots, col="blue", lwd=0.4*line_size, alpha=0.3) +
-        geom_line(size=line_size)
+        geom_vline(xintercept=knots, col="blue", linewidth=0.4*line_size, alpha=0.3) +
+        geom_line(linewidth=line_size)
     if (is.null(ci)) ci <- (attr(haz,"nvals")==1)
     if (ci)
         p <- p +
@@ -59,46 +60,45 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
 ##'
 ##' @export
 plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter=NULL,
+                          newdata0=NULL, wane_period=NULL, wane_nt=10,                        
                           ci=NULL, xlab="Time", ylab="Survival",
                           line_size=1.5, ci_alpha=0.2){
     lower <- upper <- NULL
     if (is.null(km)) km <- one_factor_cov(x)
     newdata <- default_newdata(x, newdata)
-    surv <- survival(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
+    surv <- survival(x, newdata=newdata, times=times, tmax=tmax, niter=niter,
+                     newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt)
     knots <- x$basehaz$knots[x$basehaz$knots <= max(surv$times)]
-    aes <- list(x="times", y="median")
+    aes_list <- list(x=sym("times"), y=sym("median"))
     if (attr(surv,"nvals") > 1)
-        aes <- c(aes, list(col = names(newdata), group = names(newdata)))
-    geom_maps <- do.call("aes_string", aes)
+        aes_list <- c(aes_list, list(col = sym(names(newdata)), group = sym(names(newdata))))
     geom_ylab <- ggplot2::ylab(ylab)
     geom_xlab <- ggplot2::xlab(xlab)
-    g <- ggplot(surv, mapping=geom_maps) +
+    g <- ggplot(surv, mapping=aes(!!!aes_list)) +
         ylim(0,1) +
         geom_ylab + geom_xlab +
         theme_minimal() +
         theme(panel.grid.minor = element_blank()) +
-        geom_vline(xintercept=knots, col="blue", lwd=0.4*line_size, alpha=0.3) +
-        geom_step(size=line_size)
+        geom_vline(xintercept=knots, col="blue", linewidth=0.4*line_size, alpha=0.3) +
+        geom_step(linewidth=line_size)
     if (is.null(ci)) ci <- (attr(surv,"nvals")==1)
     if (ci)
         g <- g +
             geom_ribbon(aes(ymin=lower, ymax=upper), alpha=ci_alpha)
 
     if (km){
-        aes <- list(x="time", y="surv")
-        if (one_factor_cov(x)) {
-            covname <- names(newdata)
-            aes <- c(aes, list(col=covname))
+        aes_list <- list(x=sym("time"), y=sym("surv"))
+        if (one_factor_cov(x) && !is.null(newdata)) {
+            aes_list <- c(aes_list, list(col=sym(names(newdata))))
         }
-        geom_maps <- do.call("aes_string", aes)
-        g <- g + geom_step(data=x$km, mapping=geom_maps)
+        g <- g + geom_step(data=x$km, mapping=aes(!!!aes_list))
     }
     g
 }
 
 one_factor_cov <- function(x){
     (length(x$x$factors)<=1) &&
-        (length(x$x$numerics)==0) && 
+        (length(x$x$numerics)==0) &&
         (x$ncurecovs == 0)
     ## if there are cure covs, make people choose for themselves what curves to draw
 }
