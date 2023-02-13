@@ -30,7 +30,7 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
         aes_list <- c(aes_list, list(col = sym(names(newdata)), group = sym(names(newdata))))
     geom_ylab <- ggplot2::ylab(ylab)
     geom_xlab <- ggplot2::xlab(xlab)
-    p <- ggplot(haz, mapping=aes(!!!aes_list)) +
+    p <- ggplot(haz, mapping=aes(!!!aes_list)) + # requires ggplot2 3.4.0
         geom_ylab + geom_xlab +
         theme_minimal() +
         theme(panel.grid.minor = element_blank()) +
@@ -74,7 +74,12 @@ plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter
         aes_list <- c(aes_list, list(col = sym(names(newdata)), group = sym(names(newdata))))
     geom_ylab <- ggplot2::ylab(ylab)
     geom_xlab <- ggplot2::xlab(xlab)
-    g <- ggplot(surv, mapping=aes(!!!aes_list)) +
+
+    ## requires ggplot2 3.4.0 (Nov 2022). though see 
+    ## https://stackoverflow.com/questions/59578369/what-does-cant-use-at-top-level-mean-and-how-to-resolve-it
+    ## for workarounds if this is too bleeding edge
+
+    g <- ggplot(surv, mapping=aes(!!!aes_list)) + 
         ylim(0,1) +
         geom_ylab + geom_xlab +
         theme_minimal() +

@@ -18,7 +18,7 @@ Imports:
     Rcpp (>= 0.12.0),
     rstan (>= 2.18.1),
     posterior,
-    ggplot2,
+    ggplot2 (>=3.4.0),
     gridExtra,
     rstpm2,
     splines2,
