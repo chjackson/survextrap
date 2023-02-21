@@ -77,7 +77,7 @@ plot_mspline <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs=NUL
         ylab("") +
         theme_minimal() +
         theme(panel.grid.minor = element_blank()) +
-        scale_x_continuous(breaks=knots, limits=range(knots)) +
+        scale_x_continuous(breaks=knots, limits=c(tmin, tmax)) +
         scale_y_continuous(breaks=knots, limits=c(0, max(c(bdf$value, bdf$haz)))) +
         geom_vline(xintercept=knots, col="blue", lwd=0.6, alpha=0.3)
 }
