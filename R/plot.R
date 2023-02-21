@@ -155,17 +155,16 @@ plot_hazard_ratio <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL
     lower <- upper <- NULL
     hr <- hazard_ratio(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
     knots <- x$basehaz$knots[x$basehaz$knots <= max(hr$times)]
-    aes <- list(x="times", y="median")
-    geom_maps <- do.call("aes_string", aes)
+    aes_list <- list(x=sym("times"), y=sym("median"))
     geom_ylab <- ggplot2::ylab(ylab)
     geom_xlab <- ggplot2::xlab(xlab)
-    p <- ggplot(hr, mapping=geom_maps) +
+    p <- ggplot(hr, mapping=aes(!!!aes_list)) +
         geom_ylab + geom_xlab +
         theme_minimal() +
         theme(panel.grid.minor = element_blank()) +
         geom_vline(xintercept=knots, col="blue", lwd=0.4*line_size, alpha=0.3) +
         geom_hline(yintercept=1, col="gray30") +
-        geom_line(size=line_size)
+        geom_line(linewidth=line_size)
     if (ci)
         p <- p +
             geom_ribbon(aes(ymin=lower, ymax=upper), alpha=ci_alpha)
