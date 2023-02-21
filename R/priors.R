@@ -91,8 +91,8 @@ validate_positive_parameter <- function(x) {
 
 
 get_priors <- function(loghaz, loghr, smooth, cure, logor_cure, x, xcure, est_smooth,
-                       nonprop, prior_sdnp, log_crude_event_rate){
-  if (is.null(loghaz)) loghaz <- p_normal(log_crude_event_rate, 20)
+                       nonprop, prior_sdnp){
+  if (is.null(loghaz)) loghaz <- p_normal(0, 20)
   else validate_prior(loghaz)
   loghr <- get_prior_coveffs(loghr, x, "loghr") 
   smooth <- get_prior_smooth(smooth, est_smooth)

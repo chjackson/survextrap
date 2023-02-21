@@ -23,7 +23,7 @@
 #'
 #' `start`: Start time
 #'
-#' `start`: Follow-up time
+#' `stop`: Follow-up time
 #'
 #' `n`: Number of people alive at `start`
 #'
@@ -225,9 +225,6 @@ survextrap <- function(formula,
 
     t_tmp <- sum(rowMeans(cbind(t_end, t_upp), na.rm = TRUE) - t_beg)
     d_tmp <- sum(!status == 0)
-    log_crude_event_rate <- log(d_tmp / t_tmp)
-    if (is.infinite(log_crude_event_rate))
-        log_crude_event_rate <- 0 # avoids error when there are zero events
 
     if (is.data.frame(backhaz)) {
       validate_backhaz_df(backhaz)
@@ -292,7 +289,7 @@ survextrap <- function(formula,
     }
 
     priors <- get_priors(prior_loghaz, prior_loghr, prior_smooth, prior_cure, prior_logor_cure,
-                         x, xcure, est_smooth, nonprop, prior_sdnp, log_crude_event_rate)
+                         x, xcure, est_smooth, nonprop, prior_sdnp)
 
     standata <- nlist(nevent, nrcens, nvars, nextern, ncovs,
                       basis_event, ibasis_event, ibasis_rcens,
@@ -367,7 +364,7 @@ survextrap <- function(formula,
     misc_keep <- nlist(formula, stanfit=fits,
                        fit_method, cure_formula,
                        backhaz=backhaz_df)
-    standata_keep <- standata[c("nvars","ncovs","log_crude_event_rate","ncurecovs")]
+    standata_keep <- standata[c("nvars","ncovs","ncurecovs")]
     model_keep <- nlist(cure, est_smooth, nonprop)
     spline_keep <- nlist(basehaz)
     covinfo_names <- c("xnames","xlevs","xinds","xbar","mfbase","mfzero")
