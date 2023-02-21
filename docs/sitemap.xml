@@ -43,16 +43,10 @@
     <loc>https://chjackson.github.io/survextrap/reference/hazard_ratio.html</loc>
   </url>
   <url>
-    <loc>https://chjackson.github.io/survextrap/reference/hazard_survextrap.html</loc>
-  </url>
-  <url>
     <loc>https://chjackson.github.io/survextrap/reference/index.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/mean.survextrap.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/mean_survextrap.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/mspline_basis.html</loc>
@@ -94,13 +88,7 @@
     <loc>https://chjackson.github.io/survextrap/reference/prior_pred.html</loc>
   </url>
   <url>
-    <loc>https://chjackson.github.io/survextrap/reference/qgeneric.html</loc>
-  </url>
-  <url>
     <loc>https://chjackson.github.io/survextrap/reference/rmst.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/rmst_survextrap.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/summary.survextrap.html</loc>
@@ -119,8 +107,5 @@
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/Survmspline_wane.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/surv_survextrap.html</loc>
   </url>
 </urlset>
