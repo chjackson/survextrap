@@ -116,7 +116,7 @@ This is a smoother, Bayesian analogue of the common approach to spline model sel
 
 # Prior distribution for the hazard curve
 
-A log-normal prior is used for the scale $\eta$.   The default in the package is set to to the log crude event rate plus normal(0, 20) (inspired by [rstanarm](https://arxiv.org/pdf/2002.09633.pdf)) - but this can be changed by the user. 
+A log-normal prior is used for the scale $\eta$.   The default in the package is set to normal(0, 20) - but this can be changed by the user. 
 
 A multinomial logistic distribution defines the prior for the coefficients $p_k$ that define the mass of the hazard in each region: $log(p_k / p_1) = \gamma_k$, with $\gamma_1=0$ and $\gamma_k \sim Logistic(\mu_k, \sigma)$ for $k = 2, \ldots, K$.  This prior is defined by:
 
@@ -228,7 +228,7 @@ This model can be interpreted in two different ways:
 
 * as a model where everyone follows the same hazard function $h(t) = f(t)/S(t)$, where the PDF is $f(t) = (1-p)f_0(t)$, and $f_0(t)$ is the PDF of the "uncured" parametric model.  Hence $h(t) = f_0(t) / (p/(1-p) + S_0(t))$, which asymptotically decreases towards zero with increasing $t$ (as long as $p>0$).
 
-Since we do not observe whether a person is part of the "cured" subgroup, these interpretations are indistinguishable in practice. 
+Since we cannot observe whether censored observations are part of the "cured" subgroup, these interpretations are indistinguishable in practice. 
 
 
 
