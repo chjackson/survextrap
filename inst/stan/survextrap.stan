@@ -184,12 +184,14 @@ transformed parameters {
     matrix[nrcens,nvars] coefs_rcens;
     matrix[nextern,nvars] coefs_extern;
 
+    // nonprop only, but declare outside {} so values are saved
+    matrix[nevent,nvars] b_event; // was vector[nvars]
+    matrix[nrcens,nvars] b_rcens; 
+    matrix[nextern,nvars] b_extern; 
+    matrix[ncovs,nvars-1] b_np; // nonproportionality cov effect. should be centred around 0. no intercept
+    real ssd;
+
     if (nonprop) { 
-	matrix[nevent,nvars] b_event; // was vector[nvars]
-	matrix[nrcens,nvars] b_rcens; 
-	matrix[nextern,nvars] b_extern; 
-	matrix[ncovs,nvars-1] b_np; // nonproportionality cov effect. should be centred around 0. no intercept
-	real ssd;
 	for (r in 1:ncovs){
 	    b_np[r,1:(nvars-1)] = sd_np[r]*nperr[r,1:(nvars-1)];
 	}

@@ -40,6 +40,7 @@ test_that("Basic spline model, non-proportional hazards",{
   modnp <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt",
                       nonprop=TRUE, basehaz_ops = list(df=4,degree=2))
   test_median(modnp, "alpha", -0.251)
+  expect_equal(hazard(modnp, newdata=nd, time=2)$median, c(0.10, 0.13), tol=1e-02)
 })
 
 
