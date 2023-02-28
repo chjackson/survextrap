@@ -139,7 +139,7 @@ parnames_to_df <- function(x){
 ##' fitted by optimisation rather than MCMC, the posterior mode is also returned.
 ##'
 ##' Any other posterior summary can be computed if the appropriate function to compute it
-##' is supplied here. 
+##' is supplied here.
 ##'
 ##' @param object A fitted model object as returned by \code{\link{survextrap}}
 ##'
@@ -202,6 +202,11 @@ summary.survextrap <- function(object, ...){
                                           rhat = posterior::rhat,
                                           ess_bulk = posterior::ess_bulk,
                                           ...)
+
+  ## Remove strange classes ("pillar_num"  "pillar_vctr" "vctrs_vctr")
+  for (i in which(sapply(mcmc_summ, is.numeric)))
+    mcmc_summ[[i]] <- as.numeric(mcmc_summ[[i]])
+
   names(mcmc_summ)[names(mcmc_summ) == "variable"] <- "parname"
   names(mcmc_summ)[names(mcmc_summ) %in% c("2.5%","97.5%")] <- c("lower","upper")
 
