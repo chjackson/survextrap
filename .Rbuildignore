@@ -7,5 +7,6 @@
 ^\.github$
 data-raw
 man-roxygen
+web_assets
 tests/simulation
 vignettes/examples_cache

@@ -10,7 +10,7 @@ postest_test <- function(x, newdata=NULL){
 }
 
 test_median <- function(mod, vname, value, tol=1e-01){
-    expect_equal(summary(mod) %>% filter(variable==vname) %>% pull(median),
+    expect_equal(summary(mod) %>% filter(variable==vname) %>% pull(median) %>% as.numeric(),
                  value, tol=tol)
 }
 
