@@ -75,7 +75,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2023-02-21</h4>
+            <h4 data-toc-skip class="date">2023-02-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/examples.Rmd" class="external-link"><code>vignettes/examples.Rmd</code></a></small>
       <div class="d-none name"><code>examples.Rmd</code></div>
@@ -191,14 +191,14 @@ here</a> for technical details).</p></li>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">nd_mod</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
-<span><span class="co">##   variable basis_num  median      lower   upper      sd  rhat ess_bulk</span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> alpha           <span style="color: #BB0000;">NA</span> -<span style="color: #BB0000;">0.574</span>  -<span style="color: #BB0000;">0.808</span>     -<span style="color: #BB0000;">0.362</span>  0.120    1.00    136. </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> coefs            1  0.021<span style="text-decoration: underline;">5</span>  0.002<span style="text-decoration: underline;">37</span>    0.037<span style="text-decoration: underline;">2</span> 0.009<span style="text-decoration: underline;">38</span>  1.02    126. </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> coefs            2  0.029<span style="text-decoration: underline;">8</span>  0.000<span style="text-decoration: underline;">047</span>9  0.094<span style="text-decoration: underline;">3</span> 0.025<span style="text-decoration: underline;">9</span>   1.02     86.9</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> coefs            3  0.091<span style="text-decoration: underline;">2</span>  0.015<span style="text-decoration: underline;">8</span>     0.238  0.057<span style="text-decoration: underline;">9</span>   1.01    443. </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span> coefs            4  0.161   0.026<span style="text-decoration: underline;">9</span>     0.290  0.069<span style="text-decoration: underline;">1</span>   1.00    452. </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span> coefs            5  0.122   0.024<span style="text-decoration: underline;">8</span>     0.284  0.069<span style="text-decoration: underline;">8</span>   1.02    197.</span></span></code></pre>
+<span><span class="co">##   variable basis_num  median     lower   upper      sd  rhat ess_bulk</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> alpha           <span style="color: #BB0000;">NA</span> -<span style="color: #BB0000;">0.575</span>  -<span style="color: #BB0000;">0.806</span>    -<span style="color: #BB0000;">0.350</span>  0.117   1.00      668.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> coefs            1  0.021<span style="text-decoration: underline;">5</span>  0.005<span style="text-decoration: underline;">20</span>   0.038<span style="text-decoration: underline;">5</span> 0.008<span style="text-decoration: underline;">86</span> 0.999     508.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> coefs            2  0.029<span style="text-decoration: underline;">2</span>  0.000<span style="text-decoration: underline;">854</span>  0.096<span style="text-decoration: underline;">2</span> 0.026<span style="text-decoration: underline;">2</span>  1.00      609.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span> coefs            3  0.095<span style="text-decoration: underline;">5</span>  0.013<span style="text-decoration: underline;">7</span>    0.224  0.056<span style="text-decoration: underline;">2</span>  1.00      492.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span> coefs            4  0.162   0.032<span style="text-decoration: underline;">5</span>    0.303  0.069<span style="text-decoration: underline;">2</span>  0.999     624.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span> coefs            5  0.116   0.021<span style="text-decoration: underline;">9</span>    0.266  0.064<span style="text-decoration: underline;">5</span>  0.999     491.</span></span></code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -228,9 +228,9 @@ enough iterations to get summaries with the amount of precision you want
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
 <span><span class="co">##   variable     t median `2.5%` `97.5%`</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> rmst         3   2.20   2.08    2.33</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> rmst        10   5.34   3.73    6.51</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> rmst      <span style="text-decoration: underline;">1</span>000  11.9    3.87  479.</span></span></code></pre>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> rmst         3   2.19   2.08    2.34</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> rmst        10   4.93   3.65    6.43</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> rmst      <span style="text-decoration: underline;">1</span>000   7.01   3.78  148.</span></span></code></pre>
 <p>We do not really believe that the mean survival for this population
 can be this large.</p>
 <p>This is evidence that the fitted model is unrealistic, and we should
@@ -261,15 +261,15 @@ data are shown here).</p>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
 <span><span class="co">##   variable median `2.5%` `97.5%`</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> mean       6.00   5.20    6.74</span></span></code></pre>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> mean       5.91   5.13    6.77</span></span></code></pre>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/rmst.html">rmst</a></span><span class="op">(</span><span class="va">nde_mod</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">10</span>, <span class="fl">1000</span><span class="op">)</span>, niter<span class="op">=</span><span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
 <span><span class="co">##   variable     t median `2.5%` `97.5%`</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> rmst         3   2.18   2.01    2.31</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> rmst        10   4.81   4.30    5.33</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> rmst      <span style="text-decoration: underline;">1</span>000   6.00   5.20    6.74</span></span></code></pre>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> rmst         3   2.19   2.03    2.31</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> rmst        10   4.81   4.24    5.30</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> rmst      <span style="text-decoration: underline;">1</span>000   5.91   5.13    6.77</span></span></code></pre>
 <p>Including the external data gives a more confident extrapolation. The
 mean is finite. RMST converges to the mean as it is supposed to.</p>
 <p>At present, not much thought has gone into choice of knot locations
@@ -354,7 +354,7 @@ Still alive at <span class="math inline">\(u\)</span>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
 <span><span class="co">##   variable median `2.5%` `97.5%`</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> mean       6.17   4.26    14.2</span></span></code></pre>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> mean       6.24   4.74    12.8</span></span></code></pre>
 <p>There is still substantial uncertainty about the mean, even with this
 level of information, but comparing to the second model above
 (<code>nd_mod2</code>), it is better than no information at all. More
@@ -392,10 +392,10 @@ function.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">rxph_mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">variable</span><span class="op">==</span><span class="st">"loghr"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 2 × 9</span></span></span>
-<span><span class="co">##   variable basis_num term      median  lower   upper    sd  rhat ess_bulk</span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> loghr           <span style="color: #BB0000;">NA</span> rxLev     -<span style="color: #BB0000;">0.385</span> -<span style="color: #BB0000;">0.930</span>  0.070<span style="text-decoration: underline;">4</span> 0.266  1.01     354.</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> loghr           <span style="color: #BB0000;">NA</span> rxLev+5FU -<span style="color: #BB0000;">0.682</span> -<span style="color: #BB0000;">1.26</span>  -<span style="color: #BB0000;">0.135</span>  0.294  1.00     645.</span></span></code></pre>
+<span><span class="co">##   variable basis_num term      median  lower  upper    sd  rhat ess_bulk</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> loghr           <span style="color: #BB0000;">NA</span> rxLev     -<span style="color: #BB0000;">0.359</span> -<span style="color: #BB0000;">0.881</span>  0.106 0.253  1.01    124. </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> loghr           <span style="color: #BB0000;">NA</span> rxLev+5FU -<span style="color: #BB0000;">0.610</span> -<span style="color: #BB0000;">1.19</span>  -<span style="color: #BB0000;">0.144</span> 0.290  1.03     42.6</span></span></code></pre>
 <p>The posterior median survival curves (thick lines) agree with the
 subgroup-specific Kaplan-Meier estimates (thin lines).</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
@@ -421,9 +421,9 @@ survival as the control group of the trial (corresponding to a value of
 <span>                      chains<span class="op">=</span><span class="fl">1</span>, external <span class="op">=</span> <span class="va">extdat</span>, refresh<span class="op">=</span><span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/rmst.html">rmst</a></span><span class="op">(</span><span class="va">rxphe_mod</span>, niter<span class="op">=</span><span class="fl">100</span>, t<span class="op">=</span><span class="fl">20</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##        rx variable  t   median     2.5%     97.5%</span></span>
-<span><span class="co">## 1     Obs     rmst 20 4.780701 3.591317  5.668442</span></span>
-<span><span class="co">## 2     Lev     rmst 20 6.960459 4.931927  9.648258</span></span>
-<span><span class="co">## 3 Lev+5FU     rmst 20 8.934642 6.369137 11.396620</span></span></code></pre>
+<span><span class="co">## 1     Obs     rmst 20 4.897873 3.684059  6.088934</span></span>
+<span><span class="co">## 2     Lev     rmst 20 6.741737 4.716010  9.801293</span></span>
+<span><span class="co">## 3 Lev+5FU     rmst 20 8.605789 6.252565 11.603196</span></span></code></pre>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rxphe_mod</span>, niter<span class="op">=</span><span class="fl">100</span>, tmax<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></code></pre></div>
 <p><img src="examples_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
@@ -504,20 +504,13 @@ prediction. It is likely to be excessively complicated for the data.</p>
 <span><span class="co">## Computed from 1000 by 191 log-likelihood matrix</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">##          Estimate   SE</span></span>
-<span><span class="co">## elpd_loo   -211.7 10.2</span></span>
-<span><span class="co">## p_loo         8.4  0.8</span></span>
-<span><span class="co">## looic       423.4 20.3</span></span>
+<span><span class="co">## elpd_loo   -211.1  9.9</span></span>
+<span><span class="co">## p_loo         8.0  0.7</span></span>
+<span><span class="co">## looic       422.2 19.8</span></span>
 <span><span class="co">## ------</span></span>
-<span><span class="co">## Monte Carlo SE of elpd_loo is 0.1.</span></span>
+<span><span class="co">## Monte Carlo SE of elpd_loo is 0.3.</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Pareto k diagnostic values:</span></span>
-<span><span class="co">##                          Count Pct.    Min. n_eff</span></span>
-<span><span class="co">## (-Inf, 0.5]   (good)     190   99.5%   168       </span></span>
-<span><span class="co">##  (0.5, 0.7]   (ok)         1    0.5%   153       </span></span>
-<span><span class="co">##    (0.7, 1]   (bad)        0    0.0%   &lt;NA&gt;      </span></span>
-<span><span class="co">##    (1, Inf)   (very bad)   0    0.0%   &lt;NA&gt;      </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## All Pareto k estimates are ok (k &lt; 0.7).</span></span>
+<span><span class="co">## All Pareto k estimates are good (k &lt; 0.5).</span></span>
 <span><span class="co">## See help('pareto-k-diagnostic') for details.</span></span></code></pre>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rxnph_mod</span><span class="op">$</span><span class="va">loo</span></span></code></pre></div>
@@ -525,13 +518,20 @@ prediction. It is likely to be excessively complicated for the data.</p>
 <span><span class="co">## Computed from 1000 by 191 log-likelihood matrix</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">##          Estimate   SE</span></span>
-<span><span class="co">## elpd_loo   -227.8 11.9</span></span>
-<span><span class="co">## p_loo        27.4  2.6</span></span>
-<span><span class="co">## looic       455.6 23.9</span></span>
+<span><span class="co">## elpd_loo   -227.6 12.1</span></span>
+<span><span class="co">## p_loo        27.5  2.9</span></span>
+<span><span class="co">## looic       455.2 24.1</span></span>
 <span><span class="co">## ------</span></span>
 <span><span class="co">## Monte Carlo SE of elpd_loo is 0.2.</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## All Pareto k estimates are good (k &lt; 0.5).</span></span>
+<span><span class="co">## Pareto k diagnostic values:</span></span>
+<span><span class="co">##                          Count Pct.    Min. n_eff</span></span>
+<span><span class="co">## (-Inf, 0.5]   (good)     189   99.0%   384       </span></span>
+<span><span class="co">##  (0.5, 0.7]   (ok)         2    1.0%   45        </span></span>
+<span><span class="co">##    (0.7, 1]   (bad)        0    0.0%   &lt;NA&gt;      </span></span>
+<span><span class="co">##    (1, Inf)   (very bad)   0    0.0%   &lt;NA&gt;      </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## All Pareto k estimates are ok (k &lt; 0.7).</span></span>
 <span><span class="co">## See help('pareto-k-diagnostic') for details.</span></span></code></pre>
 <p>If the warning message
 <code>"Some Pareto k diagnostic values are too high"</code> appears
@@ -579,9 +579,9 @@ regression.</p>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 3 × 10</span></span></span>
 <span><span class="co">##   variable   basis_num term   mode median lower upper     sd  rhat ess_bulk</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> pcure             <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    0.481  0.480 0.385 0.570 0.048<span style="text-decoration: underline;">7</span>  1.00    <span style="text-decoration: underline;">1</span>909.</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> logor_cure        <span style="color: #BB0000;">NA</span> x     0.778  0.775 0.202 1.36  0.292   1.00    <span style="text-decoration: underline;">1</span>782.</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> or_cure           <span style="color: #BB0000;">NA</span> x     2.18   2.17  1.22  3.91  0.682   1.00    <span style="text-decoration: underline;">1</span>782.</span></span></code></pre>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> pcure             <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    0.481  0.481 0.386 0.576 0.048<span style="text-decoration: underline;">8</span>  1.00    <span style="text-decoration: underline;">1</span>833.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> logor_cure        <span style="color: #BB0000;">NA</span> x     0.778  0.795 0.220 1.35  0.293   1.00    <span style="text-decoration: underline;">1</span>855.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> or_cure           <span style="color: #BB0000;">NA</span> x     2.18   2.21  1.25  3.87  0.687   1.00    <span style="text-decoration: underline;">1</span>855.</span></span></code></pre>
 <p>In this summary, <code>pcure</code> is the probability of cure at a
 value of 0 for the covariate <code>x.</code></p>
 </div>
