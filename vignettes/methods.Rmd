@@ -133,20 +133,24 @@ A multinomial logistic distribution defines the prior for the coefficients $p_k$
 (_Sidenote_. This is similar to the Dirichlet distribution for the $p_k$, but is slightly better behaved for estimation.  While the interpretation of $\sigma$ is not completely intuitive, we hope to show empirically that this prior works usefully well in practice) 
 
 The plots below show samples from the prior distribution for the hazard functions implied by 
-two choices of the joint distribution for $\eta$ and $p$.  In both, $\eta$ is log normal(0,1), which supports hazard rates between about 0.1 and 7, and the prior mean for $p$ is the special set that is centred around a constant hazard.  The two samples differ by the choice of prior variability.  $\sigma=0.05$ is a strong prior that forces the hazard to be nearly uniform, while $\sigma=1$ allows a wide range of wiggly shapes.   
+two choices of the joint prior distribution for $\eta$ and $p$.  In both, $\eta$ is log normal(0,1), which supports hazard rates between about 0.1 and 7, and the prior mean for $p$ is the special set that is centred around a constant hazard.  The two samples differ by the choice of prior variability.  $\sigma \sim Gamma(2,40)$ strongly favours low values of $\sigma$, which forces the hazard to be nearly uniform, while $\sigma \sim Gamma(2,1)$ allows a wide range of wiggly shapes.   
 
 ```{r,fig.height=3,class.source = 'fold-hide'}
 iknots <- c(1:9); bknots <- c(0,10)
 p_mean <- mspline_uniform_weights(iknots, bknots)
-prior_mean <- log(p_mean[-1] / p_mean[1])
-#prior_mean <- rep(1, length(knots) + 4)
 set.seed(1)
 p1 <- plot_mspline_priorpred(iknots=iknots, bknots=bknots, tmax=max(bknots)+1, 
-                       prior_mean=prior_mean, prior_sd=0.05, scale_sd=1, nsim=10) + 
-    ylim(0, 1) + ggtitle(bquote(sigma==0.05))
+                              coefs_mean = p_mean,
+                              prior_smooth = p_gamma(2, 40),	     
+                              prior_loghaz = p_normal(0, 1),
+                              nsim=10) + 	
+    ylim(0, 1) + ggtitle(bquote(sigma ~ " ~ Gamma(2,40)"))
 p2 <- plot_mspline_priorpred(iknots=iknots, bknots=bknots, tmax=max(bknots)+1, 
-                       prior_mean=prior_mean, prior_sd=1, scale_sd=1, nsim=10) + 
-    ylim(0, 1) + ggtitle(bquote(sigma==1))
+                              coefs_mean = p_mean,
+                              prior_smooth = p_gamma(2, 1),	     
+                              prior_loghaz = p_normal(0, 1),
+                              nsim=10) + 
+  ylim(0, 1) + ggtitle(bquote(sigma ~ "~ Gamma(2,1)"))
 gridExtra::grid.arrange(p1, p2, nrow=1)
 ```
 

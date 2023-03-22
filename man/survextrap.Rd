@@ -12,7 +12,7 @@ survextrap(
   coefs_mean = NULL,
   cure = FALSE,
   nonprop = FALSE,
-  prior_loghaz = NULL,
+  prior_loghaz = p_normal(0, 20),
   prior_loghr = NULL,
   prior_smooth = p_gamma(2, 1),
   prior_cure = p_beta(1, 1),
@@ -38,7 +38,7 @@ proportional hazards.}
 
 \code{start}: Start time
 
-\code{start}: Follow-up time
+\code{stop}: Follow-up time
 
 \code{n}: Number of people alive at \code{start}
 
@@ -69,13 +69,13 @@ the "methods" vignette for more details.   In models with multiple covariates, c
 there is no way to assume that some covariates have proportional hazards but others don't -
 it is all or none.}
 
-\item{prior_loghaz}{Prior for the baseline log hazard, after centering around the log
+\item{prior_loghaz}{Prior for the baseline log rate parameter (\code{log(eta)}), after centering around the log
 crude event rate in the data.
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters
 location, scale and degrees of freedom).  The default is a normal distribution with
-a mean defined by the log crude event rate in the data, and a standard deviation in the data.
+mean 0 and standard deviation 20.
 
 "Baseline" is defined
 by the continuous covariates taking a value of zero and factor covariates taking their

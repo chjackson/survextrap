@@ -1,15 +1,16 @@
 ## TODO
 ## use capital X for covariates not x
 ## Document / error that variables should be in data frame not in working env
+## should loghaz be called logscale as it's not the log hazard
 
 #' Flexible Bayesian parametric survival models
 #'
 #' Flexible Bayesian parametric survival models.  Individual data are represented using M-splines
 #' and a proportional hazards or flexible non-proportional hazards model.
 #'Optionally a mixture cure version
-#' of this model can be fitted. 
+#' of this model can be fitted.
 #' Extrapolations can be enhanced by including external aggregate data, or by including a fixed background hazard
-#' in an additive hazards (relative survival) model. 
+#' in an additive hazards (relative survival) model.
 #'
 #' @param formula  A survival formula in standard R formula syntax, with a call to `Surv()`
 #' on the left hand side.
@@ -46,7 +47,7 @@
 #' sum to 1 internally (if they do not already).
 #'
 #' @param cure If `TRUE`, a mixture cure model is used, where the "uncured" survival is defined by the
-#' M-spline model, and the cure probability is estimated. 
+#' M-spline model, and the cure probability is estimated.
 #'
 #' @param nonprop If \code{TRUE} then a non-proportional hazards model is fitted.
 #' This is achieved by modelling the spline basis weights in terms of the covariates.  See
@@ -54,13 +55,13 @@
 #' there is no way to assume that some covariates have proportional hazards but others don't -
 #' it is all or none.
 #'
-#' @param prior_loghaz Prior for the baseline log hazard, after centering around the log
+#' @param prior_loghaz Prior for the baseline log rate parameter (`log(eta)`), after centering around the log
 #' crude event rate in the data.
 #'   This should be a call to a prior constructor function, such as
 #'   `p_normal(0,1)` or `p_t(0,2,2)`.   Supported prior distribution families
 #'   are normal (parameters mean and SD) and t distributions (parameters
 #' location, scale and degrees of freedom).  The default is a normal distribution with
-#' a mean defined by the log crude event rate in the data, and a standard deviation in the data.
+#' mean 0 and standard deviation 20.
 #'
 #' "Baseline" is defined
 #'   by the continuous covariates taking a value of zero and factor covariates taking their
@@ -102,7 +103,7 @@
 #'   cause-specific hazard is modelled with the flexible parametric model.
 #'
 #' The background hazard can be supplied in two forms.  The meaning of predictions
-#' from the model depends on which of these is used. 
+#' from the model depends on which of these is used.
 #'
 #' (a) A data frame with columns \code{"hazard"} and \code{"time"}, specifying
 #' the "background" hazard at all times as a piecewise-constant (step) function.
@@ -186,7 +187,7 @@ survextrap <- function(formula,
                        coefs_mean = NULL,
                        cure = FALSE,
                        nonprop = FALSE,
-                       prior_loghaz = NULL,
+                       prior_loghaz = p_normal(0, 20),
                        prior_loghr = NULL,
                        prior_smooth = p_gamma(2,1),
                        prior_cure = p_beta(1,1),
@@ -372,14 +373,53 @@ survextrap <- function(formula,
     xcure <- list(xcure = xcure[covinfo_names])
     prior_keep <- list(priors=priors)
     prioretc_keep <- nlist(coefs_mean, smooth_sd)
+    prior_pred <- get_prior_pred(iknots=basehaz$iknots, bknots=basehaz$bknots, degree=basehaz$degree,
+                                 coefs_mean=coefs_mean, prior_smooth=prior_smooth,
+                                 prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
+                                 x=list(ncovs=ncovs, xnames=x$x$xnames),
+                                 nonprop=nonprop, prior_sdnp=prior_sdnp)
     res <- c(misc_keep, standata_keep, model_keep, spline_keep, x, xcure,
-             prior_keep, prioretc_keep, nlist(km))
+             prior_keep, prioretc_keep, nlist(prior_pred), nlist(km))
 
     class(res) <- "survextrap"
     if (loo) res$loo <- loo_survextrap(res, standata)
     res
 }
 
+## Construct functions to draw from the prior predictive distributions
+## for interesting quantities in a model specified with survextrap()
+
+get_prior_pred <- function(iknots, bknots, degree,
+                           coefs_mean, prior_smooth, prior_loghaz, prior_loghr,
+                           x, nonprop, prior_sdnp){
+  ## Hazard function
+  haz <- function(X, nsim=100){
+    prior_haz_sample(iknots=iknots, bknots=bknots, degree=degree,
+                     coefs_mean=coefs_mean, prior_smooth=prior_smooth,
+                     prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
+                     x=x, X=X, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                     nsim=nsim)
+  }
+  ## SD describing variation in hazard function with time
+  haz_sd <- function(X, tmin=0, tmax=10, nsim=100,
+                     quantiles = c(0.025, 0.5, 0.975)){
+    prior_haz_sd(iknots=iknots, bknots=bknots, degree=degree,
+                 coefs_mean=coefs_mean, prior_smooth=prior_smooth,
+                 prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
+                 x=x, X=X, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                 tmin=tmin, tmax=tmax, nsim=nsim, quantiles=quantiles)
+  }
+  ## SD describing variation in hazard ratio function with time
+  hr_sd <- function(X, X0, tmin=0, tmax=10, nsim=100,
+                    quantiles = c(0.025, 0.5, 0.975)){
+    prior_hr_sd(iknots=iknots, bknots=bknots, degree=degree,
+                coefs_mean=coefs_mean, prior_smooth=prior_smooth,
+                prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
+                x=x, X=X, X0=X0, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                tmin=tmin, tmax=tmax, nsim=nsim, quantiles=quantiles)
+  }
+  nlist(haz, haz_sd, hr_sd)
+}
 
 ## No centering is done here.  It assumes that any covariates are pre-centered
 ## around a meaningful value.   This corresponds to the intercept that the prior is placed on

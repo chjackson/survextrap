@@ -15,16 +15,16 @@ mspline_plotsetup(
 )
 }
 \arguments{
-\item{iknots}{Internal knots.  If not supplied, \code{df} has to be specified, in which case
+\item{iknots}{Vector of internal knot locations. If not supplied, \code{df} has to be specified, in which case
 the default is \code{df - degree - 1} equally spaced knots between the boundary knots.}
 
-\item{bknots}{Boundary knots.   Defaults to \code{c(0,10)}.}
+\item{bknots}{Vector with two elements, giving the boundary knot locations}
 
 \item{tmin}{Minimum plotting time.  Defaults to lower boundary knot.}
 
 \item{tmax}{Maximum plotting time.  Defaults to upper boundary knot.}
 
-\item{degree}{Spline polynomial degree.}
+\item{degree}{Spline polynomial degree (defaults to 3)}
 
 \item{df}{Desired number of basis terms, or "degrees of freedom" in the spline.
 If \code{iknots} is not supplied, the number of internal knots is then chosen to satisfy this.}

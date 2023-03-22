@@ -36,6 +36,7 @@ NULL
 p_normal <- function(location = 0, scale = 2.5) {
   validate_positive_parameter(scale)
   res <- nlist(dist = "normal", distid=1, location, scale, df=1)
+  res$r <- function(n)rnorm(n, mean=location, sd=scale)
   class(res) <- "prior"
   res
 }
@@ -46,6 +47,7 @@ p_t <- function(location = 0, scale = 2.5, df = 1) {
   validate_positive_parameter(scale)
   validate_positive_parameter(df)
   res <- nlist(dist = "t", distid=2, location, scale, df)
+  res$r <- function(n){rt(n, df=df)*scale + location}
   class(res) <- "prior"
   res
 }
@@ -56,6 +58,7 @@ p_beta <- function(shape1 = 1, shape2 = 1){
     validate_positive_parameter(shape1)
     validate_positive_parameter(shape2)
     res <- nlist(dist = "beta", shape1, shape2)
+    res$r <- function(n)rbeta(n, shape1=shape1, shape2=shape2)
     class(res) <- "prior"
     res
 }
@@ -66,6 +69,7 @@ p_gamma <- function(shape = 2, rate = 1){
     validate_positive_parameter(shape)
     validate_positive_parameter(rate)
     res <- nlist(dist = "gamma", shape, rate)
+    res$r <- function(n)rgamma(n, shape=shape, rate=rate)
     class(res) <- "prior"
     res
 }
@@ -88,13 +92,16 @@ validate_positive_parameter <- function(x) {
   invisible(TRUE)
 }
 
-
+get_prior_loghaz <- function(loghaz){
+  if (is.null(loghaz)) loghaz <- p_normal(0, 20) # currently unused: default set in function headers
+  else validate_prior(loghaz)
+  loghaz
+}
 
 get_priors <- function(loghaz, loghr, smooth, cure, logor_cure, x, xcure, est_smooth,
                        nonprop, prior_sdnp){
-  if (is.null(loghaz)) loghaz <- p_normal(0, 20)
-  else validate_prior(loghaz)
-  loghr <- get_prior_coveffs(loghr, x, "loghr") 
+  loghaz <- get_prior_loghaz(loghaz)
+  loghr <- get_prior_coveffs(loghr, x, "loghr")
   smooth <- get_prior_smooth(smooth, est_smooth)
   validate_prior(cure)
   logor_cure <- get_prior_coveffs(logor_cure, xcure, "logor_cure")
@@ -157,11 +164,12 @@ get_prior_coveffs <- function(prior, x, modelname){
     res <- data.frame(term=x$xnames, dist=dist, distid=distid,
                       location=location, scale=scale, df=df)
     rownames(res) <- NULL
+    attr(res, "r") <- lapply(prior_list,function(x)x[c("r")])
     res
 }
 
 ## Checks on priors specified as a list with one component per covariate
-## If supplied as a prior for a single component, replicate that into a list 
+## If supplied as a prior for a single component, replicate that into a list
 
 validate_prior_bycov <- function(prior, x, priorname){
   if (inherits(prior, "prior")){
@@ -196,4 +204,222 @@ get_prior_sdnp <- function(prior, x, nonprop){
   shapes <- sapply(prior_list, function(x)x$shape)
   rates <- sapply(prior_list, function(x)x$rate)
   cbind(shapes, rates)
+}
+
+prior_basehaz_sample <- function(iknots, bknots, degree=3,
+                                 coefs_mean = NULL,
+                                 prior_smooth = p_gamma(2,1), # no constants, as they are not allowed in the model
+                                 prior_loghaz,
+                                 nsim = 100){
+  ## process using common code to survextrap
+  loghaz_prior <- get_prior_loghaz(prior_loghaz)
+  smooth_prior <- get_prior_smooth(prior_smooth, est_smooth=TRUE)
+  loghaz <- loghaz_prior$r(nsim)
+  smooth <- smooth_prior$r(nsim)
+
+  coefs_mean <- default_coefs_mean(iknots, bknots, degree, coefs_mean)
+  lcoefs_mean <- log(coefs_mean[-1] / coefs_mean[1])
+  np <- length(lcoefs_mean) + 1
+  beta <- matrix(nrow=nsim, ncol=np)
+  beta[,1] <- 0
+  for (j in 2:np){
+    beta[,j] <- rlogis(nsim, lcoefs_mean[j-1], smooth)
+  }
+  coefs <- exp(beta) / rowSums(exp(beta))
+  nlist(loghaz, coefs, beta, smooth, haz=exp(loghaz))
+}
+
+##' Draw a sample from the prior distribution of the parameters
+##' governing the hazard in a survextrap model for given covariates.
+##'
+##' This is used, for example, in \code{\link{mspline_priorpred_df}} to visualise the
+##' prior distribution around hazard curves implied by a particular M-spline model
+##' and parameter priors.
+##'
+##' Cure and relative survival models are not currently handled.
+##'
+##' @aliases prior_haz_sample
+##'
+##' @inheritParams mspline_priorpred
+##' @inheritParams survextrap
+##'
+##' @return A list with components:
+##'
+##' `loghaz`: Baseline log scale parameter (`log(eta)` in the notation of the manual). For models with covariates, this is at the covariate values supplied in `X`, or at zero if `X` is not supplied.
+##'
+##' `haz`: Baseline scale parameter (`eta`).
+##'
+##' `coefs`: Spline coefficients. For non-proportional hazards model with covariates, these are returned at the suppled value of `X`, or at values of zero if `X` is not supplied. 
+##'
+##' `beta`: Multinomial logit-transformed spline coefficients.
+##'
+##' `smooth`: Smoothing standard deviation for spline coefficients.
+##'
+##' @name prior_sample
+prior_haz_sample <- function(iknots, bknots, degree=3,
+                             coefs_mean = NULL,
+                             prior_smooth = p_gamma(2,1),
+                             # no constants for the moment as they are not allowed in the model
+                             prior_loghaz,
+                             prior_loghr = NULL,
+                             x = NULL,
+                             X = NULL,
+                             nonprop = FALSE,
+                             prior_sdnp = p_gamma(2,1),
+                             nsim = 100){
+  sam <- prior_basehaz_sample(iknots=iknots, bknots=bknots, degree=degree,
+                              coefs_mean = coefs_mean, prior_smooth = prior_smooth,
+                              prior_loghaz = prior_loghaz, nsim=nsim)
+  validate_prior_x(x, X)
+
+  ## baseline HR
+  if (!is.null(x)){
+    loghr_prior <- get_prior_coveffs(prior_loghr, x, "loghr")
+    loghr <- lapply(attr(loghr_prior, "r"), function(x)x$r(nsim))
+    loghr <- do.call(cbind, loghr)
+    X <- unlist(X)
+    linpred <- loghr %*% X
+    sam$loghaz <- sam$loghaz + linpred
+    sam$haz <- exp(sam$loghaz)
+  }
+
+  ## nonprop SD
+  sdnp_prior <- get_prior_sdnp(prior_sdnp, x, nonprop)
+  if (nonprop && !is.null(x)) {
+    sdnp <- vector(x$ncovs, mode="list")
+    nvars <- ncol(sam$coefs) # number of spline basis terms
+    np_linpred <- matrix(0, nrow=nsim, ncol=nvars-1)
+    for (i in seq_len(x$ncovs)){
+      sdnp[[i]] <- rgamma(nsim, shape=sdnp_prior[i,1], rate=sdnp_prior[i,2])
+      b_np <- matrix(rnorm(nsim *(nvars - 1), 0, sdnp[[i]]), nrow=nsim, ncol=nvars-1)
+      np_linpred <- np_linpred + b_np * X[i]
+    }
+    np_linpred <- cbind(0, np_linpred)
+    sam$beta <- sam$beta + np_linpred # Can we do this?  Dims?
+    sam$coefs <- exp(sam$beta) / rowSums(exp(sam$beta))
+  } 
+
+  sam
+}
+
+
+validate_prior_x <- function(x, X){
+  if (is.null(x) && !is.null(X)) {
+    warning("Covariate values X supplied, but covariate model structure x not supplied. Ignoring covariates.")
+  }
+  else if (!is.null(x)){
+    if (is.null(X)) stop("Covariate model structure x supplied, but covariate values X not supplied")
+    if (!is.list(x) ||
+        (!("ncovs" %in% names(x))) || 
+        (!("xnames" %in% names(x))))
+      stop("x should be a list with names `ncovs` and `xnames`")
+    if (!is.numeric(x$ncovs)) stop("`x$ncovs` should be numeric")
+    if (!is.character(x$xnames)) stop("`x$xnames` should be character")
+    if (length(x$xnames) != x$ncovs) stop(sprintf("`x$xnames` is of length %s, but `x$ncovs` is %s",
+                                                  length(x$xnames), x$ncovs))
+  }
+}
+
+
+##' Compute consequences of priors chosen for a flexible hazard model in
+##' survextrap, in terms of a standard deviation measuring the
+##' variability over time of the hazard function or the hazard ratio
+##' function.
+##'
+##' The spline model in survextrap allows the hazard to change over time in an
+##' arbitrarily flexible manner.  The prior distributions on the parameters of
+##' this model have implications for how much we expect the hazard to plausibly
+##' vary over time.  These priors are hard to interpret directly, but this
+##' function can be used to compute their implications on a more
+##' easily-understandable scale.
+##'
+##' This is done by:
+##'
+##' (1) simulating a set of parameters from their prior distributions
+##'
+##' (2) computing the hazard at a fine grid of equally-spaced points spanning
+##' the boundary knots
+##'
+##' (3) calculating the empirical standard deviation of the set of hazards at
+##' these points
+##'
+##' (4) repeatedly performing steps 1-3, and summarising the distribution of the
+##' resulting standard deviations.   This is the implied prior for the hazard
+##' variability.
+##'
+##' `prior_haz_sd` computes the SD of the hazard, and the SD of the inverse hazard is also
+##' computed.   The inverse hazard at time t is the expected time to the event given survival to t.
+##'
+##' `prior_hr_sd` computes the SD of the hazard ratio between two covariate values
+##' supplied by the user.
+##'
+##' All of these SDs refer to the variability over time, e.g. a SD of 0 indicates that the
+##' hazard (or inverse hazard, or hazard ratio) is constant with time.
+##'
+##' @inheritParams mspline_args
+##' @inheritParams survextrap
+##' @inheritParams mspline_priorpred
+##'
+##' @param quantiles Quantiles used to summarise the prior predictive distribution
+##' of the standard deviation.
+##'
+##' @name prior_haz 
+##' @export
+prior_haz_sd <- function(iknots, bknots, degree=3,
+                         coefs_mean=NULL,
+                         prior_smooth=p_gamma(2,1),
+                         prior_loghaz = p_normal(0, 20),
+                         prior_loghr = NULL,
+                         x = NULL,
+                         X = NULL,
+                         nonprop = FALSE,
+                         prior_sdnp = p_gamma(2,1),
+                         tmin=0, tmax=10,
+                         nsim = 100,
+                         quantiles = c(0.025, 0.5, 0.975)){
+  pred <- mspline_priorpred_df(iknots=iknots, bknots=bknots, degree=degree,
+                               coefs_mean=coefs_mean, prior_smooth=prior_smooth,
+                               prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
+                               x=x, X=X, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                               tmin=tmin, tmax=tmax, 
+                               nsim=nsim)
+  pred$mean <- 1 / pred$haz
+  sd_haz <- tapply(pred$haz, pred$rep, sd)
+  sd_mean <- tapply(pred$mean, pred$rep, sd)
+  data.frame(sd_haz = quantile(sd_haz, quantiles),
+             sd_mean = quantile(sd_mean, quantiles))
+}
+
+##' @rdname prior_haz
+##' @export
+prior_hr_sd <- function(iknots, bknots, degree=3,
+                        coefs_mean=NULL,
+                        prior_smooth=p_gamma(2,1),
+                        prior_loghaz = p_normal(0, 20),
+                        prior_loghr = NULL,
+                        x = NULL,
+                        X = NULL,
+                        X0 = NULL,
+                        nonprop = FALSE,
+                        prior_sdnp = p_gamma(2,1),
+                        tmin=0, tmax=10,
+                        nsim = 100,
+                        quantiles = c(0.025, 0.5, 0.975)){
+  pred <- mspline_priorpred_df(iknots=iknots, bknots=bknots, degree=degree,
+                               coefs_mean=coefs_mean, prior_smooth=prior_smooth,
+                               prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
+                               x=x, X=X, X0=X0, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                               tmin=tmin, tmax=tmax, 
+                               nsim=nsim)
+  sd_hr <- tapply(pred$hr, pred$rep, sd)
+  data.frame(sd_hr = quantile(sd_hr, quantiles))
+}
+
+default_coefs_mean <- function(iknots, bknots, degree=3, coefs_mean=NULL, logit=FALSE){
+  if (is.null(coefs_mean)){
+    coefs_mean <- mspline_uniform_weights(iknots = iknots, bknots=bknots, degree=degree, logit=logit)
+  } else {
+    coefs_mean <- validate_coefs_mean(coefs_mean)
+  }
+  coefs_mean
 }

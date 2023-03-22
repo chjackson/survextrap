@@ -1,3 +1,26 @@
+##' Documentation for common M-spline arguments
+##'
+##' @name mspline_args
+##'
+##' @param iknots Vector of internal knot locations. If not supplied, \code{df} has to be specified, in which case
+#' the default is \code{df - degree - 1} equally spaced knots between the boundary knots.
+##' @param bknots Vector with two elements, giving the boundary knot locations
+##' @param degree Spline polynomial degree (defaults to 3)
+##' @param df Desired number of basis terms, or "degrees of freedom" in the spline.
+##' If \code{iknots} is not supplied, the number of internal knots is then chosen to satisfy this.
+##'
+NULL
+
+mspline_default_iknots <- function(iknots, bknots, degree, df){
+    if (is.null(iknots)) {
+        nik <- df - degree  - 1
+        iknots <- seq(bknots[1], bknots[2], length.out=nik+2)[-c(1,nik+2)]
+    }
+    validate_knots(iknots, name="iknots")
+    iknots
+}
+
+
 ##' M-spline survival distribution
 ##'
 ##' Probability density, distribution, quantile, random generation, hazard,
