@@ -11,7 +11,7 @@
 ##' @export
 print.survextrap <- function(x, ...){
   cat("M-spline survival model\n")
-  cat(sprintf("%s knots, degree %s, %s basis terms.\n", length(x$basehaz$knots), x$basehaz$degree, x$basehaz$nvars))
+  cat(sprintf("%s knots, degree %s, %s basis terms.\n", length(x$mspline$knots), x$mspline$degree, x$mspline$nvars))
   cat(sprintf("Smoothness SD: %s\n", if(x$est_smooth) "full Bayes" else round(x$smooth_sd, 2)))
 
   print_priors(x)
@@ -29,9 +29,14 @@ form_prior_str <- function(prior){
     sprintf("%s(%s)", prior$dist, parstr)
 }
 
+##' Print the priors used in a fitted survextrap model
+##'
+##' @inheritParams print.survextrap
+##'
+##' @export
 print_priors <- function(x){
     cat("Priors:\n")
-    cat(sprintf("  Baseline log hazard: %s\n", form_prior_str(x$priors$loghaz)))
+    cat(sprintf("  Baseline log hazard scale: %s\n", form_prior_str(x$priors$loghaz)))
     if (x$ncovs > 0){
         cat("  Log hazard ratios:\n")
         for (i in 1:x$ncovs){

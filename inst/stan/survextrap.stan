@@ -250,6 +250,16 @@ transformed parameters {
 		coefs_extern[i,1:nvars] = to_row_vector(coefs);
 	    }
 	}
+	// these values are unused in the PH model but they still need to be defined
+	for (j in 1:nvars) {
+	    b_event[1:nevent,j] = rep_vector(0,nevent);
+	    b_rcens[1:nrcens,j] = rep_vector(0,nrcens);
+	    b_extern[1:nextern,j] = rep_vector(0,nextern);
+	}
+	for (j in 1:(nvars-1)){
+	    b_np[1:ncovs,j] = rep_vector(0,ncovs);
+	}
+	ssd = 0;
     }
 }
 

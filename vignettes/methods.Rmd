@@ -49,7 +49,8 @@ with
 library(survextrap)
 library(ggplot2)
 p_naive <- rep(1/13, 13)
-p_const <- mspline_uniform_weights(iknots=1:9, bknots=c(0,10))
+mspline <- list(iknots=1:9, bknots=c(0,10), degree=3)
+p_const <- mspline_constant_weights(mspline)
 haz_unif <- mspline_plotdata(df=13, scale=10, coefs = p_const)
 plot_mspline(df=13, scale=10, coefs = p_naive, tmax=10) + 
     geom_line(aes(x=time, y=haz), data=haz_unif, color="red", lwd=1.5, inherit.aes = FALSE) + 
@@ -114,7 +115,7 @@ The default approach taken by `survextrap` is to choose a large number of knots 
 This is a smoother, Bayesian analogue of the common approach to spline model selection based on choosing $K$ to give the model with the lowest AIC.  It also similar in principle to the "penalised likelihood" methods implemented in e.g. the `mgcv` and `rstpm2` packages.
 
 
-# Prior distribution for the hazard curve
+# Prior distribution for the hazard curve {#priorhaz}
 
 A log-normal prior is used for the scale $\eta$.   The default in the package is set to normal(0, 20) - but this can be changed by the user. 
 
@@ -124,7 +125,7 @@ A multinomial logistic distribution defines the prior for the coefficients $p_k$
 
 (b) **Prior variability**: $\sigma$ controls the smoothness of the fitted hazard curve.
 
-    * If $\sigma=0$, then we are certain that the hazard function is the one defined by $\boldsymbol{\mu}$.
+    * If $\sigma=0$, then we are certain that the hazard function (before being scaled by $\eta$) is the one defined by $\boldsymbol{\mu}$.  By default this is a constant hazard.
 
     * Values of $\sigma$ around 1 favour wiggly curves, such that the fitted hazard curve is driven mainly by the the observed data. 
 
@@ -137,7 +138,8 @@ two choices of the joint prior distribution for $\eta$ and $p$.  In both, $\eta$
 
 ```{r,fig.height=3,class.source = 'fold-hide'}
 iknots <- c(1:9); bknots <- c(0,10)
-p_mean <- mspline_uniform_weights(iknots, bknots)
+mspline <- list(iknots=iknots, bknots=bknots)
+p_mean <- mspline_constant_weights(mspline)
 set.seed(1)
 p1 <- plot_mspline_priorpred(iknots=iknots, bknots=bknots, tmax=max(bknots)+1, 
                               coefs_mean = p_mean,

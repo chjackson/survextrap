@@ -24,7 +24,7 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
     newdata <- default_newdata(x, newdata)
     haz <- hazard(x, newdata=newdata, times=times, tmax=tmax, niter=niter,
                   newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt)
-    knots <- x$basehaz$knots[x$basehaz$knots <= max(haz$times)]
+    knots <- x$mspline$knots[x$mspline$knots <= max(haz$times)]
     aes_list <- list(x=sym("times"), y=sym("median"))
     if (attr(haz, "nvals") > 1)
         aes_list <- c(aes_list, list(col = sym(names(newdata)), group = sym(names(newdata))))
@@ -68,7 +68,7 @@ plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter
     newdata <- default_newdata(x, newdata)
     surv <- survival(x, newdata=newdata, times=times, tmax=tmax, niter=niter,
                      newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt)
-    knots <- x$basehaz$knots[x$basehaz$knots <= max(surv$times)]
+    knots <- x$mspline$knots[x$mspline$knots <= max(surv$times)]
     aes_list <- list(x=sym("times"), y=sym("median"))
     if (attr(surv,"nvals") > 1)
         aes_list <- c(aes_list, list(col = sym(names(newdata)), group = sym(names(newdata))))
@@ -110,7 +110,7 @@ one_factor_cov <- function(x){
 
 default_plottimes <- function(x, tmax=NULL, nplot=100){
     tmin <- 0
-    if (is.null(tmax)) tmax <- x$basehaz$bknots["upper"]
+    if (is.null(tmax)) tmax <- x$mspline$bknots["upper"]
     times <- seq(tmin, tmax, by = (tmax - tmin) / nplot)
 }
 
@@ -154,7 +154,7 @@ plot_hazard_ratio <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL
                               line_size=1.5, ci_alpha=0.2){
     lower <- upper <- NULL
     hr <- hazard_ratio(x, newdata=newdata, times=times, tmax=tmax, niter=niter)
-    knots <- x$basehaz$knots[x$basehaz$knots <= max(hr$times)]
+    knots <- x$mspline$knots[x$mspline$knots <= max(hr$times)]
     aes_list <- list(x=sym("times"), y=sym("median"))
     geom_ylab <- ggplot2::ylab(ylab)
     geom_xlab <- ggplot2::xlab(xlab)

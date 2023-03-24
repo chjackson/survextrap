@@ -2,11 +2,10 @@
 % Please edit documentation in R/mspline_plots.R
 \name{mspline_priorpred}
 \alias{mspline_priorpred}
-\alias{mspline_priorpred_df}
 \alias{plot_mspline_priorpred}
 \title{Generate and/or plot a sample from the prior distribution of M-spline hazard curves}
 \usage{
-mspline_priorpred_df(
+mspline_priorpred(
   iknots = NULL,
   bknots = c(0, 10),
   df = 10,
@@ -91,10 +90,10 @@ and \code{xnames} (names of these covariates).}
 
 \item{X}{Either a list, vector or one-row matrix with one covariate value.
 Factors must be supplied as multiple numeric (0/1) contrasts. (TODO doc on how to build
-the names)}
+the names - vignette)}
 
 \item{X0}{An alternative covariate value (optional).  The hazard ratio between the hazards at X
-and X0 will be returned.}
+and X0 will also be returned.}
 
 \item{nonprop}{Is the model a non-proportional hazards model (\code{TRUE} or \code{FALSE}).}
 
@@ -109,7 +108,7 @@ or a list of calls to \code{p_gamma()} with one component per covariate, as in \
 \item{nsim}{Number of simulations to draw}
 }
 \value{
-\code{mspline_priorpred_df} returns a data frame of the samples, and
+\code{mspline_priorpred} returns a data frame of the samples, and
 \code{plot_mspline_priorpred} generates a plot.
 }
 \description{

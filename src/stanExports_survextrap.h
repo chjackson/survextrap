@@ -33,7 +33,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_survextrap");
-    reader.add_event(343, 341, "end", "model_survextrap");
+    reader.add_event(353, 351, "end", "model_survextrap");
     return reader;
 }
 template <typename T0__, typename T1__, typename T2__>
@@ -1443,6 +1443,34 @@ public:
                                     "assigning variable coefs_extern");
                     }
                 }
+                current_statement_begin__ = 254;
+                for (int j = 1; j <= nvars; ++j) {
+                    current_statement_begin__ = 255;
+                    stan::model::assign(b_event, 
+                                stan::model::cons_list(stan::model::index_min_max(1, nevent), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                rep_vector(0, nevent), 
+                                "assigning variable b_event");
+                    current_statement_begin__ = 256;
+                    stan::model::assign(b_rcens, 
+                                stan::model::cons_list(stan::model::index_min_max(1, nrcens), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                rep_vector(0, nrcens), 
+                                "assigning variable b_rcens");
+                    current_statement_begin__ = 257;
+                    stan::model::assign(b_extern, 
+                                stan::model::cons_list(stan::model::index_min_max(1, nextern), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                rep_vector(0, nextern), 
+                                "assigning variable b_extern");
+                }
+                current_statement_begin__ = 259;
+                for (int j = 1; j <= (nvars - 1); ++j) {
+                    current_statement_begin__ = 260;
+                    stan::model::assign(b_np, 
+                                stan::model::cons_list(stan::model::index_min_max(1, ncovs), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                rep_vector(0, ncovs), 
+                                "assigning variable b_np");
+                }
+                current_statement_begin__ = 262;
+                stan::math::assign(ssd, 0);
             }
             // validate transformed parameters
             const char* function__ = "validate transformed params";
@@ -1557,168 +1585,168 @@ public:
             }
             // model body
             {
-            current_statement_begin__ = 257;
+            current_statement_begin__ = 267;
             validate_non_negative_index("alpha_event", "nevent", nevent);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> alpha_event(nevent);
             stan::math::initialize(alpha_event, DUMMY_VAR__);
             stan::math::fill(alpha_event, DUMMY_VAR__);
-            current_statement_begin__ = 258;
+            current_statement_begin__ = 268;
             validate_non_negative_index("alpha_rcens", "nrcens", nrcens);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> alpha_rcens(nrcens);
             stan::math::initialize(alpha_rcens, DUMMY_VAR__);
             stan::math::fill(alpha_rcens, DUMMY_VAR__);
-            current_statement_begin__ = 259;
+            current_statement_begin__ = 269;
             validate_non_negative_index("alpha_extern", "nextern", nextern);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> alpha_extern(nextern);
             stan::math::initialize(alpha_extern, DUMMY_VAR__);
             stan::math::fill(alpha_extern, DUMMY_VAR__);
-            current_statement_begin__ = 260;
+            current_statement_begin__ = 270;
             local_scalar_t__ dummy(DUMMY_VAR__);
             (void) dummy;  // dummy to suppress unused var warning
             stan::math::initialize(dummy, DUMMY_VAR__);
             stan::math::fill(dummy, DUMMY_VAR__);
-            current_statement_begin__ = 261;
+            current_statement_begin__ = 271;
             local_scalar_t__ cp(DUMMY_VAR__);
             (void) cp;  // dummy to suppress unused var warning
             stan::math::initialize(cp, DUMMY_VAR__);
             stan::math::fill(cp, DUMMY_VAR__);
-            current_statement_begin__ = 262;
+            current_statement_begin__ = 272;
             validate_non_negative_index("p_ext_stop", "nextern", nextern);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> p_ext_stop(nextern);
             stan::math::initialize(p_ext_stop, DUMMY_VAR__);
             stan::math::fill(p_ext_stop, DUMMY_VAR__);
-            current_statement_begin__ = 263;
+            current_statement_begin__ = 273;
             validate_non_negative_index("p_ext_start", "nextern", nextern);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> p_ext_start(nextern);
             stan::math::initialize(p_ext_start, DUMMY_VAR__);
             stan::math::fill(p_ext_start, DUMMY_VAR__);
-            current_statement_begin__ = 264;
+            current_statement_begin__ = 274;
             validate_non_negative_index("pcure_event", "nevent", nevent);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> pcure_event(nevent);
             stan::math::initialize(pcure_event, DUMMY_VAR__);
             stan::math::fill(pcure_event, DUMMY_VAR__);
-            current_statement_begin__ = 265;
+            current_statement_begin__ = 275;
             validate_non_negative_index("pcure_rcens", "nrcens", nrcens);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> pcure_rcens(nrcens);
             stan::math::initialize(pcure_rcens, DUMMY_VAR__);
             stan::math::fill(pcure_rcens, DUMMY_VAR__);
-            current_statement_begin__ = 266;
+            current_statement_begin__ = 276;
             validate_non_negative_index("pcure_extern", "nextern", nextern);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> pcure_extern(nextern);
             stan::math::initialize(pcure_extern, DUMMY_VAR__);
             stan::math::fill(pcure_extern, DUMMY_VAR__);
-            current_statement_begin__ = 268;
+            current_statement_begin__ = 278;
             if (as_bool(logical_gt(nevent, 0))) {
-                current_statement_begin__ = 268;
+                current_statement_begin__ = 278;
                 stan::math::assign(alpha_event, rep_vector((get_base1(prior_loghaz, 1, "prior_loghaz", 1) + get_base1(gamma, 1, "gamma", 1)), nevent));
             }
-            current_statement_begin__ = 269;
+            current_statement_begin__ = 279;
             if (as_bool(logical_gt(nrcens, 0))) {
-                current_statement_begin__ = 269;
+                current_statement_begin__ = 279;
                 stan::math::assign(alpha_rcens, rep_vector((get_base1(prior_loghaz, 1, "prior_loghaz", 1) + get_base1(gamma, 1, "gamma", 1)), nrcens));
             }
-            current_statement_begin__ = 270;
+            current_statement_begin__ = 280;
             if (as_bool(logical_gt(nextern, 0))) {
-                current_statement_begin__ = 270;
+                current_statement_begin__ = 280;
                 stan::math::assign(alpha_extern, rep_vector((get_base1(prior_loghaz, 1, "prior_loghaz", 1) + get_base1(gamma, 1, "gamma", 1)), nextern));
             }
-            current_statement_begin__ = 272;
+            current_statement_begin__ = 282;
             if (as_bool(logical_gt(ncovs, 0))) {
-                current_statement_begin__ = 274;
+                current_statement_begin__ = 284;
                 if (as_bool(logical_gt(nevent, 0))) {
-                    current_statement_begin__ = 274;
+                    current_statement_begin__ = 284;
                     stan::math::assign(alpha_event, add(alpha_event, multiply(x_event, loghr)));
                 }
-                current_statement_begin__ = 275;
+                current_statement_begin__ = 285;
                 if (as_bool(logical_gt(nrcens, 0))) {
-                    current_statement_begin__ = 275;
+                    current_statement_begin__ = 285;
                     stan::math::assign(alpha_rcens, add(alpha_rcens, multiply(x_rcens, loghr)));
                 }
-                current_statement_begin__ = 276;
+                current_statement_begin__ = 286;
                 if (as_bool(logical_gt(nextern, 0))) {
-                    current_statement_begin__ = 276;
+                    current_statement_begin__ = 286;
                     stan::math::assign(alpha_extern, add(alpha_extern, multiply(x_ext, loghr)));
                 }
             }
-            current_statement_begin__ = 279;
+            current_statement_begin__ = 289;
             if (as_bool(cure)) {
-                current_statement_begin__ = 279;
+                current_statement_begin__ = 289;
                 stan::math::assign(cp, get_base1(pcure, 1, "pcure", 1));
             } else {
-                current_statement_begin__ = 279;
+                current_statement_begin__ = 289;
                 stan::math::assign(cp, 0);
             }
-            current_statement_begin__ = 280;
+            current_statement_begin__ = 290;
             stan::math::assign(pcure_event, rep_vector(cp, nevent));
-            current_statement_begin__ = 281;
+            current_statement_begin__ = 291;
             stan::math::assign(pcure_rcens, rep_vector(cp, nrcens));
-            current_statement_begin__ = 282;
+            current_statement_begin__ = 292;
             stan::math::assign(pcure_extern, rep_vector(cp, nextern));
-            current_statement_begin__ = 284;
+            current_statement_begin__ = 294;
             if (as_bool(logical_gt(ncurecovs, 0))) {
-                current_statement_begin__ = 285;
+                current_statement_begin__ = 295;
                 if (as_bool(logical_gt(nevent, 0))) {
-                    current_statement_begin__ = 285;
+                    current_statement_begin__ = 295;
                     stan::math::assign(pcure_event, inv_logit(add(logit(pcure_event), multiply(xcure_event, logor_cure))));
                 }
-                current_statement_begin__ = 286;
+                current_statement_begin__ = 296;
                 if (as_bool(logical_gt(nrcens, 0))) {
-                    current_statement_begin__ = 286;
+                    current_statement_begin__ = 296;
                     stan::math::assign(pcure_rcens, inv_logit(add(logit(pcure_rcens), multiply(xcure_rcens, logor_cure))));
                 }
-                current_statement_begin__ = 287;
+                current_statement_begin__ = 297;
                 if (as_bool(logical_gt(nextern, 0))) {
-                    current_statement_begin__ = 287;
+                    current_statement_begin__ = 297;
                     stan::math::assign(pcure_extern, inv_logit(add(logit(pcure_extern), multiply(xcure_ext, logor_cure))));
                 }
             }
-            current_statement_begin__ = 290;
+            current_statement_begin__ = 300;
             if (as_bool(logical_gt(nevent, 0))) {
-                current_statement_begin__ = 290;
+                current_statement_begin__ = 300;
                 lp_accum__.add(log_dens(alpha_event, basis_event, coefs_event, cure, pcure_event, ibasis_event, modelid, relative, backhaz_event, pstream__));
             }
-            current_statement_begin__ = 292;
+            current_statement_begin__ = 302;
             if (as_bool(logical_gt(nrcens, 0))) {
-                current_statement_begin__ = 292;
+                current_statement_begin__ = 302;
                 lp_accum__.add(log_surv(alpha_rcens, ibasis_rcens, coefs_rcens, cure, pcure_rcens, modelid, pstream__));
             }
-            current_statement_begin__ = 295;
+            current_statement_begin__ = 305;
             if (as_bool(logical_gt(nextern, 0))) {
-                current_statement_begin__ = 296;
+                current_statement_begin__ = 306;
                 stan::math::assign(p_ext_stop, stan::math::exp(elt_multiply(log_surv(alpha_extern, ibasis_ext_stop, coefs_extern, cure, pcure_extern, modelid, pstream__), backsurv_ext_stop)));
-                current_statement_begin__ = 298;
+                current_statement_begin__ = 308;
                 stan::math::assign(p_ext_start, stan::math::exp(elt_multiply(log_surv(alpha_extern, ibasis_ext_start, coefs_extern, cure, pcure_extern, modelid, pstream__), backsurv_ext_start)));
-                current_statement_begin__ = 300;
+                current_statement_begin__ = 310;
                 lp_accum__.add(binomial_log(r_ext, n_ext, elt_divide(p_ext_stop, p_ext_start)));
             }
-            current_statement_begin__ = 304;
+            current_statement_begin__ = 314;
             stan::math::assign(dummy, loghaz_lp(get_base1(gamma, 1, "gamma", 1), prior_loghaz_dist, 0, get_base1(prior_loghaz, 2, "prior_loghaz", 1), get_base1(prior_loghaz, 3, "prior_loghaz", 1), lp__, lp_accum__, pstream__));
-            current_statement_begin__ = 308;
+            current_statement_begin__ = 318;
             stan::math::assign(dummy, loghr_lp(loghr, prior_loghr_dist, prior_loghr_location, prior_loghr_scale, prior_loghr_df, lp__, lp_accum__, pstream__));
-            current_statement_begin__ = 312;
+            current_statement_begin__ = 322;
             lp_accum__.add(logistic_log<propto__>(b_err, 0, 1));
-            current_statement_begin__ = 315;
+            current_statement_begin__ = 325;
             if (as_bool(cure)) {
-                current_statement_begin__ = 316;
+                current_statement_begin__ = 326;
                 lp_accum__.add(beta_log<propto__>(pcure, get_base1(prior_cure, 1, "prior_cure", 1), get_base1(prior_cure, 2, "prior_cure", 1)));
             }
-            current_statement_begin__ = 318;
+            current_statement_begin__ = 328;
             if (as_bool(logical_gt(ncurecovs, 0))) {
-                current_statement_begin__ = 320;
+                current_statement_begin__ = 330;
                 stan::math::assign(dummy, loghr_lp(logor_cure, prior_logor_cure_dist, prior_logor_cure_location, prior_logor_cure_scale, prior_logor_cure_df, lp__, lp_accum__, pstream__));
             }
-            current_statement_begin__ = 324;
+            current_statement_begin__ = 334;
             if (as_bool(est_smooth)) {
-                current_statement_begin__ = 325;
+                current_statement_begin__ = 335;
                 lp_accum__.add(gamma_log<propto__>(smooth_sd, get_base1(prior_smooth, 1, "prior_smooth", 1), get_base1(prior_smooth, 2, "prior_smooth", 1)));
             }
-            current_statement_begin__ = 329;
+            current_statement_begin__ = 339;
             if (as_bool(nonprop)) {
-                current_statement_begin__ = 330;
+                current_statement_begin__ = 340;
                 lp_accum__.add(gamma_log<propto__>(sd_np, stan::model::rvalue(prior_sdnp, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), "prior_sdnp"), stan::model::rvalue(prior_sdnp, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())), "prior_sdnp")));
-                current_statement_begin__ = 331;
+                current_statement_begin__ = 341;
                 for (int i = 1; i <= ncovs; ++i) {
-                    current_statement_begin__ = 332;
+                    current_statement_begin__ = 342;
                     lp_accum__.add(std_normal_log<propto__>(stan::model::rvalue(nperr, stan::model::cons_list(stan::model::index_uni(i), stan::model::cons_list(stan::model::index_min_max(1, (nvars - 1)), stan::model::nil_index_list())), "nperr")));
                 }
             }
@@ -2104,6 +2132,34 @@ public:
                                     "assigning variable coefs_extern");
                     }
                 }
+                current_statement_begin__ = 254;
+                for (int j = 1; j <= nvars; ++j) {
+                    current_statement_begin__ = 255;
+                    stan::model::assign(b_event, 
+                                stan::model::cons_list(stan::model::index_min_max(1, nevent), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                rep_vector(0, nevent), 
+                                "assigning variable b_event");
+                    current_statement_begin__ = 256;
+                    stan::model::assign(b_rcens, 
+                                stan::model::cons_list(stan::model::index_min_max(1, nrcens), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                rep_vector(0, nrcens), 
+                                "assigning variable b_rcens");
+                    current_statement_begin__ = 257;
+                    stan::model::assign(b_extern, 
+                                stan::model::cons_list(stan::model::index_min_max(1, nextern), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                rep_vector(0, nextern), 
+                                "assigning variable b_extern");
+                }
+                current_statement_begin__ = 259;
+                for (int j = 1; j <= (nvars - 1); ++j) {
+                    current_statement_begin__ = 260;
+                    stan::model::assign(b_np, 
+                                stan::model::cons_list(stan::model::index_min_max(1, ncovs), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                rep_vector(0, ncovs), 
+                                "assigning variable b_np");
+                }
+                current_statement_begin__ = 262;
+                stan::math::assign(ssd, 0);
             }
             if (!include_gqs__ && !include_tparams__) return;
             // validate transformed parameters
@@ -2172,33 +2228,33 @@ public:
             }
             if (!include_gqs__) return;
             // declare and define generated quantities
-            current_statement_begin__ = 338;
+            current_statement_begin__ = 348;
             double alpha;
             (void) alpha;  // dummy to suppress unused var warning
             stan::math::initialize(alpha, DUMMY_VAR__);
             stan::math::fill(alpha, DUMMY_VAR__);
             stan::math::assign(alpha,(get_base1(prior_loghaz, 1, "prior_loghaz", 1) + get_base1(gamma, 1, "gamma", 1)));
-            current_statement_begin__ = 339;
+            current_statement_begin__ = 349;
             validate_non_negative_index("hr", "ncovs", ncovs);
             Eigen::Matrix<double, Eigen::Dynamic, 1> hr(ncovs);
             stan::math::initialize(hr, DUMMY_VAR__);
             stan::math::fill(hr, DUMMY_VAR__);
             stan::math::assign(hr,stan::math::exp(loghr));
-            current_statement_begin__ = 340;
+            current_statement_begin__ = 350;
             validate_non_negative_index("or_cure", "ncurecovs", ncurecovs);
             Eigen::Matrix<double, Eigen::Dynamic, 1> or_cure(ncurecovs);
             stan::math::initialize(or_cure, DUMMY_VAR__);
             stan::math::fill(or_cure, DUMMY_VAR__);
             stan::math::assign(or_cure,stan::math::exp(logor_cure));
             // validate, write generated quantities
-            current_statement_begin__ = 338;
+            current_statement_begin__ = 348;
             vars__.push_back(alpha);
-            current_statement_begin__ = 339;
+            current_statement_begin__ = 349;
             size_t hr_j_1_max__ = ncovs;
             for (size_t j_1__ = 0; j_1__ < hr_j_1_max__; ++j_1__) {
                 vars__.push_back(hr(j_1__));
             }
-            current_statement_begin__ = 340;
+            current_statement_begin__ = 350;
             size_t or_cure_j_1_max__ = ncurecovs;
             for (size_t j_1__ = 0; j_1__ < or_cure_j_1_max__; ++j_1__) {
                 vars__.push_back(or_cure(j_1__));

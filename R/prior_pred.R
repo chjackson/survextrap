@@ -32,7 +32,7 @@ prior_pred <- function(n, censtime=Inf,
                        iknots, bknots, degree=3){
   nsim <- 1
   if (is.null(lcoef_mean))
-    lcoef_mean <- mspline_uniform_weights(iknots, bknots, logit=TRUE)
+    lcoef_mean <- mspline_constant_weights(iknots, bknots, logit=TRUE)
   np <- length(lcoef_mean) + 1
   beta <- matrix(nrow=nsim, ncol=np)
   beta[,1] <- 0

@@ -11,13 +11,25 @@
 ##'
 NULL
 
-mspline_default_iknots <- function(iknots, bknots, degree, df){
+mspline_default_iknots <- function(iknots=NULL, bknots, degree, df){
     if (is.null(iknots)) {
         nik <- df - degree  - 1
         iknots <- seq(bknots[1], bknots[2], length.out=nik+2)[-c(1,nik+2)]
     }
     validate_knots(iknots, name="iknots")
     iknots
+}
+
+mspline_default <- function(mspline){
+  if (!is.list(mspline)) stop("`mspline` should be a list")
+  validate_knots(mspline$bknots, name="bknots")
+  if (is.null(mspline$degree)) mspline$degree <- 3
+  if (is.null(mspline$iknots)){
+    if (!is.null(mspline$df)) {
+      mspline$iknots <- mspline_default_iknots(bknots=mspline$bknots, degree=mspline$degree, df=mspline$df)
+    }
+  }
+  mspline
 }
 
 
@@ -444,24 +456,22 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL
 ##' It is used in \code{\link{survextrap}} to choose the default prior mean
 ##' for the hazard function.
 ##'
-##' @param iknots Internal knots.
-##'
-##' @param bknots Boundary knots.
+##' @param mspline A list with components `iknots` (vector of internal knots), `bknots` (vector of boundary knots)
+##' and `degree` (polynomial degree) defining an M-spline configuration. 
 ##'
 ##' @param times Times to use to construct the numerical calculation.
 ##' By default, this is 20 equally-spaced times between the boundary knots.
-##'
-##' @param degree Spline polynomial degree.
 ##'
 ##' @param logit If \code{TRUE} then the multinomial logit transform of the coefficients
 ##' is returned.  This is a vector of length one less than the number of coefficients,
 ##' with the rth element defined by \eqn{log(coefs[r+1] / coefs[1])}.
 ##'
 ##' @export
-mspline_uniform_weights <- function(iknots, bknots, times=NULL, degree=3, logit=FALSE){
-    if (is.null(times)) times <- seq(bknots[1], bknots[2], length.out=20)
-    basis <- splines2::mSpline(times, knots = iknots, Boundary.knots = bknots,
-                               degree = degree, intercept = TRUE)
+mspline_constant_weights <- function(mspline, times=NULL, logit=FALSE){
+    if (is.null(times)) times <- seq(mspline$bknots[1], mspline$bknots[2], length.out=20)
+    mspline <- mspline_default(mspline)
+    basis <- splines2::mSpline(times, knots = mspline$iknots, Boundary.knots = mspline$bknots,
+                               degree = mspline$degree, intercept = TRUE)
     nvars <- ncol(basis)
     varloghaz <- function(logp){
         p <- exp(logp)

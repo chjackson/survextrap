@@ -19,7 +19,7 @@ survextrap(
   prior_logor_cure = NULL,
   prior_sdnp = p_gamma(2, 1),
   backhaz = NULL,
-  basehaz_ops = NULL,
+  mspline = NULL,
   fit_method = "mcmc",
   loo = (fit_method == "mcmc"),
   ...
@@ -145,7 +145,7 @@ in columns of the external data named \code{"backsurv_start"} and
 Leave-one-out cross-validation currently does not take into account any
 background hazard (effectively assuming it to be zero).}
 
-\item{basehaz_ops}{A list of control parameters defining the spline model.
+\item{mspline}{A list of control parameters defining the spline model.
 
 \code{iknots}: Internal knots.  If this is not supplied, then the number of
 knots is taken from \code{df}, and their location is taken from equally-spaced

@@ -87,14 +87,14 @@ rmst <- function(x, t, newdata=NULL, newdata0=NULL, wane_period=NULL, wane_nt=10
         for (i in 1:nt){
           if (is.null(newdata0))
             resmat[,i] <- rmst_survmspline(t[i], pars$alpha_user[,j], pars$coefs[,j,],
-                                           x$basehaz$knots, x$basehaz$degree,
+                                           x$mspline$knots, x$mspline$degree,
                                            pcure = pars$cureprob_user, backhaz = x$backhaz)
           else
             resmat[,i] <- rmst_survmspline_wane(t[i],
                                                 alpha1 = pars$alpha_user[,j],
                                                 alpha0 = pars0$alpha_user[,j],
                                                 coefs = pars$coefs[,j,],
-                                                knots = x$basehaz$knots, degree = x$basehaz$degree,
+                                                knots = x$mspline$knots, degree = x$mspline$degree,
                                                 pcure = pars$cureprob_user, backhaz = x$backhaz,
                                                 wane_period=wane_period, wane_nt=wane_nt)
         }
@@ -157,6 +157,16 @@ get_cureprob_bycovs <- function(x, stanmat, newdata=NULL){
 ## Include intercepts at covariate values of zero, as well as at baseline
 ## (mean for continuous variables and reference levels for factors)
 
+
+
+##' Posterior draws from a survextrap model
+##'
+##' Return the matrix of draws from the posterior distribution of parameters in a survextrap model,
+##' with all chains collapsed. 
+##'
+##' @inheritParams mean.survextrap
+##'
+##' @export
 get_draws <- function(x){
     if (x$fit_method %in% c("mcmc","vb"))
         fit <- x$stanfit
@@ -341,25 +351,25 @@ timedep_output <- function(x, output="survival", newdata=NULL, times=NULL, tmax=
 }
 
 survival_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
-  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$mspline$nvars))
   surv_sam <- psurvmspline(times_arr, alpha_user_arr, coefs_mat,
-                           x$basehaz$knots, x$basehaz$degree, lower.tail=FALSE,
+                           x$mspline$knots, x$mspline$degree, lower.tail=FALSE,
                            pcure=cureprob_arr, backhaz=x$backhaz)
   surv_sam
 }
 
 hazard_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
-  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$mspline$nvars))
   haz_sam <- hsurvmspline(times_arr, alpha_user_arr, coefs_mat,
-                          x$basehaz$knots, x$basehaz$degree,
+                          x$mspline$knots, x$mspline$degree,
                           pcure=cureprob_arr, backhaz=x$backhaz)
   haz_sam
 }
 
 cumhaz_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
-  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$mspline$nvars))
   cumhaz_sam <- Hsurvmspline(times_arr, alpha_user_arr, coefs_mat,
-                             x$basehaz$knots, x$basehaz$degree,
+                             x$mspline$knots, x$mspline$degree,
                              pcure=cureprob_arr, backhaz=x$backhaz)
   cumhaz_sam
 }
@@ -368,7 +378,7 @@ deconstruct_mspline <- function(x, scale=1, tmax=NULL){
   sm <- summary(x)
   cf <- sm[sm$variable=="coefs", ]$median
   scale <- exp(sm[sm$variable=="alpha", ]$median)
-  bh <- x$basehaz
+  bh <- x$mspline
   mspline_plotdata(bh$iknots, bh$bknots, bh$df, bh$degree, cf, scale=10, tmax=tmax)
 }
 
@@ -385,7 +395,7 @@ get_coefs_bycovs <- function(x, stanmat, newdata=NULL, X=NULL){
 
   if (x$nonprop){
     b_np_names <- grep("b_np", colnames(stanmat), value=TRUE)
-    nvars <- x$basehaz$nvars
+    nvars <- x$mspline$nvars
     b_np <- array(stanmat[,b_np_names], dim=c(niter, x$ncovs, nvars-1))
 
     b_mean <- log(x$coefs_mean[-1] / x$coefs_mean[1])
@@ -410,4 +420,36 @@ get_coefs_bycovs <- function(x, stanmat, newdata=NULL, X=NULL){
     coefs <- array(coefs, dim=c(niter, 1, x$nvars))[,rep(1,nvals),,drop=FALSE]
   }
   coefs
+}
+
+##' Hazard ratio between high and low values of the hazard over time 
+##'
+##' This is intended as an intuitive single-number measure of how much a hazard function changes over time.
+##' The hazard is computed on an equally-spaced fine grid between the boundary knots.
+##' The ratio between a "high" and "low" one of these hazard values is computed. 
+##' 
+##' For example, if the hazard is constant over time, then this hazard ratio will be 1.
+##'
+##' @inheritParams hazard
+##' @inheritParams prior_haz
+##'
+##' @return A summary of the posterior distribution of this hazard ratio from the fitted model,
+##' as a data frame with one row per covariate value requested in `newdata`, and one column for each
+##' of three posterior quantiles.
+##'
+##' @export
+hrtime <- function(x, newdata=NULL, niter=NULL, hq=c(0.1, 0.9)){
+  newdata <- default_newdata(x, newdata)
+  times <- seq(x$mspline$bknots[1], x$mspline$bknots[2], length.out=100)
+  haz <- hazard(x, newdata=newdata, niter=niter, times=times, sample=TRUE)
+  haz_hilo <- apply(haz, c(2,3), quantile, hq)
+  hr <- haz_hilo[2,,] / haz_hilo[1,,]
+  hr <- haz_hilo[2,,] / haz_hilo[1,,]
+  dim(hr) <- dim(haz_hilo)[c(2,3)]
+  res <- t(apply(hr, 2, quantile, c(0.5, 0.025, 0.975)))
+  res <- as.data.frame(res)
+  names(res) <- c("median","lower","upper")
+  if (!is.null(newdata))
+    res <- cbind(newdata, res)
+  res
 }

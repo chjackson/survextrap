@@ -4,15 +4,13 @@
 \alias{prior_haz}
 \alias{prior_haz_sd}
 \alias{prior_hr_sd}
-\title{Compute consequences of priors for the flexible hazard model in
+\title{Compute consequences of priors chosen for a flexible hazard model in
 survextrap, in terms of a standard deviation measuring the
 variability over time of the hazard function or the hazard ratio
 function.}
 \usage{
 prior_haz_sd(
-  iknots,
-  bknots,
-  degree = 3,
+  mspline,
   coefs_mean = NULL,
   prior_smooth = p_gamma(2, 1),
   prior_loghaz = p_normal(0, 20),
@@ -24,13 +22,12 @@ prior_haz_sd(
   tmin = 0,
   tmax = 10,
   nsim = 100,
+  hq = c(0.1, 0.9),
   quantiles = c(0.025, 0.5, 0.975)
 )
 
 prior_hr_sd(
-  iknots,
-  bknots,
-  degree = 3,
+  mspline,
   coefs_mean = NULL,
   prior_smooth = p_gamma(2, 1),
   prior_loghaz = p_normal(0, 20),
@@ -47,12 +44,23 @@ prior_hr_sd(
 )
 }
 \arguments{
-\item{iknots}{Vector of internal knot locations. If not supplied, \code{df} has to be specified, in which case
-the default is \code{df - degree - 1} equally spaced knots between the boundary knots.}
+\item{mspline}{A list of control parameters defining the spline model.
 
-\item{bknots}{Vector with two elements, giving the boundary knot locations}
+\code{iknots}: Internal knots.  If this is not supplied, then the number of
+knots is taken from \code{df}, and their location is taken from equally-spaced
+quantiles of the observed event times (concatenated with the distinct
+follow-up times in the external data).
 
-\item{degree}{Spline polynomial degree (defaults to 3)}
+\code{bknots}: Boundary knots.  If this is not supplied, the boundary knots are
+set to zero and the maximum event time (including the follow-up times in
+the external data).
+
+\code{df}: Degrees of freedom, i.e. the number of parameters (or basis terms)
+that define the hazard as a spline function of time.  Defaults to 10.  Note
+this does not necessarily overfit because the function is smoothed through
+the prior.
+
+\code{degree}: Polynomial degree used for the basis function. The default is 3, giving a cubic.}
 
 \item{coefs_mean}{Spline basis coefficients that define the prior mean for the hazard function. By
 default, these are set to values that define a constant hazard function.  They are normalised to
@@ -91,7 +99,7 @@ and \code{xnames} (names of these covariates).}
 
 \item{X}{Either a list, vector or one-row matrix with one covariate value.
 Factors must be supplied as multiple numeric (0/1) contrasts. (TODO doc on how to build
-the names)}
+the names - vignette)}
 
 \item{nonprop}{If \code{TRUE} then a non-proportional hazards model is fitted.
 This is achieved by modelling the spline basis weights in terms of the covariates.  See
@@ -109,10 +117,15 @@ or a list of calls to \code{p_gamma()} with one component per covariate, as in \
 
 \item{nsim}{Number of simulations to draw}
 
-\item{quantiles}{Quantiles used to summarise the prior predictive distribution.}
+\item{hq}{Quantiles which define the "low" and "high" values to compute the hazard ratio between.
+By default, this is \code{c(0.1, 0.9)}, so that the 10\\% and 90\\% quantiles are used
+respectively.}
+
+\item{quantiles}{Quantiles used to summarise the prior predictive distribution
+of the standard deviation.}
 
 \item{X0}{An alternative covariate value (optional).  The hazard ratio between the hazards at X
-and X0 will be returned.}
+and X0 will also be returned.}
 }
 \description{
 The spline model in survextrap allows the hazard to change over time in an
@@ -139,6 +152,8 @@ variability.
 
 \code{prior_haz_sd} computes the SD of the hazard, and the SD of the inverse hazard is also
 computed.   The inverse hazard at time t is the expected time to the event given survival to t.
+The hazard ratio between a high and low value (defined by quantiles of values at different times)
+is also computed.
 
 \code{prior_hr_sd} computes the SD of the hazard ratio between two covariate values
 supplied by the user.

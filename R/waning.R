@@ -245,29 +245,29 @@ rsurvmspline_wane <- function(n, alpha1, alpha0, coefs, knots, degree=3,
 
 survival_core_wane <- function(x, pars, times_arr, alpha_user_arr, alpha_user_arr0,
                                cureprob_arr, niter, nvals, nt, wane_period, wane_nt=10){
-  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$mspline$nvars))
   surv_sam <- psurvmspline_wane(times_arr, alpha1=alpha_user_arr, alpha0=alpha_user_arr0,
                                 coefs=coefs_mat,
-                                knots=x$basehaz$knots, degree=x$basehaz$degree, lower.tail=FALSE,
+                                knots=x$mspline$knots, degree=x$mspline$degree, lower.tail=FALSE,
                                 pcure=cureprob_arr, backhaz=x$backhaz, wane_period=wane_period, wane_nt=wane_nt)
 }
 
 hazard_core_wane <- function(x, pars, times_arr, alpha_user_arr, alpha_user_arr0,
                              cureprob_arr, niter, nvals, nt, wane_period, wane_nt=10){
-  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$mspline$nvars))
   haz_sam <- hsurvmspline_wane(times_arr, alpha1=alpha_user_arr, alpha0=alpha_user_arr0,
                                coefs=coefs_mat,
-                               knots=x$basehaz$knots, degree=x$basehaz$degree,
+                               knots=x$mspline$knots, degree=x$mspline$degree,
                                pcure=cureprob_arr, backhaz=x$backhaz,
                                wane_period=wane_period, wane_nt=wane_nt)
 }
 
 cumhaz_core_wane <- function(x, pars, times_arr, alpha_user_arr, alpha_user_arr0,
                              cureprob_arr, niter, nvals, nt, wane_period, wane_nt=10){
-  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$basehaz$nvars))
+  coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$mspline$nvars))
   haz_sam <- Hsurvmspline_wane(times_arr, alpha1=alpha_user_arr, alpha0=alpha_user_arr0,
                                coefs=coefs_mat,
-                               knots=x$basehaz$knots, degree=x$basehaz$degree,
+                               knots=x$mspline$knots, degree=x$mspline$degree,
                                pcure=cureprob_arr, backhaz=x$backhaz,
                                wane_period=wane_period, wane_nt=wane_nt)
 }

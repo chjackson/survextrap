@@ -38,7 +38,7 @@ test_that("Basic spline model, with covariates",{
 
 test_that("Basic spline model, non-proportional hazards",{
   modnp <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt",
-                      nonprop=TRUE, basehaz_ops = list(df=4,degree=2))
+                      nonprop=TRUE, mspline = list(df=4,degree=2))
   test_median(modnp, "alpha", -0.251)
   expect_equal(survival(modnp, newdata=nd, time=2)$median, c(0.5, 0.7), tol=1e-01)
   expect_equal(hazard(modnp, newdata=nd, time=2)$median, c(0.2, 0.1), tol=1e-01)
@@ -47,27 +47,27 @@ test_that("Basic spline model, non-proportional hazards",{
 
 test_that("Changing the spline specification",{
   expect_error(survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                    basehaz_ops = list(df=4)), "df - degree should be >= 2")
+                    mspline = list(df=4)), "df - degree should be >= 2")
   mod2 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                     basehaz_ops = list(degree=4))
+                     mspline = list(degree=4))
   mod1 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                      basehaz_ops = list(degree=1))
+                      mspline = list(degree=1))
   mod0 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                      basehaz_ops = list(degree=0))
+                      mspline = list(degree=0))
   expect_error(survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                      basehaz_ops = list(degree=-1)), "must be a nonnegative")
+                      mspline = list(degree=-1)), "must be a nonnegative")
   mod0 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                      basehaz_ops = list(degree=0, df=2, iknots=1.5))
-  expect_equivalent(mod0$basehaz$iknots, 1.5)
+                      mspline = list(degree=0, df=2, iknots=1.5))
+  expect_equivalent(mod0$mspline$iknots, 1.5)
 })
 
 test_that("Spline prior mean",{
   coef1 <- function(x){summary(x)[summary(x)$variable=="coefs",]$median[1]}
   mod0 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                      basehaz_ops = list(degree=0, df=2, bknots=c(0.1, 4)))
-  expect_equivalent(mod0$basehaz$bknots, c(0.1, 4))
+                      mspline = list(degree=0, df=2, bknots=c(0.1, 4)))
+  expect_equivalent(mod0$mspline$bknots, c(0.1, 4))
   mod01 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                       basehaz_ops = list(degree=0, df=2, bknots=c(0.1, 4)),
+                       mspline = list(degree=0, df=2, bknots=c(0.1, 4)),
                        coefs_mean = c(0.5, 0.5))
   expect_gt(coef1(mod01), coef1(mod0))
 })
@@ -75,13 +75,13 @@ test_that("Spline prior mean",{
 
 test_that("Smoothing standard deviation specifications",{
   mod0 <-  survextrap(Surv(years, status) ~ 1, data=colons, smooth_sd="eb", fit_method="opt",
-                      basehaz_ops = list(degree=0, df=2))
+                      mspline = list(degree=0, df=2))
   expect_true(mod0$smooth_sd != 1)
   mod1 <-  survextrap(Surv(years, status) ~ 1, data=colons, smooth_sd="bayes", fit_method="opt",
-                      basehaz_ops = list(degree=0, df=2))
+                      mspline = list(degree=0, df=2))
   expect_equal(mod1$smooth_sd, "bayes")
   mod2 <-  survextrap(Surv(years, status) ~ 1, data=colons, smooth_sd=2, fit_method="opt",
-                      basehaz_ops = list(degree=0, df=2))
+                      mspline = list(degree=0, df=2))
   expect_equal(mod2$smooth_sd, 2)
 })
 

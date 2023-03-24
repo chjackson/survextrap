@@ -4,64 +4,66 @@ test_that("spline demo plots", {
                "length of `coefs` is 5, should be 7")
 })
 
+sp <- list(iknots=1:3, bknots=c(0,5), degree=2)
+
 test_that("prior hazard parameter samples", {
   expect_error({ # ?? any sensible expectations here?
     ## no covariates
-    prior_haz_sample(iknots=1:3, bknots=c(0,5), degree=2,
-                     coefs_mean = NULL,
-                     prior_smooth = p_gamma(2,1),
-                     prior_loghaz = p_normal(0,1),
-                     nsim = 100)
+    prior_sample(mspline = sp, 
+                 coefs_mean = NULL,
+                 prior_smooth = p_gamma(2,1),
+                 prior_loghaz = p_normal(0,1),
+                 nsim = 100)
 
     ## prop haz model, 1 cov
-    prior_haz_sample(iknots=1:3, bknots=c(0,5), degree=2,
-                     coefs_mean = NULL,
-                     prior_smooth = p_gamma(2,1),
-                     prior_loghaz = p_normal(0,1),
-                     x = list(ncovs=1, xnames="treatment"),
-                     X = list(treatment=1),
-                     nsim = 100)
+    prior_sample(mspline=sp,
+                 coefs_mean = NULL,
+                 prior_smooth = p_gamma(2,1),
+                 prior_loghaz = p_normal(0,1),
+                 x = list(ncovs=1, xnames="treatment"),
+                 X = list(treatment=1),
+                 nsim = 100)
     ## prop haz model, 2 covs
-    prior_haz_sample(iknots=1:3, bknots=c(0,5), degree=2,
-                     coefs_mean = NULL,
-                     prior_smooth = p_gamma(2,1),
-                     prior_loghaz = p_normal(0,1),
-                     x = list(ncovs=2, xnames=c("treatment","age")),
-                     X = list(treatment=1, age=60),
-                     nsim = 100)
+    prior_sample(mspline=sp,
+                 coefs_mean = NULL,
+                 prior_smooth = p_gamma(2,1),
+                 prior_loghaz = p_normal(0,1),
+                 x = list(ncovs=2, xnames=c("treatment","age")),
+                 X = list(treatment=1, age=60),
+                 nsim = 100)
 
     ## nonprop haz model, 1 cov
-    prior_haz_sample(iknots=1:3, bknots=c(0,5), degree=2,
-                     coefs_mean = NULL,
-                     prior_smooth = p_gamma(2,1),
-                     prior_loghaz = p_normal(0,1),
-                     nonprop = TRUE,
-                     x = list(ncovs=1, xnames="treatment"),
-                     X = list(treatment=1),
-                     nsim = 100)
+    prior_sample(mspline=sp,
+                 coefs_mean = NULL,
+                 prior_smooth = p_gamma(2,1),
+                 prior_loghaz = p_normal(0,1),
+                 nonprop = TRUE,
+                 x = list(ncovs=1, xnames="treatment"),
+                 X = list(treatment=1),
+                 nsim = 100)
     ## nonprop haz model, 2 covs
-    prior_haz_sample(iknots=1:3, bknots=c(0,5), degree=2,
-                     coefs_mean = NULL,
-                     prior_smooth = p_gamma(2,1),
-                     prior_loghaz = p_normal(0,1),
-                     nonprop = TRUE,
-                     x = list(ncovs=1, xnames="treatment"),
-                     X = list(treatment=1),
-                     nsim = 100)
+    prior_sample(mspline=sp,
+                 coefs_mean = NULL,
+                 prior_smooth = p_gamma(2,1),
+                 prior_loghaz = p_normal(0,1),
+                 nonprop = TRUE,
+                 x = list(ncovs=1, xnames="treatment"),
+                 X = list(treatment=1),
+                 nsim = 100)
   },NA)
 })
 
 
 test_that("prior hazard function samples", {
   expect_error({
-    pdf <- mspline_priorpred_df(iknots=1:3, bknots=c(0,5), degree=2,
+    pdf <- mspline_priorpred(iknots=1:3, bknots=c(0,5), degree=2,
                                 prior_loghaz = p_normal(0,1),
                                 prior_smooth = p_gamma(10, 10),
                                 tmin=0, tmax=10, nsim=10)
     ggplot(pdf, aes(x=time, y=haz, group=rep)) + geom_line() + ylim(0,2)
 
     ## prop haz model
-    pdf <- mspline_priorpred_df(iknots=1:3, bknots=c(0,5), degree=2,
+    pdf <- mspline_priorpred(iknots=1:3, bknots=c(0,5), degree=2,
                                 prior_loghaz = p_normal(0,1),
                                 prior_smooth = p_gamma(10, 10),
                                 x = list(ncovs=1, xnames="treatment"),
@@ -85,14 +87,14 @@ test_that("prior hazard function samples", {
 test_that("prior hazard SD over time", {
   expect_error({
     ## we allow the hazard to be extremely variable
-    prior_haz_sd(iknots=c(5,10), bknots=c(0,20), degree=3,
+    prior_haz_sd(mspline=sp,
                  coefs_mean = NULL,
                  prior_smooth = p_gamma(2,1),
                  prior_loghaz = p_normal(0,1),
                  nsim = 100, quantiles=c(0.25, 0.75))
 
     ## we are confident that the hazard will be close to constant
-    prior_haz_sd(iknots=c(5,10), bknots=c(0,20), degree=3,
+    prior_haz_sd(mspline=sp,
                  coefs_mean = NULL,
                  prior_smooth = p_gamma(1,40),
                  prior_loghaz = p_normal(0,1),
@@ -101,7 +103,7 @@ test_that("prior hazard SD over time", {
     ## proportional hazards model with one covariate, uncertainty in the cov effect
     ## Hazards are sometimes higher, then the SDs over time will be higher too.
     ## SD for hazard depends on the level of the hazard.
-    prior_haz_sd(iknots=c(5,10), bknots=c(0,20), degree=3,
+    prior_haz_sd(mspline=sp,
                  coefs_mean = NULL,
                  prior_smooth = p_gamma(1,40),
                  prior_loghaz = p_normal(0,1),
@@ -109,7 +111,7 @@ test_that("prior hazard SD over time", {
                  nsim = 100, quantiles=c(0.25, 0.75))
 
     ## non proportional hazards model with one covariate. Even more uncertainty
-    prior_haz_sd(iknots=c(5,10), bknots=c(0,20), degree=3,
+    prior_haz_sd(mspline=sp,
                  coefs_mean = NULL,
                  prior_smooth = p_gamma(1,40),
                  prior_loghaz = p_normal(0,1),
@@ -128,7 +130,7 @@ test_that("prior hazard ratio SD over time", {
 
   ## Tiny nonproportionality effect: SDs for HR are close to zero.
   set.seed(1)
-  psd <- prior_hr_sd(iknots=c(5,10), bknots=c(0,20), degree=3,
+  psd <- prior_hr_sd(mspline=sp,
                      coefs_mean = NULL,
                      prior_smooth = p_gamma(1,400),
                      prior_loghaz = p_normal(0,1),

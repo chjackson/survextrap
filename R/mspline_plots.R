@@ -112,7 +112,7 @@ mspline_plotdata <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs
 ##' a prior mean for the spline coefficients (a constant hazard by default)
 ##' and particular priors for the baseline log hazard and smoothness variance
 ##'
-##' @aliases mspline_priorpred_df plot_mspline_priorpred
+##' @aliases mspline_priorpred plot_mspline_priorpred
 ##'
 ##' @inheritParams survextrap
 ##' @inheritParams mspline_plotsetup
@@ -131,31 +131,36 @@ mspline_plotdata <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs
 ##' @param X0 An alternative covariate value (optional).  The hazard ratio between the hazards at X
 ##' and X0 will also be returned.
 ##'
-##' @return \code{mspline_priorpred_df} returns a data frame of the samples, and
+##' @return \code{mspline_priorpred} returns a data frame of the samples, and
 ##' \code{plot_mspline_priorpred} generates a plot.
 ##'
 ##' @name mspline_priorpred
-mspline_priorpred_df <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3,
-                                 coefs_mean = NULL,
-                                 prior_smooth = p_gamma(2,1),
-                                 prior_loghaz = NULL,
-                                 prior_loghr = NULL,
-                                 x = NULL,
-                                 X = NULL,
-                                 X0 = NULL, # TODO
-                                 nonprop = FALSE,
-                                 prior_sdnp = p_gamma(2,1),
-                                 tmin=0, tmax=10,
-                                 nsim=10){
+mspline_priorpred <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3,
+                              coefs_mean = NULL,
+                              prior_smooth = p_gamma(2,1),
+                              prior_loghaz = NULL,
+                              prior_loghr = NULL,
+                              x = NULL,
+                              X = NULL,
+                              X0 = NULL, 
+                              nonprop = FALSE,
+                              prior_sdnp = p_gamma(2,1),
+                              tmin=0, tmax=10,
+                              nsim=10){
+  ## TODO clean up args.  get knots from df, tmin and tmax.  How is this done?
+  ## it is default_iknots.  what does that depend on?  just bknots and degree
+  ## returns iknots.
+  ##   if (is.null(mspline$iknots)) mspline$iknots <- mspline_default_iknots(...)
+  
   s <- mspline_plotsetup(iknots=iknots, bknots=bknots,
                          tmin=tmin, tmax=tmax, degree=degree, df=df)
   time <- s$time; basis <- s$basis; iknots <- s$iknots; bknots <- s$bknots
-  sam <- prior_haz_sample(iknots=iknots, bknots=bknots, degree=degree,
-                          coefs_mean=coefs_mean, prior_smooth=prior_smooth,
-                          prior_loghaz=prior_loghaz,
-                          prior_sdnp=prior_sdnp,
-                          nonprop=nonprop,
-                          x = x, X = X, nsim=nsim)
+  sam <- prior_sample(mspline = list(iknots=iknots, bknots=bknots, degree=degree),
+                      coefs_mean=coefs_mean, prior_smooth=prior_smooth,
+                      prior_loghaz=prior_loghaz,
+                      prior_sdnp=prior_sdnp,
+                      nonprop=nonprop,
+                      x = x, X = X, nsim=nsim)
   hazlist <- vector(nsim, mode="list")
   for (i in 1:nsim){
     hazlist[[i]] <- mspline_sum_basis(basis, coefs=sam$coefs[i,],
@@ -163,16 +168,17 @@ mspline_priorpred_df <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3,
     hazlist[[i]]$rep <- i
   }
   hazdf <- do.call("rbind", hazlist)
+  hazdf$mean <- 1/hazdf$haz
   hazdf$rep <- factor(hazdf$rep)
 
   if (!is.null(X0)){
     ## comparator hazard using the same parameter values but different covariate value
-    sam <- prior_haz_sample(iknots=iknots, bknots=bknots, degree=degree,
-                             coefs_mean=coefs_mean, prior_smooth=prior_smooth,
-                             prior_loghaz=prior_loghaz,
-                             prior_sdnp=prior_sdnp,
-                             nonprop=nonprop,
-                             x = x, X = X0, nsim=nsim)
+    sam <- prior_sample(mspline = list(iknots=iknots, bknots=bknots, degree=degree),
+                        coefs_mean=coefs_mean, prior_smooth=prior_smooth,
+                        prior_loghaz=prior_loghaz,
+                        prior_sdnp=prior_sdnp,
+                        nonprop=nonprop,
+                        x = x, X = X0, nsim=nsim)
     hazlist <- vector(nsim, mode="list")
     for (i in 1:nsim){
       hazlist[[i]] <- mspline_sum_basis(basis, coefs=sam$coefs[i,],
@@ -204,11 +210,11 @@ plot_mspline_priorpred <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3,
                                    nsim=10)
 {
   haz <- NULL
-  hazdf <- mspline_priorpred_df(iknots=iknots, bknots=bknots, df=df, degree=degree,
-                                coefs_mean=coefs_mean,
-                                prior_smooth=prior_smooth,
-                                prior_loghaz=prior_loghaz,
-                                tmin=0, tmax=10, nsim=10)
+  hazdf <- mspline_priorpred(iknots=iknots, bknots=bknots, df=df, degree=degree,
+                             coefs_mean=coefs_mean,
+                             prior_smooth=prior_smooth,
+                             prior_loghaz=prior_loghaz,
+                             tmin=0, tmax=10, nsim=10)
   iknots <- attr(hazdf, "iknots")
   bknots <- attr(hazdf, "bknots")
   ggplot(hazdf, aes(x=time, y=haz, group=rep)) +

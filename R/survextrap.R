@@ -131,7 +131,7 @@
 #' Leave-one-out cross-validation currently does not take into account any
 #' background hazard (effectively assuming it to be zero).
 #'
-#' @param basehaz_ops A list of control parameters defining the spline model.
+#' @param mspline A list of control parameters defining the spline model.
 #'
 #'   `iknots`: Internal knots.  If this is not supplied, then the number of
 #'   knots is taken from `df`, and their location is taken from equally-spaced
@@ -194,7 +194,7 @@ survextrap <- function(formula,
                        prior_logor_cure = NULL,
                        prior_sdnp = p_gamma(2,1),
                        backhaz = NULL,
-                       basehaz_ops = NULL,
+                       mspline = NULL,
                        fit_method = "mcmc",
                        loo = (fit_method=="mcmc"),
                        ...)
@@ -250,20 +250,20 @@ survextrap <- function(formula,
     xcure_ext <- external$Xcure
     tmax <- max(c(t_end,t_upp,external$tmax), na.rm = TRUE)
 
-    basehaz <- make_basehaz(basehaz_ops    = basehaz_ops,
+    mspline <- make_basehaz(mspline    = mspline,
                             times          = t_end,
                             times_ext      = unique(c(t_ext_start, t_ext_stop)),
                             status         = status,
                             tmin          = min(t_beg),
                             tmax          = tmax)
 
-    basis_event  <- make_basis(t_event, basehaz)
-    ibasis_event <- make_basis(t_event, basehaz, integrate = TRUE)
-    ibasis_rcens <- make_basis(t_rcens, basehaz, integrate = TRUE)
-    nvars <- basehaz$nvars
+    basis_event  <- make_basis(t_event, mspline)
+    ibasis_event <- make_basis(t_event, mspline, integrate = TRUE)
+    ibasis_rcens <- make_basis(t_rcens, mspline, integrate = TRUE)
+    nvars <- mspline$nvars
 
     if (is.null(coefs_mean)){
-        coefs_mean <- mspline_uniform_weights(iknots = basehaz$iknots, bknots=basehaz$bknots, degree=basehaz$degree)
+        coefs_mean <- mspline_constant_weights(mspline)
     } else {
       coefs_mean <- validate_coefs_mean(coefs_mean)
     }
@@ -272,8 +272,8 @@ survextrap <- function(formula,
     est_smooth <- (smooth_sd == "bayes")
     if (est_smooth) smooth_sd_init <- 1
 
-    ibasis_ext_stop <- if (nextern>0) make_basis(t_ext_stop, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
-    ibasis_ext_start <- if (nextern>0) make_basis(t_ext_start, basehaz, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
+    ibasis_ext_stop <- if (nextern>0) make_basis(t_ext_stop, mspline, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
+    ibasis_ext_start <- if (nextern>0) make_basis(t_ext_start, mspline, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
 
     if (is.data.frame(backhaz)) {
       backsurv_ext_stop <- exp(-get_cum_backhaz(external$t_ext_stop, backhaz))
@@ -367,13 +367,13 @@ survextrap <- function(formula,
                        backhaz=backhaz_df)
     standata_keep <- standata[c("nvars","ncovs","ncurecovs")]
     model_keep <- nlist(cure, est_smooth, nonprop)
-    spline_keep <- nlist(basehaz)
+    spline_keep <- nlist(mspline)
     covinfo_names <- c("xnames","xlevs","xinds","xbar","mfbase","mfzero")
     x <- list(x = x[covinfo_names])
     xcure <- list(xcure = xcure[covinfo_names])
     prior_keep <- list(priors=priors)
     prioretc_keep <- nlist(coefs_mean, smooth_sd)
-    prior_pred <- get_prior_pred(iknots=basehaz$iknots, bknots=basehaz$bknots, degree=basehaz$degree,
+    prior_pred <- get_prior_pred(mspline=mspline, 
                                  coefs_mean=coefs_mean, prior_smooth=prior_smooth,
                                  prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
                                  x=list(ncovs=ncovs, xnames=x$x$xnames),
@@ -389,36 +389,53 @@ survextrap <- function(formula,
 ## Construct functions to draw from the prior predictive distributions
 ## for interesting quantities in a model specified with survextrap()
 
-get_prior_pred <- function(iknots, bknots, degree,
+get_prior_pred <- function(mspline, 
                            coefs_mean, prior_smooth, prior_loghaz, prior_loghr,
                            x, nonprop, prior_sdnp){
-  ## Hazard function
-  haz <- function(X, nsim=100){
-    prior_haz_sample(iknots=iknots, bknots=bknots, degree=degree,
-                     coefs_mean=coefs_mean, prior_smooth=prior_smooth,
-                     prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
-                     x=x, X=X, nonprop=nonprop, prior_sdnp=prior_sdnp,
-                     nsim=nsim)
-  }
-  ## SD describing variation in hazard function with time
-  haz_sd <- function(X, tmin=0, tmax=10, nsim=100,
-                     quantiles = c(0.025, 0.5, 0.975)){
-    prior_haz_sd(iknots=iknots, bknots=bknots, degree=degree,
+  ## Samples of basic parameters defining the spline
+  sample <- function(X=NULL, nsim=100){
+    prior_sample(mspline=mspline, 
                  coefs_mean=coefs_mean, prior_smooth=prior_smooth,
                  prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
                  x=x, X=X, nonprop=nonprop, prior_sdnp=prior_sdnp,
-                 tmin=tmin, tmax=tmax, nsim=nsim, quantiles=quantiles)
+                 nsim=nsim)
+  }
+  ## Summary of the hazard if coefs_mean was set to a constant hazard
+  haz_const <- function(nsim=10000, quantiles=c(0.025, 0.5, 0.975)){
+    prior_haz_const(mspline=mspline, 
+                    prior_loghaz = prior_loghaz, 
+                    nsim=nsim, quantiles=quantiles)
+  }
+  ## Samples of hazard curves over time
+  haz <- function(X=NULL, tmin=mspline$bknots[1], tmax=mspline$bknots[2], nsim=10){
+    mspline_priorpred(iknots=mspline$iknots, bknots=mspline$bknots, degree=mspline$degree, 
+                      coefs_mean=coefs_mean, prior_smooth=prior_smooth,
+                      prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
+                      x=x, X=X, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                      tmin=tmin, tmax=tmax, 
+                      nsim=nsim)
+  }
+
+  ## SD describing variation in hazard function with time
+  haz_sd <- function(X=NULL, tmin=mspline$bknots[1], tmax=mspline$bknots[2], nsim=100,
+                     hq = c(0.1, 0.9), 
+                     quantiles = c(0.025, 0.5, 0.975)){
+    prior_haz_sd(mspline=mspline, 
+                 coefs_mean=coefs_mean, prior_smooth=prior_smooth,
+                 prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
+                 x=x, X=X, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                 tmin=tmin, tmax=tmax, nsim=nsim, hq=hq, quantiles=quantiles)
   }
   ## SD describing variation in hazard ratio function with time
-  hr_sd <- function(X, X0, tmin=0, tmax=10, nsim=100,
+  hr_sd <- function(X, X0, tmin=mspline$bknots[1], tmax=mspline$bknots[2], nsim=100,
                     quantiles = c(0.025, 0.5, 0.975)){
-    prior_hr_sd(iknots=iknots, bknots=bknots, degree=degree,
+    prior_hr_sd(mspline=mspline, 
                 coefs_mean=coefs_mean, prior_smooth=prior_smooth,
                 prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
                 x=x, X=X, X0=X0, nonprop=nonprop, prior_sdnp=prior_sdnp,
                 tmin=tmin, tmax=tmax, nsim=nsim, quantiles=quantiles)
   }
-  nlist(haz, haz_sd, hr_sd)
+  nlist(sample, haz, haz_const, haz_sd, hr_sd)
 }
 
 ## No centering is done here.  It assumes that any covariates are pre-centered
@@ -620,34 +637,34 @@ validate_external <- function(external, x, xcure, relative=FALSE){
   }
 }
 
-make_basis <- function(times, basehaz, integrate = FALSE) {
+make_basis <- function(times, mspline, integrate = FALSE) {
   N <- length(times)
-  K <- basehaz$nvars
+  K <- mspline$nvars
   if (!N) { # times is NULL or empty vector
     return(matrix(0, 0, K))
   }
-  mspline_basis(times, iknots = basehaz$iknots, bknots=basehaz$bknots,
-                degree = basehaz$degree, integrate = integrate)
+  mspline_basis(times, iknots = mspline$iknots, bknots=mspline$bknots,
+                degree = mspline$degree, integrate = integrate)
 }
 
 aa <- function(x, ...) as.array(x,...)
 
 
-make_basehaz <- function(basehaz_ops,
+make_basehaz <- function(mspline,
                          times,
                          times_ext,
                          status,
                          tmin, tmax){
-    df     <- basehaz_ops$df
-    iknots <- basehaz_ops$iknots
-    bknots <- basehaz_ops$bknots
-    degree <- basehaz_ops$degree
+    df     <- mspline$df
+    iknots <- mspline$iknots
+    bknots <- mspline$bknots
+    degree <- mspline$degree
     bh_names <- c("df","iknots","bknots","degree")
-    bad_names <- setdiff(names(basehaz_ops), bh_names)
+    bad_names <- setdiff(names(mspline), bh_names)
     if (length(bad_names) > 0) {
       blist <- paste(bad_names, collapse=",")
       plural <- if (bad_names > 1) "s" else ""
-      warning(sprintf("Element%s `%s` of `basehaz_ops` is unused. Ignoring.", plural, blist))
+      warning(sprintf("Element%s `%s` of `mspline` is unused. Ignoring.", plural, blist))
     }
     if (is.null(df))
       df <- 10L

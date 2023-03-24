@@ -65,7 +65,7 @@ library(dplyr)
 library(survextrap)
 colons2 <- colons %>% filter(rx %in% c("Obs", "Lev")) %>% droplevels()
 rxph_mod <- survextrap(Surv(years, status) ~ rx, data=colons2, 
-                       fit_method="opt", basehaz_ops=list(df=5))
+                       fit_method="opt", mspline=list(df=5))
 plot(rxph_mod, tmax=10, niter=100)
 ```
 
