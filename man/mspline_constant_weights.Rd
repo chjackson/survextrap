@@ -2,24 +2,22 @@
 % Please edit documentation in R/mspline.R
 \name{mspline_constant_weights}
 \alias{mspline_constant_weights}
-\title{Estimate M-spline basis weights which give a constant function.}
+\title{Determine M-spline basis weights which give a constant function.}
 \usage{
-mspline_constant_weights(mspline, times = NULL, logit = FALSE)
+mspline_constant_weights(mspline, logit = FALSE)
 }
 \arguments{
 \item{mspline}{A list with components \code{iknots} (vector of internal knots), \code{bknots} (vector of boundary knots)
 and \code{degree} (polynomial degree) defining an M-spline configuration.}
-
-\item{times}{Times to use to construct the numerical calculation.
-By default, this is 20 equally-spaced times between the boundary knots.}
 
 \item{logit}{If \code{TRUE} then the multinomial logit transform of the coefficients
 is returned.  This is a vector of length one less than the number of coefficients,
 with the rth element defined by \eqn{log(coefs[r+1] / coefs[1])}.}
 }
 \description{
-This works by choosing the basis coefficients that minimise the
-variance between log hazard values at different time points.
-It is used in \code{\link{survextrap}} to choose the default prior mean
-for the hazard function.
+This works by transforming the weights of the corresponding B-spline basis,
+which are equal if the B-spline is a constant function.
+}
+\references{
+Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425–441.
 }

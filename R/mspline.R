@@ -12,12 +12,12 @@
 NULL
 
 mspline_default_iknots <- function(iknots=NULL, bknots, degree, df){
-    if (is.null(iknots)) {
-        nik <- df - degree  - 1
-        iknots <- seq(bknots[1], bknots[2], length.out=nik+2)[-c(1,nik+2)]
-    }
-    validate_knots(iknots, name="iknots")
-    iknots
+  if (is.null(iknots)) {
+    nik <- df - degree  - 1
+    iknots <- seq(bknots[1], bknots[2], length.out=nik+2)[-c(1,nik+2)]
+  }
+  validate_knots(iknots, name="iknots")
+  iknots
 }
 
 mspline_default <- function(mspline){
@@ -28,7 +28,7 @@ mspline_default <- function(mspline){
     if (!is.null(mspline$df)) {
       mspline$iknots <- mspline_default_iknots(bknots=mspline$bknots, degree=mspline$degree, df=mspline$df)
     }
-  }
+  } else validate_knots(mspline$iknots, name="iknots")
   mspline
 }
 
@@ -449,38 +449,31 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL
   ret
 }
 
-##' Estimate M-spline basis weights which give a constant function.
+##' Determine M-spline basis weights which give a constant function.
 ##'
-##' This works by choosing the basis coefficients that minimise the
-##' variance between log hazard values at different time points.
-##' It is used in \code{\link{survextrap}} to choose the default prior mean
-##' for the hazard function.
+##' This works by transforming the weights of the corresponding B-spline basis,
+##' which are equal if the B-spline is a constant function. 
 ##'
 ##' @param mspline A list with components `iknots` (vector of internal knots), `bknots` (vector of boundary knots)
 ##' and `degree` (polynomial degree) defining an M-spline configuration. 
-##'
-##' @param times Times to use to construct the numerical calculation.
-##' By default, this is 20 equally-spaced times between the boundary knots.
 ##'
 ##' @param logit If \code{TRUE} then the multinomial logit transform of the coefficients
 ##' is returned.  This is a vector of length one less than the number of coefficients,
 ##' with the rth element defined by \eqn{log(coefs[r+1] / coefs[1])}.
 ##'
+##' @references Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425–441.
+##'
 ##' @export
-mspline_constant_weights <- function(mspline, times=NULL, logit=FALSE){
-    if (is.null(times)) times <- seq(mspline$bknots[1], mspline$bknots[2], length.out=20)
-    mspline <- mspline_default(mspline)
-    basis <- splines2::mSpline(times, knots = mspline$iknots, Boundary.knots = mspline$bknots,
-                               degree = mspline$degree, intercept = TRUE)
-    nvars <- ncol(basis)
-    varloghaz <- function(logp){
-        p <- exp(logp)
-        haz <- rowSums(basis * rep(p, each=nrow(basis)))
-        var(log(haz))
-    }
-    logp0 <- rep(0, nvars)
-    opt <- optim(logp0, varloghaz, control=list(maxit=10000))
-    res <- exp(opt$par)
-    p <- res / sum(res)
-    if (logit) log(p[-1]/p[1]) else p
+mspline_constant_weights <- function(mspline, logit=FALSE){
+  mspline <- mspline_default(mspline)
+  iknots <- mspline$iknots; bknots <- mspline$bknots; degree <- mspline$degree
+  knot_seq <- c(rep(bknots[1], degree+1), iknots, rep(bknots[2], degree+1))
+  K <- length(iknots) + degree + 1
+  p_const <- numeric(K)
+  rescale <- (degree+1)*(bknots[2] - bknots[1])
+  for(i in 1:K){
+    p_const[i] <- (knot_seq[i+degree+1] - knot_seq[i]) / rescale
+  }
+  p_const <- p_const/sum(p_const)
+  if (logit) log(p_const[-1]/p_const[1]) else p_const
 }

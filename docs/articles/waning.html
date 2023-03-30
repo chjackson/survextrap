@@ -43,6 +43,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
+    <a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a>
     <a class="dropdown-item" href="../articles/waning.html">Treatment effect waning in survextrap</a>
   </div>
 </li>
@@ -75,7 +76,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2023-02-28</h4>
+            <h4 data-toc-skip class="date">2023-03-30</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/waning.Rmd" class="external-link"><code>vignettes/waning.Rmd</code></a></small>
       <div class="d-none name"><code>waning.Rmd</code></div>
@@ -172,7 +173,7 @@ years).</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/chjackson/survextrap" class="external-link">survextrap</a></span><span class="op">)</span></span>
 <span><span class="va">colons2</span> <span class="op">&lt;-</span> <span class="va">colons</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">rx</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Obs"</span>, <span class="st">"Lev"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/droplevels.html" class="external-link">droplevels</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">rxph_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">rx</span>, data<span class="op">=</span><span class="va">colons2</span>, </span>
-<span>                       fit_method<span class="op">=</span><span class="st">"opt"</span>, basehaz_ops<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>df<span class="op">=</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span>                       fit_method<span class="op">=</span><span class="st">"opt"</span>, mspline<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>df<span class="op">=</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rxph_mod</span>, tmax<span class="op">=</span><span class="fl">10</span>, niter<span class="op">=</span><span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 <p><img src="waning_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
 <p>To predict from this model under a waning treatment effect we must
@@ -227,13 +228,13 @@ distribution).</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>digits<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/rmst.html">rmst</a></span><span class="op">(</span><span class="va">rxph_mod</span>, t<span class="op">=</span><span class="fl">50</span>, niter<span class="op">=</span><span class="fl">100</span>, newdata<span class="op">=</span><span class="va">nd_full</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##    rx variable  t median 2.5% 97.5%</span></span>
-<span><span class="co">## 1 Lev     rmst 50   16.1  3.9    32</span></span>
-<span><span class="co">## 2 Obs     rmst 50    9.8  3.1    23</span></span></code></pre>
+<span><span class="co">## 1 Lev     rmst 50   14.7  3.5    33</span></span>
+<span><span class="co">## 2 Obs     rmst 50    9.4  3.1    24</span></span></code></pre>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/rmst.html">rmst</a></span><span class="op">(</span><span class="va">rxph_mod</span>, t<span class="op">=</span><span class="fl">50</span>, niter<span class="op">=</span><span class="fl">20</span>, newdata<span class="op">=</span><span class="va">nd_full</span>, newdata0<span class="op">=</span><span class="va">nd_null</span>, wane_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##    rx variable  t median 2.5% 97.5%</span></span>
-<span><span class="co">## 1 Lev     rmst 50   13.4  4.0    35</span></span>
-<span><span class="co">## 2 Obs     rmst 50    9.8  3.5    21</span></span></code></pre>
+<span><span class="co">## 1 Lev     rmst 50   12.4  3.3    31</span></span>
+<span><span class="co">## 2 Obs     rmst 50    9.3  2.7    24</span></span></code></pre>
 <div class="section level3">
 <h3 id="distribution-utilities">Distribution utilities<a class="anchor" aria-label="anchor" href="#distribution-utilities"></a>
 </h3>

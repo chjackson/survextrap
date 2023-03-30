@@ -13,6 +13,9 @@
     <loc>https://chjackson.github.io/survextrap/articles/methods.html</loc>
   </url>
   <url>
+    <loc>https://chjackson.github.io/survextrap/articles/priors.html</loc>
+  </url>
+  <url>
     <loc>https://chjackson.github.io/survextrap/articles/waning.html</loc>
   </url>
   <url>
@@ -37,10 +40,16 @@
     <loc>https://chjackson.github.io/survextrap/reference/get_cum_backhaz.html</loc>
   </url>
   <url>
+    <loc>https://chjackson.github.io/survextrap/reference/get_draws.html</loc>
+  </url>
+  <url>
     <loc>https://chjackson.github.io/survextrap/reference/hazard.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/hazard_ratio.html</loc>
+  </url>
+  <url>
+    <loc>https://chjackson.github.io/survextrap/reference/hrtime.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/index.html</loc>
@@ -49,13 +58,22 @@
     <loc>https://chjackson.github.io/survextrap/reference/mean.survextrap.html</loc>
   </url>
   <url>
+    <loc>https://chjackson.github.io/survextrap/reference/mspline_args.html</loc>
+  </url>
+  <url>
     <loc>https://chjackson.github.io/survextrap/reference/mspline_basis.html</loc>
+  </url>
+  <url>
+    <loc>https://chjackson.github.io/survextrap/reference/mspline_constant_weights.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/mspline_plotdata.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/mspline_plotsetup.html</loc>
+  </url>
+  <url>
+    <loc>https://chjackson.github.io/survextrap/reference/mspline_priorpred.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/mspline_uniform_weights.html</loc>
@@ -82,10 +100,25 @@
     <loc>https://chjackson.github.io/survextrap/reference/print.survextrap.html</loc>
   </url>
   <url>
+    <loc>https://chjackson.github.io/survextrap/reference/print_priors.html</loc>
+  </url>
+  <url>
     <loc>https://chjackson.github.io/survextrap/reference/priors.html</loc>
   </url>
   <url>
+    <loc>https://chjackson.github.io/survextrap/reference/prior_haz.html</loc>
+  </url>
+  <url>
+    <loc>https://chjackson.github.io/survextrap/reference/prior_haz_const.html</loc>
+  </url>
+  <url>
     <loc>https://chjackson.github.io/survextrap/reference/prior_pred.html</loc>
+  </url>
+  <url>
+    <loc>https://chjackson.github.io/survextrap/reference/prior_sample.html</loc>
+  </url>
+  <url>
+    <loc>https://chjackson.github.io/survextrap/reference/p_meansurv.html</loc>
   </url>
   <url>
     <loc>https://chjackson.github.io/survextrap/reference/rmst.html</loc>

@@ -22,21 +22,33 @@ reference:
   - mean.survextrap
   - rmst
   - get_cum_backhaz
+  - get_draws
+  - hrtime
 - title: Datasets
 - contents:
   - colons
   - curedata
+- title: Utilities to examine prior distributions in M-spline models
+- contents:
+  - prior_sample
+  - p_meansurv
+  - prior_haz_const
+  - prior_haz_sd
+  - prior_hr_sd
+  - mspline_priorpred
+  - plot_mspline_priorpred
+  - prior_pred
+  - print_priors
 - title: M-spline utilities
 - contents:
   - Survmspline
   - Survmspline_wane
   - mspline_basis
-  - mspline_uniform_weights
+  - mspline_constant_weights
   - mspline_plotsetup
   - mspline_plotdata
   - plot_mspline
-  - plot_mspline_priorpred
-  - prior_pred
+  - mspline_args
 - title: Package overview
 - contents:
   - survextrap-package

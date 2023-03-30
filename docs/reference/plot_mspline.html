@@ -26,6 +26,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
+    <a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a>
     <a class="dropdown-item" href="../articles/waning.html">Treatment effect waning in survextrap</a>
   </div>
 </li>
@@ -71,12 +72,12 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>iknots</dt>
-<dd><p>Internal knots.  If not supplied, <code>df</code> has to be specified, in which case
+<dd><p>Vector of internal knot locations. If not supplied, <code>df</code> has to be specified, in which case
 the default is <code>df - degree - 1</code> equally spaced knots between the boundary knots.</p></dd>
 
 
 <dt>bknots</dt>
-<dd><p>Boundary knots.   Defaults to <code>c(0,10)</code>.</p></dd>
+<dd><p>Vector with two elements, giving the boundary knot locations</p></dd>
 
 
 <dt>df</dt>
@@ -85,7 +86,7 @@ If <code>iknots</code> is not supplied, the number of internal knots is then cho
 
 
 <dt>degree</dt>
-<dd><p>Spline polynomial degree.</p></dd>
+<dd><p>Spline polynomial degree (defaults to 3)</p></dd>
 
 
 <dt>coefs</dt>

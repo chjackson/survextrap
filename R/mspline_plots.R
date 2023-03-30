@@ -135,6 +135,7 @@ mspline_plotdata <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs
 ##' \code{plot_mspline_priorpred} generates a plot.
 ##'
 ##' @name mspline_priorpred
+##' @export
 mspline_priorpred <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3,
                               coefs_mean = NULL,
                               prior_smooth = p_gamma(2,1),

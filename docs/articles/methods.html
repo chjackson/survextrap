@@ -43,6 +43,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
+    <a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a>
     <a class="dropdown-item" href="../articles/waning.html">Treatment effect waning in survextrap</a>
   </div>
 </li>
@@ -75,7 +76,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2023-02-28</h4>
+            <h4 data-toc-skip class="date">2023-03-30</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -117,7 +118,8 @@ the hazard.</p></li>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/chjackson/survextrap" class="external-link">survextrap</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="va">p_naive</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">13</span>, <span class="fl">13</span><span class="op">)</span></span>
-<span><span class="va">p_const</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_uniform_weights.html">mspline_uniform_weights</a></span><span class="op">(</span>iknots<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">9</span>, bknots<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">mspline</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iknots<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">9</span>, bknots<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">10</span><span class="op">)</span>, degree<span class="op">=</span><span class="fl">3</span><span class="op">)</span></span>
+<span><span class="va">p_const</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_constant_weights.html">mspline_constant_weights</a></span><span class="op">(</span><span class="va">mspline</span><span class="op">)</span></span>
 <span><span class="va">haz_unif</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_plotdata.html">mspline_plotdata</a></span><span class="op">(</span>df<span class="op">=</span><span class="fl">13</span>, scale<span class="op">=</span><span class="fl">10</span>, coefs <span class="op">=</span> <span class="va">p_const</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_mspline.html">plot_mspline</a></span><span class="op">(</span>df<span class="op">=</span><span class="fl">13</span>, scale<span class="op">=</span><span class="fl">10</span>, coefs <span class="op">=</span> <span class="va">p_naive</span>, tmax<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">time</span>, y<span class="op">=</span><span class="va">haz</span><span class="op">)</span>, data<span class="op">=</span><span class="va">haz_unif</span>, color<span class="op">=</span><span class="st">"red"</span>, lwd<span class="op">=</span><span class="fl">1.5</span>, inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span> </span>
@@ -240,7 +242,7 @@ implemented in e.g. the <code>mgcv</code> and <code>rstpm2</code>
 packages.</p>
 </div>
 <div class="section level2">
-<h2 id="prior-distribution-for-the-hazard-curve">Prior distribution for the hazard curve<a class="anchor" aria-label="anchor" href="#prior-distribution-for-the-hazard-curve"></a>
+<h2 id="priorhaz">Prior distribution for the hazard curve<a class="anchor" aria-label="anchor" href="#priorhaz"></a>
 </h2>
 <p>A log-normal prior is used for the scale <span class="math inline">\(\eta\)</span>. The default in the package is set
 to normal(0, 20) - but this can be changed by the user.</p>
@@ -260,7 +262,8 @@ above.</p></li>
 fitted hazard curve.</p>
 <ul>
 <li><p>If <span class="math inline">\(\sigma=0\)</span>, then we are
-certain that the hazard function is the one defined by <span class="math inline">\(\boldsymbol{\mu}\)</span>.</p></li>
+certain that the hazard function (before being scaled by <span class="math inline">\(\eta\)</span>) is the one defined by <span class="math inline">\(\boldsymbol{\mu}\)</span>. By default this is a
+constant hazard.</p></li>
 <li><p>Values of <span class="math inline">\(\sigma\)</span> around 1
 favour wiggly curves, such that the fitted hazard curve is driven mainly
 by the the observed data.</p></li>
@@ -276,27 +279,33 @@ behaved for estimation. While the interpretation of <span class="math inline">\(
 hope to show empirically that this prior works usefully well in
 practice)</p>
 <p>The plots below show samples from the prior distribution for the
-hazard functions implied by two choices of the joint distribution for
-<span class="math inline">\(\eta\)</span> and <span class="math inline">\(p\)</span>. In both, <span class="math inline">\(\eta\)</span> is log normal(0,1), which supports
+hazard functions implied by two choices of the joint prior distribution
+for <span class="math inline">\(\eta\)</span> and <span class="math inline">\(p\)</span>. In both, <span class="math inline">\(\eta\)</span> is log normal(0,1), which supports
 hazard rates between about 0.1 and 7, and the prior mean for <span class="math inline">\(p\)</span> is the special set that is centred
 around a constant hazard. The two samples differ by the choice of prior
-variability. <span class="math inline">\(\sigma=0.05\)</span> is a
-strong prior that forces the hazard to be nearly uniform, while <span class="math inline">\(\sigma=1\)</span> allows a wide range of wiggly
-shapes.</p>
+variability. <span class="math inline">\(\sigma \sim
+Gamma(2,40)\)</span> strongly favours low values of <span class="math inline">\(\sigma\)</span>, which forces the hazard to be
+nearly uniform, while <span class="math inline">\(\sigma \sim
+Gamma(2,1)\)</span> allows a wide range of wiggly shapes.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">iknots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span>; <span class="va">bknots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">10</span><span class="op">)</span></span>
-<span><span class="va">p_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_uniform_weights.html">mspline_uniform_weights</a></span><span class="op">(</span><span class="va">iknots</span>, <span class="va">bknots</span><span class="op">)</span></span>
-<span><span class="va">prior_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">p_mean</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">/</span> <span class="va">p_mean</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#prior_mean &lt;- rep(1, length(knots) + 4)</span></span>
+<span><span class="va">mspline</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iknots<span class="op">=</span><span class="va">iknots</span>, bknots<span class="op">=</span><span class="va">bknots</span><span class="op">)</span></span>
+<span><span class="va">p_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_constant_weights.html">mspline_constant_weights</a></span><span class="op">(</span><span class="va">mspline</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_mspline_priorpred.html">plot_mspline_priorpred</a></span><span class="op">(</span>iknots<span class="op">=</span><span class="va">iknots</span>, bknots<span class="op">=</span><span class="va">bknots</span>, tmax<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">bknots</span><span class="op">)</span><span class="op">+</span><span class="fl">1</span>, </span>
-<span>                       prior_mean<span class="op">=</span><span class="va">prior_mean</span>, prior_sd<span class="op">=</span><span class="fl">0.05</span>, scale_sd<span class="op">=</span><span class="fl">1</span>, nsim<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/bquote.html" class="external-link">bquote</a></span><span class="op">(</span><span class="va">sigma</span><span class="op">==</span><span class="fl">0.05</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_mspline_priorpred.html">plot_mspline_priorpred</a></span><span class="op">(</span>iknots<span class="op">=</span><span class="va">iknots</span>, bknots<span class="op">=</span><span class="va">bknots</span>, tmax<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">bknots</span><span class="op">)</span><span class="op">+</span><span class="fl">1</span>, </span>
-<span>                       prior_mean<span class="op">=</span><span class="va">prior_mean</span>, prior_sd<span class="op">=</span><span class="fl">1</span>, scale_sd<span class="op">=</span><span class="fl">1</span>, nsim<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/bquote.html" class="external-link">bquote</a></span><span class="op">(</span><span class="va">sigma</span><span class="op">==</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_priorpred.html">plot_mspline_priorpred</a></span><span class="op">(</span>iknots<span class="op">=</span><span class="va">iknots</span>, bknots<span class="op">=</span><span class="va">bknots</span>, tmax<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">bknots</span><span class="op">)</span><span class="op">+</span><span class="fl">1</span>, </span>
+<span>                              coefs_mean <span class="op">=</span> <span class="va">p_mean</span>,</span>
+<span>                              prior_smooth <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">40</span><span class="op">)</span>,         </span>
+<span>                              prior_loghaz <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                              nsim<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span>    </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/bquote.html" class="external-link">bquote</a></span><span class="op">(</span><span class="va">sigma</span> <span class="op">~</span> <span class="st">" ~ Gamma(2,40)"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_priorpred.html">plot_mspline_priorpred</a></span><span class="op">(</span>iknots<span class="op">=</span><span class="va">iknots</span>, bknots<span class="op">=</span><span class="va">bknots</span>, tmax<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">bknots</span><span class="op">)</span><span class="op">+</span><span class="fl">1</span>, </span>
+<span>                              coefs_mean <span class="op">=</span> <span class="va">p_mean</span>,</span>
+<span>                              prior_smooth <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,      </span>
+<span>                              prior_loghaz <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                              nsim<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/bquote.html" class="external-link">bquote</a></span><span class="op">(</span><span class="va">sigma</span> <span class="op">~</span> <span class="st">"~ Gamma(2,1)"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">gridExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html" class="external-link">grid.arrange</a></span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Removed 999 rows containing missing values (`geom_line()`).</span></span></code></pre>
+<pre><code><span><span class="co">## Warning: Removed 50 rows containing missing values (`geom_line()`).</span></span></code></pre>
 <p><img src="methods_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
 <p>By default, the package estimates <span class="math inline">\(\sigma\)</span> as part of the full Bayesian model
 (with a gamma(2,1) prior), so that uncertainty about the level of

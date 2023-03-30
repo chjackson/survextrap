@@ -10,4 +10,5 @@ man-roxygen
 web_assets
 tests/simulation
 vignettes/examples_cache
-vignettes/priors.Rmd
+^doc$
+^Meta$
