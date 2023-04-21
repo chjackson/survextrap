@@ -9,7 +9,7 @@ sp <- list(iknots=1:3, bknots=c(0,5), degree=2)
 test_that("prior hazard parameter samples", {
   expect_error({ # ?? any sensible expectations here?
     ## no covariates
-    prior_sample(mspline = sp, 
+    prior_sample(mspline = sp,
                  coefs_mean = NULL,
                  prior_smooth = p_gamma(2,1),
                  prior_loghaz = p_normal(0,1),
@@ -20,7 +20,6 @@ test_that("prior hazard parameter samples", {
                  coefs_mean = NULL,
                  prior_smooth = p_gamma(2,1),
                  prior_loghaz = p_normal(0,1),
-                 x = list(ncovs=1, xnames="treatment"),
                  X = list(treatment=1),
                  nsim = 100)
     ## prop haz model, 2 covs
@@ -28,7 +27,6 @@ test_that("prior hazard parameter samples", {
                  coefs_mean = NULL,
                  prior_smooth = p_gamma(2,1),
                  prior_loghaz = p_normal(0,1),
-                 x = list(ncovs=2, xnames=c("treatment","age")),
                  X = list(treatment=1, age=60),
                  nsim = 100)
 
@@ -37,8 +35,7 @@ test_that("prior hazard parameter samples", {
                  coefs_mean = NULL,
                  prior_smooth = p_gamma(2,1),
                  prior_loghaz = p_normal(0,1),
-                 nonprop = TRUE,
-                 x = list(ncovs=1, xnames="treatment"),
+                 prior_sdnp = p_gamma(2,1),
                  X = list(treatment=1),
                  nsim = 100)
     ## nonprop haz model, 2 covs
@@ -46,8 +43,7 @@ test_that("prior hazard parameter samples", {
                  coefs_mean = NULL,
                  prior_smooth = p_gamma(2,1),
                  prior_loghaz = p_normal(0,1),
-                 nonprop = TRUE,
-                 x = list(ncovs=1, xnames="treatment"),
+                 prior_sdnp = p_gamma(2,1),
                  X = list(treatment=1),
                  nsim = 100)
   },NA)
@@ -66,7 +62,6 @@ test_that("prior hazard function samples", {
     pdf <- mspline_priorpred(iknots=1:3, bknots=c(0,5), degree=2,
                                 prior_loghaz = p_normal(0,1),
                                 prior_smooth = p_gamma(10, 10),
-                                x = list(ncovs=1, xnames="treatment"),
                                 X = list(treatment=-5),
                                 tmin=0, tmax=10, nsim=10)
     ggplot(pdf, aes(x=time, y=haz, group=rep)) + geom_line() + ylim(0,2)
@@ -75,9 +70,7 @@ test_that("prior hazard function samples", {
     p <- plot_mspline_priorpred(iknots=1:3, bknots=c(0,5), df=5, degree=2,
                                 prior_loghaz = p_normal(0,1),
                                 prior_smooth = p_gamma(10, 10),
-                                x = list(ncovs=1, xnames="treatment"),
                                 X = list(treatment=-5),
-                                nonprop = TRUE,
                                 prior_sdnp = p_gamma(2,1),
                                 tmin=0, tmax=10, nsim=10)
     p
@@ -107,7 +100,7 @@ test_that("prior hazard SD over time", {
                  coefs_mean = NULL,
                  prior_smooth = p_gamma(1,40),
                  prior_loghaz = p_normal(0,1),
-                 x = list(ncovs=1, xnames="treatment"), X = list(treatment=1),
+                 X = list(treatment=1),
                  nsim = 100, quantiles=c(0.25, 0.75))
 
     ## non proportional hazards model with one covariate. Even more uncertainty
@@ -115,8 +108,7 @@ test_that("prior hazard SD over time", {
                  coefs_mean = NULL,
                  prior_smooth = p_gamma(1,40),
                  prior_loghaz = p_normal(0,1),
-                 x = list(ncovs=1, xnames="treatment"), X = list(treatment=1),
-                 nonprop = TRUE,
+                 X = list(treatment=1),
                  prior_sdnp = p_gamma(2,1),
                  nsim = 100, quantiles=c(0.25, 0.75))
 
@@ -134,10 +126,8 @@ test_that("prior hazard ratio SD over time", {
                      coefs_mean = NULL,
                      prior_smooth = p_gamma(1,400),
                      prior_loghaz = p_normal(0,1),
-                     x = list(ncovs=1, xnames="treatment"),
                      X = list(treatment=1),
                      X0 = list(treatment=0),
-                     nonprop = TRUE,
                      prior_sdnp = p_gamma(1, 100),
                      nsim = 100, quantiles=c(0.25, 0.75))
   expect_lt(psd$sd_hr[2], 0.5)

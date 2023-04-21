@@ -11,15 +11,17 @@
 ##'
 ##' @param ylab Y-axis label
 ##'
-##' @param line_size Passed to \code{\link{geom_line}}.
+##' @param line_size Passed to \code{\link{geom_line}}
 ##'
 ##' @param ci_alpha Transparency for the credible interval ribbons
+##'
+##' @param show_knots Show the locations of the spline knots as vertical lines
 ##'
 ##' @export
 plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
                         newdata0=NULL, wane_period=NULL, wane_nt=10,                        
                         ci=NULL, xlab="Time", ylab="Hazard",
-                        line_size=1.5, ci_alpha=0.2){
+                        line_size=1.5, ci_alpha=0.2, show_knots=FALSE){
     lower <- upper <- NULL
     newdata <- default_newdata(x, newdata)
     haz <- hazard(x, newdata=newdata, times=times, tmax=tmax, niter=niter,
@@ -34,8 +36,9 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
         geom_ylab + geom_xlab +
         theme_minimal() +
         theme(panel.grid.minor = element_blank()) +
-        geom_vline(xintercept=knots, col="blue", linewidth=0.4*line_size, alpha=0.3) +
         geom_line(linewidth=line_size)
+    if (show_knots) 
+      p <- p + geom_vline(xintercept=knots, col="blue", linewidth=0.4*line_size, alpha=0.3)
     if (is.null(ci)) ci <- (attr(haz,"nvals")==1)
     if (ci)
         p <- p +
@@ -62,7 +65,7 @@ plot_hazard <- function(x, newdata=NULL, times=NULL, tmax=NULL, niter=NULL,
 plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter=NULL,
                           newdata0=NULL, wane_period=NULL, wane_nt=10,                        
                           ci=NULL, xlab="Time", ylab="Survival",
-                          line_size=1.5, ci_alpha=0.2){
+                          line_size=1.5, ci_alpha=0.2, show_knots=FALSE){
     lower <- upper <- NULL
     if (is.null(km)) km <- one_factor_cov(x)
     newdata <- default_newdata(x, newdata)
@@ -84,8 +87,9 @@ plot_survival <- function(x, newdata=NULL, times=NULL, tmax=NULL, km=NULL, niter
         geom_ylab + geom_xlab +
         theme_minimal() +
         theme(panel.grid.minor = element_blank()) +
-        geom_vline(xintercept=knots, col="blue", linewidth=0.4*line_size, alpha=0.3) +
         geom_step(linewidth=line_size)
+    if (show_knots)
+      p <- p + geom_vline(xintercept=knots, col="blue", linewidth=0.4*line_size, alpha=0.3)
     if (is.null(ci)) ci <- (attr(surv,"nvals")==1)
     if (ci)
         g <- g +
@@ -134,11 +138,16 @@ plot.survextrap <- function(x, type="hazsurv", newdata=NULL, ...){
 }
 
 plot_hazsurv <- function(x, newdata=NULL, ...){
-    ps <- plot_survival(x, newdata=newdata, ...)
-    ph <- plot_hazard(x, newdata=newdata, ...)
-    gridExtra::grid.arrange(ps, ph, nrow=1)
+  ps <- plot_survival(x, newdata=newdata, ...) +
+    theme(legend.position = "none")
+  ph <- plot_hazard(x, newdata=newdata, ...)
+  ## Get the plot grids the same size, even when the legend is removed from the left one
+  ps <- ggplotGrob(ps) 
+  ph <- ggplotGrob(ph)
+  g <- cbind(ps, ph)
+  grid::grid.newpage()
+  grid::grid.draw(g)
 }
-
 
 ##' Plot hazard ratio against time from a survextrap model
 ##'

@@ -43,7 +43,7 @@ drawing the intervals if the plot shows the curve for only one covariate value.}
 
 \item{ylab}{Y-axis label}
 
-\item{line_size}{Passed to \code{\link{geom_line}}.}
+\item{line_size}{Passed to \code{\link{geom_line}}}
 
 \item{ci_alpha}{Transparency for the credible interval ribbons}
 }

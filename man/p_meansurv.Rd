@@ -9,10 +9,14 @@ p_meansurv(median, upper, mspline = NULL)
 \arguments{
 \item{median}{Best guess (prior median) for a typical survival time}
 
-\item{upper}{95\% credible limit for a survival time}
+\item{upper}{Upper limit of 95\% credible interval for a survival time}
 
 \item{mspline}{A list with components \code{iknots} (vector of internal knots), \code{bknots} (vector of boundary knots)
 and \code{degree} (polynomial degree) defining an M-spline configuration.}
+}
+\value{
+A normal prior in the format returned by \code{\link{p_normal}}, which can
+be passed directly to the \code{prior_loghaz} argument in \code{\link{survextrap}}.
 }
 \description{
 Derive a normal prior for the hazard scale parameter based on a guess at survival times

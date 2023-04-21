@@ -18,7 +18,8 @@ plot_survival(
   xlab = "Time",
   ylab = "Survival",
   line_size = 1.5,
-  ci_alpha = 0.2
+  ci_alpha = 0.2,
+  show_knots = FALSE
 )
 }
 \arguments{
@@ -33,7 +34,12 @@ for each level of this factor.
 
 (b) if there are multiple covariates, or any numeric covariates, then the output
 is computed at the mean of each numeric covariate in the original data, and at the
-baseline level of each factor covariate.}
+baseline level of each factor covariate.
+
+Note caution is required about how treatment groups (for example) are stored in your data.
+If these are coded as numeric (0/1), then if \code{newdata} is not specified, then only one
+output will be shown, which relates to the average value of this numeric variable over
+the data, which doesn't correspond to either of the treatment groups.}
 
 \item{times}{Vector of times at which to compute the estimates.}
 
@@ -74,9 +80,11 @@ drawing the intervals if the plot shows the curve for only one covariate value.}
 
 \item{ylab}{Y-axis label}
 
-\item{line_size}{Passed to \code{\link{geom_line}}.}
+\item{line_size}{Passed to \code{\link{geom_line}}}
 
 \item{ci_alpha}{Transparency for the credible interval ribbons}
+
+\item{show_knots}{Show the locations of the spline knots as vertical lines}
 }
 \description{
 Plot survival curves from a survextrap model

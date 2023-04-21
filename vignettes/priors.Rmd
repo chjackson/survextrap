@@ -26,7 +26,7 @@ The principle behind the package is that any information that is relevant to ext
 
 * **Parametric mechanisms** denote the form of $f()$.   These might include the notion that some people are cured (mixture cure models), or that disease-specific and background hazards can be modelled additively (relative survival models).   Conventional parametric survival models (like the Weibull and log-logistic) are generally used out of familiarity, not because they are thought to represent meaningful mechanisms for survival.
 
-    The default parametric model in `survextrap` is a flexible spline-based model.  This is designed as a "black box", which aims to fit the data as well as possible.  It is is not designed to be treated as a mechanism for extrapolation.
+    The default parametric model in `survextrap` is a flexible spline-based model.  This is designed as a "black box", which aims to fit the data as well as possible.  It is not designed to be treated as a mechanism for extrapolation.
 
     However, this spline model has parameters $\theta$, which still need prior distributions, because the model is Bayesian! 
 
@@ -42,7 +42,7 @@ This article describes these two kinds of "prior" that can be used in `survextra
 
 We suppose there is some expert judgement about survival over the time period from $t$ to $u$, and we can "elicit" this as the probability $p$ that a person who is alive at $t$ will have died before $u$. 
 
-This elicitation might be done in many ways (e.g. through consensus methods, or consulting multiple experts and aggregating their beliefs).  survextrap does not include tools or guidance for doing elicitation, but further info is available, e.g. from [Bojke et al.](https://journals.sagepub.com/doi/pdf/10.1177/0272989X211028236), [SHELF](https://shelf.sites.sheffield.ac.uk/). 
+This elicitation might be done in many ways (e.g. through consensus methods, or consulting multiple experts and aggregating their beliefs).  `survextrap` does not include tools or guidance for doing elicitation, but further info is available, e.g. from [Bojke et al.](https://journals.sagepub.com/doi/pdf/10.1177/0272989X211028236), or [SHELF](https://shelf.sites.sheffield.ac.uk/). 
 
 One simple way is to elicit:
 
@@ -105,8 +105,8 @@ Before fitting a model, we can use the `mspline_priorpred` function to check tha
 from the prior would be considered plausible representations of the knowledge that exists outside the data. 
 
 To use this before the model is fitted, we have to know the knots defining the spline, and choose a set
-of priors. `survextrap` provides a set of default priors, which may or may not be sensible in a given application,
-and a procedure for picking knots. 
+of priors. `survextrap` provides a set of default priors, which may or may not be sensible in a given application.
+and a procedure for picking knots (see the [methods vignette](../methods.html#bayesspec)).
 
 <!-- (TODO: what about a "no fit" model option.  Then we can return functions that work like
 mspline_priorpred ) -->
@@ -160,7 +160,7 @@ A simple heuristic is to specify
 
 * a prior guess (e.g. we guess that average survival time is 50 years after the start of the study)
 
-* a prior upper credible limit (e.g. we guess it is unlikely that the mean survival time is 80 years after the start of the study).  Note that this represents uncertainty about the mean survival in a population, rather than the variability between individuals in the population, so perhaps this should be narrower than you think. 
+* a prior upper credible limit (e.g. we guess it is unlikely that the mean survival time is 80 years after the start of the study).  Note that this represents uncertainty about the mean survival in a population, rather than the variability between individuals in the population, so perhaps the credible interval should be narrower than you think. 
 
 * hence giving a median and lower credible limit for $h(t)$, hence (after dividing by the constant $\sum_k p_k b_k(t)$ for an arbitrary $t$ and logging), giving a median $m$ and lower credible limit $L$ for $\log(\eta)$.  Hence a normal prior for $\log(\eta)$ can be defined with median $m$, and standard deviation $(L-m)/2$.
 
@@ -199,7 +199,7 @@ Here we simulate `nsim=30` prior hazard trajectories from the model `ndi_mod`, a
 set.seed(1)
 haz_sim <- ndi_mod$prior_pred$haz(nsim=30)
 ggplot(haz_sim, aes(x=time, y=haz, group=rep)) + 
-  geom_line() + xlab("Years") + ylab("Hazard")
+  geom_line() + xlab("Years") + ylab("Hazard") + ylim(0,0.05)
 ```
 
 An alternative way is to use the `mspline_priorpred` function, which does not require a model to be specified with the `survextrap` function, but does require the knots and priors to be supplied explicitly. 
@@ -213,7 +213,7 @@ haz_sim <- mspline_priorpred(iknots=sp$iknots, bknots=sp$bknots, degree=sp$degre
                              tmax=3, nsim=30)
 ```
 
-These plots can give some idea of how much risks might be expected to vary over time.   The parameter driving these variations is $\sigma$, whose prior can be defined with the `prior_smooth` argument to `survextrap`.  In the default model, $\sigma=0$ means that we are sure that the hazard will be constant.   Therefore we might want to define the prior for $\sigma$ to rule out implausibly large changes.  For example, a Gamma(2,20):
+These plots can give some idea of how much risks might be expected to vary over time.   The parameter driving these variations is $\sigma$, whose prior can be defined with the `prior_smooth` argument to `survextrap`.  In the standard `survextrap` model, $\sigma=0$ means that we are sure that the hazard will be constant.   Therefore we might want to define the prior for $\sigma$ to rule out implausibly large changes.  For example, a Gamma(2,20):
 
 ```{r,results="hide"}
 set.seed(1)
@@ -223,13 +223,13 @@ haz_sim <- mspline_priorpred(iknots=sp$iknots, bknots=sp$bknots, degree=sp$degre
                              prior_loghaz = p_meansurv(median=50, upper=80, mspline=sp),
                              tmax=3, nsim=30)
 ggplot(haz_sim, aes(x=time, y=haz, group=rep)) + 
-  geom_line() + xlab("Years") + ylab("Hazard")
+  geom_line() + xlab("Years") + ylab("Hazard") + ylim(0,0.05)
 ```
 
 
 The choice of this prior might be important if we want to extrapolate outside the data, while accounting for potential hazard changes outside the data.   If the data informing extrapolation are weak, then the extrapolations will be sensitive to the prior for these potential hazard changes.  
 
-Plotting multiple trajectories gives a rough idea, but ideally we want a more quantitative summary of the typical amount of variation through time. 
+Plotting multiple trajectories gives a rough idea of the typical amount of variation through time, but , but ideally we want a more quantitative summary of this.
 
 <!-- TODO What about showing posteriors compared to priors in these examples?? -->
 
@@ -240,14 +240,14 @@ The variation in a hazard curve can be summarised simply by taking a fine grid o
 
 Since the SD depends on the scale of the hazard, a more useful measure of variation would be the ratio between a particularly high and a particularly low hazard on this grid.    High and low might be defined from the 90\% and 10\% quantiles over time.  If the hazard is constant, over time, this ratio will be 1. 
 
-These measures are computed by the `haz_sd()` function. 
+These measures are computed by the `haz_sd()` function: the `sd_haz` component is the SD over time of the hazard, `sd_mean` is the SD over time of the inverse hazard, and `hr` is the high/low hazard ratio (90\%/10\% by default).
 
 ```{r}
 set.seed(1)
 ndi_mod$prior_pred$haz_sd()
 ```
 
-The implied prior for the high/low hazard ratio is shown in the `hr` column.  This shows that the default Gamma$(a=2,b=1)$ prior used in this model is very vague.  We can make it less vague by reducing $a/b$.  A Gamma(2, 5), for example, leads to an upper 90\% credible limit of about 5-6 for the hazard ratio over time.  Trial and error is probably necessary to produce a prior that is judged plausible by this metric.
+This shows that the default Gamma$(a=2,b=1)$ prior used in this model is very vague.  We can make it less vague by reducing $a/b$.  A Gamma(2, 5), for example, leads to an upper 90\% credible limit of about 5-6 for the hazard ratio over time.  Trial and error is probably necessary to produce a prior that is judged plausible by this metric.
 
 ```{r}
 set.seed(1)
@@ -316,6 +316,11 @@ rmst(ndi3_mod, t=10, niter=100)
 ```
 
 -->
+
+## Hazard ratios for effects of covariates
+
+_[To do]_
+
 
 ## SD of hazard ratios over time in non-proportional hazards models 
 

@@ -81,7 +81,10 @@ p_gamma <- function(shape = 2, rate = 1){
 #'
 #' @param median Best guess (prior median) for a typical survival time
 #'
-#' @param upper 95% credible limit for a survival time
+#' @param upper Upper limit of 95% credible interval for a survival time
+#'
+#' @return A normal prior in the format returned by \code{\link{p_normal}}, which can
+#' be passed directly to the \code{prior_loghaz} argument in \code{\link{survextrap}}. 
 #'
 #' @export
 p_meansurv <- function(median, upper, mspline=NULL){
@@ -96,6 +99,21 @@ p_meansurv <- function(median, upper, mspline=NULL){
   p_normal(logeta_median, logeta_sd)
 }
 
+#' Derive a normal prior for the log hazard ratio parameter based on a guess at the hazard ratio
+#'
+#' @param median Best guess (prior median) for a typical hazard ratio
+#'
+#' @param upper Upper limit of 95% credible interval for hazard ratio
+#'
+#' @return A normal prior in the format returned by \code{\link{p_normal}}, which can
+#' be passed directly to the \code{prior_loghr} argument in \code{\link{survextrap}}. 
+#'
+#' @export
+p_hr <- function(median, upper){
+  loghr_median <- log(median)
+  loghr_sd <- (log(upper) - log(median)) / qnorm(0.975)
+  p_normal(loghr_median, loghr_sd)
+}
 
 # internal ----------------------------------------------------------------
 
@@ -284,41 +302,57 @@ prior_sample <- function(mspline,
                                         # no constants for the moment as they are not allowed in the model
                          prior_loghaz,
                          prior_loghr = NULL,
-                         x = NULL,
                          X = NULL,
-                         nonprop = FALSE,
-                         prior_sdnp = p_gamma(2,1),
+                         X0 = NULL,
+                         prior_sdnp = NULL, 
                          nsim = 100){
   sam <- prior_basehaz_sample(mspline,
                               coefs_mean = coefs_mean, prior_smooth = prior_smooth,
                               prior_loghaz = prior_loghaz, nsim=nsim)
-  if (is.null(x)) x <- list(ncovs=0, xnames=NULL)
-  validate_prior_x(x, X)
 
-  ## baseline HR
+  if (is.null(X)) x <- list(ncovs=0, xnames=NULL)
+  else {
+    X <- validate_prior_X(X)
+    x <- list(ncovs = length(X), xnames = names(X))
+  }
+  
+  ## baseline hazard scale 
   if (x$ncovs > 0){
     loghr_prior <- get_prior_coveffs(prior_loghr, x, "loghr")
     loghr <- lapply(attr(loghr_prior, "r"), function(x)x$r(nsim))
     loghr <- do.call(cbind, loghr)
-    X <- unlist(X)
+    if (!is.null(X0)){
+      X0 <- validate_prior_X(X0)
+      linpred0 <- loghr %*% X0
+      sam$loghaz0 <- sam$loghaz + linpred0
+      sam$haz0 <- exp(sam$loghaz0)
+    }
     linpred <- loghr %*% X
     sam$loghaz <- sam$loghaz + linpred
     sam$haz <- exp(sam$loghaz)
   }
 
-  ## nonprop SD
-  sdnp_prior <- get_prior_sdnp(prior_sdnp, x, nonprop)
-  if (nonprop && !is.null(x)) {
+  ## nonprop haz models 
+  if (!is.null(prior_sdnp)) {
+    sdnp_prior <- get_prior_sdnp(prior_sdnp, x, nonprop=TRUE)
     sdnp <- vector(x$ncovs, mode="list")
     nvars <- ncol(sam$coefs) # number of spline basis terms
     np_linpred <- matrix(0, nrow=nsim, ncol=nvars-1)
     for (i in seq_len(x$ncovs)){
       sdnp[[i]] <- rgamma(nsim, shape=sdnp_prior[i,1], rate=sdnp_prior[i,2])
-      b_np <- matrix(rnorm(nsim *(nvars - 1), 0, sdnp[[i]]), nrow=nsim, ncol=nvars-1)
+      b_np <- matrix(rnorm(nsim *(nvars - 1), 0, sdnp[[i]]),
+                     nrow=nsim, ncol=nvars-1)
+      if (!is.null(X0))
+        np_linpred0 <- np_linpred + b_np * X0[i]
       np_linpred <- np_linpred + b_np * X[i]
     }
+    if (!is.null(X0)){
+      np_linpred0 <- cbind(0, np_linpred0)
+      sam$beta0 <- sam$beta + np_linpred0
+      sam$coefs0 <- exp(sam$beta0) / rowSums(exp(sam$beta0))
+    }
     np_linpred <- cbind(0, np_linpred)
-    sam$beta <- sam$beta + np_linpred # Can we do this?  Dims?
+    sam$beta <- sam$beta + np_linpred
     sam$coefs <- exp(sam$beta) / rowSums(exp(sam$beta))
   }
 
@@ -345,6 +379,11 @@ prior_haz_const <- function(mspline,
 }
 
 
+validate_prior_X <- function(X){
+  X <- unlist(X)
+}
+
+## TODO remove if unused  
 validate_prior_x <- function(x, X){
   if (x$ncovs==0 && !is.null(X)) {
     warning("Covariate values X supplied, but x$ncovs=0. Ignoring covariates.")
@@ -407,7 +446,9 @@ validate_prior_x <- function(x, X){
 ##' @inheritParams survextrap
 ##' @inheritParams mspline_priorpred
 ##'
-##' @param hq Quantiles which define the "low" and "high" values to compute the hazard ratio between.
+##' @param hq Quantiles which define the "low" and "high" values of a time-varying quantity (hazard in `prior_haz_sd` and the hazard ratio in `prior_hr_sd`).
+##' The ratio between the high and low values will be summarised, as a measure of
+##' time-dependence. 
 ##' By default, this is `c(0.1, 0.9)`, so that the 10\% and 90\% quantiles are used
 ##' respectively.
 ##'
@@ -421,10 +462,8 @@ prior_haz_sd <- function(mspline,
                          prior_smooth=p_gamma(2,1),
                          prior_loghaz = p_normal(0, 20),
                          prior_loghr = NULL,
-                         x = NULL,
                          X = NULL,
-                         nonprop = FALSE,
-                         prior_sdnp = p_gamma(2,1),
+                         prior_sdnp = NULL, 
                          tmin=0, tmax=10,
                          nsim = 100,
                          hq = c(0.1, 0.9),
@@ -432,7 +471,7 @@ prior_haz_sd <- function(mspline,
   pred <- mspline_priorpred(iknots=mspline$iknots, bknots=mspline$bknots, degree=mspline$degree,
                                coefs_mean=coefs_mean, prior_smooth=prior_smooth,
                                prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
-                               x=x, X=X, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                               X=X, prior_sdnp=prior_sdnp,
                                tmin=tmin, tmax=tmax,
                             nsim=nsim)
   pred$mean <- 1 / pred$haz
@@ -448,6 +487,8 @@ prior_haz_sd <- function(mspline,
              hr = quantile(hr, quantiles))
 }
 
+## Should this be consistent with hr_survextrap , two rows of X, X0? 
+
 ##' @rdname prior_haz
 ##' @export
 prior_hr_sd <- function(mspline,
@@ -455,22 +496,26 @@ prior_hr_sd <- function(mspline,
                         prior_smooth=p_gamma(2,1),
                         prior_loghaz = p_normal(0, 20),
                         prior_loghr = NULL,
-                        x = NULL,
-                        X = NULL,
-                        X0 = NULL,
-                        nonprop = FALSE,
-                        prior_sdnp = p_gamma(2,1),
+                        X,
+                        X0,
+                        prior_sdnp = NULL, 
                         tmin=0, tmax=10,
                         nsim = 100,
+                        hq = c(0.1, 0.9),
                         quantiles = c(0.025, 0.5, 0.975)){
   pred <- mspline_priorpred(iknots=mspline$iknots, bknots=mspline$bknots, degree=mspline$degree,
                             coefs_mean=coefs_mean, prior_smooth=prior_smooth,
                             prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
-                            x=x, X=X, X0=X0, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                            X=X, X0=X0, prior_sdnp=prior_sdnp,
                             tmin=tmin, tmax=tmax,
                             nsim=nsim)
   sd_hr <- tapply(pred$hr, pred$rep, sd)
-  data.frame(sd_hr = quantile(sd_hr, quantiles))
+  hq <- tapply(pred$hr, pred$rep, quantile, probs = hq)
+  hq <- do.call("rbind", hq)
+  hrr <- hq[,2] / hq[,1]
+  
+  data.frame(sd_hr = quantile(sd_hr, quantiles),
+             hrr = quantile(hrr, quantiles))
 }
 
 default_coefs_mean <- function(mspline, coefs_mean=NULL, logit=FALSE){

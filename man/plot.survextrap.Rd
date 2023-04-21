@@ -20,7 +20,12 @@ for each level of this factor.
 
 (b) if there are multiple covariates, or any numeric covariates, then the output
 is computed at the mean of each numeric covariate in the original data, and at the
-baseline level of each factor covariate.}
+baseline level of each factor covariate.
+
+Note caution is required about how treatment groups (for example) are stored in your data.
+If these are coded as numeric (0/1), then if \code{newdata} is not specified, then only one
+output will be shown, which relates to the average value of this numeric variable over
+the data, which doesn't correspond to either of the treatment groups.}
 
 \item{...}{Additional arguments, passed on to \code{plot_hazard} and \code{plot_survival}.}
 }

@@ -18,13 +18,20 @@ for each level of this factor.
 
 (b) if there are multiple covariates, or any numeric covariates, then the output
 is computed at the mean of each numeric covariate in the original data, and at the
-baseline level of each factor covariate.}
+baseline level of each factor covariate.
+
+Note caution is required about how treatment groups (for example) are stored in your data.
+If these are coded as numeric (0/1), then if \code{newdata} is not specified, then only one
+output will be shown, which relates to the average value of this numeric variable over
+the data, which doesn't correspond to either of the treatment groups.}
 
 \item{niter}{Number of MCMC iterations to use to compute credible
 intervals.  Set to a low value to make this function quicker, at the cost of
 some approximation error (which may not be important for plotting).}
 
-\item{hq}{Quantiles which define the "low" and "high" values to compute the hazard ratio between.
+\item{hq}{Quantiles which define the "low" and "high" values of a time-varying quantity (hazard in \code{prior_haz_sd} and the hazard ratio in \code{prior_hr_sd}).
+The ratio between the high and low values will be summarised, as a measure of
+time-dependence.
 By default, this is \code{c(0.1, 0.9)}, so that the 10\\% and 90\\% quantiles are used
 respectively.}
 }

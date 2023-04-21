@@ -69,13 +69,15 @@ the "methods" vignette for more details.   In models with multiple covariates, c
 there is no way to assume that some covariates have proportional hazards but others don't -
 it is all or none.}
 
-\item{prior_loghaz}{Prior for the baseline log rate parameter (\code{log(eta)}), after centering around the log
-crude event rate in the data.
+\item{prior_loghaz}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters
 location, scale and degrees of freedom).  The default is a normal distribution with
 mean 0 and standard deviation 20.
+
+Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
+full model specification).
 
 "Baseline" is defined
 by the continuous covariates taking a value of zero and factor covariates taking their
@@ -195,10 +197,10 @@ A list of objects defining the fitted model.  A particularly important component
 \code{stanfit}: The object returned by \code{rstan} containing samples from the fitted model.  See the \href{https://mc-stan.org/rstan/index.html}{rstan} documentation.
 }
 \description{
-Flexible Bayesian parametric survival models.  Individual data are represented using M-splines
-and a proportional hazards or flexible non-proportional hazards model.
-Optionally a mixture cure version
-of this model can be fitted.
-Extrapolations can be enhanced by including external aggregate data, or by including a fixed background hazard
-in an additive hazards (relative survival) model.
+Flexible Bayesian parametric survival models.  Individual data are
+represented using M-splines and a proportional hazards or flexible
+non-proportional hazards model.  Optionally a mixture cure version
+of this model can be fitted.  Extrapolations can be enhanced by
+including external aggregate data, or by including a fixed
+background hazard in an additive hazards (relative survival) model.
 }

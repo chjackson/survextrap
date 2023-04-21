@@ -15,10 +15,8 @@ prior_haz_sd(
   prior_smooth = p_gamma(2, 1),
   prior_loghaz = p_normal(0, 20),
   prior_loghr = NULL,
-  x = NULL,
   X = NULL,
-  nonprop = FALSE,
-  prior_sdnp = p_gamma(2, 1),
+  prior_sdnp = NULL,
   tmin = 0,
   tmax = 10,
   nsim = 100,
@@ -32,14 +30,13 @@ prior_hr_sd(
   prior_smooth = p_gamma(2, 1),
   prior_loghaz = p_normal(0, 20),
   prior_loghr = NULL,
-  x = NULL,
-  X = NULL,
-  X0 = NULL,
-  nonprop = FALSE,
-  prior_sdnp = p_gamma(2, 1),
+  X,
+  X0,
+  prior_sdnp = NULL,
   tmin = 0,
   tmax = 10,
   nsim = 100,
+  hq = c(0.1, 0.9),
   quantiles = c(0.025, 0.5, 0.975)
 )
 }
@@ -70,13 +67,15 @@ sum to 1 internally (if they do not already).}
 models where this is estimated.  This should be a call to \code{p_gamma()}.  The
 default is \code{p_gamma(2,1)}.}
 
-\item{prior_loghaz}{Prior for the baseline log rate parameter (\code{log(eta)}), after centering around the log
-crude event rate in the data.
+\item{prior_loghaz}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters
 location, scale and degrees of freedom).  The default is a normal distribution with
 mean 0 and standard deviation 20.
+
+Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
+full model specification).
 
 "Baseline" is defined
 by the continuous covariates taking a value of zero and factor covariates taking their
@@ -94,18 +93,9 @@ of each list component matches the name of the coefficient, e.g.
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
-\item{x}{Only required for models with covariates.  A list with components \code{ncovs} (number of covariates)
-and \code{xnames} (names of these covariates).}
-
 \item{X}{Either a list, vector or one-row matrix with one covariate value.
-Factors must be supplied as multiple numeric (0/1) contrasts. (TODO doc on how to build
-the names - vignette)}
-
-\item{nonprop}{If \code{TRUE} then a non-proportional hazards model is fitted.
-This is achieved by modelling the spline basis weights in terms of the covariates.  See
-the "methods" vignette for more details.   In models with multiple covariates, currently
-there is no way to assume that some covariates have proportional hazards but others don't -
-it is all or none.}
+Factors must be supplied as multiple numeric (0/1) contrasts. (TODO doc on how to
+match then with prior_loghr and prior_sdnp, and naming)}
 
 \item{prior_sdnp}{Prior for the standard deviation parameters that smooth the non-proportionality
 effects over time in non-proportional hazards models.  This should be a call to \code{p_gamma()}
@@ -117,15 +107,17 @@ or a list of calls to \code{p_gamma()} with one component per covariate, as in \
 
 \item{nsim}{Number of simulations to draw}
 
-\item{hq}{Quantiles which define the "low" and "high" values to compute the hazard ratio between.
+\item{hq}{Quantiles which define the "low" and "high" values of a time-varying quantity (hazard in \code{prior_haz_sd} and the hazard ratio in \code{prior_hr_sd}).
+The ratio between the high and low values will be summarised, as a measure of
+time-dependence.
 By default, this is \code{c(0.1, 0.9)}, so that the 10\\% and 90\\% quantiles are used
 respectively.}
 
 \item{quantiles}{Quantiles used to summarise the prior predictive distribution
 of the standard deviation.}
 
-\item{X0}{An alternative covariate value (optional).  The hazard ratio between the hazards at X
-and X0 will also be returned.}
+\item{X0}{An alternative covariate value (optional).  The hazard
+ratio between the hazards at X and X0 will also be returned.}
 }
 \description{
 The spline model in survextrap allows the hazard to change over time in an

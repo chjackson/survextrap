@@ -1,16 +1,19 @@
 ## TODO
 ## use capital X for covariates not x
 ## Document / error that variables should be in data frame not in working env
-## should loghaz be called logscale as it's not the log hazard
+## should loghaz be called logscale as it's not the log hazard/? but its more like a rate than a scale so that'd also be confusing.
+## hazscale?  loghscale? logeta?
+
+## prior_smooth, prior_sdnp inconsistently named
 
 #' Flexible Bayesian parametric survival models
 #'
-#' Flexible Bayesian parametric survival models.  Individual data are represented using M-splines
-#' and a proportional hazards or flexible non-proportional hazards model.
-#'Optionally a mixture cure version
-#' of this model can be fitted.
-#' Extrapolations can be enhanced by including external aggregate data, or by including a fixed background hazard
-#' in an additive hazards (relative survival) model.
+#' Flexible Bayesian parametric survival models.  Individual data are
+#' represented using M-splines and a proportional hazards or flexible
+#' non-proportional hazards model.  Optionally a mixture cure version
+#' of this model can be fitted.  Extrapolations can be enhanced by
+#' including external aggregate data, or by including a fixed
+#' background hazard in an additive hazards (relative survival) model.
 #'
 #' @param formula  A survival formula in standard R formula syntax, with a call to `Surv()`
 #' on the left hand side.
@@ -55,13 +58,15 @@
 #' there is no way to assume that some covariates have proportional hazards but others don't -
 #' it is all or none.
 #'
-#' @param prior_loghaz Prior for the baseline log rate parameter (`log(eta)`), after centering around the log
-#' crude event rate in the data.
+#' @param prior_loghaz Prior for the baseline log hazard scale parameter (`log(eta)`).
 #'   This should be a call to a prior constructor function, such as
 #'   `p_normal(0,1)` or `p_t(0,2,2)`.   Supported prior distribution families
 #'   are normal (parameters mean and SD) and t distributions (parameters
 #' location, scale and degrees of freedom).  The default is a normal distribution with
 #' mean 0 and standard deviation 20.
+#'
+#' Note that `eta` is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
+#' full model specification).
 #'
 #' "Baseline" is defined
 #'   by the continuous covariates taking a value of zero and factor covariates taking their
@@ -276,8 +281,8 @@ survextrap <- function(formula,
     ibasis_ext_start <- if (nextern>0) make_basis(t_ext_start, mspline, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
 
     if (is.data.frame(backhaz)) {
-      backsurv_ext_stop <- exp(-get_cum_backhaz(external$t_ext_stop, backhaz))
-      backsurv_ext_start <- exp(-get_cum_backhaz(external$t_ext_start, backhaz))
+      backsurv_ext_stop <- exp(-get_cum_backhaz(t_ext_stop, backhaz))
+      backsurv_ext_start <- exp(-get_cum_backhaz(t_ext_start, backhaz))
     } else {
       backsurv_ext_stop <- aa(external$backsurv_stop)
       backsurv_ext_start <- aa(external$backsurv_start)
@@ -376,7 +381,6 @@ survextrap <- function(formula,
     prior_pred <- get_prior_pred(mspline=mspline, 
                                  coefs_mean=coefs_mean, prior_smooth=prior_smooth,
                                  prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
-                                 x=list(ncovs=ncovs, xnames=x$x$xnames),
                                  nonprop=nonprop, prior_sdnp=prior_sdnp)
     res <- c(misc_keep, standata_keep, model_keep, spline_keep, x, xcure,
              prior_keep, prioretc_keep, nlist(prior_pred), nlist(km))
@@ -391,13 +395,13 @@ survextrap <- function(formula,
 
 get_prior_pred <- function(mspline, 
                            coefs_mean, prior_smooth, prior_loghaz, prior_loghr,
-                           x, nonprop, prior_sdnp){
+                           nonprop, prior_sdnp){
   ## Samples of basic parameters defining the spline
   sample <- function(X=NULL, nsim=100){
     prior_sample(mspline=mspline, 
                  coefs_mean=coefs_mean, prior_smooth=prior_smooth,
                  prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
-                 x=x, X=X, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                 X=X, prior_sdnp=prior_sdnp,
                  nsim=nsim)
   }
   ## Summary of the hazard if coefs_mean was set to a constant hazard
@@ -411,7 +415,7 @@ get_prior_pred <- function(mspline,
     mspline_priorpred(iknots=mspline$iknots, bknots=mspline$bknots, degree=mspline$degree, 
                       coefs_mean=coefs_mean, prior_smooth=prior_smooth,
                       prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
-                      x=x, X=X, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                      X=X, prior_sdnp=prior_sdnp,
                       tmin=tmin, tmax=tmax, 
                       nsim=nsim)
   }
@@ -423,7 +427,7 @@ get_prior_pred <- function(mspline,
     prior_haz_sd(mspline=mspline, 
                  coefs_mean=coefs_mean, prior_smooth=prior_smooth,
                  prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
-                 x=x, X=X, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                 X=X, prior_sdnp=prior_sdnp,
                  tmin=tmin, tmax=tmax, nsim=nsim, hq=hq, quantiles=quantiles)
   }
   ## SD describing variation in hazard ratio function with time
@@ -432,7 +436,7 @@ get_prior_pred <- function(mspline,
     prior_hr_sd(mspline=mspline, 
                 coefs_mean=coefs_mean, prior_smooth=prior_smooth,
                 prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
-                x=x, X=X, X0=X0, nonprop=nonprop, prior_sdnp=prior_sdnp,
+                X=X, X0=X0, prior_sdnp=prior_sdnp,
                 tmin=tmin, tmax=tmax, nsim=nsim, quantiles=quantiles)
   }
   nlist(sample, haz, haz_const, haz_sd, hr_sd)

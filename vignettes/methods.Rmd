@@ -96,7 +96,7 @@ plot_mspline(iknots=c(1,3,5), bknots=c(0, 7),
 * I'd assume there is no difference between different kinds of arbitrarily-flexible model (fractional polynomials, particular kinds of spline) in terms of how well they tend to fit observed data, because they are all designed to do that job very well.  The difference I think will be in their computational efficiency, and how easily we can devise clearly-understandable priors on their parameters.  Priors will be influential in the places where there are no data.  For extrapolation, we don't want to rely on opaque nuances of the functional forms used in specific model families.
 
 
-# Bayesian model specification 
+# Bayesian model specification {#bayesspec}
 
 The _parameters_ of the model, $p_k$ and $\eta$, are estimated from data using Bayesian inference.
 
@@ -106,7 +106,7 @@ The _flexibility_ of the fitted model is determined by two things.
 
 (b) The _prior distribution_ on the basis coefficients $p_k$.  This plays the role of _smoothing_ the fitted hazard function.
 
-The default approach taken by `survextrap` is to choose a large number of knots $K$, intended to accommodate all reasonable situations, and then _estimate_ the extent of smoothing needed from the data.
+The default approach taken by `survextrap` is to choose a large number of knots and basis functions (the default is $K=10$), intended to accommodate all reasonable situations, and then _estimate_ the extent of smoothing needed from the data.
 
 * With _more data_, the fitted curve is as flexible as necessary to represent the data.
 

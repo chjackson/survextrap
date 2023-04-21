@@ -31,13 +31,15 @@ the prior.
 
 \code{degree}: Polynomial degree used for the basis function. The default is 3, giving a cubic.}
 
-\item{prior_loghaz}{Prior for the baseline log rate parameter (\code{log(eta)}), after centering around the log
-crude event rate in the data.
+\item{prior_loghaz}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters
 location, scale and degrees of freedom).  The default is a normal distribution with
 mean 0 and standard deviation 20.
+
+Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
+full model specification).
 
 "Baseline" is defined
 by the continuous covariates taking a value of zero and factor covariates taking their

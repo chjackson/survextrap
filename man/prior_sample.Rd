@@ -11,10 +11,9 @@ prior_sample(
   prior_smooth = p_gamma(2, 1),
   prior_loghaz,
   prior_loghr = NULL,
-  x = NULL,
   X = NULL,
-  nonprop = FALSE,
-  prior_sdnp = p_gamma(2, 1),
+  X0 = NULL,
+  prior_sdnp = NULL,
   nsim = 100
 )
 }
@@ -45,13 +44,15 @@ sum to 1 internally (if they do not already).}
 models where this is estimated.  This should be a call to \code{p_gamma()}.  The
 default is \code{p_gamma(2,1)}.}
 
-\item{prior_loghaz}{Prior for the baseline log rate parameter (\code{log(eta)}), after centering around the log
-crude event rate in the data.
+\item{prior_loghaz}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters
 location, scale and degrees of freedom).  The default is a normal distribution with
 mean 0 and standard deviation 20.
+
+Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
+full model specification).
 
 "Baseline" is defined
 by the continuous covariates taking a value of zero and factor covariates taking their
@@ -69,14 +70,12 @@ of each list component matches the name of the coefficient, e.g.
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
-\item{x}{Only required for models with covariates.  A list with components \code{ncovs} (number of covariates)
-and \code{xnames} (names of these covariates).}
-
 \item{X}{Either a list, vector or one-row matrix with one covariate value.
-Factors must be supplied as multiple numeric (0/1) contrasts. (TODO doc on how to build
-the names - vignette)}
+Factors must be supplied as multiple numeric (0/1) contrasts. (TODO doc on how to
+match then with prior_loghr and prior_sdnp, and naming)}
 
-\item{nonprop}{Is the model a non-proportional hazards model (\code{TRUE} or \code{FALSE}).}
+\item{X0}{An alternative covariate value (optional).  The hazard
+ratio between the hazards at X and X0 will also be returned.}
 
 \item{prior_sdnp}{Prior for the standard deviation parameters that smooth the non-proportionality
 effects over time in non-proportional hazards models.  This should be a call to \code{p_gamma()}
