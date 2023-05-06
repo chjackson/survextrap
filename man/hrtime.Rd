@@ -4,7 +4,7 @@
 \alias{hrtime}
 \title{Hazard ratio between high and low values of the hazard over time}
 \usage{
-hrtime(x, newdata = NULL, niter = NULL, hq = c(0.1, 0.9))
+hrtime(x, newdata = NULL, niter = NULL, summ_fns = NULL, hq = c(0.1, 0.9))
 }
 \arguments{
 \item{x}{A fitted model object as returned by \code{\link{survextrap}}}
@@ -20,31 +20,43 @@ for each level of this factor.
 is computed at the mean of each numeric covariate in the original data, and at the
 baseline level of each factor covariate.
 
-Note caution is required about how treatment groups (for example) are stored in your data.
-If these are coded as numeric (0/1), then if \code{newdata} is not specified, then only one
-output will be shown, which relates to the average value of this numeric variable over
-the data, which doesn't correspond to either of the treatment groups.}
+Note caution is required about how treatment groups (for example)
+are stored in your data.  If these are coded as numeric (0/1),
+then if \code{newdata} is not specified only one output will be shown,
+which relates to the average value of this numeric variable over
+the data, which doesn't correspond to either of the treatment
+groups.  To avoid this, a treatment group should be stored as a
+factor.}
 
 \item{niter}{Number of MCMC iterations to use to compute credible
 intervals.  Set to a low value to make this function quicker, at the cost of
-some approximation error (which may not be important for plotting).}
+some approximation error (which may not be important for plotting or model
+development).}
 
-\item{hq}{Quantiles which define the "low" and "high" values of a time-varying quantity (hazard in \code{prior_haz_sd} and the hazard ratio in \code{prior_hr_sd}).
-The ratio between the high and low values will be summarised, as a measure of
-time-dependence.
-By default, this is \code{c(0.1, 0.9)}, so that the 10\\% and 90\\% quantiles are used
-respectively.}
+\item{summ_fns}{A list of functions to use to summarise the posterior sample.
+This is passed to \code{\link[posterior:summarise_draws]{posterior::summarise_draws}}.
+By default this is \code{list(median=median, ~quantile(.x, probs=c(0.025, 0.975)))}.
+If the list is named, then the names will be used for the columns of the
+output.}
+
+\item{hq}{Quantiles which define the "low" and "high" values of a
+time-varying quantity (hazard in \code{prior_haz_sd} and the hazard
+ratio in \code{prior_hr_sd}).  The ratio between the high and low
+values will be summarised, as a measure of time-dependence.  By
+default, this is \code{c(0.1, 0.9)}, so that the 10\% and 90\%
+quantiles are used respectively.}
 }
 \value{
-A summary of the posterior distribution of this hazard ratio from the fitted model,
-as a data frame with one row per covariate value requested in \code{newdata}, and one column for each
-of three posterior quantiles.
+A summary of the posterior distribution of this hazard
+ratio from the fitted model, as a data frame with one row per
+covariate value requested in \code{newdata}, and one column for each
+posterior summary statistic.
 }
 \description{
-This is intended as an intuitive single-number measure of how much a hazard function changes over time.
-The hazard is computed on an equally-spaced fine grid between the boundary knots.
-The ratio between a "high" and "low" one of these hazard values is computed.
-}
-\details{
-For example, if the hazard is constant over time, then this hazard ratio will be 1.
+This is intended as an intuitive single-number measure of how much
+a hazard function changes over time.  The hazard is computed on an
+equally-spaced fine grid between the boundary knots.  The ratio
+between a "high" and "low" one of these hazard values is computed.
+For example, if the hazard is constant over time, then this hazard
+ratio will be 1.
 }

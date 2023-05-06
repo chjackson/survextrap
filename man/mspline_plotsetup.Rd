@@ -2,37 +2,37 @@
 % Please edit documentation in R/mspline_plots.R
 \name{mspline_plotsetup}
 \alias{mspline_plotsetup}
-\title{Get times and basis for an illustration of an M-spline with given knots.}
+\title{Get basis for an illustration of an M-spline with given knots.}
 \usage{
 mspline_plotsetup(
-  iknots,
-  bknots = c(0, 10),
+  knots,
+  bknot = 10,
   tmin = NULL,
   tmax = NULL,
   degree = 3,
   df = 10,
-  extrap_model = "constant"
+  bsmooth = TRUE
 )
 }
 \arguments{
-\item{iknots}{Vector of internal knot locations. If not supplied, \code{df} has to be specified, in which case
-the default is \code{df - degree - 1} equally spaced knots between the boundary knots.}
+\item{knots}{Vector of knot locations. If not supplied, \code{df} has to be specified, in which case
+the default is \code{df - degree - 1} equally spaced knots between zero and the highest knot.}
 
-\item{bknots}{Vector with two elements, giving the boundary knot locations}
+\item{bknot}{Location of the highest knot}
 
-\item{tmin}{Minimum plotting time.  Defaults to lower boundary knot.}
+\item{tmin}{Minimum plotting time.  Defaults to zero.}
 
-\item{tmax}{Maximum plotting time.  Defaults to upper boundary knot.}
+\item{tmax}{Maximum plotting time.  Defaults to the highest knot.}
 
 \item{degree}{Spline polynomial degree (defaults to 3)}
 
-\item{df}{Desired number of basis terms, or "degrees of freedom" in the spline.
-If \code{iknots} is not supplied, the number of internal knots is then chosen to satisfy this.}
+\item{df}{Desired number of basis terms, or "degrees of freedom"
+in the spline.  If \code{knots} is not supplied, the number of
+knots is then chosen to satisfy this.}
 
-\item{extrap_model}{If \code{"constant"} then the hazard after the final boundary
-knot equals the hazard at this knot.  Otherwise the basis functions are simply
-extended outside boundary knot.}
+\item{bsmooth}{If \code{TRUE} then the function is constrained to
+also have zero derivative and second derivative at the boundary.}
 }
 \description{
-Get times and basis for an illustration of an M-spline with given knots.
+Get basis for an illustration of an M-spline with given knots.
 }

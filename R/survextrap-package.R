@@ -1,6 +1,6 @@
 #' The 'survextrap' package.
 #'
-#' @description For an introduction to and an overview of the `survextrap` package, see
+#' @description For an introduction to and overview of the `survextrap` package, and full documentation, see
 #'
 #' \url{https://chjackson.github.io/survextrap/}
 #' 
@@ -18,9 +18,6 @@
 #' @importFrom splines2 mSpline iSpline
 #' @importFrom survminer surv_summary
 #' 
-#' @importFrom stats as.formula delete.response dweibull integrate median model.matrix model.response optim predict pweibull quantile qbeta qgamma qnorm qt rlogis rnorm runif rbeta rgamma rt sd terms time var formula model.frame na.pass plogis qlogis get_all_vars reshape
-#'
-#' @references
-#' Stan Development Team (NA). RStan: the R interface to Stan. R package version 2.26.11. https://mc-stan.org
+#' @importFrom stats as.formula delete.response dweibull integrate median model.matrix model.response optim predict pweibull quantile qbeta qgamma qnorm qt rlogis rnorm runif rbeta rgamma rt sd terms time var formula model.frame na.pass plogis qlogis get_all_vars reshape .getXlevels setNames
 #'
 NULL

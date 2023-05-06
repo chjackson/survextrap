@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,11 +24,14 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/cetuximab.html">Case study of using survextrap: cetuximab for head and neck cancer</a>
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
     <a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a>
-    <a class="dropdown-item" href="../articles/waning.html">Treatment effect waning in survextrap</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -46,13 +49,13 @@
 </nav><div class="container template-reference-topic">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Estimates of survival from a survextrap model</h1>
+      <img src="" class="logo" alt=""><h1>Estimates of survival from a <code><a href="survextrap.html">survextrap</a></code> model</h1>
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/R/outputs.R" class="external-link"><code>R/outputs.R</code></a></small>
       <div class="d-none name"><code>survival.Rd</code></div>
     </div>
 
     <div class="ref-description section level2">
-    <p>Estimates of survival from a survextrap model</p>
+    <p>Estimates of survival from a <code><a href="survextrap.html">survextrap</a></code> model</p>
     </div>
 
     <div class="section level2">
@@ -60,9 +63,10 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">survival</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
 <span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  times <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  t <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tmax <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  niter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  summ_fns <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sample <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  newdata0 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  wane_period <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -84,18 +88,25 @@ the following default is used:</p>
 for each level of this factor.</p>
 <p>(b) if there are multiple covariates, or any numeric covariates, then the output
 is computed at the mean of each numeric covariate in the original data, and at the
-baseline level of each factor covariate.</p></dd>
+baseline level of each factor covariate.</p>
+<p>Note caution is required about how treatment groups (for example)
+are stored in your data.  If these are coded as numeric (0/1),
+then if <code>newdata</code> is not specified only one output will be shown,
+which relates to the average value of this numeric variable over
+the data, which doesn't correspond to either of the treatment
+groups.  To avoid this, a treatment group should be stored as a
+factor.</p></dd>
 
 
-<dt>times</dt>
+<dt>t</dt>
 <dd><p>Vector of times at which to compute the estimates.</p></dd>
 
 
 <dt>tmax</dt>
 <dd><p>Maximum time at which to compute the estimates.  If
-<code>times</code> is supplied, then this is ignored.  If <code>times</code> is not
-supplied, then <code>times</code> is set to a set of 100 equally spaced
-time points from 0 to <code>tmax</code>.  If both <code>tmax</code> and <code>times</code>
+<code>t</code> is supplied, then this is ignored.  If <code>t</code> is not
+supplied, then <code>t</code> is set to a set of 100 equally spaced
+time points from 0 to <code>tmax</code>.  If both <code>tmax</code> and <code>t</code>
 are not supplied, then <code>tmax</code> is set to the maximum follow up time
 in the data.</p></dd>
 
@@ -103,7 +114,16 @@ in the data.</p></dd>
 <dt>niter</dt>
 <dd><p>Number of MCMC iterations to use to compute credible
 intervals.  Set to a low value to make this function quicker, at the cost of
-some approximation error (which may not be important for plotting).</p></dd>
+some approximation error (which may not be important for plotting or model
+development).</p></dd>
+
+
+<dt>summ_fns</dt>
+<dd><p>A list of functions to use to summarise the posterior sample.
+This is passed to <code><a href="https://mc-stan.org/posterior/reference/draws_summary.html" class="external-link">posterior::summarise_draws</a></code>.
+By default this is <code>list(median=median, ~quantile(.x, probs=c(0.025, 0.975)))</code>.
+If the list is named, then the names will be used for the columns of the
+output.</p></dd>
 
 
 <dt>sample</dt>
@@ -113,14 +133,14 @@ of being summarised as a median and 95% credible intervals.</p></dd>
 
 <dt>newdata0</dt>
 <dd><p>Data frame of covariate values defining the "untreated" group
-for use in treatment waning models, see <code><a href="Survmspline_wane.html">Survmspline_wane</a></code>.</p></dd>
+for use in treatment waning models. See <code><a href="Survmspline_wane.html">Survmspline_wane</a></code>.</p></dd>
 
 
 <dt>wane_period</dt>
 <dd><p>Vector of two numbers, defining the time period over which
 the hazard is interpolated between the hazard of the "treated" group (taken from <code>newdata</code>)
 and the hazard of the "untreated" group (taken from <code>newdata0</code>).  Optional - if
-not supplied then no waning is assumed.</p></dd>
+this is not supplied, then no waning is assumed.</p></dd>
 
 
 <dt>wane_nt</dt>

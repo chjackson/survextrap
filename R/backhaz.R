@@ -1,5 +1,9 @@
-##' Obtain the cumulative hazard at a particular time, given a data frame of
-##' piecewise-constant background hazards.
+##' Cumulative background hazards
+##'
+##' Obtain the cumulative hazard at a particular time, given a data
+##' frame of piecewise-constant background hazards.  This is used in
+##' the computation of likelihoods and results in additive hazards
+##' models.
 ##'
 ##' @param t A time point, or vector of time points, to calculate the cumulative
 ##'  hazard at.
@@ -13,11 +17,12 @@
 ##'  \code{"time"} should be 0, and the final row specifies the hazard at all
 ##'  times greater than the last element of \code{"time"}.
 ##'
-##'  The background hazard is the hazard of death from causes other than the
-##'  specific cause of interest. The overall hazard is defined as the sum of the
-##'  background hazard and the cause-specific hazard.  The cause-specific hazard
-##'  is modelled with the M-spline model, and the background hazard is assumed
-##'  to be known.
+##' In additive hazards models, the background hazard is the hazard of
+##'  death from causes other than the specific cause of interest. The
+##'  overall hazard is defined as the sum of the background hazard and
+##'  the cause-specific hazard.  In \code{\link{survextrap}}, the
+##'  cause-specific hazard is modelled with the M-spline model, and
+##'  the background hazard is assumed to be known.
 ##'
 ##' @return The cumulative hazard at `t`.
 ##'
@@ -52,4 +57,21 @@ validate_backhaz_df <- function(backhaz){
     stop("backhaz$time should be sorted in increasing order")
   if (any(backhaz$hazard < 0))
     stop("backhaz$hazard should all be non-negative")
+}
+
+
+make_backhaz <- function(backhaz, data, td){
+  if (is.data.frame(backhaz)) {
+    validate_backhaz_df(backhaz)
+    backhaz_event <- backhaz$hazard[findInterval(td$t_event, backhaz$time)]
+    backhaz_df <- backhaz
+  } else if (!is.null(backhaz)) {
+    if (!is.character(backhaz)) stop("`backhaz` should be a data frame or a character string giving the name of a column in the data")
+    bh <- data[[backhaz]]
+    backhaz_event <- bh[td$ind_event]
+    backhaz_df <- NULL
+  } else backhaz_event <- backhaz_df <- NULL
+  relative <- !is.null(backhaz_event)
+  backhaz_event <- if (relative) aa(backhaz_event) else aa(numeric(td$nevent))
+  list(event = backhaz_event, df=backhaz_df, relative=relative)
 }

@@ -3,7 +3,7 @@
 \docType{data}
 \name{curedata}
 \alias{curedata}
-\title{Simulated data for testing cure models}
+\title{Simulated data for testing mixture cure models}
 \format{
 \code{t} Survival times, right-censored at 10 years.
 
@@ -18,9 +18,10 @@ Simulated.
 curedata
 }
 \description{
-Survival times of 200 fake people.
-The cure probability is 0.5 for \code{x=0}, and the log
-odds ratio for cure is 0.5, so that the cure probability is about 0.62 for \code{x=1}.
-The uncured population have survival times distributed as a Weibull with shape 1.5 and scale 1.2.
+Survival times of 200 fake people.  The cure probability is 0.5
+for \code{x=0}, and the log odds ratio for cure is 0.5, so that the
+cure probability is about 0.62 for \code{x=1}.  The uncured population
+have survival times distributed as a Weibull with shape 1.5 and
+scale 1.2.
 }
 \keyword{datasets}

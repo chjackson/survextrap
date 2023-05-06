@@ -22,7 +22,8 @@ psurvmspline(
   log.p = FALSE,
   pcure = 0,
   offsetH = 0,
-  backhaz = NULL
+  backhaz = NULL,
+  bsmooth = TRUE
 )
 
 Hsurvmspline(
@@ -34,7 +35,8 @@ Hsurvmspline(
   log = FALSE,
   pcure = 0,
   offsetH = 0,
-  backhaz = NULL
+  backhaz = NULL,
+  bsmooth = TRUE
 )
 
 hsurvmspline(
@@ -46,7 +48,8 @@ hsurvmspline(
   log = FALSE,
   pcure = 0,
   offseth = 0,
-  backhaz = NULL
+  backhaz = NULL,
+  bsmooth = TRUE
 )
 
 dsurvmspline(
@@ -59,7 +62,8 @@ dsurvmspline(
   pcure = 0,
   offseth = 0,
   offsetH = 0,
-  backhaz = NULL
+  backhaz = NULL,
+  bsmooth = TRUE
 )
 
 qsurvmspline(
@@ -72,7 +76,8 @@ qsurvmspline(
   log.p = FALSE,
   pcure = 0,
   offsetH = 0,
-  backhaz = NULL
+  backhaz = NULL,
+  bsmooth = TRUE
 )
 
 rsurvmspline(
@@ -83,15 +88,33 @@ rsurvmspline(
   degree = 3,
   pcure = 0,
   offsetH = 0,
-  backhaz = NULL
+  backhaz = NULL,
+  bsmooth = TRUE
 )
 
-rmst_survmspline(t, alpha, coefs, knots, degree = 3, pcure = 0, backhaz = NULL)
+rmst_survmspline(
+  t,
+  alpha,
+  coefs,
+  knots,
+  degree = 3,
+  pcure = 0,
+  backhaz = NULL,
+  bsmooth = TRUE
+)
 
-mean_survmspline(alpha, coefs, knots, degree = 3, pcure = 0, backhaz = NULL)
+mean_survmspline(
+  alpha,
+  coefs,
+  knots,
+  degree = 3,
+  pcure = 0,
+  backhaz = NULL,
+  bsmooth = TRUE
+)
 }
 \arguments{
-\item{alpha}{Log scale parameter.}
+\item{alpha}{Log hazard scale parameter.}
 
 \item{coefs}{Spline basis coefficients. These should sum to 1,
 otherwise they are normalised internally to sum to 1.}
@@ -102,9 +125,9 @@ increasing order.  These include the two boundary knots.
 In vectorised usage of these functions, the knots and degree must be
 the same for all alternative times and parameter values.}
 
-\item{degree}{Spline polynomial degree.}
+\item{degree}{Spline polynomial degree (defaults to 3)}
 
-\item{lower.tail}{logical; if TRUE (default), probabilities are \eqn{P(X
+\item{lower.tail}{logical; if \code{TRUE} (default), probabilities are \eqn{P(X
 \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}
 
 \item{pcure}{Probability of "cure", which defaults to zero.  If this is non-zero, this defines a "mixture cure" version of the M-spline model.}
@@ -117,6 +140,9 @@ This should have two columns, named \code{"time"} and
 specified time and the next time. The first element of
 \code{"time"} should be 0, and the final row specifies the hazard at all
 times greater than the last element of \code{"time"}.}
+
+\item{bsmooth}{If \code{TRUE} then the function is constrained to
+also have zero derivative and second derivative at the boundary.}
 
 \item{x, q, t}{Vector of times.}
 
@@ -140,14 +166,13 @@ numerical inversion.
 \code{qsurvmspline} on a sample of uniform random numbers.
 }
 \description{
-Probability density, distribution, quantile, random generation, hazard,
-cumulative hazard, mean and restricted mean functions for the
-M-spline time-to-event model.
+Probability density, distribution, quantile, random generation,
+hazard, cumulative hazard, mean and restricted mean functions for
+the M-spline time-to-event model.  This can optionally be combined
+with a cure probability, and / or with a known background hazard
+trajectory that is a piecewise-constant function of time.
 }
 \details{
-This can optionally be combined with a cure probability, and / or with
-a known background hazard trajectory that is a piecewise-constant function of time.
-
 These are the same as the M-splines used to model survival data in \code{rstanarm}, except that an
 additional assumption is made that the hazard is constant beyond the boundary knots at its
 value at the boundary.   This gives a continuous but non-smooth function.
@@ -169,7 +194,7 @@ That is, the cause-specific hazard decreases to zero, and the overall hazard con
 the background hazard, as time increases.
 }
 \references{
-Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425–441.
+Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425-441.
 
 Brilleman, S. L., Elci, E. M., Novik, J. B., & Wolfe, R. (2020). Bayesian survival analysis using the rstanarm R package. arXiv preprint arXiv:2002.09633.
 

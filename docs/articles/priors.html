@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,11 +41,14 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/cetuximab.html">Case study of using survextrap: cetuximab for head and neck cancer</a>
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
     <a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a>
-    <a class="dropdown-item" href="../articles/waning.html">Treatment effect waning in survextrap</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -76,7 +79,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2023-03-30</h4>
+            <h4 data-toc-skip class="date">2023-05-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/priors.Rmd" class="external-link"><code>vignettes/priors.Rmd</code></a></small>
       <div class="d-none name"><code>priors.Rmd</code></div>
@@ -112,14 +115,14 @@ log-logistic) are generally used out of familiarity, not because they
 are thought to represent meaningful mechanisms for survival.</p>
 <p>The default parametric model in <code>survextrap</code> is a flexible
 spline-based model. This is designed as a “black box”, which aims to fit
-the data as well as possible. It is is not designed to be treated as a
+the data as well as possible. It is not designed to be treated as a
 mechanism for extrapolation.</p>
-<p>However, this spline model has parameters <span class="math inline">\(\theta\)</span>, which still need prior
-distributions, because the model is Bayesian!</p>
 </li>
 </ul>
-<p>This article describes these two kinds of “prior” that can be used in
-<code>survextrap</code> models.</p>
+<p>However, this spline model has parameters <span class="math inline">\(\theta\)</span>, which still need prior
+distributions, because the model is Bayesian!</p>
+<p>This article describes these two kinds of “prior” judgements that can
+be used in <code>survextrap</code> models.</p>
 <ol style="list-style-type: decimal">
 <li><p>Judgements about survival probabilities, that can be converted to
 pseudo-data, and treated as part of the model likelihood for data <span class="math inline">\(\boldsymbol{x}\)</span>.</p></li>
@@ -136,9 +139,9 @@ alive at <span class="math inline">\(t\)</span> will have died before
 <span class="math inline">\(u\)</span>.</p>
 <p>This elicitation might be done in many ways (e.g. through consensus
 methods, or consulting multiple experts and aggregating their beliefs).
-survextrap does not include tools or guidance for doing elicitation, but
-further info is available, e.g. from <a href="https://journals.sagepub.com/doi/pdf/10.1177/0272989X211028236" class="external-link">Bojke
-et al.</a>, <a href="https://shelf.sites.sheffield.ac.uk/" class="external-link">SHELF</a>.</p>
+<code>survextrap</code> does not include tools or guidance for doing
+elicitation, but further info is available, e.g. from <a href="https://journals.sagepub.com/doi/pdf/10.1177/0272989X211028236" class="external-link">Bojke
+et al.</a>, or <a href="https://shelf.sites.sheffield.ac.uk/" class="external-link">SHELF</a>.</p>
 <p>One simple way is to elicit:</p>
 <ul>
 <li><p>a best guess for what <span class="math inline">\(p\)</span> is.
@@ -238,15 +241,14 @@ outside the data.</p>
 <p>To use this before the model is fitted, we have to know the knots
 defining the spline, and choose a set of priors. <code>survextrap</code>
 provides a set of default priors, which may or may not be sensible in a
-given application, and a procedure for picking knots.</p>
-<!-- (TODO: what about a "no fit" model option.  Then we can return functions that work like
-mspline_priorpred ) -->
-<p>First we fit a default model and print the default priors that are
+given application. and a procedure for picking knots (see the <a href="../methods.html#bayesspec">methods vignette</a>).</p>
+<p>First we fit a default model, and print the default priors that are
 used.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/chjackson/survextrap" class="external-link">survextrap</a></span><span class="op">)</span></span>
-<span><span class="va">nd_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colons</span>, fit_method<span class="op">=</span><span class="st">"opt"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/print_priors.html">print_priors</a></span><span class="op">(</span><span class="va">nd_mod</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">nd_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colons</span>, fit_method<span class="op">=</span><span class="st">"opt"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/print_priors.html">print_priors</a></span><span class="op">(</span><span class="va">nd_mod</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Priors:</span></span>
 <span><span class="co">##   Baseline log hazard scale: normal(location=0,scale=20)</span></span>
 <span><span class="co">##   Smoothness SD: gamma(shape=2,rate=1)</span></span></code></pre>
@@ -263,7 +265,7 @@ be examined in <code>coefs_mean</code> - by default, this defines a
 hazard function <span class="math inline">\(h(t)\)</span> that is
 constant over time. The number and location of knots can also be
 examined in the <code>mspline</code> component of the model.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">nd_mod</span><span class="op">$</span><span class="va">coefs_mean</span>,<span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">sp</span> <span class="op">&lt;-</span> <span class="va">nd_mod</span><span class="op">$</span><span class="va">mspline</span></span></code></pre></div>
 <p>Together, these knots and prior choices define the model to be fitted
@@ -282,21 +284,21 @@ specification.</p>
 <h5 id="constant-hazard-level">Constant hazard level<a class="anchor" aria-label="anchor" href="#constant-hazard-level"></a>
 </h5>
 <p>The first thing to verify is the typical level of the hazard. If no
-prior for <span class="math inline">\(\eta\)</span> is supplied in
+prior for the hazard scale parameter <span class="math inline">\(\eta\)</span> is supplied in
 <code>survextrap</code>, then a default <span class="math inline">\(N(0,20)\)</span> is used, which is very vague. We
 can illustrate the implications of this choice by deriving the prior for
 the constant hazard <span class="math inline">\(h(t) = \eta \sum_k p_k
 b_k(t)\)</span> which is implied by the prior for <span class="math inline">\(\eta\)</span> and the special values of <span class="math inline">\(p_k\)</span> that imply a constant hazard (found
-using <code><a href="../reference/mspline_constant_weights.html">mspline_constant_weights()</a></code>).</p>
+using <code><a href="../reference/mspline_constant_coefs.html">mspline_constant_coefs()</a></code>).</p>
 <p>The <code>haz_const</code> function returns a summary of the implied
 prior for this constant hazard, and the implied prior for the mean
 survival time <span class="math inline">\(1/h(t)\)</span>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nd_mod</span><span class="op">$</span><span class="va">prior_pred</span><span class="op">$</span><span class="fu">haz_const</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##                haz         mean</span></span>
-<span><span class="co">## 2.5%  8.573188e-18 1.044229e-17</span></span>
-<span><span class="co">## 50%   9.060939e-01 1.103638e+00</span></span>
-<span><span class="co">## 97.5% 9.576440e+16 1.166427e+17</span></span></code></pre>
+<span><span class="co">## 2.5%  8.336083e-18 1.073931e-17</span></span>
+<span><span class="co">## 50%   8.810345e-01 1.135029e+00</span></span>
+<span><span class="co">## 97.5% 9.311588e+16 1.199604e+17</span></span></code></pre>
 <p>These credible limits are extreme. Perhaps this is reasonable if the
 dataset is large and would dominate any choice of prior. In most
 applications, however, we have some idea of what a typical survival time
@@ -310,7 +312,8 @@ years after the start of the study)</p></li>
 the mean survival time is 80 years after the start of the study). Note
 that this represents uncertainty about the mean survival in a
 population, rather than the variability between individuals in the
-population, so perhaps this should be narrower than you think.</p></li>
+population, so perhaps the credible interval should be narrower than you
+think.</p></li>
 <li><p>hence giving a median and lower credible limit for <span class="math inline">\(h(t)\)</span>, hence (after dividing by the
 constant <span class="math inline">\(\sum_k p_k b_k(t)\)</span> for an
 arbitrary <span class="math inline">\(t\)</span> and logging), giving a
@@ -323,16 +326,16 @@ median <span class="math inline">\(m\)</span>, and standard deviation
 <p>This is implemented in the function <code>p_meansurv</code>. Note
 that a spline knot specification is required to obtain the constant
 <span class="math inline">\(\sum_k p_k b_k(t)\)</span>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span></span></code></pre></div>
 <p>For a given prior on <span class="math inline">\(\eta\)</span> and
 spline specification, the function <code>prior_haz_const</code> can be
 used to summarise the implied prior on the constant hazard and mean
 survival time. We use this now to check that the prior that we defined
 with <code>p_meansurv</code> is the one that we intended to define.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/prior_haz_const.html">prior_haz_const</a></span><span class="op">(</span>mspline<span class="op">=</span><span class="va">sp</span>, </span>
-<span>                prior_loghaz <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>                prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##          haz  mean</span></span>
 <span><span class="co">## 2.5%  0.0125 31.25</span></span>
 <span><span class="co">## 50%   0.0200 50.00</span></span>
@@ -346,12 +349,12 @@ includes the weakly informative prior that we defined and checked. For
 reporting purposes, we can use <code>print_priors</code> to view the
 normal prior for <span class="math inline">\(\log(\eta)\)</span> that
 was automatically derived.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ndi_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colons</span>, fit_method<span class="op">=</span><span class="st">"opt"</span>,</span>
-<span>                      prior_loghaz <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span><span class="op">)</span></span>
+<span>                      prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/print_priors.html">print_priors</a></span><span class="op">(</span><span class="va">ndi_mod</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Priors:</span></span>
-<span><span class="co">##   Baseline log hazard scale: normal(location=-3.81341071676004,scale=0.2398021764446)</span></span>
+<span><span class="co">##   Baseline log hazard scale: normal(location=-3.7853644873736,scale=0.2398021764446)</span></span>
 <span><span class="co">##   Smoothness SD: gamma(shape=2,rate=1)</span></span></code></pre>
 </div>
 <div class="section level5">
@@ -366,53 +369,52 @@ called <code>haz_sim</code>) which contains the hazard value
 <p>Here we simulate <code>nsim=30</code> prior hazard trajectories from
 the model <code>ndi_mod</code>, and plot them with
 <code>ggplot</code>.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">haz_sim</span> <span class="op">&lt;-</span> <span class="va">ndi_mod</span><span class="op">$</span><span class="va">prior_pred</span><span class="op">$</span><span class="fu">haz</span><span class="op">(</span>nsim<span class="op">=</span><span class="fl">30</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">haz_sim</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">time</span>, y<span class="op">=</span><span class="va">haz</span>, group<span class="op">=</span><span class="va">rep</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Years"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Hazard"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="priors_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Years"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Hazard"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+<p><img src="priors_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
 <p>An alternative way is to use the <code>mspline_priorpred</code>
 function, which does not require a model to be specified with the
 <code>survextrap</code> function, but does require the knots and priors
 to be supplied explicitly.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">haz_sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_priorpred.html">mspline_priorpred</a></span><span class="op">(</span>iknots<span class="op">=</span><span class="va">sp</span><span class="op">$</span><span class="va">iknots</span>, bknots<span class="op">=</span><span class="va">sp</span><span class="op">$</span><span class="va">bknots</span>, degree<span class="op">=</span><span class="va">sp</span><span class="op">$</span><span class="va">degree</span>, </span>
+<span><span class="va">haz_sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_priorpred.html">mspline_priorpred</a></span><span class="op">(</span>knots<span class="op">=</span><span class="va">sp</span><span class="op">$</span><span class="va">knots</span>, degree<span class="op">=</span><span class="va">sp</span><span class="op">$</span><span class="va">degree</span>, </span>
 <span>                             coefs_mean <span class="op">=</span> <span class="va">ndi_mod</span><span class="op">$</span><span class="va">coefs_mean</span>,   </span>
-<span>                             prior_smooth <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">1</span><span class="op">)</span>,   </span>
-<span>                             prior_loghaz <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span>,</span>
+<span>                             prior_hsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">1</span><span class="op">)</span>,   </span>
+<span>                             prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span>,</span>
 <span>                             tmax<span class="op">=</span><span class="fl">3</span>, nsim<span class="op">=</span><span class="fl">30</span><span class="op">)</span></span></code></pre></div>
 <p>These plots can give some idea of how much risks might be expected to
 vary over time. The parameter driving these variations is <span class="math inline">\(\sigma\)</span>, whose prior can be defined with
-the <code>prior_smooth</code> argument to <code>survextrap</code>. In
-the default model, <span class="math inline">\(\sigma=0\)</span> means
-that we are sure that the hazard will be constant. Therefore we might
-want to define the prior for <span class="math inline">\(\sigma\)</span>
-to rule out implausibly large changes. For example, a Gamma(2,20):</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+the <code>prior_hsd</code> argument to <code>survextrap</code>. In the
+standard <code>survextrap</code> model, <span class="math inline">\(\sigma=0\)</span> means that we are sure that the
+hazard will be constant. Therefore we might want to define the prior for
+<span class="math inline">\(\sigma\)</span> to rule out implausibly
+large changes. For example, a Gamma(2,20):</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">haz_sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_priorpred.html">mspline_priorpred</a></span><span class="op">(</span>iknots<span class="op">=</span><span class="va">sp</span><span class="op">$</span><span class="va">iknots</span>, bknots<span class="op">=</span><span class="va">sp</span><span class="op">$</span><span class="va">bknots</span>, degree<span class="op">=</span><span class="va">sp</span><span class="op">$</span><span class="va">degree</span>, </span>
+<span><span class="va">haz_sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_priorpred.html">mspline_priorpred</a></span><span class="op">(</span>knots<span class="op">=</span><span class="va">sp</span><span class="op">$</span><span class="va">knots</span>, degree<span class="op">=</span><span class="va">sp</span><span class="op">$</span><span class="va">degree</span>, </span>
 <span>                             coefs_mean <span class="op">=</span> <span class="va">ndi_mod</span><span class="op">$</span><span class="va">coefs_mean</span>,   </span>
-<span>                             prior_smooth <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">20</span><span class="op">)</span>,   </span>
-<span>                             prior_loghaz <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span>,</span>
+<span>                             prior_hsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">20</span><span class="op">)</span>,   </span>
+<span>                             prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span>,</span>
 <span>                             tmax<span class="op">=</span><span class="fl">3</span>, nsim<span class="op">=</span><span class="fl">30</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">haz_sim</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">time</span>, y<span class="op">=</span><span class="va">haz</span>, group<span class="op">=</span><span class="va">rep</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Years"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Hazard"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="priors_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Years"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Hazard"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+<p><img src="priors_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
 <p>The choice of this prior might be important if we want to extrapolate
 outside the data, while accounting for potential hazard changes outside
 the data. If the data informing extrapolation are weak, then the
 extrapolations will be sensitive to the prior for these potential hazard
 changes.</p>
-<p>Plotting multiple trajectories gives a rough idea, but ideally we
-want a more quantitative summary of the typical amount of variation
-through time.</p>
-<!-- TODO What about showing posteriors compared to priors in these examples?? -->
+<p>Plotting multiple trajectories gives a rough idea of the typical
+amount of variation through time, but , but ideally we want a more
+quantitative summary of this.</p>
 </div>
 </div>
 <div class="section level3">
-<h3 id="ratio-between-high-and-low-hazards-over-time">Ratio between high and low hazards over time<a class="anchor" aria-label="anchor" href="#ratio-between-high-and-low-hazards-over-time"></a>
+<h3 id="hrsd">Ratio between high and low hazards over time<a class="anchor" aria-label="anchor" href="#hrsd"></a>
 </h3>
 <p>The variation in a hazard curve can be summarised simply by taking a
 fine grid of equally-spaced points between the time boundary knots, and
@@ -423,210 +425,142 @@ measure of variation would be the ratio between a particularly high and
 a particularly low hazard on this grid. High and low might be defined
 from the 90% and 10% quantiles over time. If the hazard is constant,
 over time, this ratio will be 1.</p>
-<p>These measures are computed by the <code>haz_sd()</code>
-function.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<p>These measures are computed by the <code>haz_sd()</code> function:
+the <code>sd_haz</code> component is the SD over time of the hazard,
+<code>sd_mean</code> is the SD over time of the inverse hazard, and
+<code>hr</code> is the high/low hazard ratio (90%/10% by default).</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">ndi_mod</span><span class="op">$</span><span class="va">prior_pred</span><span class="op">$</span><span class="fu">haz_sd</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##            sd_haz      sd_mean           hr</span></span>
-<span><span class="co">## 2.5%  0.001168678 2.443512e+01 1.613613e+00</span></span>
-<span><span class="co">## 50%   0.007332239 5.754781e+02 2.781123e+01</span></span>
-<span><span class="co">## 97.5% 0.021517722 2.053783e+12 1.926511e+07</span></span></code></pre>
-<p>The implied prior for the high/low hazard ratio is shown in the
-<code>hr</code> column. This shows that the default Gamma<span class="math inline">\((a=2,b=1)\)</span> prior used in this model is
+<span><span class="co">## 2.5%  0.001515510 3.114473e+01 1.817126e+00</span></span>
+<span><span class="co">## 50%   0.008722217 6.809896e+02 4.013356e+01</span></span>
+<span><span class="co">## 97.5% 0.024717065 8.197922e+11 4.182825e+08</span></span></code></pre>
+<p>This shows that the default Gamma<span class="math inline">\((a=2,b=1)\)</span> prior used in this model is
 very vague. We can make it less vague by reducing <span class="math inline">\(a/b\)</span>. A Gamma(2, 5), for example, leads to
-an upper 90% credible limit of about 5-6 for the hazard ratio over time.
+an upper 90% credible limit of about 5 for the hazard ratio over time.
 Trial and error is probably necessary to produce a prior that is judged
 plausible by this metric.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/prior_haz.html">prior_haz_sd</a></span><span class="op">(</span>mspline<span class="op">=</span><span class="va">sp</span>,                              </span>
-<span>             prior_smooth <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">5</span><span class="op">)</span>,   </span>
-<span>             prior_loghaz <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span>, </span>
+<span>             prior_hsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">5</span><span class="op">)</span>,   </span>
+<span>             prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span>, </span>
 <span>             quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span><span class="op">)</span>,</span>
 <span>             nsim<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##           sd_haz    sd_mean       hr</span></span>
-<span><span class="co">## 10% 0.0005275675   9.877431 1.134455</span></span>
-<span><span class="co">## 50% 0.0019418839  41.158853 1.742006</span></span>
-<span><span class="co">## 90% 0.0053229716 254.616143 5.791212</span></span></code></pre>
+<span><span class="co">## 10% 0.0004542116   9.037567 1.080665</span></span>
+<span><span class="co">## 50% 0.0018053422  37.800321 1.517070</span></span>
+<span><span class="co">## 90% 0.0050991490 231.092233 4.620972</span></span></code></pre>
 <p>Note that a large number of simulations <code>nsim</code> from the
 prior may be required for a precise estimate of these tail quantiles,
 and the distribution is skewed, so that the 95% credible limit may be
 much higher than the 90% limit, for example.</p>
-<p>Let us now fit a model and compare the posterior for this hazard
-ratio to the prior…</p>
-<p><em>[Further work to do on this article. Compare posteriors of RMST
-between different priors]</em></p>
-<!-- 
-
-ndi_mod with 2,1 prior, prior 23 (2, 50000) posterior 2 (6,436) still implausible
-ndi2_mod with 2,5 prior, prior 2 (1,25), posterior 2 (4, 18).  
-so a bit tighter so still looks like this thing is not strongly identifiable from the data. 
-ndi3_mod prior 1.1 (1.01, 1.44) posterior 1.04 (1.01 to 1.58). 
-yeah this stuff is driven by the prior. 
-IQR is a bit more robust, but still posterior is driven by the prior 
-
-Sure this means we need informative judgements for extrapolation. 
-
-But does this matter for getting a well fitting model for the data?  
-Expect not if we are integrating the hazard over time to get the survival. 
-
-RMST in obs period is only affected if we make strong assumptions that the hazard is constant. 
-However extrapolations are affected, since they rely on the constant value at the final time,
-which is affected by the assumptions about variations. 
-
-
-
-```r
-ndi2_mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                       prior_loghaz = p_meansurv(median=50, upper=80, mspline=sp),
-                       prior_smooth = p_gamma(2, 5))
-
-ndi3_mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                       prior_loghaz = p_meansurv(median=50, upper=80, mspline=sp),
-                       prior_smooth = p_gamma(2, 50))
-
-draws <- get_draws(ndi2_mod)
-hist(draws[,"smooth_sd[1]"], prob=TRUE)
-x <- seq(0, 4, 0.1)
-lines(x, dgamma(x, 2, 5))
-```
-
-<img src="priors_files/figure-html/unnamed-chunk-14-1.png" width="700" />
-
-```r
-ndi_mod$prior_pred$haz_sd(hq=c(0.25, 0.75))
-```
-
-```
-##             sd_haz      sd_mean           hr
-## 2.5%  0.0007732824 1.739514e+01     1.198793
-## 50%   0.0066788312 6.093398e+02     4.408589
-## 97.5% 0.0189441127 4.097307e+09 38805.436371
-```
-
-```r
-ndi2_mod$prior_pred$haz_sd(hq=c(0.25, 0.75))
-```
-
-```
-##             sd_haz     sd_mean       hr
-## 2.5%  0.0003979433    6.304079 1.080348
-## 50%   0.0022218393   45.656962 1.529024
-## 97.5% 0.0102873241 1412.630848 6.185837
-```
-
-```r
-ndi3_mod$prior_pred$haz_sd(hq=c(0.25, 0.75))
-```
-
-```
-##             sd_haz    sd_mean       hr
-## 2.5%  2.581759e-05  0.4858311 1.006128
-## 50%   1.995431e-04  3.7537410 1.038470
-## 97.5% 1.107813e-03 19.1749536 1.183066
-```
-
-```r
-hrtime(ndi_mod, hq=c(0.25, 0.75))
-```
-
-```
-##     median    lower    upper
-## 1 2.325494 1.378448 47.99107
-```
-
-```r
-hrtime(ndi2_mod, hq=c(0.25, 0.75))
-```
-
-```
-##     median    lower    upper
-## 1 2.039763 1.321271 4.471633
-```
-
-```r
-hrtime(ndi3_mod, hq=c(0.25, 0.75))
-```
-
-```
-##    median    lower    upper
-## 1 1.02407 1.002251 1.224311
-```
-
-```r
-rmst(ndi_mod, t=3, niter=100)
-```
-
-```
-##  [38;5;246m# A tibble: 1 × 5 [39m
-##   variable     t median `2.5%` `97.5%`
-##    [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<num> [39m [23m   [3m [38;5;246m<num> [39m [23m   [3m [38;5;246m<num> [39m [23m    [3m [38;5;246m<num> [39m [23m
-##  [38;5;250m1 [39m rmst         3   2.58   2.43    2.86
-```
-
-```r
-rmst(ndi2_mod, t=3, niter=100)
-```
-
-```
-##  [38;5;246m# A tibble: 1 × 5 [39m
-##   variable     t median `2.5%` `97.5%`
-##    [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<num> [39m [23m   [3m [38;5;246m<num> [39m [23m   [3m [38;5;246m<num> [39m [23m    [3m [38;5;246m<num> [39m [23m
-##  [38;5;250m1 [39m rmst         3   2.57   2.43    2.66
-```
-
-```r
-rmst(ndi3_mod, t=3, niter=100)
-```
-
-```
-##  [38;5;246m# A tibble: 1 × 5 [39m
-##   variable     t median `2.5%` `97.5%`
-##    [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<num> [39m [23m   [3m [38;5;246m<num> [39m [23m   [3m [38;5;246m<num> [39m [23m    [3m [38;5;246m<num> [39m [23m
-##  [38;5;250m1 [39m rmst         3   2.62   2.54    2.71
-```
-
-```r
-rmst(ndi_mod, t=10, niter=100)
-```
-
-```
-##  [38;5;246m# A tibble: 1 × 5 [39m
-##   variable     t median `2.5%` `97.5%`
-##    [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<num> [39m [23m   [3m [38;5;246m<num> [39m [23m   [3m [38;5;246m<num> [39m [23m    [3m [38;5;246m<num> [39m [23m
-##  [38;5;250m1 [39m rmst        10   7.63   4.47    8.14
-```
-
-```r
-rmst(ndi2_mod, t=10, niter=100)
-```
-
-```
-##  [38;5;246m# A tibble: 1 × 5 [39m
-##   variable     t median `2.5%` `97.5%`
-##    [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<num> [39m [23m   [3m [38;5;246m<num> [39m [23m   [3m [38;5;246m<num> [39m [23m    [3m [38;5;246m<num> [39m [23m
-##  [38;5;250m1 [39m rmst        10   7.48   5.88    8.10
-```
-
-```r
-rmst(ndi3_mod, t=10, niter=100)
-```
-
-```
-##  [38;5;246m# A tibble: 1 × 5 [39m
-##   variable     t median `2.5%` `97.5%`
-##    [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<num> [39m [23m   [3m [38;5;246m<num> [39m [23m   [3m [38;5;246m<num> [39m [23m    [3m [38;5;246m<num> [39m [23m
-##  [38;5;250m1 [39m rmst        10   6.56   5.90    7.37
-```
-
--->
+<p>Let us now fit a model and compare the posterior 95% credible
+interval for this hazard ratio to the prior. The posterior interval is
+narrower than the prior interval, showing the influence of the data.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="va">nd_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colons</span>, fit_method<span class="op">=</span><span class="st">"mcmc"</span>,</span>
+<span>                     chains<span class="op">=</span><span class="fl">1</span>, iter<span class="op">=</span><span class="fl">1000</span>,</span>
+<span>                     prior_hsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">qgamma</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.975</span><span class="op">)</span>, <span class="fl">2</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">nd_mod</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">variable</span><span class="op">==</span><span class="st">"hsd"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">lower</span>, <span class="va">upper</span><span class="op">)</span></span></code></pre></div>
+<p>In practical applications, if the prior is suspected to be
+influential, then the results of interest should be compared between
+different reasonable priors.</p>
+</div>
+<div class="section level3">
+<h3 id="hazard-ratios-for-effects-of-covariates">Hazard ratios for effects of covariates<a class="anchor" aria-label="anchor" href="#hazard-ratios-for-effects-of-covariates"></a>
+</h3>
+<p>Hazard ratios for effects of predictors in survival models are
+commonly presented and discussed in practice, so prior judgements about
+them may be easier to make, compared to the other parameters in
+<code>survextrap</code> models.</p>
+<p><code>survextrap</code> uses normal (or t) priors for the log hazard
+ratio. The default is normal(0, 2.5). A utility <code><a href="../reference/prior_hr.html">prior_hr()</a></code>
+is provided to check what credible interval on the hazard ratio scale is
+implied by a particular prior for the log hazard ratio. This shows that
+the default is actually very vague, and supports hazard ratios up to
+148. The prior SD should be reduced if this is implausible and the
+sample size is small enough that this would be influential.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/prior_hr.html">prior_hr</a></span><span class="op">(</span><span class="fu"><a href="../reference/priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2.5</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##         2.5%          50%        97.5% </span></span>
+<span><span class="co">## 7.447254e-03 1.000000e+00 1.342777e+02</span></span></code></pre>
+<p>Conversely, the function <code>p_hr</code> goes the other way round
+and converts a prior median and upper 95% credible limit for the hazard
+ratio to a normal prior on the log scale. This shows that we should use
+a prior SD of 1.17 for the log HR if we wanted to give a low probability
+(2.5%) to HRs above 10. <code>p_hr</code> returns a list in a the same
+format as <code>p_normal</code>, which can be supplied directly to
+<code>prior_loghr</code> argument of <code>survextrap</code> models.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/p_hr.html">p_hr</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">1</span>, upper<span class="op">=</span><span class="fl">10</span><span class="op">)</span><span class="op">$</span><span class="va">scale</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 1.17481</span></span></code></pre>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/prior_hr.html">prior_hr</a></span><span class="op">(</span><span class="fu"><a href="../reference/p_hr.html">p_hr</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">1</span>, upper<span class="op">=</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##  2.5%   50% 97.5% </span></span>
+<span><span class="co">##   0.1   1.0  10.0</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="sd-of-hazard-ratios-over-time-in-non-proportional-hazards-models">SD of hazard ratios over time in non-proportional hazards
 models<a class="anchor" aria-label="anchor" href="#sd-of-hazard-ratios-over-time-in-non-proportional-hazards-models"></a>
 </h3>
-<p><em>[To do]</em></p>
+<p>The novel non-proportional hazards model in <code>survextrap</code>
+works by modelling the spline coefficients in terms of covariates, as
+well as the hazard scale parameter. The model is described in the <a href="methods.html#nonprop">methods vignette</a> and an example of
+fitting one is given in the <a href="examples.html#nonprop">examples
+vignette</a>.</p>
+<p>The parameters that relate the covariates to the spline coefficients
+do not have any direct interpretation in terms of how an effect of the
+covariate on the hazard changes over time. In theory, the model allows
+the hazard ratio to increase and decrease arbitrarily in a flexible way,
+in the same manner as a spline function.</p>
+<p>The parameter <span class="math inline">\(\tau\)</span> governs the
+amount of flexibility in the hazard ratio function. With <span class="math inline">\(\tau=0\)</span> the model is a proportional
+hazards model, and as <span class="math inline">\(\tau\)</span>
+increases the hazard ratio becomes a more flexible function of time. The
+exact value of <span class="math inline">\(\tau\)</span> does not have
+an interpretation, but as we did for <span class="math inline">\(\sigma\)</span> <a href="#hrsd">above</a>, we can
+use <em>simulation</em> to calibrate the prior so that it matches
+plausible judgements.</p>
+<p>This is done with the <code>prior_hr_sd</code> function, which works
+for <span class="math inline">\(\tau\)</span> in the same way as
+<code>prior_haz_sd</code> does for <span class="math inline">\(\sigma\)</span>. The new requirement here is that
+covariate values <code>X</code> and reference covariate values
+<code>X0</code> should be supplied, most easily as lists. The hazard
+ratio between these will be computed.</p>
+<p>All the other priors should be supplied: <code>prior_hscale</code>
+for <span class="math inline">\(\eta\)</span>, <code>prior_hsd</code>
+for <span class="math inline">\(\sigma\)</span>, and
+<code>prior_loghr</code> for the “baseline” hazard ratio to which the
+non-proportionality effects are applied. The function will simulate from
+the joint prior distribution of hazard ratios implied by all these
+priors together with the one that we want to calibrate:
+<code>prior_hrsd</code>, the Gamma prior for <span class="math inline">\(\tau\)</span>.</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/prior_haz.html">prior_hr_sd</a></span><span class="op">(</span>mspline<span class="op">=</span><span class="va">sp</span>,                              </span>
+<span>            prior_hsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">5</span><span class="op">)</span>,   </span>
+<span>            prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span>,</span>
+<span>            prior_loghr <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>,</span>
+<span>            prior_hrsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">3</span><span class="op">)</span>,</span>
+<span>            X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"rxLev+5FU"</span><span class="op">=</span><span class="fl">0</span><span class="op">)</span>,</span>
+<span>            X0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"rxLev+5FU"</span><span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span>
+<span>            quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
+<span>            nsim<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##            sd_hr      hrr</span></span>
+<span><span class="co">## 5%   0.002741409 1.046165</span></span>
+<span><span class="co">## 95% 25.903734169 7.497514</span></span></code></pre>
+<p>The <code>sd_hr</code> column is the standard deviation of the hazard
+ratio, and the <code>hrr</code> column is the ratio between a high and a
+low value (by default the 90% versus the 10% quantile, but these can be
+customised with the <code>hq</code> argument). These quantities both
+have their own implicit prior distributions. Since we supplied
+<code>quantiles=c(0.05,0.95)</code>, then 90% prior credible intervals
+for these two quantities are shown here. These should be checked for
+consistency with beliefs, and the Gamma prior for <span class="math inline">\(\tau\)</span> (supplied as
+<code>p_gamma(2,3)</code> revised if necessary.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

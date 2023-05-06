@@ -9,8 +9,8 @@ test_that("get_cum_backhaz",{
 
 
 alpha <- -0.35
-coefs <- c(0.0012, 0.029, 0.1, 0.15, 0.11, 0.11, 0.23, 0.0074, 0.052, 0.1)
-knots <- c(0, 0.36, 0.62, 0.91, 1.2, 1.54, 2.02, 3)
+coefs <- c(0.0012, 0.029, 0.1, 0.11, 0.23, 0.0074, 0.052, 0.1)
+knots <- c(0.36, 0.62, 0.91, 1.2, 1.54, 2.02, 3)
 
 test_that("distribution functions with backhaz",{
   backhaz <- data.frame(hazard = c(0.01, 0.02, 0.03), time = c(0, 5, 10))

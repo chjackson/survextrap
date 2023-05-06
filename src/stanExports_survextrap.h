@@ -474,17 +474,17 @@ private:
         matrix_d x_ext;
         matrix_d xcure_ext;
         vector_d b_mean;
-        int est_smooth;
-        vector_d smooth_sd_fixed;
+        int est_hsd;
+        vector_d hsd_fixed;
         int cure;
         int relative;
         vector_d backhaz_event;
         vector_d backsurv_ext_start;
         vector_d backsurv_ext_stop;
-        int prior_loghaz_dist;
-        vector_d prior_loghaz;
+        int prior_hscale_dist;
+        vector_d prior_hscale;
         vector_d prior_cure;
-        vector_d prior_smooth;
+        vector_d prior_hsd;
         std::vector<int> prior_loghr_dist;
         vector_d prior_loghr_location;
         vector_d prior_loghr_scale;
@@ -495,7 +495,7 @@ private:
         vector_d prior_logor_cure_df;
         int modelid;
         int nonprop;
-        matrix_d prior_sdnp;
+        matrix_d prior_hrsd;
 public:
     model_survextrap(stan::io::var_context& context__,
         std::ostream* pstream__ = 0)
@@ -761,22 +761,22 @@ public:
                 b_mean(j_1__) = vals_r__[pos__++];
             }
             current_statement_begin__ = 136;
-            context__.validate_dims("data initialization", "est_smooth", "int", context__.to_vec());
-            est_smooth = int(0);
-            vals_i__ = context__.vals_i("est_smooth");
+            context__.validate_dims("data initialization", "est_hsd", "int", context__.to_vec());
+            est_hsd = int(0);
+            vals_i__ = context__.vals_i("est_hsd");
             pos__ = 0;
-            est_smooth = vals_i__[pos__++];
+            est_hsd = vals_i__[pos__++];
             current_statement_begin__ = 137;
-            validate_non_negative_index("smooth_sd_fixed", "(1 - est_smooth)", (1 - est_smooth));
-            context__.validate_dims("data initialization", "smooth_sd_fixed", "vector_d", context__.to_vec((1 - est_smooth)));
-            smooth_sd_fixed = Eigen::Matrix<double, Eigen::Dynamic, 1>((1 - est_smooth));
-            vals_r__ = context__.vals_r("smooth_sd_fixed");
+            validate_non_negative_index("hsd_fixed", "(1 - est_hsd)", (1 - est_hsd));
+            context__.validate_dims("data initialization", "hsd_fixed", "vector_d", context__.to_vec((1 - est_hsd)));
+            hsd_fixed = Eigen::Matrix<double, Eigen::Dynamic, 1>((1 - est_hsd));
+            vals_r__ = context__.vals_r("hsd_fixed");
             pos__ = 0;
-            size_t smooth_sd_fixed_j_1_max__ = (1 - est_smooth);
-            for (size_t j_1__ = 0; j_1__ < smooth_sd_fixed_j_1_max__; ++j_1__) {
-                smooth_sd_fixed(j_1__) = vals_r__[pos__++];
+            size_t hsd_fixed_j_1_max__ = (1 - est_hsd);
+            for (size_t j_1__ = 0; j_1__ < hsd_fixed_j_1_max__; ++j_1__) {
+                hsd_fixed(j_1__) = vals_r__[pos__++];
             }
-            check_greater_or_equal(function__, "smooth_sd_fixed", smooth_sd_fixed, 0);
+            check_greater_or_equal(function__, "hsd_fixed", hsd_fixed, 0);
             current_statement_begin__ = 139;
             context__.validate_dims("data initialization", "cure", "int", context__.to_vec());
             cure = int(0);
@@ -820,20 +820,20 @@ public:
                 backsurv_ext_stop(j_1__) = vals_r__[pos__++];
             }
             current_statement_begin__ = 146;
-            context__.validate_dims("data initialization", "prior_loghaz_dist", "int", context__.to_vec());
-            prior_loghaz_dist = int(0);
-            vals_i__ = context__.vals_i("prior_loghaz_dist");
+            context__.validate_dims("data initialization", "prior_hscale_dist", "int", context__.to_vec());
+            prior_hscale_dist = int(0);
+            vals_i__ = context__.vals_i("prior_hscale_dist");
             pos__ = 0;
-            prior_loghaz_dist = vals_i__[pos__++];
+            prior_hscale_dist = vals_i__[pos__++];
             current_statement_begin__ = 147;
-            validate_non_negative_index("prior_loghaz", "3", 3);
-            context__.validate_dims("data initialization", "prior_loghaz", "vector_d", context__.to_vec(3));
-            prior_loghaz = Eigen::Matrix<double, Eigen::Dynamic, 1>(3);
-            vals_r__ = context__.vals_r("prior_loghaz");
+            validate_non_negative_index("prior_hscale", "3", 3);
+            context__.validate_dims("data initialization", "prior_hscale", "vector_d", context__.to_vec(3));
+            prior_hscale = Eigen::Matrix<double, Eigen::Dynamic, 1>(3);
+            vals_r__ = context__.vals_r("prior_hscale");
             pos__ = 0;
-            size_t prior_loghaz_j_1_max__ = 3;
-            for (size_t j_1__ = 0; j_1__ < prior_loghaz_j_1_max__; ++j_1__) {
-                prior_loghaz(j_1__) = vals_r__[pos__++];
+            size_t prior_hscale_j_1_max__ = 3;
+            for (size_t j_1__ = 0; j_1__ < prior_hscale_j_1_max__; ++j_1__) {
+                prior_hscale(j_1__) = vals_r__[pos__++];
             }
             current_statement_begin__ = 148;
             validate_non_negative_index("prior_cure", "2", 2);
@@ -847,16 +847,16 @@ public:
             }
             check_greater_or_equal(function__, "prior_cure", prior_cure, 0);
             current_statement_begin__ = 149;
-            validate_non_negative_index("prior_smooth", "(2 * est_smooth)", (2 * est_smooth));
-            context__.validate_dims("data initialization", "prior_smooth", "vector_d", context__.to_vec((2 * est_smooth)));
-            prior_smooth = Eigen::Matrix<double, Eigen::Dynamic, 1>((2 * est_smooth));
-            vals_r__ = context__.vals_r("prior_smooth");
+            validate_non_negative_index("prior_hsd", "(2 * est_hsd)", (2 * est_hsd));
+            context__.validate_dims("data initialization", "prior_hsd", "vector_d", context__.to_vec((2 * est_hsd)));
+            prior_hsd = Eigen::Matrix<double, Eigen::Dynamic, 1>((2 * est_hsd));
+            vals_r__ = context__.vals_r("prior_hsd");
             pos__ = 0;
-            size_t prior_smooth_j_1_max__ = (2 * est_smooth);
-            for (size_t j_1__ = 0; j_1__ < prior_smooth_j_1_max__; ++j_1__) {
-                prior_smooth(j_1__) = vals_r__[pos__++];
+            size_t prior_hsd_j_1_max__ = (2 * est_hsd);
+            for (size_t j_1__ = 0; j_1__ < prior_hsd_j_1_max__; ++j_1__) {
+                prior_hsd(j_1__) = vals_r__[pos__++];
             }
-            check_greater_or_equal(function__, "prior_smooth", prior_smooth, 0);
+            check_greater_or_equal(function__, "prior_hsd", prior_hsd, 0);
             current_statement_begin__ = 150;
             validate_non_negative_index("prior_loghr_dist", "ncovs", ncovs);
             context__.validate_dims("data initialization", "prior_loghr_dist", "int", context__.to_vec(ncovs));
@@ -958,17 +958,17 @@ public:
             pos__ = 0;
             nonprop = vals_i__[pos__++];
             current_statement_begin__ = 163;
-            validate_non_negative_index("prior_sdnp", "(ncovs * nonprop)", (ncovs * nonprop));
-            validate_non_negative_index("prior_sdnp", "2", 2);
-            context__.validate_dims("data initialization", "prior_sdnp", "matrix_d", context__.to_vec((ncovs * nonprop),2));
-            prior_sdnp = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>((ncovs * nonprop), 2);
-            vals_r__ = context__.vals_r("prior_sdnp");
+            validate_non_negative_index("prior_hrsd", "(ncovs * nonprop)", (ncovs * nonprop));
+            validate_non_negative_index("prior_hrsd", "2", 2);
+            context__.validate_dims("data initialization", "prior_hrsd", "matrix_d", context__.to_vec((ncovs * nonprop),2));
+            prior_hrsd = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>((ncovs * nonprop), 2);
+            vals_r__ = context__.vals_r("prior_hrsd");
             pos__ = 0;
-            size_t prior_sdnp_j_2_max__ = 2;
-            size_t prior_sdnp_j_1_max__ = (ncovs * nonprop);
-            for (size_t j_2__ = 0; j_2__ < prior_sdnp_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < prior_sdnp_j_1_max__; ++j_1__) {
-                    prior_sdnp(j_1__, j_2__) = vals_r__[pos__++];
+            size_t prior_hrsd_j_2_max__ = 2;
+            size_t prior_hrsd_j_1_max__ = (ncovs * nonprop);
+            for (size_t j_2__ = 0; j_2__ < prior_hrsd_j_2_max__; ++j_2__) {
+                for (size_t j_1__ = 0; j_1__ < prior_hrsd_j_1_max__; ++j_1__) {
+                    prior_hrsd(j_1__, j_2__) = vals_r__[pos__++];
                 }
             }
             // initialize transformed data variables
@@ -987,8 +987,8 @@ public:
             validate_non_negative_index("b_err", "(nvars - 1)", (nvars - 1));
             num_params_r__ += (nvars - 1);
             current_statement_begin__ = 170;
-            validate_non_negative_index("smooth_sd", "est_smooth", est_smooth);
-            num_params_r__ += est_smooth;
+            validate_non_negative_index("hsd", "est_hsd", est_hsd);
+            num_params_r__ += est_hsd;
             current_statement_begin__ = 171;
             validate_non_negative_index("pcure", "cure", cure);
             num_params_r__ += cure;
@@ -996,7 +996,7 @@ public:
             validate_non_negative_index("logor_cure", "ncurecovs", ncurecovs);
             num_params_r__ += ncurecovs;
             current_statement_begin__ = 175;
-            validate_non_negative_index("sd_np", "(ncovs * nonprop)", (ncovs * nonprop));
+            validate_non_negative_index("hrsd", "(ncovs * nonprop)", (ncovs * nonprop));
             num_params_r__ += (ncovs * nonprop);
             current_statement_begin__ = 176;
             validate_non_negative_index("nperr", "(ncovs * nonprop)", (ncovs * nonprop));
@@ -1074,21 +1074,21 @@ public:
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable b_err: ") + e.what()), current_statement_begin__, prog_reader__());
         }
         current_statement_begin__ = 170;
-        if (!(context__.contains_r("smooth_sd")))
-            stan::lang::rethrow_located(std::runtime_error(std::string("Variable smooth_sd missing")), current_statement_begin__, prog_reader__());
-        vals_r__ = context__.vals_r("smooth_sd");
+        if (!(context__.contains_r("hsd")))
+            stan::lang::rethrow_located(std::runtime_error(std::string("Variable hsd missing")), current_statement_begin__, prog_reader__());
+        vals_r__ = context__.vals_r("hsd");
         pos__ = 0U;
-        validate_non_negative_index("smooth_sd", "est_smooth", est_smooth);
-        context__.validate_dims("parameter initialization", "smooth_sd", "vector_d", context__.to_vec(est_smooth));
-        Eigen::Matrix<double, Eigen::Dynamic, 1> smooth_sd(est_smooth);
-        size_t smooth_sd_j_1_max__ = est_smooth;
-        for (size_t j_1__ = 0; j_1__ < smooth_sd_j_1_max__; ++j_1__) {
-            smooth_sd(j_1__) = vals_r__[pos__++];
+        validate_non_negative_index("hsd", "est_hsd", est_hsd);
+        context__.validate_dims("parameter initialization", "hsd", "vector_d", context__.to_vec(est_hsd));
+        Eigen::Matrix<double, Eigen::Dynamic, 1> hsd(est_hsd);
+        size_t hsd_j_1_max__ = est_hsd;
+        for (size_t j_1__ = 0; j_1__ < hsd_j_1_max__; ++j_1__) {
+            hsd(j_1__) = vals_r__[pos__++];
         }
         try {
-            writer__.vector_lb_unconstrain(0, smooth_sd);
+            writer__.vector_lb_unconstrain(0, hsd);
         } catch (const std::exception& e) {
-            stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable smooth_sd: ") + e.what()), current_statement_begin__, prog_reader__());
+            stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable hsd: ") + e.what()), current_statement_begin__, prog_reader__());
         }
         current_statement_begin__ = 171;
         if (!(context__.contains_r("pcure")))
@@ -1125,21 +1125,21 @@ public:
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable logor_cure: ") + e.what()), current_statement_begin__, prog_reader__());
         }
         current_statement_begin__ = 175;
-        if (!(context__.contains_r("sd_np")))
-            stan::lang::rethrow_located(std::runtime_error(std::string("Variable sd_np missing")), current_statement_begin__, prog_reader__());
-        vals_r__ = context__.vals_r("sd_np");
+        if (!(context__.contains_r("hrsd")))
+            stan::lang::rethrow_located(std::runtime_error(std::string("Variable hrsd missing")), current_statement_begin__, prog_reader__());
+        vals_r__ = context__.vals_r("hrsd");
         pos__ = 0U;
-        validate_non_negative_index("sd_np", "(ncovs * nonprop)", (ncovs * nonprop));
-        context__.validate_dims("parameter initialization", "sd_np", "vector_d", context__.to_vec((ncovs * nonprop)));
-        Eigen::Matrix<double, Eigen::Dynamic, 1> sd_np((ncovs * nonprop));
-        size_t sd_np_j_1_max__ = (ncovs * nonprop);
-        for (size_t j_1__ = 0; j_1__ < sd_np_j_1_max__; ++j_1__) {
-            sd_np(j_1__) = vals_r__[pos__++];
+        validate_non_negative_index("hrsd", "(ncovs * nonprop)", (ncovs * nonprop));
+        context__.validate_dims("parameter initialization", "hrsd", "vector_d", context__.to_vec((ncovs * nonprop)));
+        Eigen::Matrix<double, Eigen::Dynamic, 1> hrsd((ncovs * nonprop));
+        size_t hrsd_j_1_max__ = (ncovs * nonprop);
+        for (size_t j_1__ = 0; j_1__ < hrsd_j_1_max__; ++j_1__) {
+            hrsd(j_1__) = vals_r__[pos__++];
         }
         try {
-            writer__.vector_lb_unconstrain(0, sd_np);
+            writer__.vector_lb_unconstrain(0, hrsd);
         } catch (const std::exception& e) {
-            stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable sd_np: ") + e.what()), current_statement_begin__, prog_reader__());
+            stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable hrsd: ") + e.what()), current_statement_begin__, prog_reader__());
         }
         current_statement_begin__ = 176;
         if (!(context__.contains_r("nperr")))
@@ -1212,12 +1212,12 @@ public:
             else
                 b_err = in__.vector_constrain((nvars - 1));
             current_statement_begin__ = 170;
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> smooth_sd;
-            (void) smooth_sd;  // dummy to suppress unused var warning
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> hsd;
+            (void) hsd;  // dummy to suppress unused var warning
             if (jacobian__)
-                smooth_sd = in__.vector_lb_constrain(0, est_smooth, lp__);
+                hsd = in__.vector_lb_constrain(0, est_hsd, lp__);
             else
-                smooth_sd = in__.vector_lb_constrain(0, est_smooth);
+                hsd = in__.vector_lb_constrain(0, est_hsd);
             current_statement_begin__ = 171;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> pcure;
             (void) pcure;  // dummy to suppress unused var warning
@@ -1233,12 +1233,12 @@ public:
             else
                 logor_cure = in__.vector_constrain(ncurecovs);
             current_statement_begin__ = 175;
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> sd_np;
-            (void) sd_np;  // dummy to suppress unused var warning
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> hrsd;
+            (void) hrsd;  // dummy to suppress unused var warning
             if (jacobian__)
-                sd_np = in__.vector_lb_constrain(0, (ncovs * nonprop), lp__);
+                hrsd = in__.vector_lb_constrain(0, (ncovs * nonprop), lp__);
             else
-                sd_np = in__.vector_lb_constrain(0, (ncovs * nonprop));
+                hrsd = in__.vector_lb_constrain(0, (ncovs * nonprop));
             current_statement_begin__ = 176;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> nperr;
             (void) nperr;  // dummy to suppress unused var warning
@@ -1312,16 +1312,16 @@ public:
                     current_statement_begin__ = 196;
                     stan::model::assign(b_np, 
                                 stan::model::cons_list(stan::model::index_uni(r), stan::model::cons_list(stan::model::index_min_max(1, (nvars - 1)), stan::model::nil_index_list())), 
-                                multiply(get_base1(sd_np, r, "sd_np", 1), stan::model::rvalue(nperr, stan::model::cons_list(stan::model::index_uni(r), stan::model::cons_list(stan::model::index_min_max(1, (nvars - 1)), stan::model::nil_index_list())), "nperr")), 
+                                multiply(get_base1(hrsd, r, "hrsd", 1), stan::model::rvalue(nperr, stan::model::cons_list(stan::model::index_uni(r), stan::model::cons_list(stan::model::index_min_max(1, (nvars - 1)), stan::model::nil_index_list())), "nperr")), 
                                 "assigning variable b_np");
                 }
                 current_statement_begin__ = 198;
-                if (as_bool(est_smooth)) {
+                if (as_bool(est_hsd)) {
                     current_statement_begin__ = 199;
-                    stan::math::assign(ssd, get_base1(smooth_sd, 1, "smooth_sd", 1));
+                    stan::math::assign(ssd, get_base1(hsd, 1, "hsd", 1));
                 } else {
                     current_statement_begin__ = 201;
-                    stan::math::assign(ssd, get_base1(smooth_sd_fixed, 1, "smooth_sd_fixed", 1));
+                    stan::math::assign(ssd, get_base1(hsd_fixed, 1, "hsd_fixed", 1));
                 }
                 current_statement_begin__ = 203;
                 stan::math::assign(b, append_row(0, add(b_mean, multiply(b_err, ssd))));
@@ -1401,12 +1401,12 @@ public:
                 }
             } else {
                 current_statement_begin__ = 233;
-                if (as_bool(est_smooth)) {
+                if (as_bool(est_hsd)) {
                     current_statement_begin__ = 234;
-                    stan::math::assign(b, append_row(0, add(b_mean, multiply(b_err, get_base1(smooth_sd, 1, "smooth_sd", 1)))));
+                    stan::math::assign(b, append_row(0, add(b_mean, multiply(b_err, get_base1(hsd, 1, "hsd", 1)))));
                 } else {
                     current_statement_begin__ = 236;
-                    stan::math::assign(b, append_row(0, add(b_mean, multiply(b_err, get_base1(smooth_sd_fixed, 1, "smooth_sd_fixed", 1)))));
+                    stan::math::assign(b, append_row(0, add(b_mean, multiply(b_err, get_base1(hsd_fixed, 1, "hsd_fixed", 1)))));
                 }
                 current_statement_begin__ = 237;
                 stan::math::assign(coefs, softmax(b));
@@ -1638,17 +1638,17 @@ public:
             current_statement_begin__ = 278;
             if (as_bool(logical_gt(nevent, 0))) {
                 current_statement_begin__ = 278;
-                stan::math::assign(alpha_event, rep_vector((get_base1(prior_loghaz, 1, "prior_loghaz", 1) + get_base1(gamma, 1, "gamma", 1)), nevent));
+                stan::math::assign(alpha_event, rep_vector((get_base1(prior_hscale, 1, "prior_hscale", 1) + get_base1(gamma, 1, "gamma", 1)), nevent));
             }
             current_statement_begin__ = 279;
             if (as_bool(logical_gt(nrcens, 0))) {
                 current_statement_begin__ = 279;
-                stan::math::assign(alpha_rcens, rep_vector((get_base1(prior_loghaz, 1, "prior_loghaz", 1) + get_base1(gamma, 1, "gamma", 1)), nrcens));
+                stan::math::assign(alpha_rcens, rep_vector((get_base1(prior_hscale, 1, "prior_hscale", 1) + get_base1(gamma, 1, "gamma", 1)), nrcens));
             }
             current_statement_begin__ = 280;
             if (as_bool(logical_gt(nextern, 0))) {
                 current_statement_begin__ = 280;
-                stan::math::assign(alpha_extern, rep_vector((get_base1(prior_loghaz, 1, "prior_loghaz", 1) + get_base1(gamma, 1, "gamma", 1)), nextern));
+                stan::math::assign(alpha_extern, rep_vector((get_base1(prior_hscale, 1, "prior_hscale", 1) + get_base1(gamma, 1, "gamma", 1)), nextern));
             }
             current_statement_begin__ = 282;
             if (as_bool(logical_gt(ncovs, 0))) {
@@ -1713,14 +1713,14 @@ public:
             current_statement_begin__ = 305;
             if (as_bool(logical_gt(nextern, 0))) {
                 current_statement_begin__ = 306;
-                stan::math::assign(p_ext_stop, stan::math::exp(elt_multiply(log_surv(alpha_extern, ibasis_ext_stop, coefs_extern, cure, pcure_extern, modelid, pstream__), backsurv_ext_stop)));
+                stan::math::assign(p_ext_stop, elt_multiply(stan::math::exp(log_surv(alpha_extern, ibasis_ext_stop, coefs_extern, cure, pcure_extern, modelid, pstream__)), backsurv_ext_stop));
                 current_statement_begin__ = 308;
-                stan::math::assign(p_ext_start, stan::math::exp(elt_multiply(log_surv(alpha_extern, ibasis_ext_start, coefs_extern, cure, pcure_extern, modelid, pstream__), backsurv_ext_start)));
+                stan::math::assign(p_ext_start, elt_multiply(stan::math::exp(log_surv(alpha_extern, ibasis_ext_start, coefs_extern, cure, pcure_extern, modelid, pstream__)), backsurv_ext_start));
                 current_statement_begin__ = 310;
                 lp_accum__.add(binomial_log(r_ext, n_ext, elt_divide(p_ext_stop, p_ext_start)));
             }
             current_statement_begin__ = 314;
-            stan::math::assign(dummy, loghaz_lp(get_base1(gamma, 1, "gamma", 1), prior_loghaz_dist, 0, get_base1(prior_loghaz, 2, "prior_loghaz", 1), get_base1(prior_loghaz, 3, "prior_loghaz", 1), lp__, lp_accum__, pstream__));
+            stan::math::assign(dummy, loghaz_lp(get_base1(gamma, 1, "gamma", 1), prior_hscale_dist, 0, get_base1(prior_hscale, 2, "prior_hscale", 1), get_base1(prior_hscale, 3, "prior_hscale", 1), lp__, lp_accum__, pstream__));
             current_statement_begin__ = 318;
             stan::math::assign(dummy, loghr_lp(loghr, prior_loghr_dist, prior_loghr_location, prior_loghr_scale, prior_loghr_df, lp__, lp_accum__, pstream__));
             current_statement_begin__ = 322;
@@ -1736,14 +1736,14 @@ public:
                 stan::math::assign(dummy, loghr_lp(logor_cure, prior_logor_cure_dist, prior_logor_cure_location, prior_logor_cure_scale, prior_logor_cure_df, lp__, lp_accum__, pstream__));
             }
             current_statement_begin__ = 334;
-            if (as_bool(est_smooth)) {
+            if (as_bool(est_hsd)) {
                 current_statement_begin__ = 335;
-                lp_accum__.add(gamma_log<propto__>(smooth_sd, get_base1(prior_smooth, 1, "prior_smooth", 1), get_base1(prior_smooth, 2, "prior_smooth", 1)));
+                lp_accum__.add(gamma_log<propto__>(hsd, get_base1(prior_hsd, 1, "prior_hsd", 1), get_base1(prior_hsd, 2, "prior_hsd", 1)));
             }
             current_statement_begin__ = 339;
             if (as_bool(nonprop)) {
                 current_statement_begin__ = 340;
-                lp_accum__.add(gamma_log<propto__>(sd_np, stan::model::rvalue(prior_sdnp, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), "prior_sdnp"), stan::model::rvalue(prior_sdnp, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())), "prior_sdnp")));
+                lp_accum__.add(gamma_log<propto__>(hrsd, stan::model::rvalue(prior_hrsd, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), "prior_hrsd"), stan::model::rvalue(prior_hrsd, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())), "prior_hrsd")));
                 current_statement_begin__ = 341;
                 for (int i = 1; i <= ncovs; ++i) {
                     current_statement_begin__ = 342;
@@ -1774,10 +1774,10 @@ public:
         names__.push_back("gamma");
         names__.push_back("loghr");
         names__.push_back("b_err");
-        names__.push_back("smooth_sd");
+        names__.push_back("hsd");
         names__.push_back("pcure");
         names__.push_back("logor_cure");
-        names__.push_back("sd_np");
+        names__.push_back("hrsd");
         names__.push_back("nperr");
         names__.push_back("b");
         names__.push_back("coefs");
@@ -1806,7 +1806,7 @@ public:
         dims__.push_back((nvars - 1));
         dimss__.push_back(dims__);
         dims__.resize(0);
-        dims__.push_back(est_smooth);
+        dims__.push_back(est_hsd);
         dimss__.push_back(dims__);
         dims__.resize(0);
         dims__.push_back(cure);
@@ -1900,10 +1900,10 @@ public:
         for (size_t j_1__ = 0; j_1__ < b_err_j_1_max__; ++j_1__) {
             vars__.push_back(b_err(j_1__));
         }
-        Eigen::Matrix<double, Eigen::Dynamic, 1> smooth_sd = in__.vector_lb_constrain(0, est_smooth);
-        size_t smooth_sd_j_1_max__ = est_smooth;
-        for (size_t j_1__ = 0; j_1__ < smooth_sd_j_1_max__; ++j_1__) {
-            vars__.push_back(smooth_sd(j_1__));
+        Eigen::Matrix<double, Eigen::Dynamic, 1> hsd = in__.vector_lb_constrain(0, est_hsd);
+        size_t hsd_j_1_max__ = est_hsd;
+        for (size_t j_1__ = 0; j_1__ < hsd_j_1_max__; ++j_1__) {
+            vars__.push_back(hsd(j_1__));
         }
         Eigen::Matrix<double, Eigen::Dynamic, 1> pcure = in__.vector_lub_constrain(0, 1, cure);
         size_t pcure_j_1_max__ = cure;
@@ -1915,10 +1915,10 @@ public:
         for (size_t j_1__ = 0; j_1__ < logor_cure_j_1_max__; ++j_1__) {
             vars__.push_back(logor_cure(j_1__));
         }
-        Eigen::Matrix<double, Eigen::Dynamic, 1> sd_np = in__.vector_lb_constrain(0, (ncovs * nonprop));
-        size_t sd_np_j_1_max__ = (ncovs * nonprop);
-        for (size_t j_1__ = 0; j_1__ < sd_np_j_1_max__; ++j_1__) {
-            vars__.push_back(sd_np(j_1__));
+        Eigen::Matrix<double, Eigen::Dynamic, 1> hrsd = in__.vector_lb_constrain(0, (ncovs * nonprop));
+        size_t hrsd_j_1_max__ = (ncovs * nonprop);
+        for (size_t j_1__ = 0; j_1__ < hrsd_j_1_max__; ++j_1__) {
+            vars__.push_back(hrsd(j_1__));
         }
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> nperr = in__.matrix_constrain((ncovs * nonprop), (nvars - 1));
         size_t nperr_j_2_max__ = (nvars - 1);
@@ -2001,16 +2001,16 @@ public:
                     current_statement_begin__ = 196;
                     stan::model::assign(b_np, 
                                 stan::model::cons_list(stan::model::index_uni(r), stan::model::cons_list(stan::model::index_min_max(1, (nvars - 1)), stan::model::nil_index_list())), 
-                                multiply(get_base1(sd_np, r, "sd_np", 1), stan::model::rvalue(nperr, stan::model::cons_list(stan::model::index_uni(r), stan::model::cons_list(stan::model::index_min_max(1, (nvars - 1)), stan::model::nil_index_list())), "nperr")), 
+                                multiply(get_base1(hrsd, r, "hrsd", 1), stan::model::rvalue(nperr, stan::model::cons_list(stan::model::index_uni(r), stan::model::cons_list(stan::model::index_min_max(1, (nvars - 1)), stan::model::nil_index_list())), "nperr")), 
                                 "assigning variable b_np");
                 }
                 current_statement_begin__ = 198;
-                if (as_bool(est_smooth)) {
+                if (as_bool(est_hsd)) {
                     current_statement_begin__ = 199;
-                    stan::math::assign(ssd, get_base1(smooth_sd, 1, "smooth_sd", 1));
+                    stan::math::assign(ssd, get_base1(hsd, 1, "hsd", 1));
                 } else {
                     current_statement_begin__ = 201;
-                    stan::math::assign(ssd, get_base1(smooth_sd_fixed, 1, "smooth_sd_fixed", 1));
+                    stan::math::assign(ssd, get_base1(hsd_fixed, 1, "hsd_fixed", 1));
                 }
                 current_statement_begin__ = 203;
                 stan::math::assign(b, append_row(0, add(b_mean, multiply(b_err, ssd))));
@@ -2090,12 +2090,12 @@ public:
                 }
             } else {
                 current_statement_begin__ = 233;
-                if (as_bool(est_smooth)) {
+                if (as_bool(est_hsd)) {
                     current_statement_begin__ = 234;
-                    stan::math::assign(b, append_row(0, add(b_mean, multiply(b_err, get_base1(smooth_sd, 1, "smooth_sd", 1)))));
+                    stan::math::assign(b, append_row(0, add(b_mean, multiply(b_err, get_base1(hsd, 1, "hsd", 1)))));
                 } else {
                     current_statement_begin__ = 236;
-                    stan::math::assign(b, append_row(0, add(b_mean, multiply(b_err, get_base1(smooth_sd_fixed, 1, "smooth_sd_fixed", 1)))));
+                    stan::math::assign(b, append_row(0, add(b_mean, multiply(b_err, get_base1(hsd_fixed, 1, "hsd_fixed", 1)))));
                 }
                 current_statement_begin__ = 237;
                 stan::math::assign(coefs, softmax(b));
@@ -2233,7 +2233,7 @@ public:
             (void) alpha;  // dummy to suppress unused var warning
             stan::math::initialize(alpha, DUMMY_VAR__);
             stan::math::fill(alpha, DUMMY_VAR__);
-            stan::math::assign(alpha,(get_base1(prior_loghaz, 1, "prior_loghaz", 1) + get_base1(gamma, 1, "gamma", 1)));
+            stan::math::assign(alpha,(get_base1(prior_hscale, 1, "prior_hscale", 1) + get_base1(gamma, 1, "gamma", 1)));
             current_statement_begin__ = 349;
             validate_non_negative_index("hr", "ncovs", ncovs);
             Eigen::Matrix<double, Eigen::Dynamic, 1> hr(ncovs);
@@ -2307,10 +2307,10 @@ public:
             param_name_stream__ << "b_err" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
-        size_t smooth_sd_j_1_max__ = est_smooth;
-        for (size_t j_1__ = 0; j_1__ < smooth_sd_j_1_max__; ++j_1__) {
+        size_t hsd_j_1_max__ = est_hsd;
+        for (size_t j_1__ = 0; j_1__ < hsd_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
-            param_name_stream__ << "smooth_sd" << '.' << j_1__ + 1;
+            param_name_stream__ << "hsd" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
         size_t pcure_j_1_max__ = cure;
@@ -2325,10 +2325,10 @@ public:
             param_name_stream__ << "logor_cure" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
-        size_t sd_np_j_1_max__ = (ncovs * nonprop);
-        for (size_t j_1__ = 0; j_1__ < sd_np_j_1_max__; ++j_1__) {
+        size_t hrsd_j_1_max__ = (ncovs * nonprop);
+        for (size_t j_1__ = 0; j_1__ < hrsd_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
-            param_name_stream__ << "sd_np" << '.' << j_1__ + 1;
+            param_name_stream__ << "hrsd" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
         size_t nperr_j_2_max__ = (nvars - 1);
@@ -2460,10 +2460,10 @@ public:
             param_name_stream__ << "b_err" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
-        size_t smooth_sd_j_1_max__ = est_smooth;
-        for (size_t j_1__ = 0; j_1__ < smooth_sd_j_1_max__; ++j_1__) {
+        size_t hsd_j_1_max__ = est_hsd;
+        for (size_t j_1__ = 0; j_1__ < hsd_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
-            param_name_stream__ << "smooth_sd" << '.' << j_1__ + 1;
+            param_name_stream__ << "hsd" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
         size_t pcure_j_1_max__ = cure;
@@ -2478,10 +2478,10 @@ public:
             param_name_stream__ << "logor_cure" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
-        size_t sd_np_j_1_max__ = (ncovs * nonprop);
-        for (size_t j_1__ = 0; j_1__ < sd_np_j_1_max__; ++j_1__) {
+        size_t hrsd_j_1_max__ = (ncovs * nonprop);
+        for (size_t j_1__ = 0; j_1__ < hrsd_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
-            param_name_stream__ << "sd_np" << '.' << j_1__ + 1;
+            param_name_stream__ << "hrsd" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
         size_t nperr_j_2_max__ = (nvars - 1);

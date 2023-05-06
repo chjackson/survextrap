@@ -1,50 +1,17 @@
-##' Documentation for common M-spline arguments
-##'
-##' @name mspline_args
-##'
-##' @param iknots Vector of internal knot locations. If not supplied, \code{df} has to be specified, in which case
-#' the default is \code{df - degree - 1} equally spaced knots between the boundary knots.
-##' @param bknots Vector with two elements, giving the boundary knot locations
-##' @param degree Spline polynomial degree (defaults to 3)
-##' @param df Desired number of basis terms, or "degrees of freedom" in the spline.
-##' If \code{iknots} is not supplied, the number of internal knots is then chosen to satisfy this.
-##'
-NULL
 
-mspline_default_iknots <- function(iknots=NULL, bknots, degree, df){
-  if (is.null(iknots)) {
-    nik <- df - degree  - 1
-    iknots <- seq(bknots[1], bknots[2], length.out=nik+2)[-c(1,nik+2)]
-  }
-  validate_knots(iknots, name="iknots")
-  iknots
-}
-
-mspline_default <- function(mspline){
-  if (!is.list(mspline)) stop("`mspline` should be a list")
-  validate_knots(mspline$bknots, name="bknots")
-  if (is.null(mspline$degree)) mspline$degree <- 3
-  if (is.null(mspline$iknots)){
-    if (!is.null(mspline$df)) {
-      mspline$iknots <- mspline_default_iknots(bknots=mspline$bknots, degree=mspline$degree, df=mspline$df)
-    }
-  } else validate_knots(mspline$iknots, name="iknots")
-  mspline
-}
 
 
 ##' M-spline survival distribution
 ##'
-##' Probability density, distribution, quantile, random generation, hazard,
-##' cumulative hazard, mean and restricted mean functions for the
-##' M-spline time-to-event model.
-##'
-##' This can optionally be combined with a cure probability, and / or with
-##' a known background hazard trajectory that is a piecewise-constant function of time.
+##' Probability density, distribution, quantile, random generation,
+##' hazard, cumulative hazard, mean and restricted mean functions for
+##' the M-spline time-to-event model.  This can optionally be combined
+##' with a cure probability, and / or with a known background hazard
+##' trajectory that is a piecewise-constant function of time.
 ##'
 ##'
 ##' @aliases dsurvmspline psurvmspline qsurvmspline rsurvmspline
-##' hsurvmspline Hsurvmspline mean_survmspline rmst_survmspline
+##'   hsurvmspline Hsurvmspline mean_survmspline rmst_survmspline
 ##'
 ##' @param x,q,t Vector of times.
 ##'
@@ -52,7 +19,7 @@ mspline_default <- function(mspline){
 ##'
 ##' @param n Number of random numbers to simulate.
 ##'
-##' @param alpha Log scale parameter.
+##' @param alpha Log hazard scale parameter.
 ##'
 ##' @param coefs Spline basis coefficients. These should sum to 1,
 ##' otherwise they are normalised internally to sum to 1.
@@ -63,11 +30,11 @@ mspline_default <- function(mspline){
 ##' In vectorised usage of these functions, the knots and degree must be
 ##' the same for all alternative times and parameter values.
 ##'
-##' @param degree Spline polynomial degree.
+##' @inheritParams mspline_args
 ##'
 ##' @param log,log.p Return log density or probability.
 ##'
-##' @param lower.tail logical; if TRUE (default), probabilities are \eqn{P(X
+##' @param lower.tail logical; if \code{TRUE} (default), probabilities are \eqn{P(X
 ##' \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.
 ##'
 ##' @param pcure Probability of "cure", which defaults to zero.  If this is non-zero, this defines a "mixture cure" version of the M-spline model.
@@ -117,7 +84,7 @@ mspline_default <- function(mspline){
 ##'
 ##' @references
 ##'
-##' Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425–441.
+##' Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425-441.
 ##'
 ##' Brilleman, S. L., Elci, E. M., Novik, J. B., & Wolfe, R. (2020). Bayesian survival analysis using the rstanarm R package. arXiv preprint arXiv:2002.09633.
 ##'
@@ -130,29 +97,57 @@ NULL
 
 ##' Evaluate an M-spline basis matrix at the specified times.
 ##'
-##' Extrapolation beyond the boundary knots is done by assuming that each basis term
-##' is constant beyond the boundary at its value at the boundary.
-##' This gives a continuous but non-smooth function.   Each basis term is assumed to be
-##' zero at times less than zero, since these models are used for hazard functions
-##' in survival data.
+##' Evaluate an M-spline basis matrix at the specified times.
+##' Extrapolation beyond the boundary knots is done by assuming that
+##' each basis term is constant beyond the boundary. 
+##'
+##' The lower boundary is fixed to zero, and each basis term is
+##' assumed to be zero at times less than zero, since these models are
+##' used for hazard functions in survival data.
 ##'
 ##' @param times A numeric vector of times at which to evaluate the basis.
 ##'
-##' @param iknots Internal knots
-##'
-##' @param bknots Boundary knots
+##' @param knots Spline knots
 ##'
 ##' @param degree Spline degree
 ##'
 ##' @param integrate If \code{TRUE}, then the integrated M-spline (I-spline) basis is returned.
 ##'
+##' @param bsmooth If \code{TRUE} then the function is constrained to
+##'   also have zero derivative and second derivative at the boundary,
+##'   which improves smoothness at the boundary (experimental feature).
+##'
+##' @references The [splines2](https://cran.r-project.org/web/packages/splines2/index.html) package is used.
+##'
 ##' @return A two-dimensional array.  Rows are the times, and columns are the basis terms.
 ##'
-mspline_basis <- function(times, iknots, bknots, degree=3, integrate = FALSE) {
-  validate_knots(iknots, name="iknots")
-  validate_knots(bknots, name="bknots")
-  tmax <- bknots[2]
-  tmin <- bknots[1]
+mspline_basis <- function(times, knots, degree=3, integrate = FALSE,
+                          bsmooth = TRUE){
+  if (is.null(bsmooth)) bsmooth <- TRUE
+  if (bsmooth){
+    if (degree != 3)
+      stop("spline degree must be 3 unless using bsmooth=FALSE")
+    res <- mspline_basis_bsmooth(times=times, knots=knots, integrate = integrate)
+  }
+  else
+    res <- mspline_basis_unsmooth(times=times, knots=knots,
+                                  degree=degree, integrate = integrate)
+  attr(res, "times") <- times
+  attr(res, "bsmooth") <- bsmooth
+  attr(res, "knots") <- times
+  attr(res, "Boundary.knots") <- NULL
+  ## note that this overwrites the knots attributes created by splines2
+  ## which are the internal knots
+  res
+}
+
+mspline_basis_unsmooth <- function(times, knots, degree=3, integrate = FALSE) {
+  validate_knots(knots, name="knots")
+  knots <- sort(knots) # just in case
+  tmax <- max(knots)
+  tmin <- 0
+  iknots <- knots[-length(knots)]
+  bknots <- c(tmin, tmax)
   # evaluate basis at knots first, to set up use of predict()
   basis0 <- splines2::mSpline(iknots, knots = iknots, Boundary.knots = bknots,
                               degree = degree, intercept = TRUE)
@@ -193,10 +188,49 @@ mspline_basis <- function(times, iknots, bknots, degree=3, integrate = FALSE) {
   aa(out)
 }
 
+##' M-spline basis that is constrained to be constant and smooth at
+##' the upper boundary, so that the derivative and second derivative
+##' are zero.
+##'
+##' @author Derivation by Iain Timmins (https://github.com/irtimmins)
+##'
+##' Lower boundary constraints not supported, on the assumption that
+##' users will nearly always use a lower boundary of zero, so no need
+##' to model below the boundary.
+##'
+##' @noRd
+mspline_basis_bsmooth <- function(times, knots, integrate = FALSE) {
+  degree <- 3
+  basis0 <- mspline_basis_unsmooth(times, knots, degree=degree, integrate)
+  knots <- sort(knots) # just in case
+  iknots <- knots[-length(knots)]
+  bknots <- c(0, max(knots))
+  n <- ncol(basis0)
+  res <- matrix(nrow=length(times), ncol=n-2)
+  for (i in 1:(n-3))
+    res[,i] <- basis0[,i]
+  b <- splines2::mSpline(iknots, knots = iknots, Boundary.knots = bknots,
+                         degree = degree, intercept = TRUE)
+  b_deriv <- splines2::mSpline(iknots, knots = iknots, Boundary.knots = bknots,
+                               degree = degree, intercept = TRUE, derivs=1)
+  b_2deriv <- splines2::mSpline(iknots, knots = iknots, Boundary.knots = bknots,
+                               degree = degree, intercept = TRUE, derivs=2)
+  U <- bknots[2]
+  bU <- predict(b, U)
+  bdU <- predict(b_deriv, U)
+  b2dU <- predict(b_2deriv, U)
+  ncoef <- 1 / bU[n]
+  n1coef <- - ncoef * bdU[n] / bdU[n-1]
+  n2coef <- ( - n1coef * b2dU[n-1]  -  ncoef * b2dU[n] ) /  b2dU[n-2]
+  res[,n-2] <- n2coef*basis0[,n-2] + n1coef*basis0[,n-1] + ncoef*basis0[,n]
+  res
+}
+
+
 ##' @rdname Survmspline
 ##' @export
 psurvmspline <- function(q, alpha, coefs, knots, degree=3, lower.tail=TRUE, log.p=FALSE,
-                         pcure=0, offsetH=0, backhaz=NULL){
+                         pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
   if (!is.null(backhaz)) offsetH <- get_cum_backhaz(q, backhaz)
   if (is.null(pcure)) pcure <- 0
   ind <- att <- NULL
@@ -204,7 +238,7 @@ psurvmspline <- function(q, alpha, coefs, knots, degree=3, lower.tail=TRUE, log.
   for (i in seq_along(d)) assign(names(d)[i], d[[i]])
   if (any(ind)){
     log_cumhaz <- Hsurvmspline(x=q, alpha=alpha, coefs=coefs, knots=knots, degree=degree, log=TRUE,
-                               offsetH=0)
+                               offsetH=0, bsmooth=bsmooth)
     log_surv <- as.numeric(-exp(log_cumhaz))
     pp <- pcure>0
     log_surv[pp] <- log(pcure[pp] + (1 - pcure[pp])*exp(log_surv[pp]))
@@ -227,7 +261,7 @@ psurvmspline <- function(q, alpha, coefs, knots, degree=3, lower.tail=TRUE, log.
 ##' @rdname Survmspline
 ##' @export
 Hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
-                         pcure=0, offsetH=0, backhaz=NULL){
+                         pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
     if (!is.null(backhaz)) offsetH <- get_cum_backhaz(x, backhaz)
     if (is.null(pcure)) pcure <- 0
     ind <- att <- NULL
@@ -235,10 +269,8 @@ Hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
         knots <- sort(knots)
-        iknots <- knots[-c(1,length(knots))]
-        bknots <- knots[c(1,length(knots))]
-        ibasis <- mspline_basis(q, iknots=iknots, bknots=bknots, degree=degree, integrate=TRUE)
-        log_cumhaz <- as.vector(alpha) + log(rowSums(coefs * ibasis))
+        ibasis <- mspline_basis(q, knots=knots, degree=degree, integrate=TRUE, bsmooth=bsmooth)
+        log_cumhaz <- mspline_sum_basis(ibasis, coefs, as.vector(alpha), log=TRUE)
         pp <- pcure>0
         log_cumhaz[pp] = - (pcure[pp] + (1 - pcure[pp])*(-log_cumhaz[pp])) # since surv = -log_cumhaz
         if (log){
@@ -257,7 +289,7 @@ Hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
 ##' @rdname Survmspline
 ##' @export
 hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
-                         pcure=0, offseth=0, backhaz=NULL){
+                         pcure=0, offseth=0, backhaz=NULL, bsmooth=TRUE){
     if (!is.null(backhaz)) offseth <- backhaz$hazard[findInterval(x, backhaz$time)]
     if (is.null(pcure)) pcure <- 0
     ind <- att <- NULL
@@ -265,16 +297,13 @@ hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
         knots <- sort(knots)
-        iknots <- knots[-c(1,length(knots))]
-        bknots <- knots[c(1,length(knots))]
-        basis <- mspline_basis(q, iknots=iknots, bknots=bknots, degree=degree)
-        loghaz <- as.vector(alpha) + log(rowSums(coefs * basis))
-
+        basis <- mspline_basis(q, knots=knots, degree=degree, bsmooth=bsmooth)
+        loghaz <- mspline_sum_basis(basis, coefs, as.vector(alpha), log=TRUE)
         pp <- pcure>0
         logdens <- dsurvmspline(x=x[pp], alpha=alpha[pp], coefs=coefs[pp,,drop=FALSE],
-                               knots=knots, degree=degree, pcure=0, log=TRUE)
+                               knots=knots, degree=degree, pcure=0, log=TRUE, bsmooth=bsmooth)
         logsurv <- psurvmspline(q=q[pp], alpha=alpha[pp], coefs=coefs[pp,,drop=FALSE],
-                               knots=knots, degree=degree, pcure=pcure[pp], log.p=TRUE)
+                               knots=knots, degree=degree, pcure=pcure[pp], log.p=TRUE, lower.tail=FALSE, bsmooth=bsmooth)
         loghaz[pp] <- log(1 - pcure[pp]) + logdens - logsurv
 
         if (log){
@@ -293,7 +322,8 @@ hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
 ##' @rdname Survmspline
 ##' @export
 dsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
-                         pcure=0, offseth=0, offsetH=0, backhaz=NULL){
+                         pcure=0, offseth=0, offsetH=0, backhaz=NULL,
+                         bsmooth=TRUE){
   if (!is.null(backhaz)) {
     offseth <- backhaz$hazard[findInterval(x, backhaz$time)]
     offsetH <- get_cum_backhaz(x, backhaz)
@@ -305,9 +335,10 @@ dsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
   for (i in seq_along(d)) assign(names(d)[i], d[[i]])
   if (any(ind)){
     loghaz <- hsurvmspline(q, alpha, coefs, knots, degree,
-                           log=TRUE, pcure=pcure, offseth=offseth)
+                           log=TRUE, pcure=pcure, offseth=offseth,
+                           bsmooth=bsmooth)
     logsurv <- psurvmspline(q, alpha, coefs, knots, degree,
-                            log.p=TRUE, lower.tail=FALSE, pcure=pcure, offsetH=offsetH)
+                            log.p=TRUE, lower.tail=FALSE, pcure=pcure, offsetH=offsetH, bsmooth=bsmooth)
     logdens <- loghaz + logsurv
     if (log)
       ret[ind] <- logdens
@@ -321,22 +352,22 @@ dsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
 ##' @rdname Survmspline
 ##' @export
 qsurvmspline <- function(p, alpha, coefs, knots, degree=3, lower.tail=TRUE, log.p=FALSE,
-                         pcure=0, offsetH=0, backhaz=NULL){
+                         pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
   if (log.p) p <- exp(p)
   if (!lower.tail) p <- 1 - p
   if (is.null(pcure)) pcure <- 0
-  qgeneric(psurvmspline, p=p, matargs=c("coefs"), scalarargs=c("knots","degree","backhaz"),
+  qgeneric(psurvmspline, p=p, matargs=c("coefs"), scalarargs=c("knots","degree","backhaz","bsmooth"),
            alpha=alpha, coefs=coefs, knots=knots, degree=degree,
-           pcure=pcure, offsetH=offsetH, backhaz=backhaz)
+           pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
 }
 
 ##' @rdname Survmspline
 ##' @export
 rsurvmspline <- function(n, alpha, coefs, knots, degree=3,
-                         pcure=0, offsetH=0, backhaz=NULL){
+                         pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
   if (length(n) > 1) n <- length(n)
   qsurvmspline(p=runif(n), alpha=alpha, coefs=coefs, knots=knots, degree=degree,
-               pcure=pcure, offsetH=offsetH, backhaz=backhaz)
+               pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
 }
 
 survmspline_dist_setup <- function(q, alpha, coefs, knots, pcure=0, offsetH=0, offseth=0){
@@ -368,33 +399,33 @@ survmspline_dist_setup <- function(q, alpha, coefs, knots, pcure=0, offsetH=0, o
 }
 
 validate_knots <- function(knots, name="knots"){
-    if (any(!is.numeric(knots))) stop(sprintf("some of `%s` are not numeric", name))
-    if (any(knots < 0)) stop(sprintf("some of `%s` are < 0", name))
-    if (name=="bknots")
-        if (length(knots) != 2) stop("`bknots` should be a vector of length 2")
-    ## splines2 handles checking whether internal knots are within boundary
-    ## splines2 handles checking the degree
+  if (any(!is.numeric(knots)))
+    stop(sprintf("All `%s` should be numeric", name))
+  if (any(knots <= 0))
+    stop(sprintf("All %s should be > 0 ", name))
+  ## splines2 handles checking whether internal knots are within boundary
+  ## splines2 handles checking the degree
 }
 
 
 ##' @rdname Survmspline
 ##' @export
-rmst_survmspline = function(t, alpha, coefs, knots, degree=3, pcure=0, backhaz=NULL){
+rmst_survmspline = function(t, alpha, coefs, knots, degree=3, pcure=0, backhaz=NULL, bsmooth=TRUE){
     if (is.null(pcure)) pcure <- 0
     rmst_generic(psurvmspline, t, start=0,
                  matargs = c("coefs"),
-                 unvectorised_args = c("knots","degree","backhaz"),
-                 alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, backhaz=backhaz)
+                 unvectorised_args = c("knots","degree","backhaz","bsmooth"),
+                 alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, backhaz=backhaz, bsmooth=bsmooth)
 }
 
 ##' @rdname Survmspline
 ##' @export
-mean_survmspline = function(alpha, coefs, knots, degree=3, pcure=0, backhaz=NULL){
+mean_survmspline = function(alpha, coefs, knots, degree=3, pcure=0, backhaz=NULL, bsmooth=TRUE){
     nt <- if (is.matrix(coefs)) nrow(coefs) else 1
     rmst_generic(psurvmspline, rep(Inf,nt), start=0,
                  matargs = c("coefs"),
-                 unvectorised_args = c("knots","degree","backhaz"),
-                 alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, backhaz=backhaz)
+                 unvectorised_args = c("knots","degree","backhaz","bsmooth"),
+                 alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, backhaz=backhaz, bsmooth=bsmooth)
 }
 
 #
@@ -449,24 +480,28 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL
   ret
 }
 
-##' Determine M-spline basis weights which give a constant function.
+##' Determine M-spline basis coefficients which give a constant function.
 ##'
-##' This works by transforming the weights of the corresponding B-spline basis,
-##' which are equal if the B-spline is a constant function. 
+##' This works by transforming the coefficients of the corresponding B-spline basis,
+##' which are equal if the B-spline is a constant function.
 ##'
-##' @param mspline A list with components `iknots` (vector of internal knots), `bknots` (vector of boundary knots)
-##' and `degree` (polynomial degree) defining an M-spline configuration. 
+##' @param mspline A list with components `knots` (vector of knots),
+##' and `degree` (polynomial degree) defining an M-spline configuration.
 ##'
 ##' @param logit If \code{TRUE} then the multinomial logit transform of the coefficients
 ##' is returned.  This is a vector of length one less than the number of coefficients,
 ##' with the rth element defined by \eqn{log(coefs[r+1] / coefs[1])}.
 ##'
-##' @references Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425–441.
+##' @references Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425-441.
 ##'
 ##' @export
-mspline_constant_weights <- function(mspline, logit=FALSE){
+mspline_constant_coefs <- function(mspline, logit=FALSE){
   mspline <- mspline_default(mspline)
-  iknots <- mspline$iknots; bknots <- mspline$bknots; degree <- mspline$degree
+  iknots <- mspline$knots[-length(mspline$knots)]
+  bknots <- c(0, max(mspline$knots))
+  degree <- mspline$degree
+
+  ## Firstly determine coefs for constant function under unsmoothed basis
   knot_seq <- c(rep(bknots[1], degree+1), iknots, rep(bknots[2], degree+1))
   K <- length(iknots) + degree + 1
   p_const <- numeric(K)
@@ -474,6 +509,67 @@ mspline_constant_weights <- function(mspline, logit=FALSE){
   for(i in 1:K){
     p_const[i] <- (knot_seq[i+degree+1] - knot_seq[i]) / rescale
   }
+
+  ## Deduce equivalent coefs for bsmoothed basis with same knots
+  if (mspline$bsmooth)
+    p_const <- c(p_const[1:(K-3)],
+                 p_const[K]*mspline_basis_unsmooth(bknots[2], mspline$knots)[K])
+
   p_const <- p_const/sum(p_const)
+
   if (logit) log(p_const[-1]/p_const[1]) else p_const
+}
+
+## Validate and initialise a mspline list object
+## Set default bsmooth and degree
+mspline_default <- function(mspline){
+  if (!is.null(mspline)){
+    if (!is.list(mspline)) stop("`mspline` should be a list")
+    bh_names <- c("df","knots","degree","nvars","knots","bsmooth","add_knots")
+    bad_names <- setdiff(names(mspline), bh_names)
+    if (length(bad_names) > 0) {
+      blist <- paste(bad_names, collapse=",")
+      plural <- if (length(bad_names) > 1) "s" else ""
+      warning(sprintf("Element%s `%s` of `mspline` is unused. Ignoring.", plural, blist))
+    }
+  } else mspline <- list()
+  if (is.null(mspline$bsmooth))
+    mspline$bsmooth <- TRUE
+  else 
+    if (!is.logical(mspline$bsmooth))
+      stop("mspline$bsmooth should be NULL, TRUE or FALSE")
+  if (is.null(mspline$degree))
+    mspline$degree <- 3
+  else if (mspline$degree!=3 && mspline$bsmooth)
+    stop("M-spline degree must be 3 unless bsmooth=FALSE")
+  mspline
+}
+
+## @param basis Matrix giving spline basis
+## @param coefs Vector or matrix giving coefficients.  If matrix, it should
+## have the same number of rows as coefs
+mspline_sum_basis <- function(basis, coefs=NULL, alpha=0, time, log=FALSE) {
+  coefs <- validate_coefs(coefs, basis)
+  if (!is.matrix(coefs)) coefs <- rep(coefs, each=nrow(basis))
+  if (log)
+    haz <- alpha + log(rowSums(basis * coefs))
+  else
+    haz <- exp(alpha) * rowSums(basis * coefs)
+  haz
+}
+
+validate_coefs <- function(coefs=NULL, basis){
+  nvars <- ncol(basis)
+  if (is.null(coefs))
+    coefs <- rep(1, nvars)
+  else {
+    nc <- if (is.matrix(coefs)) ncol(coefs) else length(coefs)
+    if (nc != nvars)
+      stop(sprintf("dimension of `coefs` is %s, should be %s for this M-spline specification", length(coefs), nvars))
+  }
+  if (is.matrix(coefs))
+    coefs <- coefs / rowSums(coefs)
+  else
+    coefs <- coefs / sum(coefs)
+  coefs
 }

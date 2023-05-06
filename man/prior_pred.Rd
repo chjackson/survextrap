@@ -7,44 +7,131 @@ in an M-spline survival model.}
 \usage{
 prior_pred(
   n,
+  mspline,
   censtime = Inf,
-  alpha_mean = 0,
-  alpha_sd = 20,
-  lcoef_mean = NULL,
-  lcoef_sd = 1,
-  iknots,
-  bknots,
-  degree = 3
+  coefs_mean = NULL,
+  prior_hsd = p_gamma(2, 1),
+  prior_hscale,
+  X = NULL,
+  prior_loghr = NULL,
+  prior_hrsd = NULL,
+  prior_cure = NULL
 )
 }
 \arguments{
-\item{n}{Sample size of the simulated dataset.  Each observation in the dataset is
-generated from a model with the same parameters.  These parameters are generated from
-a single simulation from the prior distribution.}
+\item{n}{Sample size of the simulated dataset.  Each observation in
+the dataset is generated from a model with the same parameters.
+These parameters are generated from a single simulation from the
+prior distribution.}
 
-\item{censtime}{Right-censoring time to impose on the simulated event times.}
+\item{mspline}{A list of control parameters defining the spline model.
 
-\item{alpha_mean}{Prior mean of the normal distribution for the baseline log hazard.}
+\code{knots}: Spline knots.  If this is not supplied, then the number
+of knots is taken from \code{df}, and their location is taken from
+equally-spaced quantiles of the observed event times in the
+individual-level data.
 
-\item{alpha_sd}{Prior standard deviation of the normal distribution for the baseline log hazard.}
+\code{add_knots}: Any extra knots beyond those chosen from the
+individual-level data (or supplied in \code{knots}).  This is intended
+to be used when there are \code{external} data included in the
+model.  External data are typically outside the time period
+covered by the individual data.  \code{add_knots} would then be chosen
+to span the time period covered by the external data, so that the
+hazard trajectory can vary over that time.
 
-\item{lcoef_mean}{Prior mean vector of the the logistic distribution for the spline coefficients on the multinomial logit scale.}
+If there are external data, and both \code{knots} and \code{add_knots} are
+omitted, then a default set of knots is chosen to span both the
+individual and external data, by taking the quantiles of a vector
+defined by concatenating the individual-level event times with
+the \code{start} and \code{stop} times in the external data.
 
-\item{lcoef_sd}{Prior standard deviation of the logistic distribution for the spline coefficients on the multinomial logit scale.}
+\code{df}: Degrees of freedom, i.e. the number of parameters (or basis
+terms) intended to result from choosing knots based on quantiles
+of the data.  The total number of parameters will then be \code{df}
+plus the number of additional knots specified in
+\code{add_knots}. \code{df} defaults to 10.  This does not necessarily
+overfit, because the function is smoothed through the prior.
 
-\item{iknots}{Internal knots of the M-spline.}
+\code{degree}: Polynomial degree used for the basis function. The
+default is 3, giving a cubic.
 
-\item{bknots}{Boundary knots of the M-spline.}
+\code{bsmooth}: If \code{TRUE} (on by default) the spline is smoother
+at the highest knot, by defining the derivative and second derivative
+at this point to be zero.}
 
-\item{degree}{M-spline polynomial degree.}
+\item{censtime}{Right-censoring time to impose on the simulated
+event times.}
+
+\item{coefs_mean}{Spline basis coefficients that define the prior mean for the hazard function. By
+default, these are set to values that define a constant hazard function.  They are normalised to
+sum to 1 internally (if they do not already).}
+
+\item{prior_hsd}{Gamma prior for the standard deviation that
+controls the variability over time (or smoothness) of the hazard
+function.  This should be a call to \code{p_gamma()}.  The default is
+\code{p_gamma(2,1)}.  See \code{\link{prior_haz_sd}} for a way to
+calibrate this to represent a meaningful belief.}
+
+\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
+This should be a call to a prior constructor function, such as
+\code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
+are normal (parameters mean and SD) and t distributions (parameters
+location, scale and degrees of freedom).  The default is a normal distribution with
+mean 0 and standard deviation 20.
+
+Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
+full model specification).
+
+"Baseline" is defined by the continuous covariates taking a value
+of zero and factor covariates taking their reference level.  To
+use a different baseline, the data should be transformed
+appropriately beforehand, so that a value of zero has a different
+meaning.  For continuous covariates, it helps for both
+computation and interpretation to define the value of zero to
+denote a typical value in the data, e.g. the mean.}
+
+\item{X}{Either a list, vector or one-row matrix, with one value
+for each covariate in the model.  Defaults to zero.  Factors
+must be supplied as multiple numeric (0/1) contrasts.
+If there are multiple covariates and a single prior given in
+\code{prior_loghr}, then this prior will be used for all the covariates.
+If a list of priors is provided, then both this list and \code{X}
+must be named with the names of the covariates.}
+
+\item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
+\code{p_normal()} or \code{p_t()}.  A list of calls can also be provided, to give
+different priors to different coefficients, where the name
+of each list component matches the name of the coefficient, e.g.
+\code{list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3))}
+
+The default is \code{p_normal(0,2.5)} for all coefficients.}
+
+\item{prior_hrsd}{Prior for the standard deviation parameters that
+smooth the non-proportionality effects over time in
+non-proportional hazards models.  This should be a call to
+\code{p_gamma()} or a list of calls to \code{p_gamma()} with one component
+per covariate, as in \code{prior_loghr}.  See
+\code{\link{prior_hr_sd}} for a way to calibrate this to
+represent a meaningful belief.}
+
+\item{prior_cure}{Prior for the baseline cure probability.  This should be a
+call to \code{p_beta()}.  The default is a uniform prior, \code{p_beta(1,1)}.
+Baseline is defined by the mean of continuous covariates and the reference
+level of factor covariates.}
 }
 \value{
-A data frame with columns \code{time} (simulated time) and \code{event} (indicator for whether
-the time is an event time, as opposed to a right-censoring time).  The prior parameters are returned
-in the \code{prior} attribute as a list with components \code{alpha} (baseline log hazard) and
-\code{coefs} (spline coefficients).
+A data frame with columns \code{time} (simulated time) and
+\code{event} (indicator for whether the time is an event time, as
+opposed to a right-censoring time).  The prior parameters are
+returned in the \code{prior} attribute as a list with components
+\code{alpha} (baseline log hazard) and \code{coefs} (spline
+coefficients).
 }
 \description{
 Simulate a dataset from the prior predictive distribution of survival times
-in an M-spline survival model.
+in an M-spline survival model.  Mixture cure and additive hazards models
+not currently supported.
+}
+\seealso{
+\code{\link{prior_sample}}
 }

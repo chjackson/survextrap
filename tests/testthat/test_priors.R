@@ -4,7 +4,7 @@ test_that("Error handling for priors",{
                    prior_loghr = list(p_normal(1,2))),
         "1 component, but there are 2 coefficients")
     expect_error(survextrap(Surv(t, status) ~ 1, data=curedata, fit_method="opt", cure=~x,
-                            prior_smooth = p_normal(0.2, 10)), "should be p_gamma")
+                            prior_hsd = p_normal(0.2, 10)), "should be p_gamma")
     expect_error(
         survextrap(Surv(t, status) ~ 1, data=curedata, fit_method="opt", cure=~x,
                    prior_logor_cure = p_gamma(0.2, 10)), "should be one of")
@@ -13,12 +13,12 @@ test_that("Error handling for priors",{
                    prior_logor_cure = "gamma"), "should be a call")
 })
 
-test_that("Priors on loghaz behave",{
+test_that("Priors on hscale behave",{
     nd1 <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt",
-                      prior_loghaz = p_normal(0, 2))
+                      prior_hscale = p_normal(0, 2))
     m1 <- summary(nd1) %>% filter(variable=="alpha") %>% pull(median)
     nd2 <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt",
-                      prior_loghaz = p_normal(4, 0.1))
+                      prior_hscale = p_normal(4, 0.1))
     m2 <- summary(nd2) %>% filter(variable=="alpha") %>% pull(median)
     expect_gt(m2, m1)
 })
@@ -67,31 +67,31 @@ test_that("Priors on cure prob covariates behave",{
 
 test_that("Priors on smoothing SD behave",{
     nd1 <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                      prior_smooth = p_gamma(1, 2))
+                      prior_hsd = p_gamma(1, 2))
     nd2 <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                      prior_smooth = p_gamma(0.8, 2))
-    m1 <- summary(nd1) %>% filter(variable=="smooth_sd") %>% pull(median)
-    m2 <- summary(nd2) %>% filter(variable=="smooth_sd") %>% pull(median)
+                      prior_hsd = p_gamma(0.8, 2))
+    m1 <- summary(nd1) %>% filter(variable=="hsd") %>% pull(median)
+    m2 <- summary(nd2) %>% filter(variable=="hsd") %>% pull(median)
     expect_lt(m2, m1)
 })
 
 test_that("Errors in priors on nonprop",{
-  expect_error(survextrap(Surv(years,status)~rx, data=colons, prior_sdnp = p_normal(4, 2), nonprop=TRUE),
+  expect_error(survextrap(Surv(years,status)~rx, data=colons, prior_hrsd = p_normal(4, 2), nonprop=TRUE),
                "p_gamma")
-  expect_error(survextrap(Surv(years,status)~rx, data=colons, prior_sdnp = list(x=p_gamma(4, 2)), nonprop=TRUE),
+  expect_error(survextrap(Surv(years,status)~rx, data=colons, prior_hrsd = list(x=p_gamma(4, 2)), nonprop=TRUE),
                "1 component")
   expect_error(survextrap(Surv(years,status)~rx, data=colons,
-                          prior_sdnp = list(xwrong1=p_gamma(4, 2), xwrong2=p_gamma(4, 2)), nonprop=TRUE),
-               "names of prior_sdnp do not match")
+                          prior_hrsd = list(xwrong1=p_gamma(4, 2), xwrong2=p_gamma(4, 2)), nonprop=TRUE),
+               "names of prior_hrsd do not match")
 })
 
 test_that("Priors on non-proportional hazards smoothing SD behave",{
     nd1 <- survextrap(Surv(years, status) ~ rx, data=colons, nonprop=TRUE, fit_method="opt",
-                      prior_sdnp = p_gamma(2, 1))
+                      prior_hrsd = p_gamma(2, 1))
     nd2 <- survextrap(Surv(years, status) ~ rx, data=colons, nonprop=TRUE, fit_method="opt",
-                      prior_sdnp = p_gamma(3, 1))
-    m1 <- summary(nd1) %>% filter(variable=="sd_np", term=="rxLev") %>% pull(median)
-    m2 <- summary(nd2) %>% filter(variable=="sd_np", term=="rxLev") %>% pull(median)
+                      prior_hrsd = p_gamma(3, 1))
+    m1 <- summary(nd1) %>% filter(variable=="hrsd", term=="rxLev") %>% pull(median)
+    m2 <- summary(nd2) %>% filter(variable=="hrsd", term=="rxLev") %>% pull(median)
     expect_lt(m1, m2)
 })
 

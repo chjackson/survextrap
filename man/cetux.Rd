@@ -23,7 +23,11 @@ matched to the Bonner trial population by age, gender, cancer site, and date of 
 From the "Surveillance Epidemiology and End Results" (SEER) database.
 Each line gives counts of \code{r} survivors up to \code{stop} years,
 given \code{n} people alive at \code{start}.  \code{haz} is the
-corresponding constand hazard estimate over this period.
+corresponding constant hazard estimate over this period, computed
+as \code{-log(r/n)}.
+There are also 95\% interval estimates for the hazard based on the data
+on one period at a time, derived
+from Bayesian principles as \code{-log(qbeta(c(0.975, 0.025), r, n-r))}.
 
 \code{cetux_bh} Mortality rates for the population of the
 USA, matched by age and sex to the patients from the Bonner trial.
@@ -35,7 +39,7 @@ See Guyot et al. (2017) for more details of each of these.
 
 An object of class \code{data.frame} with 424 rows and 4 columns.
 
-An object of class \code{data.frame} with 21 rows and 5 columns.
+An object of class \code{data.frame} with 21 rows and 8 columns.
 
 An object of class \code{data.frame} with 54 rows and 2 columns.
 }
@@ -48,7 +52,7 @@ cetux_bh
 }
 \description{
 Datasets for evaluation of cetuximab in head and neck cancer, as previously
-analysed by Guyot et al. (2017) to demonstrate models for survival extrapolation
+analysed by \href{https://journals.sagepub.com/doi/pdf/10.1177/0272989X16670604}{Guyot et al. (2017)} to demonstrate models for survival extrapolation
 with Bayesian evidence synthesis.
 }
 \references{

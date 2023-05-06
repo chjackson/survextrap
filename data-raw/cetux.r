@@ -6,12 +6,6 @@ cetux <- read.table("data-raw/ipd_recon.dat",header = TRUE) %>%
   rename(months = t) %>%
   select(months, years, d, treat)
 
-cetux_seer <- read.table("../paper/guyot_data/seer.dat",skip=10,
-                         col.names=c("t","num","denom"),nrows = 21) %>%
-  mutate(start = t-1) %>%
-  select(start,stop=t,r=num,n=denom) %>%
-  mutate(treat = factor("Control"))
-
 agemed <- 57
 agesd <- (83 - 34)/6 # interpret range as 6 SDs. not used
 p_male <- 0.8
@@ -25,6 +19,15 @@ cetux_bh <- read.table("../paper/guyot_data/mort_usa.txt",header=TRUE,skip=2) %>
          hazard = p_male*Male + (1 - p_male)*Female) %>%
   filter(Trialyear >= 0) %>%
   select(time=Trialyear, hazard)
+
+cetux_seer <- read.table("../paper/guyot_data/seer.dat",skip=10,
+                         col.names=c("t","num","denom"),nrows = 21) %>%
+  mutate(start = t-1) %>%
+  select(start,stop=t,r=num,n=denom) %>%
+  mutate(treat = factor("Control"),
+         haz = -log(r/n),
+         haz_upper = -log(qbeta(0.025, r, n-r)),
+         haz_lower = -log(qbeta(0.975, r, n-r)))
 
 use_data(cetux, overwrite=TRUE)
 use_data(cetux_seer, overwrite=TRUE)

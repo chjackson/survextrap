@@ -11,7 +11,11 @@
 
 \item{...}{Other arguments (currently unused).
 
-This currently prints a statement of the fitted model, the prior distributions, and a table of summary statistics of the posterior distributions of the model parameters.  For descriptions of the parameters in this summary table, see \code{\link{summary.survextrap}}.}
+This prints a summary of the data, a statement of the fitted
+model, the prior distributions, and a table of summary statistics
+of the posterior distributions of the model parameters.  For
+descriptions of the parameters in this summary table, see
+\code{\link{summary.survextrap}}.}
 }
 \description{
 Print a fitted survextrap model

@@ -6,7 +6,20 @@ reference:
 - title: Fitting models
 - contents:
   - survextrap
+- title: Utilities to determine prior distributions for M-spline models
+- contents:
   - priors
+  - prior_sample
+  - p_meansurv
+  - p_hr
+  - prior_haz_const
+  - prior_haz_sd
+  - prior_hr
+  - prior_hr_sd
+  - mspline_priorpred
+  - plot_mspline_priorpred
+  - prior_pred
+  - print_priors
 - title: Getting results from fitted models
 - contents:
   - print.survextrap
@@ -21,30 +34,22 @@ reference:
   - plot.survextrap
   - mean.survextrap
   - rmst
+  - irmst
   - get_cum_backhaz
   - get_draws
   - hrtime
 - title: Datasets
 - contents:
   - colons
+  - cetux
   - curedata
-- title: Utilities to examine prior distributions in M-spline models
-- contents:
-  - prior_sample
-  - p_meansurv
-  - prior_haz_const
-  - prior_haz_sd
-  - prior_hr_sd
-  - mspline_priorpred
-  - plot_mspline_priorpred
-  - prior_pred
-  - print_priors
 - title: M-spline utilities
 - contents:
   - Survmspline
   - Survmspline_wane
+  - mspline_spec
   - mspline_basis
-  - mspline_constant_weights
+  - mspline_constant_coefs
   - mspline_plotsetup
   - mspline_plotdata
   - plot_mspline

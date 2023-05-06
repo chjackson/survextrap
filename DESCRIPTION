@@ -1,6 +1,6 @@
 Package: survextrap
 Title: Survival Extrapolation with a Flexible Parametric Model and External Data
-Version: 0.1
+Version: 0.8
 Authors@R: 
     c(person("Christopher", "Jackson", , "chris.jackson@mrc-bsu.cam.ac.uk", role = c("aut", "cre", "cph"),
              comment = c(ORCID = "0000-0002-6656-8913")),
@@ -43,7 +43,13 @@ Suggests:
     SHELF,
     flexsurvcure,
     splines,
-    dplyr
+    dplyr,
+    viridis,
+    forcats,
+    fs,
+    purrr,
+    tidyr,
+    stringr
 VignetteBuilder: knitr
 URL: https://github.com/chjackson/survextrap,
     https://chjackson.github.io/survextrap/

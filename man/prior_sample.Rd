@@ -2,49 +2,68 @@
 % Please edit documentation in R/priors.R
 \name{prior_sample}
 \alias{prior_sample}
-\title{Draw a sample from the prior distribution of the parameters
-governing the hazard in a survextrap model for given covariates.}
+\title{Sample from the joint prior of parameters in a survextrap model}
 \usage{
 prior_sample(
   mspline,
   coefs_mean = NULL,
-  prior_smooth = p_gamma(2, 1),
-  prior_loghaz,
+  prior_hsd = p_gamma(2, 1),
+  prior_hscale,
   prior_loghr = NULL,
   X = NULL,
   X0 = NULL,
-  prior_sdnp = NULL,
+  prior_hrsd = NULL,
+  prior_cure = NULL,
   nsim = 100
 )
 }
 \arguments{
 \item{mspline}{A list of control parameters defining the spline model.
 
-\code{iknots}: Internal knots.  If this is not supplied, then the number of
-knots is taken from \code{df}, and their location is taken from equally-spaced
-quantiles of the observed event times (concatenated with the distinct
-follow-up times in the external data).
+\code{knots}: Spline knots.  If this is not supplied, then the number
+of knots is taken from \code{df}, and their location is taken from
+equally-spaced quantiles of the observed event times in the
+individual-level data.
 
-\code{bknots}: Boundary knots.  If this is not supplied, the boundary knots are
-set to zero and the maximum event time (including the follow-up times in
-the external data).
+\code{add_knots}: Any extra knots beyond those chosen from the
+individual-level data (or supplied in \code{knots}).  This is intended
+to be used when there are \code{external} data included in the
+model.  External data are typically outside the time period
+covered by the individual data.  \code{add_knots} would then be chosen
+to span the time period covered by the external data, so that the
+hazard trajectory can vary over that time.
 
-\code{df}: Degrees of freedom, i.e. the number of parameters (or basis terms)
-that define the hazard as a spline function of time.  Defaults to 10.  Note
-this does not necessarily overfit because the function is smoothed through
-the prior.
+If there are external data, and both \code{knots} and \code{add_knots} are
+omitted, then a default set of knots is chosen to span both the
+individual and external data, by taking the quantiles of a vector
+defined by concatenating the individual-level event times with
+the \code{start} and \code{stop} times in the external data.
 
-\code{degree}: Polynomial degree used for the basis function. The default is 3, giving a cubic.}
+\code{df}: Degrees of freedom, i.e. the number of parameters (or basis
+terms) intended to result from choosing knots based on quantiles
+of the data.  The total number of parameters will then be \code{df}
+plus the number of additional knots specified in
+\code{add_knots}. \code{df} defaults to 10.  This does not necessarily
+overfit, because the function is smoothed through the prior.
+
+\code{degree}: Polynomial degree used for the basis function. The
+default is 3, giving a cubic.
+
+\code{bsmooth}: If \code{TRUE} (on by default) the spline is smoother
+at the highest knot, by defining the derivative and second derivative
+at this point to be zero.}
 
 \item{coefs_mean}{Spline basis coefficients that define the prior mean for the hazard function. By
 default, these are set to values that define a constant hazard function.  They are normalised to
 sum to 1 internally (if they do not already).}
 
-\item{prior_smooth}{Gamma prior for the smoothing standard deviation, in
-models where this is estimated.  This should be a call to \code{p_gamma()}.  The
-default is \code{p_gamma(2,1)}.}
+\item{prior_hsd}{Gamma prior for the standard deviation that
+controls the variability over time (or smoothness) of the hazard
+function.  This should be a call to \code{p_gamma()}.  The default is
+\code{p_gamma(2,1)}.  See \code{\link{prior_haz_sd}} for a way to
+calibrate this to represent a meaningful belief.}
 
-\item{prior_loghaz}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
+\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters
@@ -54,12 +73,12 @@ mean 0 and standard deviation 20.
 Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
 full model specification).
 
-"Baseline" is defined
-by the continuous covariates taking a value of zero and factor covariates taking their
-reference level.  To use a different baseline, the data should be transformed
-appropriately beforehand, so that a value of zero has a different meaning.
-
-For continuous covariates, it helps for both computation and interpretation to define the value of zero to
+"Baseline" is defined by the continuous covariates taking a value
+of zero and factor covariates taking their reference level.  To
+use a different baseline, the data should be transformed
+appropriately beforehand, so that a value of zero has a different
+meaning.  For continuous covariates, it helps for both
+computation and interpretation to define the value of zero to
 denote a typical value in the data, e.g. the mean.}
 
 \item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
@@ -70,37 +89,54 @@ of each list component matches the name of the coefficient, e.g.
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
-\item{X}{Either a list, vector or one-row matrix with one covariate value.
-Factors must be supplied as multiple numeric (0/1) contrasts. (TODO doc on how to
-match then with prior_loghr and prior_sdnp, and naming)}
+\item{X}{Either a list, vector or one-row matrix, with one value
+for each covariate in the model.  Defaults to zero.  Factors
+must be supplied as multiple numeric (0/1) contrasts.
+If there are multiple covariates and a single prior given in
+\code{prior_loghr}, then this prior will be used for all the covariates.
+If a list of priors is provided, then both this list and \code{X}
+must be named with the names of the covariates.}
 
-\item{X0}{An alternative covariate value (optional).  The hazard
-ratio between the hazards at X and X0 will also be returned.}
+\item{X0}{An alternative set of "reference" covariate values
+(optional).  The hazard ratio between the hazards at \code{X}
+and \code{X0} will also be returned.}
 
-\item{prior_sdnp}{Prior for the standard deviation parameters that smooth the non-proportionality
-effects over time in non-proportional hazards models.  This should be a call to \code{p_gamma()}
-or a list of calls to \code{p_gamma()} with one component per covariate, as in \code{prior_loghr}.}
+\item{prior_hrsd}{Prior for the standard deviation parameters that
+smooth the non-proportionality effects over time in
+non-proportional hazards models.  This should be a call to
+\code{p_gamma()} or a list of calls to \code{p_gamma()} with one component
+per covariate, as in \code{prior_loghr}.  See
+\code{\link{prior_hr_sd}} for a way to calibrate this to
+represent a meaningful belief.}
+
+\item{prior_cure}{Prior for the baseline cure probability.  This should be a
+call to \code{p_beta()}.  The default is a uniform prior, \code{p_beta(1,1)}.
+Baseline is defined by the mean of continuous covariates and the reference
+level of factor covariates.}
 
 \item{nsim}{Number of simulations to draw}
 }
 \value{
 A list with components:
 
-\code{loghaz}: Baseline log scale parameter (\code{log(eta)} in the notation of the manual). For models with covariates, this is at the covariate values supplied in \code{X}, or at zero if \code{X} is not supplied.
+\code{alpha}: Baseline log hazard scale parameter (\code{log(eta)} in the notation of the manual). For models with covariates, this is at the covariate values supplied in \code{X}, or at zero if \code{X} is not supplied.
 
-\code{haz}: Baseline scale parameter (\code{eta}).
+\code{hscale}: Baseline hazard scale parameter (\code{eta}).
 
 \code{coefs}: Spline coefficients. For non-proportional hazards model with covariates, these are returned at the suppled value of \code{X}, or at values of zero if \code{X} is not supplied.
 
 \code{beta}: Multinomial logit-transformed spline coefficients.
 
-\code{smooth}: Smoothing standard deviation for spline coefficients.
+\code{hsd}: Smoothing standard deviation for spline coefficients.
+
+If \code{X0} is supplied, then \code{alpha0}, \code{hscale0}, \code{beta0}, \code{coefs0} are also returned, representing reference covariate values.
+
+\code{pcure} is returned in cure models (the cure probability).
 }
 \description{
-This is used, for example, in \code{\link{mspline_priorpred}} to visualise the
-prior distribution around hazard curves implied by a particular M-spline model
-and parameter priors.
-}
-\details{
-Cure and relative survival models are not currently handled.
+Draws a sample from the joint prior distribution of the parameters
+governing a survextrap model for given covariates.  This is used,
+for example, in \code{\link{mspline_priorpred}}, to visualise the
+prior distribution around hazard curves implied by a particular
+M-spline model and parameter priors.
 }

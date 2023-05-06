@@ -22,13 +22,20 @@ for each level of this factor.
 is computed at the mean of each numeric covariate in the original data, and at the
 baseline level of each factor covariate.
 
-Note caution is required about how treatment groups (for example) are stored in your data.
-If these are coded as numeric (0/1), then if \code{newdata} is not specified, then only one
-output will be shown, which relates to the average value of this numeric variable over
-the data, which doesn't correspond to either of the treatment groups.}
+Note caution is required about how treatment groups (for example)
+are stored in your data.  If these are coded as numeric (0/1),
+then if \code{newdata} is not specified only one output will be shown,
+which relates to the average value of this numeric variable over
+the data, which doesn't correspond to either of the treatment
+groups.  To avoid this, a treatment group should be stored as a
+factor.}
 
 \item{...}{Additional arguments, passed on to \code{plot_hazard} and \code{plot_survival}.}
 }
 \description{
-Plot method for survextrap model objects
+Intended as a quick check of the results of a model fit.   See
+\code{\link{plot_survival}} and \code{\link{plot_hazard}} for
+the functions behind each panel, and \code{\link{survival}}
+and \code{\link{hazard}} to extract the data being plotted here
+to enable custom plots like these.
 }

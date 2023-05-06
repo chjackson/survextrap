@@ -4,22 +4,19 @@
 \alias{prior_haz}
 \alias{prior_haz_sd}
 \alias{prior_hr_sd}
-\title{Compute consequences of priors chosen for a flexible hazard model in
-survextrap, in terms of a standard deviation measuring the
-variability over time of the hazard function or the hazard ratio
-function.}
+\title{Determine priors for time-varying hazards and hazard ratios}
 \usage{
 prior_haz_sd(
   mspline,
   coefs_mean = NULL,
-  prior_smooth = p_gamma(2, 1),
-  prior_loghaz = p_normal(0, 20),
+  prior_hsd = p_gamma(2, 1),
+  prior_hscale = p_normal(0, 20),
   prior_loghr = NULL,
   X = NULL,
-  prior_sdnp = NULL,
+  prior_hrsd = NULL,
   tmin = 0,
-  tmax = 10,
-  nsim = 100,
+  tmax = NULL,
+  nsim = 1000,
   hq = c(0.1, 0.9),
   quantiles = c(0.025, 0.5, 0.975)
 )
@@ -27,12 +24,12 @@ prior_haz_sd(
 prior_hr_sd(
   mspline,
   coefs_mean = NULL,
-  prior_smooth = p_gamma(2, 1),
-  prior_loghaz = p_normal(0, 20),
+  prior_hsd = p_gamma(2, 1),
+  prior_hscale = p_normal(0, 20),
   prior_loghr = NULL,
   X,
   X0,
-  prior_sdnp = NULL,
+  prior_hrsd = NULL,
   tmin = 0,
   tmax = 10,
   nsim = 100,
@@ -43,31 +40,50 @@ prior_hr_sd(
 \arguments{
 \item{mspline}{A list of control parameters defining the spline model.
 
-\code{iknots}: Internal knots.  If this is not supplied, then the number of
-knots is taken from \code{df}, and their location is taken from equally-spaced
-quantiles of the observed event times (concatenated with the distinct
-follow-up times in the external data).
+\code{knots}: Spline knots.  If this is not supplied, then the number
+of knots is taken from \code{df}, and their location is taken from
+equally-spaced quantiles of the observed event times in the
+individual-level data.
 
-\code{bknots}: Boundary knots.  If this is not supplied, the boundary knots are
-set to zero and the maximum event time (including the follow-up times in
-the external data).
+\code{add_knots}: Any extra knots beyond those chosen from the
+individual-level data (or supplied in \code{knots}).  This is intended
+to be used when there are \code{external} data included in the
+model.  External data are typically outside the time period
+covered by the individual data.  \code{add_knots} would then be chosen
+to span the time period covered by the external data, so that the
+hazard trajectory can vary over that time.
 
-\code{df}: Degrees of freedom, i.e. the number of parameters (or basis terms)
-that define the hazard as a spline function of time.  Defaults to 10.  Note
-this does not necessarily overfit because the function is smoothed through
-the prior.
+If there are external data, and both \code{knots} and \code{add_knots} are
+omitted, then a default set of knots is chosen to span both the
+individual and external data, by taking the quantiles of a vector
+defined by concatenating the individual-level event times with
+the \code{start} and \code{stop} times in the external data.
 
-\code{degree}: Polynomial degree used for the basis function. The default is 3, giving a cubic.}
+\code{df}: Degrees of freedom, i.e. the number of parameters (or basis
+terms) intended to result from choosing knots based on quantiles
+of the data.  The total number of parameters will then be \code{df}
+plus the number of additional knots specified in
+\code{add_knots}. \code{df} defaults to 10.  This does not necessarily
+overfit, because the function is smoothed through the prior.
+
+\code{degree}: Polynomial degree used for the basis function. The
+default is 3, giving a cubic.
+
+\code{bsmooth}: If \code{TRUE} (on by default) the spline is smoother
+at the highest knot, by defining the derivative and second derivative
+at this point to be zero.}
 
 \item{coefs_mean}{Spline basis coefficients that define the prior mean for the hazard function. By
 default, these are set to values that define a constant hazard function.  They are normalised to
 sum to 1 internally (if they do not already).}
 
-\item{prior_smooth}{Gamma prior for the smoothing standard deviation, in
-models where this is estimated.  This should be a call to \code{p_gamma()}.  The
-default is \code{p_gamma(2,1)}.}
+\item{prior_hsd}{Gamma prior for the standard deviation that
+controls the variability over time (or smoothness) of the hazard
+function.  This should be a call to \code{p_gamma()}.  The default is
+\code{p_gamma(2,1)}.  See \code{\link{prior_haz_sd}} for a way to
+calibrate this to represent a meaningful belief.}
 
-\item{prior_loghaz}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
+\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters
@@ -77,12 +93,12 @@ mean 0 and standard deviation 20.
 Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
 full model specification).
 
-"Baseline" is defined
-by the continuous covariates taking a value of zero and factor covariates taking their
-reference level.  To use a different baseline, the data should be transformed
-appropriately beforehand, so that a value of zero has a different meaning.
-
-For continuous covariates, it helps for both computation and interpretation to define the value of zero to
+"Baseline" is defined by the continuous covariates taking a value
+of zero and factor covariates taking their reference level.  To
+use a different baseline, the data should be transformed
+appropriately beforehand, so that a value of zero has a different
+meaning.  For continuous covariates, it helps for both
+computation and interpretation to define the value of zero to
 denote a typical value in the data, e.g. the mean.}
 
 \item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
@@ -93,41 +109,57 @@ of each list component matches the name of the coefficient, e.g.
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
-\item{X}{Either a list, vector or one-row matrix with one covariate value.
-Factors must be supplied as multiple numeric (0/1) contrasts. (TODO doc on how to
-match then with prior_loghr and prior_sdnp, and naming)}
+\item{X}{Either a list, vector or one-row matrix, with one value
+for each covariate in the model.  Defaults to zero.  Factors
+must be supplied as multiple numeric (0/1) contrasts.
+If there are multiple covariates and a single prior given in
+\code{prior_loghr}, then this prior will be used for all the covariates.
+If a list of priors is provided, then both this list and \code{X}
+must be named with the names of the covariates.}
 
-\item{prior_sdnp}{Prior for the standard deviation parameters that smooth the non-proportionality
-effects over time in non-proportional hazards models.  This should be a call to \code{p_gamma()}
-or a list of calls to \code{p_gamma()} with one component per covariate, as in \code{prior_loghr}.}
+\item{prior_hrsd}{Prior for the standard deviation parameters that
+smooth the non-proportionality effects over time in
+non-proportional hazards models.  This should be a call to
+\code{p_gamma()} or a list of calls to \code{p_gamma()} with one component
+per covariate, as in \code{prior_loghr}.  See
+\code{\link{prior_hr_sd}} for a way to calibrate this to
+represent a meaningful belief.}
 
-\item{tmin}{Minimum plotting time.  Defaults to lower boundary knot.}
+\item{tmin}{Minimum plotting time.  Defaults to zero.}
 
-\item{tmax}{Maximum plotting time.  Defaults to upper boundary knot.}
+\item{tmax}{Maximum plotting time.  Defaults to the highest knot.}
 
 \item{nsim}{Number of simulations to draw}
 
-\item{hq}{Quantiles which define the "low" and "high" values of a time-varying quantity (hazard in \code{prior_haz_sd} and the hazard ratio in \code{prior_hr_sd}).
-The ratio between the high and low values will be summarised, as a measure of
-time-dependence.
-By default, this is \code{c(0.1, 0.9)}, so that the 10\\% and 90\\% quantiles are used
-respectively.}
+\item{hq}{Quantiles which define the "low" and "high" values of a
+time-varying quantity (hazard in \code{prior_haz_sd} and the hazard
+ratio in \code{prior_hr_sd}).  The ratio between the high and low
+values will be summarised, as a measure of time-dependence.  By
+default, this is \code{c(0.1, 0.9)}, so that the 10\% and 90\%
+quantiles are used respectively.}
 
 \item{quantiles}{Quantiles used to summarise the prior predictive distribution
 of the standard deviation.}
 
-\item{X0}{An alternative covariate value (optional).  The hazard
-ratio between the hazards at X and X0 will also be returned.}
+\item{X0}{An alternative set of "reference" covariate values
+(optional).  The hazard ratio between the hazards at \code{X}
+and \code{X0} will also be returned.}
 }
 \description{
-The spline model in survextrap allows the hazard to change over time in an
-arbitrarily flexible manner.  The prior distributions on the parameters of
-this model have implications for how much we expect the hazard to plausibly
-vary over time.  These priors are hard to interpret directly, but this
-function can be used to compute their implications on a more
-easily-understandable scale.
+Computes consequences of priors chosen for the parameters \code{hsd}
+and \code{hrsd} in a flexible hazard model \code{\link{survextrap}} on
+an interpretable scale.  This can be used to calibrate Gamma
+priors for these parameters to match interpretable beliefs.
 }
 \details{
+The spline model in \code{\link{survextrap}} allows the hazard to
+change over time in an arbitrarily flexible manner.  The prior
+distributions on the parameters of this model have implications
+for how much we expect the hazard to plausibly vary over time.
+These priors are hard to interpret directly, but this function can
+be used to compute their implications on a more
+easily-understandable scale.
+
 This is done by:
 
 (1) simulating a set of parameters from their prior distributions
@@ -143,7 +175,7 @@ resulting standard deviations.   This is the implied prior for the hazard
 variability.
 
 \code{prior_haz_sd} computes the SD of the hazard, and the SD of the inverse hazard is also
-computed.   The inverse hazard at time t is the expected time to the event given survival to t.
+computed.   The inverse hazard at time \code{t} is the expected time to the event given survival to \code{t}.
 The hazard ratio between a high and low value (defined by quantiles of values at different times)
 is also computed.
 

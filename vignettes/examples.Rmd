@@ -23,14 +23,14 @@ knitr::opts_chunk$set(eval=TRUE, message=FALSE, warning=FALSE, cache=TRUE)
 
 ```{r,echo=FALSE,message=FALSE}
 rstan::rstan_options(auto_write = TRUE)
+options(mc.cores = 2) # CRAN check limits to 2 cores
 # options(mc.cores = parallel::detectCores()) # CRAN check limits to 2 cores
 ```
 
-This vignette gives examples of how to run `survextrap` to fit survival models.
+This vignette gives a quick tour of the features of the `survextrap` package, showing how to use it to fit a range of survival models.   See the [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetuximab.html) for a more in-depth demonstration of how it might be used in a typical health technology assessment. 
 
 See the [README](../index.html) for the design principles of the package, and the [methods vignette](methods.html) for technical details of the methods.
 
-It is work in progress, so it will be sketchy in some places.   The code is supposed to work, but do not be surprised if there are bugs - please report any on [github issues](https://github.com/chjackson/survextrap/issues).
 
 # Examples
 
@@ -46,29 +46,27 @@ survminer::ggsurvplot(survfit(Surv(years, status) ~ 1, data=colons), data=colons
 
 ## Simplest model: no external data
 
-The following is the simplest, default model in the package fitted to the short-term trial data alone. No external data are supplied.  After three years (the maximum follow up time of the short term data) 
-the model assumes the hazard stays constant.   
+The following is the simplest, default model in the package fitted to the short-term trial data alone. No external data are supplied.  After three years (the maximum follow up time of the short term data) the model assumes the hazard stays constant.
 
 The plot shows the posterior median and 95\% credible intervals for the survival and hazard functions.  The spline adapts to give a practically perfect fit to the short-term data - note the Kaplan-Meier curve is obscured by the fitted posterior median.   Although the model assumes the extrapolated hazard is constant, there is still a wide uncertainty interval around this constant value.  This might be thought to be plausible.
 
 ```{r,results="hide"}
 nd_mod <- survextrap(Surv(years, status) ~ 1, data=colons, chains=1)
-plot(nd_mod, tmax=5)
+plot(nd_mod, show_knots=TRUE, tmax=5)
 ```
 
 The spline knots are shown as blue lines.  We could allow for the possibility of hazard changes beyond three years by placing spline knots beyond this point. 
 
-The `mspline` argument is used to control the spline.  The `bknots` component of this is the vector comprising the lower and upper boundary knots.  Here we simply move the upper boundary knot from three to four years.
+The `mspline` argument is used to control the spline.  Here we create an additional knot outside the 
+data, at 4 years.
 
 ```{r,results="hide"}
 nd_mod2 <- survextrap(Surv(years, status) ~ 1, data=colons, chains=1, 
-                      mspline = list(bknots = c(0, 4)))
+                      mspline = list(add_knots=4))
 plot(nd_mod2, tmax=5)
 ```
 
-This increases the amount of uncertainty about the extrapolated survival and hazard.  
-
-There are other ways we could have done this, such as changing the position of the knot, or adding extra knots around or beyond the upper part of the data.   The extrapolations are likely to be sensitive to the choice. 
+This increases the amount of uncertainty about the extrapolated survival and hazard.   The extrapolations are likely to be sensitive to the choice of any knots placed outside the data.  
 
 A sensible guide is to place the upper knot at the latest time that you are interested in modelling.  Beyond this time, you either think the hazard will not change, or any changes in the hazard do not matter for the purpose of the model.
 
@@ -87,37 +85,43 @@ Most of the example models in this vignette have been specified using computatio
 
 * `chains=1` was set in the examples above.   This defines the number of chains used in the MCMC method to estimate the model.    This option can be left out in practice - in which case, four MCMC chains are used, which is the default setting in the `rstan` engine that the package uses, and is more reliable in practice. 
 
-* Likewise, some models below are fitted using `fit.method="opt"`.  This uses an [approximation to the posterior](https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html).  This is OK for producing point estimates of the parameters (the posterior mode is used - note this is likely to differ from the mean or median) but the uncertainty will be only roughly approximated - so it is only recommended for quick checks and model development.
+* Likewise, some models below are fitted using `fit.method="opt"`.  This uses an [approximation to the posterior](https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html).  This is OK for producing point estimates of the parameters (the posterior mode is used - note this is likely to differ from the mean or median) but the uncertainty will be only roughly approximated.  This is very useful for quick checks and model development.
 
-* If using MCMC, make sure to check the diagnostics to ensure that the fit has _converged_ - the 
-values of `rhat` in the summary output (e.g. below) should not be more than 1.05 for each parameter ([see here](https://mc-stan.org/rstan/reference/Rhat.html) for technical details).
-
+* If using MCMC, make sure to check the diagnostics to ensure that the fit has _converged_ - the values of `rhat` in the summary output (e.g. below) should not be more than 1.05 for each parameter ([see here](https://mc-stan.org/rstan/reference/Rhat.html) for technical details). {#convergence}
 ```{r}
 head(summary(nd_mod))
 ```
+{#divergences}
+* If using MCMC, there may be a warning produced by Stan about `divergent transitions after warmup`.  This is a limitation of the sampling algorithm, and can happen when the posterior distribution is awkward to sample from.  If there are only one or two divergent transitions, the message is probably safe to ignore, but in any case the results should be examined to ensure they make sense.  With lots of divergent transitions, it is safer to simplify the model, e.g. by using stronger priors or fewer spline knots.
 
 
-## Mean and restricted mean survival 
+## Restricted mean survival 
 
-The functions `mean` and `rmst` calculate the mean and restricted mean survival time (RMST) from a fitted model.  Uncertainty is expressed by using the MCMC sample of the model parameters, and calculating the mean (or RMST) for each draw, which produces a sample from the posterior distribution.   The posterior median and credible intervals are computed by summarising this sample.
+The function `rmst` calculates the restricted mean survival time (RMST) from a fitted model.  Uncertainty is expressed by using the MCMC sample of the model parameters, and calculating the mean (or RMST) for each draw, which produces a sample from the posterior distribution.   The posterior median and credible intervals are computed by summarising this sample.
 
-For particular combinations of parameter values, the mean under the model `nd_mod` cannot be calculated (resulting in an error message about a divergent integral), suggesting there is a substantial posterior probability that the mean is infinite.  
+For particular combinations of parameter values, the mean under the model `nd_mod` cannot be calculated 
 
-Instead we compute the restricted mean survival time $RMST(t)$ over three alternative time limits $t$: 3, 10 and 1000 years.  The upper 95\% credible limit for $RMST(1000)$ is very large. 
-(`niter` controls how many MCMC iterations to use to summarise the distribution - this is artificially reduced here so this example runs faster. In real applications you should check there are enough iterations to get summaries with the amount of precision you want - this will usually be 1000 or more)
+Here we compute the restricted mean survival time $RMST(t)$ over three alternative time limits $t$: 3, 10 and 1000 years.  The upper 95\% credible limit for $RMST(1000)$ is very large.
+
+> **Note**: `niter` controls how many iterations of the MCMC sample (previously drawn by `survextrap`) should be used to summarise the distribution.  This is artificially set to a small number in this example so that it runs faster.  This is OK for quick checks, but in practice for "final results", you should check there are enough iterations to get summaries with the amount of precision you want, which will usually be 1000 or more.
 
 ```{r}
-# mean(nd_mod)
-rmst(nd_mod2, c(3,10,1000), niter=100)
+rmst(nd_mod2, t = c(3,10,1000), niter=100)
 ```
 
-We do not really believe that the mean survival for this population can be this large. 
+We do not really believe that the mean survival for this population can be this large.  This is evidence that the fitted model is unrealistic, and we should have included external information to bound the estimates of the mean within plausible values.  This can be done with external data. 
 
-This is evidence that the fitted model is unrealistic, and we should have included external information to bound the estimates of the mean within plausible values. 
+> **Note** also the `mean` function can be used to get the mean survival time over an infinite time horizon.  In practice, this is sometimes numerically unstable, resulting in an error message about a divergent integral.  That would suggest that there is a substantial posterior probability that the mean is infinite.   This is often a consequence of having not enough data to inform survival over an infinite horizon.
 
-This can be done with external data. 
+## Custom posterior summaries 
 
-
+The `summ_fns` argument can be used to specify any custom summaries of the posterior distribution of quantities in `survextrap` models.  For example, to use the mean, median and interquartile range, rather than the median and 95\% credible interval:
+```{r}
+rmst(nd_mod2, t = c(3,10,1000),
+     summ_fns = list(mean=mean, median=median,
+                     ~quantile(.x, c(0.25, 0.75))),
+     niter=50)
+```
 
 
 
@@ -130,8 +134,14 @@ extdat <- data.frame(start = c(5, 10, 15, 20),
                      stop =  c(10, 15, 20, 25), 
                      n = c(100, 100, 100, 100), 
                      r = c(50, 40, 30, 20))
+```
+
+This is passed as the `external` argument to `survextrap`.   Extra knots are added at 10 and 25 years, to allow for the possibility that the hazard function will change shape during the times covered by the external data.   The external data are coarser than the individual data, and it would be impossible to identify complex hazard variations from them, so there is no point in using more than a couple of extra knots.  If there is a concern that this knot choice may influence the results, then sensitivity analysis is advised. 
+
+```{r,results="hide"}
 nde_mod <- survextrap(Surv(years, status) ~ 1, data=colons, 
-                      chains=1, external = extdat)
+                      chains=1, external = extdat,
+                      mspline = list(add_knots=c(4, 10, 25)))
 plot(nde_mod)
 ```
 
@@ -140,9 +150,7 @@ mean(nde_mod, niter=100)
 rmst(nde_mod, c(3, 10, 1000), niter=100)
 ```
 
-Including the external data gives a more confident extrapolation.   The mean is finite.  RMST converges to the mean as it is supposed to. 
-
-At present, not much thought has gone into choice of knot locations with external data.  Currently these knots are based on just concatenating the event times in the individual data with the follow-up times in the external data, and then taking quantiles.   Suggestions are welcome for a smarter approach.   Knots in the middle of follow-up intervals?
+Including the external data gives a more confident extrapolation.   The mean is finite.  RMST converges to the mean, as it is supposed to. 
 
 
 
@@ -161,7 +169,7 @@ SHELF::fitdist(vals=c(0.1, 0.3, 0.5), probs=c(0.025, 0.5, 0.975),
 
 We can interpret this as the posterior from having observed $y=6$ survivors out of $n=20$ people (recalling the posterior from a $Binomial(y, n)$ combined with a vague $Beta(0.5, 0.5)$ prior is $Beta(y+0.5, n-y+0.5)$, and rounding $n$ and $y$ to whole numbers).
 
-So the expert's judgment is equivalent to the information in an external dataset of the form 
+So the expert's judgement is equivalent to the information in an external dataset of the form:
 
 <table> 
 <tr>
@@ -236,7 +244,7 @@ plot_hazard(rxphe_mod, niter=100, tmax=20)
 ```
 
 
-### Non-proportional hazards model
+### Non-proportional hazards model {#nonprop}
 
 The flexible non-proportional hazards model described in the [methods vignette](methods.html#nonprop) can be specified with `nonprop=TRUE`.
 
@@ -261,7 +269,7 @@ plot_hazard_ratio(rxnph_mod, newdata=nd) +
   coord_cartesian(ylim=c(0,5)) 
 ```
 
-In this example, the credible interval for the Lev+5FU / Lev hazard ratio is wide, and does not suggest that the hazard ratio is time-varying.  This model is probably overfitted around time 0.5 to 1.  Fewer knots may be preferable.
+In this example, the credible interval for the Lev+5FU / Lev hazard ratio is wide, and does not suggest that the hazard ratio is time-varying.  This model may be overfitted around time 0.5 to 1 - fewer knots may be preferable if this model is intended for description of hazard trajectories.
 
 ### Treatment effect waning models 
 
@@ -273,7 +281,9 @@ These are described in [their own vignette](waning.html).
 
 The leave-one-out cross-validation method of the [`loo`](http://mc-stan.org/loo/) package is automatically implemented for every model fitted with `survextrap`, unless `survextrap(..., loo=FALSE)` is used.
 
-The cross-validation results are returned in the `loo` component of the fitted model object.  See [the loo vignettes](https://mc-stan.org/loo/articles/loo2-example.html) for some information about how to interpret these.
+The cross-validation results are returned in the `loo` and `loo_external` component of the fitted model object, describing the fit of the model to the individual and external data respectively.  For the external data, "leave one out" refers to leaving out a single individual's outcome from the aggregate totals.
+
+See [the loo vignette](https://mc-stan.org/loo/articles/loo2-example.html) for some information about how to interpret these.
 
 Roughly, lower values of the `looic` statistic indicate models with better predictive ability.  This is demonstrated here by comparing the proportional hazards model with the non-proportional hazards model.  `looic` is lower for the proportional hazards model, suggesting that the non-proportional hazards model is worse for prediction.  It is likely to be excessively complicated for the data. 
 
@@ -285,9 +295,7 @@ rxph_mod$loo
 rxnph_mod$loo
 ```
 
-If the warning message `"Some Pareto k diagnostic values are too high"` appears after calling `survextrap`, it was produced by the `loo` package.   The fitted model is still valid, but the cross-validation statistics may not be.  See [the loo vignette] and the references from there for more explanation.  This happens for the non-proportional hazards model here - cross-validation failed for 2 out of the 191 observations in the data.
-
-For models with external data, the cross-validation statistics describe the fit to the individual level ("internal") data.  Therefore, models with and without external data may be compared statistically on the basis of their fit to the individual-level data.  Though a model that does better by this measure is not necessarily better at representing survival outside the period covered by that data. 
+If the warning message `"Some Pareto k diagnostic values are too high"` appears after calling `survextrap`, it was produced by the `loo` package.   The fitted model is still valid, but the cross-validation statistics may not be.  See [the loo vignette](https://mc-stan.org/loo/articles/loo2-example.html) and the references from there for more explanation.  This happens for the non-proportional hazards model here - cross-validation failed for 2 out of the 191 observations in the data.
     
 
 
@@ -300,9 +308,8 @@ The probability of cure for `x=0` is 0.5, and for `x=1` 0.622 (so the log odds r
 ```{r,results="hide"}
 plot(survfit(Surv(t, status) ~ 1, data=curedata))
 
-noncure_mod <- survextrap(Surv(t, status) ~ 1, data=curedata,  
-                          cure=FALSE, fit_method = "opt")
-plot(noncure_mod) # doesn't quite capture the curve
+noncure_mod <- survextrap(Surv(t, status) ~ 1, data=curedata, fit_method = "opt")
+plot_survival(noncure_mod,tmax=5) 
 
 cure_mod <- survextrap(Surv(t, status) ~ 1, data=curedata, chains=1, cure=TRUE, iter=1000)
 plot(cure_mod, tmax=10, niter=20) 
@@ -351,10 +358,10 @@ The posterior medians of the survival and hazard functions under `mod_bh` are ov
 
 ```{r}
 plot_survival(mod, tmax=15, niter=20) + 
-  geom_line(data=survival(mod_bh, tmax=15, niter=20), aes(y=median, x=times), col="red", lwd=1.2)
+  geom_line(data=survival(mod_bh, tmax=15, niter=20), aes(y=median, x=t), col="red", lwd=1.2)
 
 plot_hazard(mod, tmax=15, niter=20) + 
-  geom_line(data=hazard(mod_bh, tmax=15, niter=20), aes(y=median, x=times), col="red", lwd=1.2)
+  geom_line(data=hazard(mod_bh, tmax=15, niter=20), aes(y=median, x=t), col="red", lwd=1.2)
 ```
 
 

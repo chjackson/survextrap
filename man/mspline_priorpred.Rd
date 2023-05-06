@@ -6,58 +6,61 @@
 \title{Generate and/or plot a sample from the prior distribution of M-spline hazard curves}
 \usage{
 mspline_priorpred(
-  iknots = NULL,
-  bknots = c(0, 10),
+  knots = NULL,
   df = 10,
   degree = 3,
+  bsmooth = TRUE,
   coefs_mean = NULL,
-  prior_smooth = p_gamma(2, 1),
-  prior_loghaz = NULL,
+  prior_hsd = p_gamma(2, 1),
+  prior_hscale = NULL,
   prior_loghr = NULL,
   X = NULL,
   X0 = NULL,
-  prior_sdnp = NULL,
+  prior_hrsd = NULL,
   tmin = 0,
   tmax = 10,
   nsim = 10
 )
 
 plot_mspline_priorpred(
-  iknots = NULL,
-  bknots = c(0, 10),
+  knots = NULL,
   df = 10,
   degree = 3,
   coefs_mean = NULL,
-  prior_smooth = p_gamma(2, 1),
-  prior_loghaz = p_normal(0, 20),
+  prior_hsd = p_gamma(2, 1),
+  prior_hscale = p_normal(0, 20),
   prior_loghr = NULL,
   X = NULL,
-  prior_sdnp = p_gamma(2, 1),
+  prior_hrsd = p_gamma(2, 1),
   tmin = 0,
-  tmax = 10,
+  tmax = NULL,
   nsim = 10
 )
 }
 \arguments{
-\item{iknots}{Vector of internal knot locations. If not supplied, \code{df} has to be specified, in which case
-the default is \code{df - degree - 1} equally spaced knots between the boundary knots.}
+\item{knots}{Vector of knot locations. If not supplied, \code{df} has to be specified, in which case
+the default is \code{df - degree - 1} equally spaced knots between zero and the highest knot.}
 
-\item{bknots}{Vector with two elements, giving the boundary knot locations}
-
-\item{df}{Desired number of basis terms, or "degrees of freedom" in the spline.
-If \code{iknots} is not supplied, the number of internal knots is then chosen to satisfy this.}
+\item{df}{Desired number of basis terms, or "degrees of freedom"
+in the spline.  If \code{knots} is not supplied, the number of
+knots is then chosen to satisfy this.}
 
 \item{degree}{Spline polynomial degree (defaults to 3)}
+
+\item{bsmooth}{If \code{TRUE} then the function is constrained to
+also have zero derivative and second derivative at the boundary.}
 
 \item{coefs_mean}{Spline basis coefficients that define the prior mean for the hazard function. By
 default, these are set to values that define a constant hazard function.  They are normalised to
 sum to 1 internally (if they do not already).}
 
-\item{prior_smooth}{Gamma prior for the smoothing standard deviation, in
-models where this is estimated.  This should be a call to \code{p_gamma()}.  The
-default is \code{p_gamma(2,1)}.}
+\item{prior_hsd}{Gamma prior for the standard deviation that
+controls the variability over time (or smoothness) of the hazard
+function.  This should be a call to \code{p_gamma()}.  The default is
+\code{p_gamma(2,1)}.  See \code{\link{prior_haz_sd}} for a way to
+calibrate this to represent a meaningful belief.}
 
-\item{prior_loghaz}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
+\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters
@@ -67,12 +70,12 @@ mean 0 and standard deviation 20.
 Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
 full model specification).
 
-"Baseline" is defined
-by the continuous covariates taking a value of zero and factor covariates taking their
-reference level.  To use a different baseline, the data should be transformed
-appropriately beforehand, so that a value of zero has a different meaning.
-
-For continuous covariates, it helps for both computation and interpretation to define the value of zero to
+"Baseline" is defined by the continuous covariates taking a value
+of zero and factor covariates taking their reference level.  To
+use a different baseline, the data should be transformed
+appropriately beforehand, so that a value of zero has a different
+meaning.  For continuous covariates, it helps for both
+computation and interpretation to define the value of zero to
 denote a typical value in the data, e.g. the mean.}
 
 \item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
@@ -83,29 +86,41 @@ of each list component matches the name of the coefficient, e.g.
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
-\item{X}{Either a list, vector or one-row matrix with one covariate value.
-Factors must be supplied as multiple numeric (0/1) contrasts. (TODO doc on how to
-match then with prior_loghr and prior_sdnp, and naming)}
+\item{X}{Either a list, vector or one-row matrix, with one value
+for each covariate in the model.  Defaults to zero.  Factors
+must be supplied as multiple numeric (0/1) contrasts.
+If there are multiple covariates and a single prior given in
+\code{prior_loghr}, then this prior will be used for all the covariates.
+If a list of priors is provided, then both this list and \code{X}
+must be named with the names of the covariates.}
 
-\item{X0}{An alternative covariate value (optional).  The hazard
-ratio between the hazards at X and X0 will also be returned.}
+\item{X0}{An alternative set of "reference" covariate values
+(optional).  The hazard ratio between the hazards at \code{X}
+and \code{X0} will also be returned.}
 
-\item{prior_sdnp}{Prior for the standard deviation parameters that smooth the non-proportionality
-effects over time in non-proportional hazards models.  This should be a call to \code{p_gamma()}
-or a list of calls to \code{p_gamma()} with one component per covariate, as in \code{prior_loghr}.}
+\item{prior_hrsd}{Prior for the standard deviation parameters that
+smooth the non-proportionality effects over time in
+non-proportional hazards models.  This should be a call to
+\code{p_gamma()} or a list of calls to \code{p_gamma()} with one component
+per covariate, as in \code{prior_loghr}.  See
+\code{\link{prior_hr_sd}} for a way to calibrate this to
+represent a meaningful belief.}
 
-\item{tmin}{Minimum plotting time.  Defaults to lower boundary knot.}
+\item{tmin}{Minimum plotting time.  Defaults to zero.}
 
-\item{tmax}{Maximum plotting time.  Defaults to upper boundary knot.}
+\item{tmax}{Maximum plotting time.  Defaults to the highest knot.}
 
 \item{nsim}{Number of simulations to draw}
 }
 \value{
-\code{mspline_priorpred} returns a data frame of the samples, and
-\code{plot_mspline_priorpred} generates a plot.
+\code{mspline_priorpred} returns a data frame of the
+samples, and \code{plot_mspline_priorpred} generates a plot.  No
+customisation options are provided for the plot function, which
+is just intended as a quick check.
 }
 \description{
-Generates and/or plots the hazard curves (as functions of time) implied by
-a prior mean for the spline coefficients (a constant hazard by default)
-and particular priors for the baseline log hazard and smoothness variance
+Generates and/or plots the hazard curves (as functions of time)
+implied by a prior mean for the spline coefficients (a constant
+hazard by default) and particular priors for the baseline log
+hazard and smoothness standard deviation.
 }

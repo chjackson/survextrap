@@ -4,26 +4,34 @@
 \alias{mspline_basis}
 \title{Evaluate an M-spline basis matrix at the specified times.}
 \usage{
-mspline_basis(times, iknots, bknots, degree = 3, integrate = FALSE)
+mspline_basis(times, knots, degree = 3, integrate = FALSE, bsmooth = TRUE)
 }
 \arguments{
 \item{times}{A numeric vector of times at which to evaluate the basis.}
 
-\item{iknots}{Internal knots}
-
-\item{bknots}{Boundary knots}
+\item{knots}{Spline knots}
 
 \item{degree}{Spline degree}
 
 \item{integrate}{If \code{TRUE}, then the integrated M-spline (I-spline) basis is returned.}
+
+\item{bsmooth}{If \code{TRUE} then the function is constrained to
+also have zero derivative and second derivative at the boundary,
+which improves smoothness at the boundary (experimental feature).}
 }
 \value{
 A two-dimensional array.  Rows are the times, and columns are the basis terms.
 }
 \description{
-Extrapolation beyond the boundary knots is done by assuming that each basis term
-is constant beyond the boundary at its value at the boundary.
-This gives a continuous but non-smooth function.   Each basis term is assumed to be
-zero at times less than zero, since these models are used for hazard functions
-in survival data.
+Evaluate an M-spline basis matrix at the specified times.
+Extrapolation beyond the boundary knots is done by assuming that
+each basis term is constant beyond the boundary.
+}
+\details{
+The lower boundary is fixed to zero, and each basis term is
+assumed to be zero at times less than zero, since these models are
+used for hazard functions in survival data.
+}
+\references{
+The \href{https://cran.r-project.org/web/packages/splines2/index.html}{splines2} package is used.
 }

@@ -2,8 +2,7 @@
 % Please edit documentation in R/backhaz.R
 \name{get_cum_backhaz}
 \alias{get_cum_backhaz}
-\title{Obtain the cumulative hazard at a particular time, given a data frame of
-piecewise-constant background hazards.}
+\title{Cumulative background hazards}
 \usage{
 get_cum_backhaz(t, backhaz)
 }
@@ -20,17 +19,20 @@ a piecewise-constant function (step function) of time. The first element of
 \code{"time"} should be 0, and the final row specifies the hazard at all
 times greater than the last element of \code{"time"}.
 
-The background hazard is the hazard of death from causes other than the
-specific cause of interest. The overall hazard is defined as the sum of the
-background hazard and the cause-specific hazard.  The cause-specific hazard
-is modelled with the M-spline model, and the background hazard is assumed
-to be known.}
+In additive hazards models, the background hazard is the hazard of
+death from causes other than the specific cause of interest. The
+overall hazard is defined as the sum of the background hazard and
+the cause-specific hazard.  In \code{\link{survextrap}}, the
+cause-specific hazard is modelled with the M-spline model, and
+the background hazard is assumed to be known.}
 }
 \value{
 The cumulative hazard at \code{t}.
 }
 \description{
-Obtain the cumulative hazard at a particular time, given a data frame of
-piecewise-constant background hazards.
+Obtain the cumulative hazard at a particular time, given a data
+frame of piecewise-constant background hazards.  This is used in
+the computation of likelihoods and results in additive hazards
+models.
 }
 \keyword{internal}

@@ -1,10 +1,10 @@
 mod <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt")
 nd <- data.frame(rx = c("Lev+5FU","Lev"))
 
-test_that("hazard ratio", {
-  hr <- hazard_ratio(mod, newdata=nd, times=1:2, niter=20)
-  expect_equal(hr$median[1], hr$median[2])
-  plot_hazard_ratio(mod, newdata=nd, niter=20, times=1:5)
+test_that("hazard ratio plot", {
+  expect_error({
+    plot_hazard_ratio(mod, newdata=nd, niter=20, t=1:5)
+  }, NA)
 })
 
 test_that("survival and hazard plots", {
@@ -19,14 +19,13 @@ test_that("survival and hazard plots", {
 test_that("deconstruct fitted spline",{
   expect_error({
     hazdf <-  deconstruct_mspline(mod)
-    bknots <- unname(attr(hazdf,"bknots"))
-    iknots <- unname(attr(hazdf,"iknots"))
+    knots <- unname(attr(hazdf,"knots"))
     p <- ggplot(hazdf, aes(x=time, y=value, group=term)) +
       geom_line(alpha=0.5) +
-      scale_x_continuous(breaks=c(iknots, bknots)) +
+      scale_x_continuous(breaks=c(knots)) +
       theme_minimal() +
       theme(panel.grid.minor = element_blank()) +
-      geom_vline(xintercept = bknots, col="gray50") +
+      geom_vline(xintercept = max(knots), col="gray50") +
       xlab("Time") + ylab("Hazard")
   }, NA)
 })

@@ -14,9 +14,9 @@ See \code{\link[survival]{colon}}.
 colons
 }
 \description{
-Survival times of 185 patients with primary node positive breast
-cancer.  This is the data provided in the \code{survival} package as
-\code{colon}, but this is restricted to outcome of recurrence-free
+Survival times of 191 patients from a trial of chemotherapy for
+colon cancer.  This is the data provided in the \code{survival} package
+as \code{colon}, but this is restricted to outcome of recurrence-free
 survival, artificially censored at 3 years, and taking a 20\%
 random sample.
 }

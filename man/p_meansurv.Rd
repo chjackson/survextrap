@@ -2,7 +2,7 @@
 % Please edit documentation in R/priors.R
 \name{p_meansurv}
 \alias{p_meansurv}
-\title{Derive a normal prior for the hazard scale parameter based on a guess at survival times}
+\title{Derive a normal prior for the log hazard scale parameter based on a guess at survival times}
 \usage{
 p_meansurv(median, upper, mspline = NULL)
 }
@@ -11,13 +11,25 @@ p_meansurv(median, upper, mspline = NULL)
 
 \item{upper}{Upper limit of 95\% credible interval for a survival time}
 
-\item{mspline}{A list with components \code{iknots} (vector of internal knots), \code{bknots} (vector of boundary knots)
+\item{mspline}{A list with components \code{knots} (vector of knots),
 and \code{degree} (polynomial degree) defining an M-spline configuration.}
 }
 \value{
 A normal prior in the format returned by \code{\link{p_normal}}, which can
-be passed directly to the \code{prior_loghaz} argument in \code{\link{survextrap}}.
+be passed directly to the \code{prior_hscale} argument in \code{\link{survextrap}}.
 }
 \description{
-Derive a normal prior for the hazard scale parameter based on a guess at survival times
+Derive a normal prior for the log hazard scale parameter based on a
+guess at survival times.  The scale parameter is hard to interpret,
+and depends on the spline knots.  However for any scale parameter,
+we can determine the spline coefficients that give a constant
+hazard (\code{\link{mspline_constant_coefs}}).  Therefore if we can
+guess a typical survival time, we can guess a typical hazard (as 1
+divided by the survival time) and deduce the scale parameter.  The
+prior is then constructed by assuming normality on the log scale,
+and assuming the log upper credible limit is two SDs away from the
+log median.
+}
+\seealso{
+\code{\link{prior_haz_const}}, \code{\link{mspline_constant_coefs}}
 }

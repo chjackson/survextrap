@@ -5,10 +5,7 @@
 \alias{survextrap-package}
 \title{The 'survextrap' package.}
 \description{
-For an introduction to and an overview of the \code{survextrap} package, see
+For an introduction to and overview of the \code{survextrap} package, and full documentation, see
 
 \url{https://chjackson.github.io/survextrap/}
-}
-\references{
-Stan Development Team (NA). RStan: the R interface to Stan. R package version 2.26.11. https://mc-stan.org
 }

@@ -8,18 +8,18 @@ survextrap(
   formula,
   data,
   external = NULL,
-  smooth_sd = "bayes",
-  coefs_mean = NULL,
   cure = FALSE,
   nonprop = FALSE,
-  prior_loghaz = p_normal(0, 20),
+  prior_hscale = p_normal(0, 20),
   prior_loghr = NULL,
-  prior_smooth = p_gamma(2, 1),
+  prior_hsd = p_gamma(2, 1),
   prior_cure = p_beta(1, 1),
   prior_logor_cure = NULL,
-  prior_sdnp = p_gamma(2, 1),
+  prior_hrsd = p_gamma(2, 1),
   backhaz = NULL,
   mspline = NULL,
+  hsd = "bayes",
+  coefs_mean = NULL,
   fit_method = "mcmc",
   loo = (fit_method == "mcmc"),
   ...
@@ -32,7 +32,8 @@ on the left hand side.
 Covariates included on the right hand side of the formula with be modelled with
 proportional hazards.}
 
-\item{data}{Data frame containing variables in \code{formula}.}
+\item{data}{Data frame containing variables in \code{formula}.  Variables should be
+in a data frame, and not in the working environment.}
 
 \item{external}{External data as a data frame of aggregate survival counts with columns:
 
@@ -42,34 +43,18 @@ proportional hazards.}
 
 \code{n}: Number of people alive at \code{start}
 
-\code{r}: Number of those people who are still alive at \code{stop}
-
-It is intended to add facilities to the package to produce this format of data from
-other common forms of external data, e.g. registry or population data, or elicited judgements
-about conditional survival}
-
-\item{smooth_sd}{Smoothing parameter estimation.
-
-\code{"bayes"}: the smoothing parameter is estimated by full Bayes.
-
-\code{"eb"}: empirical Bayes is used.
-
-Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number.}
-
-\item{coefs_mean}{Spline basis coefficients that define the prior mean for the hazard function. By
-default, these are set to values that define a constant hazard function.  They are normalised to
-sum to 1 internally (if they do not already).}
+\code{r}: Number of those people who are still alive at \code{stop}}
 
 \item{cure}{If \code{TRUE}, a mixture cure model is used, where the "uncured" survival is defined by the
 M-spline model, and the cure probability is estimated.}
 
 \item{nonprop}{If \code{TRUE} then a non-proportional hazards model is fitted.
-This is achieved by modelling the spline basis weights in terms of the covariates.  See
-the "methods" vignette for more details.   In models with multiple covariates, currently
+This is achieved by modelling the spline basis coefficients in terms of the covariates.  See
+the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette} for more details.   In models with multiple covariates, currently
 there is no way to assume that some covariates have proportional hazards but others don't -
 it is all or none.}
 
-\item{prior_loghaz}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
+\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters
@@ -79,12 +64,12 @@ mean 0 and standard deviation 20.
 Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
 full model specification).
 
-"Baseline" is defined
-by the continuous covariates taking a value of zero and factor covariates taking their
-reference level.  To use a different baseline, the data should be transformed
-appropriately beforehand, so that a value of zero has a different meaning.
-
-For continuous covariates, it helps for both computation and interpretation to define the value of zero to
+"Baseline" is defined by the continuous covariates taking a value
+of zero and factor covariates taking their reference level.  To
+use a different baseline, the data should be transformed
+appropriately beforehand, so that a value of zero has a different
+meaning.  For continuous covariates, it helps for both
+computation and interpretation to define the value of zero to
 denote a typical value in the data, e.g. the mean.}
 
 \item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
@@ -95,9 +80,11 @@ of each list component matches the name of the coefficient, e.g.
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
-\item{prior_smooth}{Gamma prior for the smoothing standard deviation, in
-models where this is estimated.  This should be a call to \code{p_gamma()}.  The
-default is \code{p_gamma(2,1)}.}
+\item{prior_hsd}{Gamma prior for the standard deviation that
+controls the variability over time (or smoothness) of the hazard
+function.  This should be a call to \code{p_gamma()}.  The default is
+\code{p_gamma(2,1)}.  See \code{\link{prior_haz_sd}} for a way to
+calibrate this to represent a meaningful belief.}
 
 \item{prior_cure}{Prior for the baseline cure probability.  This should be a
 call to \code{p_beta()}.  The default is a uniform prior, \code{p_beta(1,1)}.
@@ -108,9 +95,13 @@ level of factor covariates.}
 This should be a call to \code{p_normal()} or \code{p_t()}.  The default is
 \code{p_normal(0,2.5)}.}
 
-\item{prior_sdnp}{Prior for the standard deviation parameters that smooth the non-proportionality
-effects over time in non-proportional hazards models.  This should be a call to \code{p_gamma()}
-or a list of calls to \code{p_gamma()} with one component per covariate, as in \code{prior_loghr}.}
+\item{prior_hrsd}{Prior for the standard deviation parameters that
+smooth the non-proportionality effects over time in
+non-proportional hazards models.  This should be a call to
+\code{p_gamma()} or a list of calls to \code{p_gamma()} with one component
+per covariate, as in \code{prior_loghr}.  See
+\code{\link{prior_hr_sd}} for a way to calibrate this to
+represent a meaningful belief.}
 
 \item{backhaz}{Background hazard, that is, for causes of death other than the
 cause of interest. This defines a "relative survival" model where the
@@ -122,8 +113,8 @@ The background hazard can be supplied in two forms.  The meaning of predictions
 from the model depends on which of these is used.
 
 (a) A data frame with columns \code{"hazard"} and \code{"time"}, specifying
-the "background" hazard at all times as a piecewise-constant (step) function.
-Each row gives the "background" hazard between the specified time and the
+the background hazard at all times as a piecewise-constant (step) function.
+Each row gives the background hazard between the specified time and the
 next time.  The first element of \code{"time"} should be 0, and the final row
 specifies the hazard at all times greater than the last element of
 \code{"time"}.
@@ -149,21 +140,50 @@ background hazard (effectively assuming it to be zero).}
 
 \item{mspline}{A list of control parameters defining the spline model.
 
-\code{iknots}: Internal knots.  If this is not supplied, then the number of
-knots is taken from \code{df}, and their location is taken from equally-spaced
-quantiles of the observed event times (concatenated with the distinct
-follow-up times in the external data).
+\code{knots}: Spline knots.  If this is not supplied, then the number
+of knots is taken from \code{df}, and their location is taken from
+equally-spaced quantiles of the observed event times in the
+individual-level data.
 
-\code{bknots}: Boundary knots.  If this is not supplied, the boundary knots are
-set to zero and the maximum event time (including the follow-up times in
-the external data).
+\code{add_knots}: Any extra knots beyond those chosen from the
+individual-level data (or supplied in \code{knots}).  This is intended
+to be used when there are \code{external} data included in the
+model.  External data are typically outside the time period
+covered by the individual data.  \code{add_knots} would then be chosen
+to span the time period covered by the external data, so that the
+hazard trajectory can vary over that time.
 
-\code{df}: Degrees of freedom, i.e. the number of parameters (or basis terms)
-that define the hazard as a spline function of time.  Defaults to 10.  Note
-this does not necessarily overfit because the function is smoothed through
-the prior.
+If there are external data, and both \code{knots} and \code{add_knots} are
+omitted, then a default set of knots is chosen to span both the
+individual and external data, by taking the quantiles of a vector
+defined by concatenating the individual-level event times with
+the \code{start} and \code{stop} times in the external data.
 
-\code{degree}: Polynomial degree used for the basis function. The default is 3, giving a cubic.}
+\code{df}: Degrees of freedom, i.e. the number of parameters (or basis
+terms) intended to result from choosing knots based on quantiles
+of the data.  The total number of parameters will then be \code{df}
+plus the number of additional knots specified in
+\code{add_knots}. \code{df} defaults to 10.  This does not necessarily
+overfit, because the function is smoothed through the prior.
+
+\code{degree}: Polynomial degree used for the basis function. The
+default is 3, giving a cubic.
+
+\code{bsmooth}: If \code{TRUE} (on by default) the spline is smoother
+at the highest knot, by defining the derivative and second derivative
+at this point to be zero.}
+
+\item{hsd}{Smoothing parameter estimation.
+
+\code{"bayes"}: the smoothing parameter is estimated by full Bayes.
+
+\code{"eb"}: empirical Bayes is used.
+
+Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number.}
+
+\item{coefs_mean}{Spline basis coefficients that define the prior mean for the hazard function. By
+default, these are set to values that define a constant hazard function.  They are normalised to
+sum to 1 internally (if they do not already).}
 
 \item{fit_method}{Method from \pkg{rstan} used to fit the model.  Defaults to MCMC.
 
@@ -182,25 +202,40 @@ If \code{fit_method="vb"}, then variational Bayes methods are used, via \pkg{rst
 \pkg{rstan}.  It might give a better approximation to the posterior
 than \code{fit_method="opt"}, but has not been investigated in depth for these models.}
 
-\item{loo}{Compute leave-one-out cross-validation statistics.  This is done by default. Set to
-\code{FALSE} to not compute them.
-If these statistics are computed, then they are returned in the \code{loo} component of the
-object returned by \code{survextrap}.  See the \code{"examples"} vignette for some explanation
-of these.}
+\item{loo}{Compute leave-one-out cross-validation statistics.
+This is done by default. Set to \code{FALSE} to not compute
+them.  If these statistics are computed, then they are returned
+in the \code{loo} and \code{loo_external} components of the
+object returned by \code{survextrap}.  \code{loo} describes the
+fit of the model to the individual-level data, and
+\code{loo_external} describes fit to the external data.
+
+See the \code{"examples"} vignette for more explanation of these.}
 
 \item{...}{Additional arguments to supply to control the Stan fit, passed to the appropriate
 \pkg{rstan} function, depending on which is chosen through the \code{fit_method} argument.}
 }
 \value{
-A list of objects defining the fitted model.  A particularly important component is
+A list of objects defining the fitted model.  These are not
+intended to be extracted directly by users.  Instead see
+\code{\link{summary.survextrap}} for summarising the parameter
+estimates, and the functions \code{\link{hazard}},
+\code{\link{survival}}, \code{\link{rmst}} and others for
+computing interesting summaries of the fitted survival
+distribution.
 
-\code{stanfit}: The object returned by \code{rstan} containing samples from the fitted model.  See the \href{https://mc-stan.org/rstan/index.html}{rstan} documentation.
+The object returned by \code{rstan} containing samples from the fitted
+model is returned in the \code{stanfit} component.  See the
+\href{https://mc-stan.org/rstan/index.html}{rstan} documentation.  The
+function \code{\link{get_draws}} is provided to convert this to a
+simple matrix of posterior samples with all chains collapsed.
 }
 \description{
 Flexible Bayesian parametric survival models.  Individual data are
 represented using M-splines and a proportional hazards or flexible
-non-proportional hazards model.  Optionally a mixture cure version
-of this model can be fitted.  Extrapolations can be enhanced by
-including external aggregate data, or by including a fixed
-background hazard in an additive hazards (relative survival) model.
+non-proportional hazards model.  External aggregate data can be
+included, for example, to enable extrapolation outside the
+individual data.  A fixed background hazard can also be included in
+an additive hazards (relative survival) model.  Mixture cure
+versions of these models can also be used.
 }

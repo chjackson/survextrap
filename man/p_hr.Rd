@@ -16,5 +16,6 @@ A normal prior in the format returned by \code{\link{p_normal}}, which can
 be passed directly to the \code{prior_loghr} argument in \code{\link{survextrap}}.
 }
 \description{
-Derive a normal prior for the log hazard ratio parameter based on a guess at the hazard ratio
+Derive a normal prior for the log hazard ratio parameter based on a guess at the hazard ratio.
+This assumes that the log upper limit is 2 standard deviations away from the log median.
 }

@@ -1,6 +1,6 @@
 alpha <- -0.35
-coefs <- c(0.0012, 0.029, 0.1, 0.15, 0.11, 0.11, 0.23, 0.0074, 0.052, 0.1)
-knots <- c(0, 0.36, 0.62, 0.91, 1.2, 1.54, 2.02, 3)
+coefs <- c(0.0012, 0.029, 0.1, 0.15, 0.23, 0.0074, 0.052, 0.1)
+knots <- c(0.36, 0.62, 0.91, 1.2, 1.54, 2.02, 3)
 
 test_that("psurvmspline",{
     q <- c(-1, 0, Inf, NA, NaN)
@@ -79,4 +79,22 @@ test_that("offsets in distribution functions",{
   pr1 <- dsurvmspline(1.2, alpha, coefs, knots, offseth=0.01, offsetH=0.02)
   pr2 <- dsurvmspline(1.2, alpha, coefs, knots, offseth=0.01, offsetH = c(NA,0.02))
   expect_equal(pr1, pr2[2])
+})
+
+test_that("dists with constant hazard",{
+    knots <- c(1,2,3)
+    cf <- mspline_constant_coefs(list(knots=knots))
+    haz <- hsurvmspline(c(1), 0, cf, knots)
+    cumhaz <- Hsurvmspline(3, 0, cf, knots)
+    expect_equal(haz * 3, cumhaz)
+    prob <- psurvmspline(3, 0, cf, knots, lower.tail = FALSE)
+    expect_equal(prob, exp(-cumhaz))
+
+    alpha <- c(0, 1)
+    cf2 <- rbind(cf, cf)
+    haz <- hsurvmspline(c(1), alpha, cf2, knots)
+    cumhaz <- Hsurvmspline(3, alpha, cf2, knots)
+    expect_equal(haz * 3, cumhaz)
+    prob <- psurvmspline(3, alpha, cf2, knots, lower.tail = FALSE)
+    expect_equal(prob, exp(-cumhaz))
 })

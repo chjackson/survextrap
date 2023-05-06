@@ -7,7 +7,7 @@
 plot_hazard_ratio(
   x,
   newdata = NULL,
-  times = NULL,
+  t = NULL,
   tmax = NULL,
   niter = NULL,
   ci = TRUE,
@@ -20,21 +20,27 @@ plot_hazard_ratio(
 \arguments{
 \item{x}{A fitted model object as returned by \code{\link{survextrap}}}
 
-\item{newdata}{A data frame with two rows.  The hazard ratio will be defined as hazard(first row)
-divided by hazard(second row).}
+\item{newdata}{A data frame with two rows.  The hazard ratio will
+be defined as hazard(second row) divided by hazard(first row).
+If the only covariate in the model is a factor with two levels,
+then \code{newdata} defaults to a data frame containing the
+levels of this factor, so that the hazard ratio for the second
+level versus the first level is computed.  For any other models,
+\code{newdata} must be supplied explicitly.}
 
-\item{times}{Vector of times at which to compute the estimates.}
+\item{t}{Vector of times at which to compute the estimates.}
 
 \item{tmax}{Maximum time at which to compute the estimates.  If
-\code{times} is supplied, then this is ignored.  If \code{times} is not
-supplied, then \code{times} is set to a set of 100 equally spaced
-time points from 0 to \code{tmax}.  If both \code{tmax} and \code{times}
+\code{t} is supplied, then this is ignored.  If \code{t} is not
+supplied, then \code{t} is set to a set of 100 equally spaced
+time points from 0 to \code{tmax}.  If both \code{tmax} and \code{t}
 are not supplied, then \code{tmax} is set to the maximum follow up time
 in the data.}
 
 \item{niter}{Number of MCMC iterations to use to compute credible
 intervals.  Set to a low value to make this function quicker, at the cost of
-some approximation error (which may not be important for plotting).}
+some approximation error (which may not be important for plotting or model
+development).}
 
 \item{ci}{If \code{TRUE} then credible intervals are drawn.  Defaults to
 drawing the intervals if the plot shows the curve for only one covariate value.}
@@ -48,5 +54,7 @@ drawing the intervals if the plot shows the curve for only one covariate value.}
 \item{ci_alpha}{Transparency for the credible interval ribbons}
 }
 \description{
-Intended for use with non-proportional hazards models (\code{survextrap(...,nonprop=TRUE)}).
+Intended for use with non-proportional hazards models (\code{survextrap(...,nonprop=TRUE)}).   Intended as a quick check of a model fit, so there are
+limited customisation options.
+The underlying data can be extracted with \code{\link{hazard_ratio}}.
 }

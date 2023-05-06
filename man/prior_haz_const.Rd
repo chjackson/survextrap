@@ -7,7 +7,7 @@ prior on the hazard scale parameter and spline specification.}
 \usage{
 prior_haz_const(
   mspline,
-  prior_loghaz = p_normal(0, 20),
+  prior_hscale = p_normal(0, 20),
   nsim = 10000,
   quantiles = c(0.025, 0.5, 0.975)
 )
@@ -15,23 +15,40 @@ prior_haz_const(
 \arguments{
 \item{mspline}{A list of control parameters defining the spline model.
 
-\code{iknots}: Internal knots.  If this is not supplied, then the number of
-knots is taken from \code{df}, and their location is taken from equally-spaced
-quantiles of the observed event times (concatenated with the distinct
-follow-up times in the external data).
+\code{knots}: Spline knots.  If this is not supplied, then the number
+of knots is taken from \code{df}, and their location is taken from
+equally-spaced quantiles of the observed event times in the
+individual-level data.
 
-\code{bknots}: Boundary knots.  If this is not supplied, the boundary knots are
-set to zero and the maximum event time (including the follow-up times in
-the external data).
+\code{add_knots}: Any extra knots beyond those chosen from the
+individual-level data (or supplied in \code{knots}).  This is intended
+to be used when there are \code{external} data included in the
+model.  External data are typically outside the time period
+covered by the individual data.  \code{add_knots} would then be chosen
+to span the time period covered by the external data, so that the
+hazard trajectory can vary over that time.
 
-\code{df}: Degrees of freedom, i.e. the number of parameters (or basis terms)
-that define the hazard as a spline function of time.  Defaults to 10.  Note
-this does not necessarily overfit because the function is smoothed through
-the prior.
+If there are external data, and both \code{knots} and \code{add_knots} are
+omitted, then a default set of knots is chosen to span both the
+individual and external data, by taking the quantiles of a vector
+defined by concatenating the individual-level event times with
+the \code{start} and \code{stop} times in the external data.
 
-\code{degree}: Polynomial degree used for the basis function. The default is 3, giving a cubic.}
+\code{df}: Degrees of freedom, i.e. the number of parameters (or basis
+terms) intended to result from choosing knots based on quantiles
+of the data.  The total number of parameters will then be \code{df}
+plus the number of additional knots specified in
+\code{add_knots}. \code{df} defaults to 10.  This does not necessarily
+overfit, because the function is smoothed through the prior.
 
-\item{prior_loghaz}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
+\code{degree}: Polynomial degree used for the basis function. The
+default is 3, giving a cubic.
+
+\code{bsmooth}: If \code{TRUE} (on by default) the spline is smoother
+at the highest knot, by defining the derivative and second derivative
+at this point to be zero.}
+
+\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters
@@ -41,12 +58,12 @@ mean 0 and standard deviation 20.
 Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
 full model specification).
 
-"Baseline" is defined
-by the continuous covariates taking a value of zero and factor covariates taking their
-reference level.  To use a different baseline, the data should be transformed
-appropriately beforehand, so that a value of zero has a different meaning.
-
-For continuous covariates, it helps for both computation and interpretation to define the value of zero to
+"Baseline" is defined by the continuous covariates taking a value
+of zero and factor covariates taking their reference level.  To
+use a different baseline, the data should be transformed
+appropriately beforehand, so that a value of zero has a different
+meaning.  For continuous covariates, it helps for both
+computation and interpretation to define the value of zero to
 denote a typical value in the data, e.g. the mean.}
 
 \item{nsim}{Number of simulations to draw}
@@ -57,4 +74,7 @@ of the standard deviation.}
 \description{
 Summarises the prior for the constant hazard implied by a particular
 prior on the hazard scale parameter and spline specification.
+}
+\seealso{
+\code{\link{p_meansurv}}, \code{\link{mspline_constant_coefs}}
 }

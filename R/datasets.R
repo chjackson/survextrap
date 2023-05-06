@@ -1,8 +1,8 @@
 ##' Colon cancer survival data
 ##' 
-##' Survival times of 185 patients with primary node positive breast
-##' cancer.  This is the data provided in the `survival` package as
-##' `colon`, but this is restricted to outcome of recurrence-free
+##' Survival times of 191 patients from a trial of chemotherapy for
+##' colon cancer.  This is the data provided in the `survival` package
+##' as `colon`, but this is restricted to outcome of recurrence-free
 ##' survival, artificially censored at 3 years, and taking a 20%
 ##' random sample.
 ##' 
@@ -17,12 +17,13 @@
 
 
 
-##' Simulated data for testing cure models
+##' Simulated data for testing mixture cure models
 ##' 
-##' Survival times of 200 fake people.
-##' The cure probability is 0.5 for `x=0`, and the log
-##' odds ratio for cure is 0.5, so that the cure probability is about 0.62 for `x=1`.
-##' The uncured population have survival times distributed as a Weibull with shape 1.5 and scale 1.2.
+##' Survival times of 200 fake people.  The cure probability is 0.5
+##' for `x=0`, and the log odds ratio for cure is 0.5, so that the
+##' cure probability is about 0.62 for `x=1`.  The uncured population
+##' have survival times distributed as a Weibull with shape 1.5 and
+##' scale 1.2.
 ##' 
 ##' @format
 ##'
@@ -41,7 +42,7 @@
 ##' Datasets for evaluation of cetuximab in head and neck cancer
 ##'
 ##' Datasets for evaluation of cetuximab in head and neck cancer, as previously
-##' analysed by Guyot et al. (2017) to demonstrate models for survival extrapolation
+##' analysed by [Guyot et al. (2017)](https://journals.sagepub.com/doi/pdf/10.1177/0272989X16670604) to demonstrate models for survival extrapolation
 ##' with Bayesian evidence synthesis.
 ##'
 ##' @aliases cetux cetux_seer cetux_bh
@@ -63,7 +64,11 @@
 ##' From the "Surveillance Epidemiology and End Results" (SEER) database.
 ##' Each line gives counts of \code{r} survivors up to \code{stop} years, 
 ##' given \code{n} people alive at \code{start}.  \code{haz} is the
-##' corresponding constand hazard estimate over this period. 
+##' corresponding constant hazard estimate over this period, computed
+##' as \code{-log(r/n)}.  
+##' There are also 95% interval estimates for the hazard based on the data
+##' on one period at a time, derived
+##' from Bayesian principles as \code{-log(qbeta(c(0.975, 0.025), r, n-r))}.
 ##'
 ##' \code{cetux_bh} Mortality rates for the population of the
 ##' USA, matched by age and sex to the patients from the Bonner trial.

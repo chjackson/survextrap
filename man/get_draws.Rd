@@ -10,6 +10,7 @@ get_draws(x)
 \item{x}{A fitted model object as returned by \code{\link{survextrap}}}
 }
 \description{
-Return the matrix of draws from the posterior distribution of parameters in a survextrap model,
-with all chains collapsed.
+Return the matrix of draws from the posterior distribution of
+parameters in a \code{\link{survextrap}} model, with all chains
+collapsed.
 }

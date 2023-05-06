@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,11 +24,14 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/cetuximab.html">Case study of using survextrap: cetuximab for head and neck cancer</a>
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
     <a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a>
-    <a class="dropdown-item" href="../articles/waning.html">Treatment effect waning in survextrap</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -65,11 +68,70 @@
           <code><a href="survextrap.html">survextrap()</a></code> 
         </dt>
         <dd>Flexible Bayesian parametric survival models</dd>
-      </dl><dl><dt>
+      </dl></div><div class="section level2">
+      <h2 id="utilities-to-determine-prior-distributions-for-m-spline-models">Utilities to determine prior distributions for M-spline models<a class="anchor" aria-label="anchor" href="#utilities-to-determine-prior-distributions-for-m-spline-models"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
           
           <code><a href="priors.html">p_normal()</a></code> <code><a href="priors.html">p_t()</a></code> <code><a href="priors.html">p_beta()</a></code> <code><a href="priors.html">p_gamma()</a></code> 
         </dt>
         <dd>Prior distributions and options</dd>
+      </dl><dl><dt>
+          
+          <code><a href="prior_sample.html">prior_sample()</a></code> 
+        </dt>
+        <dd>Sample from the joint prior of parameters in a survextrap model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="p_meansurv.html">p_meansurv()</a></code> 
+        </dt>
+        <dd>Derive a normal prior for the log hazard scale parameter based on a guess at survival times</dd>
+      </dl><dl><dt>
+          
+          <code><a href="p_hr.html">p_hr()</a></code> 
+        </dt>
+        <dd>Derive a normal prior for the log hazard ratio parameter based on a guess at the hazard ratio</dd>
+      </dl><dl><dt>
+          
+          <code><a href="prior_haz_const.html">prior_haz_const()</a></code> 
+        </dt>
+        <dd>Summarises the prior for the constant hazard implied by a particular
+prior on the hazard scale parameter and spline specification.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="prior_haz.html">prior_haz_sd()</a></code> <code><a href="prior_haz.html">prior_hr_sd()</a></code> 
+        </dt>
+        <dd>Determine priors for time-varying hazards and hazard ratios</dd>
+      </dl><dl><dt>
+          
+          <code><a href="prior_hr.html">prior_hr()</a></code> 
+        </dt>
+        <dd>Summarises the prior for the hazard ratio implied by a particular
+prior on the log hazard ratio</dd>
+      </dl><dl><dt>
+          
+          <code><a href="mspline_priorpred.html">mspline_priorpred()</a></code> <code><a href="mspline_priorpred.html">plot_mspline_priorpred()</a></code> 
+        </dt>
+        <dd>Generate and/or plot a sample from the prior distribution of M-spline hazard curves</dd>
+      </dl><dl><dt>
+          
+          <code><a href="prior_pred.html">prior_pred()</a></code> 
+        </dt>
+        <dd>Simulate a dataset from the prior predictive distribution of survival times
+in an M-spline survival model.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="print_priors.html">print_priors()</a></code> 
+        </dt>
+        <dd>Print the priors used in a fitted survextrap model</dd>
       </dl></div><div class="section level2">
       <h2 id="getting-results-from-fitted-models">Getting results from fitted models<a class="anchor" aria-label="anchor" href="#getting-results-from-fitted-models"></a></h2>
       
@@ -95,12 +157,12 @@
           
           <code><a href="survival.html">survival()</a></code> 
         </dt>
-        <dd>Estimates of survival from a survextrap model</dd>
+        <dd>Estimates of survival from a <code><a href="https://chjackson.github.io/survextrap/reference/survextrap.html">survextrap</a></code> model</dd>
       </dl><dl><dt>
           
           <code><a href="hazard.html">hazard()</a></code> 
         </dt>
-        <dd>Estimates of hazard from a survextrap model</dd>
+        <dd>Estimates of hazard from a <code><a href="https://chjackson.github.io/survextrap/reference/survextrap.html">survextrap</a></code> model</dd>
       </dl><dl><dt>
           
           <code><a href="cumhaz.html">cumhaz()</a></code> 
@@ -143,10 +205,14 @@
         <dd>Restricted mean survival time</dd>
       </dl><dl><dt>
           
+          <code><a href="irmst.html">irmst()</a></code> 
+        </dt>
+        <dd>Incremental restricted mean survival time</dd>
+      </dl><dl><dt>
+          
           <code><a href="get_cum_backhaz.html">get_cum_backhaz()</a></code> 
         </dt>
-        <dd>Obtain the cumulative hazard at a particular time, given a data frame of
-piecewise-constant background hazards.</dd>
+        <dd>Cumulative background hazards</dd>
       </dl><dl><dt>
           
           <code><a href="get_draws.html">get_draws()</a></code> 
@@ -175,61 +241,14 @@ piecewise-constant background hazards.</dd>
         <dd>Colon cancer survival data</dd>
       </dl><dl><dt>
           
+          <code><a href="cetux.html">cetux</a></code> <code><a href="cetux.html">cetux_seer</a></code> <code><a href="cetux.html">cetux_bh</a></code> 
+        </dt>
+        <dd>Datasets for evaluation of cetuximab in head and neck cancer</dd>
+      </dl><dl><dt>
+          
           <code><a href="curedata.html">curedata</a></code> 
         </dt>
-        <dd>Simulated data for testing cure models</dd>
-      </dl></div><div class="section level2">
-      <h2 id="utilities-to-examine-prior-distributions-in-m-spline-models">Utilities to examine prior distributions in M-spline models<a class="anchor" aria-label="anchor" href="#utilities-to-examine-prior-distributions-in-m-spline-models"></a></h2>
-      
-      
-
-      
-    </div><div id="" class="section level2">
-      
-      
-      
-
-      <dl><dt>
-          
-          <code><a href="prior_sample.html">prior_sample()</a></code> 
-        </dt>
-        <dd>Draw a sample from the prior distribution of the parameters
-governing the hazard in a survextrap model for given covariates.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="p_meansurv.html">p_meansurv()</a></code> 
-        </dt>
-        <dd>Derive a normal prior for the hazard scale parameter based on a guess at survival times</dd>
-      </dl><dl><dt>
-          
-          <code><a href="prior_haz_const.html">prior_haz_const()</a></code> 
-        </dt>
-        <dd>Summarises the prior for the constant hazard implied by a particular
-prior on the hazard scale parameter and spline specification.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="prior_haz.html">prior_haz_sd()</a></code> <code><a href="prior_haz.html">prior_hr_sd()</a></code> 
-        </dt>
-        <dd>Compute consequences of priors chosen for a flexible hazard model in
-survextrap, in terms of a standard deviation measuring the
-variability over time of the hazard function or the hazard ratio
-function.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="mspline_priorpred.html">mspline_priorpred()</a></code> <code><a href="mspline_priorpred.html">plot_mspline_priorpred()</a></code> 
-        </dt>
-        <dd>Generate and/or plot a sample from the prior distribution of M-spline hazard curves</dd>
-      </dl><dl><dt>
-          
-          <code><a href="prior_pred.html">prior_pred()</a></code> 
-        </dt>
-        <dd>Simulate a dataset from the prior predictive distribution of survival times
-in an M-spline survival model.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="print_priors.html">print_priors()</a></code> 
-        </dt>
-        <dd>Print the priors used in a fitted survextrap model</dd>
+        <dd>Simulated data for testing mixture cure models</dd>
       </dl></div><div class="section level2">
       <h2 id="m-spline-utilities">M-spline utilities<a class="anchor" aria-label="anchor" href="#m-spline-utilities"></a></h2>
       
@@ -253,19 +272,24 @@ in an M-spline survival model.</dd>
         <dd>M-spline survival distribution under treatment effect waning</dd>
       </dl><dl><dt>
           
+          <code><a href="mspline_spec.html">mspline_spec()</a></code> 
+        </dt>
+        <dd>Make default M-spline knot specification.</dd>
+      </dl><dl><dt>
+          
           <code><a href="mspline_basis.html">mspline_basis()</a></code> 
         </dt>
         <dd>Evaluate an M-spline basis matrix at the specified times.</dd>
       </dl><dl><dt>
           
-          <code><a href="mspline_constant_weights.html">mspline_constant_weights()</a></code> 
+          <code><a href="mspline_constant_coefs.html">mspline_constant_coefs()</a></code> 
         </dt>
-        <dd>Determine M-spline basis weights which give a constant function.</dd>
+        <dd>Determine M-spline basis coefficients which give a constant function.</dd>
       </dl><dl><dt>
           
           <code><a href="mspline_plotsetup.html">mspline_plotsetup()</a></code> 
         </dt>
-        <dd>Get times and basis for an illustration of an M-spline with given knots.</dd>
+        <dd>Get basis for an illustration of an M-spline with given knots.</dd>
       </dl><dl><dt>
           
           <code><a href="mspline_plotdata.html">mspline_plotdata()</a></code> 
@@ -280,7 +304,7 @@ in an M-spline survival model.</dd>
           
           <code><a href="mspline_args.html">mspline_args</a></code> 
         </dt>
-        <dd>Documentation for common M-spline arguments</dd>
+        <dd>Documentation for arguments used in illustration of M-splines</dd>
       </dl></div><div class="section level2">
       <h2 id="package-overview">Package overview<a class="anchor" aria-label="anchor" href="#package-overview"></a></h2>
       

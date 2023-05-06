@@ -5,10 +5,11 @@
 \title{Data for plotting an M-spline function, showing how it is built up from its basis}
 \usage{
 mspline_plotdata(
-  iknots = NULL,
-  bknots = c(0, 10),
+  knots = NULL,
+  bknot = 10,
   df = 10,
   degree = 3,
+  bsmooth = TRUE,
   coefs = NULL,
   scale = 1,
   tmin = 0,
@@ -16,15 +17,19 @@ mspline_plotdata(
 )
 }
 \arguments{
-\item{iknots}{Vector of internal knot locations. If not supplied, \code{df} has to be specified, in which case
-the default is \code{df - degree - 1} equally spaced knots between the boundary knots.}
+\item{knots}{Vector of knot locations. If not supplied, \code{df} has to be specified, in which case
+the default is \code{df - degree - 1} equally spaced knots between zero and the highest knot.}
 
-\item{bknots}{Vector with two elements, giving the boundary knot locations}
+\item{bknot}{Location of the highest knot}
 
-\item{df}{Desired number of basis terms, or "degrees of freedom" in the spline.
-If \code{iknots} is not supplied, the number of internal knots is then chosen to satisfy this.}
+\item{df}{Desired number of basis terms, or "degrees of freedom"
+in the spline.  If \code{knots} is not supplied, the number of
+knots is then chosen to satisfy this.}
 
 \item{degree}{Spline polynomial degree (defaults to 3)}
+
+\item{bsmooth}{If \code{TRUE} then the function is constrained to
+also have zero derivative and second derivative at the boundary.}
 
 \item{coefs}{Coefficients of the spline basis terms.  These are normalised internally to sum to 1,
 if they do not already sum to 1.}
@@ -33,9 +38,9 @@ if they do not already sum to 1.}
 terms, the function is multiplied by \code{scale}.   The log of the scale is the parameter called
 \code{alpha} in the results of a \code{survextrap} model, the intercept of the linear model on the log hazard.}
 
-\item{tmin}{Minimum plotting time.  Defaults to lower boundary knot.}
+\item{tmin}{Minimum plotting time.  Defaults to zero.}
 
-\item{tmax}{Maximum plotting time.  Defaults to upper boundary knot.}
+\item{tmax}{Maximum plotting time.  Defaults to the highest knot.}
 }
 \description{
 Data for plotting an M-spline function, showing how it is built up from its basis

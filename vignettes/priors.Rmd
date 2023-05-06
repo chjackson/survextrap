@@ -28,13 +28,13 @@ The principle behind the package is that any information that is relevant to ext
 
     The default parametric model in `survextrap` is a flexible spline-based model.  This is designed as a "black box", which aims to fit the data as well as possible.  It is not designed to be treated as a mechanism for extrapolation.
 
-    However, this spline model has parameters $\theta$, which still need prior distributions, because the model is Bayesian! 
+However, this spline model has parameters $\theta$, which still need prior distributions, because the model is Bayesian! 
 
-This article describes these two kinds of "prior" that can be used in `survextrap` models.
+This article describes these two kinds of "prior" judgements that can be used in `survextrap` models.
 
 1. Judgements about survival probabilities, that can be converted to pseudo-data, and treated as part of the model likelihood for data $\boldsymbol{x}$.
 
-2. Priors on parameters $\theta$ in spline models.  
+2. Priors on parameters $\theta$ in spline models.
 
 
 
@@ -61,7 +61,7 @@ bet
 
 This gives a Beta(`r round(bet$shape1,1)`, `r round(bet$shape2,2)`) distribution.  We can plot its probability density function, to check that the distribution represents the beliefs about $p$ that we intended to use:
 
-```{r}
+```{r,message=FALSE,warning=FALSE}
 library(ggplot2)
 ggplot(data.frame(p = c(0, 1)), aes(x = p)) +
   stat_function(fun = dbeta, args=list(shape1=bet$shape1, shape2=bet$shape2)) +
@@ -101,24 +101,20 @@ A general way to ensure that the chosen priors represent meaningful beliefs is t
 
 ## Plotting plausible hazard trajectories
 
-Before fitting a model, we can use the `mspline_priorpred` function to check that hazard curves simulated
-from the prior would be considered plausible representations of the knowledge that exists outside the data. 
+Before fitting a model, we can use the `mspline_priorpred` function to check that hazard curves simulated from the prior would be considered plausible representations of the knowledge that exists outside the data. 
 
-To use this before the model is fitted, we have to know the knots defining the spline, and choose a set
-of priors. `survextrap` provides a set of default priors, which may or may not be sensible in a given application.
-and a procedure for picking knots (see the [methods vignette](../methods.html#bayesspec)).
+To use this before the model is fitted, we have to know the knots defining the spline, and choose a set of priors. `survextrap` provides a set of default priors, which may or may not be sensible in a given application. and a procedure for picking knots (see the [methods vignette](../methods.html#bayesspec)).
 
-<!-- (TODO: what about a "no fit" model option.  Then we can return functions that work like
-mspline_priorpred ) -->
+First we fit a default model, and print the default priors that are used.
 
-First we fit a default model and print the default priors that are used.   
-
-```{r,message=FALSE,warning=FALSE}
+```{r,message=FALSE,warning=FALSE,results="hide"}
 library(survextrap)
 nd_mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt")
-print_priors(nd_mod)
 ```
 
+```{r}
+print_priors(nd_mod)
+```
 
 The "baseline log hazard scale" parameter is the parameter $\log(\eta)$ in the definition of the M-spline function for the hazard: $h(t) = \eta \sum_k p_k b_k(t)$.  By itself, $\eta$ does not define a hazard.  It only defines a hazard after being combined with the basis coefficients $p_k$ and basis terms $b_k()$. 
 
@@ -131,8 +127,7 @@ round(nd_mod$coefs_mean,2)
 sp <- nd_mod$mspline
 ```
 
-Together, these knots and prior choices define the model to be fitted to the data.  We can now simulate
-the consequences of these choices, in terms of:  
+Together, these knots and prior choices define the model to be fitted to the data.  We can now simulate the consequences of these choices, in terms of:
 
 * the typical level of the hazard
 
@@ -140,14 +135,12 @@ the consequences of these choices, in terms of:
 
 * how much the hazard tends to vary through time 
 
-The fitted model object (`nd_mod` here) has a component called `prior_pred`, which is a list of functions that can be used to simulate various interesting quantities from this prior specification.   
+The fitted model object (`nd_mod` here) has a component called `prior_pred`, which is a list of functions that can be used to simulate various interesting quantities from this prior specification.
 
 
 #### Constant hazard level 
 
-The first thing to verify is the typical level of the hazard.  If no prior for $\eta$ is supplied in 
-`survextrap`, then a default $N(0,20)$ is used, which is very vague.   We can illustrate the implications
-of this choice by deriving the prior for the constant hazard $h(t) = \eta \sum_k p_k b_k(t)$ which is implied by the prior for $\eta$ and the special values of $p_k$ that imply a constant hazard (found using `mspline_constant_weights()`).
+The first thing to verify is the typical level of the hazard.  If no prior for the hazard scale parameter $\eta$ is supplied in `survextrap`, then a default $N(0,20)$ is used, which is very vague.   We can illustrate the implications of this choice by deriving the prior for the constant hazard $h(t) = \eta \sum_k p_k b_k(t)$ which is implied by the prior for $\eta$ and the special values of $p_k$ that imply a constant hazard (found using `mspline_constant_coefs()`).
 
 The `haz_const` function returns a summary of the implied prior for this constant hazard, and the implied prior for the mean survival time $1/h(t)$.
 ```{r}
@@ -175,7 +168,7 @@ that we defined with `p_meansurv` is the one that we intended to define.
 
 ```{r}
 prior_haz_const(mspline=sp, 
-                prior_loghaz = p_meansurv(median=50, upper=80, mspline=sp))
+                prior_hscale = p_meansurv(median=50, upper=80, mspline=sp))
 ```
 
 The prior median and upper credible limit match the numbers that we put in.  We also get a lower 2.5% credible limit as a consequence of the normal assumption - this should be checked for plausibility, and the prior revised if necessary. 
@@ -184,7 +177,7 @@ Finally, an updated `survextrap` model can be fitted that includes the weakly in
 
 ```{r}
 ndi_mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                      prior_loghaz = p_meansurv(median=50, upper=80, mspline=sp))
+                      prior_hscale = p_meansurv(median=50, upper=80, mspline=sp))
 print_priors(ndi_mod)
 ```
 
@@ -206,21 +199,21 @@ An alternative way is to use the `mspline_priorpred` function, which does not re
 
 ```{r,results="hide"}
 set.seed(1)
-haz_sim <- mspline_priorpred(iknots=sp$iknots, bknots=sp$bknots, degree=sp$degree, 
+haz_sim <- mspline_priorpred(knots=sp$knots, degree=sp$degree, 
                              coefs_mean = ndi_mod$coefs_mean,   
-                             prior_smooth = p_gamma(2,1),   
-                             prior_loghaz = p_meansurv(median=50, upper=80, mspline=sp),
+                             prior_hsd = p_gamma(2,1),   
+                             prior_hscale = p_meansurv(median=50, upper=80, mspline=sp),
                              tmax=3, nsim=30)
 ```
 
-These plots can give some idea of how much risks might be expected to vary over time.   The parameter driving these variations is $\sigma$, whose prior can be defined with the `prior_smooth` argument to `survextrap`.  In the standard `survextrap` model, $\sigma=0$ means that we are sure that the hazard will be constant.   Therefore we might want to define the prior for $\sigma$ to rule out implausibly large changes.  For example, a Gamma(2,20):
+These plots can give some idea of how much risks might be expected to vary over time.   The parameter driving these variations is $\sigma$, whose prior can be defined with the `prior_hsd` argument to `survextrap`.  In the standard `survextrap` model, $\sigma=0$ means that we are sure that the hazard will be constant.   Therefore we might want to define the prior for $\sigma$ to rule out implausibly large changes.  For example, a Gamma(2,20):
 
 ```{r,results="hide"}
 set.seed(1)
-haz_sim <- mspline_priorpred(iknots=sp$iknots, bknots=sp$bknots, degree=sp$degree, 
+haz_sim <- mspline_priorpred(knots=sp$knots, degree=sp$degree, 
                              coefs_mean = ndi_mod$coefs_mean,   
-                             prior_smooth = p_gamma(2,20),   
-                             prior_loghaz = p_meansurv(median=50, upper=80, mspline=sp),
+                             prior_hsd = p_gamma(2,20),   
+                             prior_hscale = p_meansurv(median=50, upper=80, mspline=sp),
                              tmax=3, nsim=30)
 ggplot(haz_sim, aes(x=time, y=haz, group=rep)) + 
   geom_line() + xlab("Years") + ylab("Hazard") + ylim(0,0.05)
@@ -231,12 +224,11 @@ The choice of this prior might be important if we want to extrapolate outside th
 
 Plotting multiple trajectories gives a rough idea of the typical amount of variation through time, but , but ideally we want a more quantitative summary of this.
 
-<!-- TODO What about showing posteriors compared to priors in these examples?? -->
 
 
-## Ratio between high and low hazards over time
+## Ratio between high and low hazards over time {#hrsd}
 
-The variation in a hazard curve can be summarised simply by taking a fine grid of equally-spaced points between the time boundary knots, and computing the empirical standard deviation of the hazard on those points.   If the hazard is constant, then the SD will be zero.    
+The variation in a hazard curve can be summarised simply by taking a fine grid of equally-spaced points between the time boundary knots, and computing the empirical standard deviation of the hazard on those points.   If the hazard is constant, then the SD will be zero.
 
 Since the SD depends on the scale of the hazard, a more useful measure of variation would be the ratio between a particularly high and a particularly low hazard on this grid.    High and low might be defined from the 90\% and 10\% quantiles over time.  If the hazard is constant, over time, this ratio will be 1. 
 
@@ -247,81 +239,77 @@ set.seed(1)
 ndi_mod$prior_pred$haz_sd()
 ```
 
-This shows that the default Gamma$(a=2,b=1)$ prior used in this model is very vague.  We can make it less vague by reducing $a/b$.  A Gamma(2, 5), for example, leads to an upper 90\% credible limit of about 5-6 for the hazard ratio over time.  Trial and error is probably necessary to produce a prior that is judged plausible by this metric.
+This shows that the default Gamma$(a=2,b=1)$ prior used in this model is very vague.  We can make it less vague by reducing $a/b$.  A Gamma(2, 5), for example, leads to an upper 90\% credible limit of about 5 for the hazard ratio over time.  Trial and error is probably necessary to produce a prior that is judged plausible by this metric.
 
 ```{r}
 set.seed(1)
 prior_haz_sd(mspline=sp,                              
-             prior_smooth = p_gamma(2,5),   
-             prior_loghaz = p_meansurv(median=50, upper=80, mspline=sp), 
+             prior_hsd = p_gamma(2,5),   
+             prior_hscale = p_meansurv(median=50, upper=80, mspline=sp), 
              quantiles = c(0.1, 0.5, 0.9),
              nsim=1000)
 ```
 
 Note that a large number of simulations `nsim` from the prior may be required for a precise estimate of these tail quantiles, and the distribution is skewed, so that the 95\% credible limit may be much higher than the 90\% limit, for example. 
 
-Let us now fit a model and compare the posterior for this hazard ratio to the prior... 
+Let us now fit a model and compare the posterior 95\% credible interval for this hazard ratio to the prior. The posterior interval is narrower than the prior interval, showing the influence of the data.
 
-_[Further work to do on this article.  Compare posteriors of RMST between different priors]_
-
-<!-- 
-
-ndi_mod with 2,1 prior, prior 23 (2, 50000) posterior 2 (6,436) still implausible
-ndi2_mod with 2,5 prior, prior 2 (1,25), posterior 2 (4, 18).  
-so a bit tighter so still looks like this thing is not strongly identifiable from the data. 
-ndi3_mod prior 1.1 (1.01, 1.44) posterior 1.04 (1.01 to 1.58). 
-yeah this stuff is driven by the prior. 
-IQR is a bit more robust, but still posterior is driven by the prior 
-
-Sure this means we need informative judgements for extrapolation. 
-
-But does this matter for getting a well fitting model for the data?  
-Expect not if we are integrating the hazard over time to get the survival. 
-
-RMST in obs period is only affected if we make strong assumptions that the hazard is constant. 
-However extrapolations are affected, since they rely on the constant value at the final time,
-which is affected by the assumptions about variations. 
-
-
-```{r}
-ndi2_mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                       prior_loghaz = p_meansurv(median=50, upper=80, mspline=sp),
-                       prior_smooth = p_gamma(2, 5))
-
-ndi3_mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
-                       prior_loghaz = p_meansurv(median=50, upper=80, mspline=sp),
-                       prior_smooth = p_gamma(2, 50))
-
-draws <- get_draws(ndi2_mod)
-hist(draws[,"smooth_sd[1]"], prob=TRUE)
-x <- seq(0, 4, 0.1)
-lines(x, dgamma(x, 2, 5))
-
-ndi_mod$prior_pred$haz_sd(hq=c(0.25, 0.75))
-ndi2_mod$prior_pred$haz_sd(hq=c(0.25, 0.75))
-ndi3_mod$prior_pred$haz_sd(hq=c(0.25, 0.75))
-
-hrtime(ndi_mod, hq=c(0.25, 0.75))
-hrtime(ndi2_mod, hq=c(0.25, 0.75))
-hrtime(ndi3_mod, hq=c(0.25, 0.75))
-
-rmst(ndi_mod, t=3, niter=100)
-rmst(ndi2_mod, t=3, niter=100)
-rmst(ndi3_mod, t=3, niter=100)
-
-rmst(ndi_mod, t=10, niter=100)
-rmst(ndi2_mod, t=10, niter=100)
-rmst(ndi3_mod, t=10, niter=100)
-
+```{r,message=FALSE,warning=FALSE,results="hide"}
+library(dplyr)
+nd_mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="mcmc",
+                     chains=1, iter=1000,
+                     prior_hsd = p_gamma(2,5))
+qgamma(c(0.025, 0.975), 2, 5)
+summary(nd_mod) %>% filter(variable=="hsd") %>% select(lower, upper)
 ```
 
--->
+In practical applications, if the prior is suspected to be influential, then 
+the results of interest should be compared between different reasonable priors. 
+
+
 
 ## Hazard ratios for effects of covariates
 
-_[To do]_
+Hazard ratios for effects of predictors in survival models are commonly presented
+and discussed in practice, so prior judgements about them may be easier to make, 
+compared to the other parameters in `survextrap` models. 
+
+`survextrap` uses normal (or t) priors for the log hazard ratio.  The default is normal(0, 2.5).   A utility `prior_hr()` is provided to check what credible interval on the hazard ratio scale is implied by a  particular prior for the log hazard ratio.  This shows that the default is actually very vague, and supports hazard ratios up to 148.  The prior SD should be reduced if this is implausible and the sample size is small enough that this would be influential. 
+
+```{r}
+prior_hr(p_normal(0, 2.5))
+```
+
+Conversely, the function `p_hr` goes the other way round and converts a prior median and upper 95% credible limit for the hazard ratio to a normal prior on the log scale. This shows that we should use a prior SD of 1.17 for the log HR if we wanted to give a low probability (2.5%) to HRs above 10.   `p_hr` returns a list in a the same format as `p_normal`, which can be supplied directly to `prior_loghr` argument of `survextrap` models. 
+
+```{r}
+p_hr(median=1, upper=10)$scale
+prior_hr(p_hr(median=1, upper=10))
+```
 
 
 ## SD of hazard ratios over time in non-proportional hazards models 
 
-_[To do]_
+The novel non-proportional hazards model in `survextrap` works by modelling the spline coefficients in terms of covariates, as well as the hazard scale parameter. 
+The model is described in the [methods vignette](methods.html#nonprop) and an example of fitting one is given in the [examples vignette](examples.html#nonprop).
+
+The parameters that relate the covariates to the spline coefficients do not have any direct interpretation in terms of how an effect of the covariate on the hazard changes over time.   In theory, the model allows the hazard ratio to increase and decrease arbitrarily in a flexible way, in the same manner as a spline function. 
+
+The parameter $\tau$ governs the amount of flexibility in the hazard ratio function. With $\tau=0$ the model is a proportional hazards model, and as $\tau$ increases the hazard ratio becomes a more flexible function of time.   The exact value of $\tau$ does not have an interpretation, but as we did for $\sigma$ [above](#hrsd), we can use _simulation_ to calibrate the prior so that it matches plausible judgements. 
+
+This is done with the `prior_hr_sd` function, which works for $\tau$ in the same way as `prior_haz_sd` does for $\sigma$.   The new requirement here is that covariate values `X` and reference covariate values `X0` should be supplied, most easily as lists.  The hazard ratio between these will be computed.
+
+All the other priors should be supplied: `prior_hscale` for $\eta$, `prior_hsd` for $\sigma$, and `prior_loghr` for the "baseline" hazard ratio to which the non-proportionality effects are applied.  The function will simulate from the joint prior distribution of hazard ratios implied by all these priors together with the one that we want to calibrate: `prior_hrsd`, the Gamma prior for $\tau$. 
+
+```{r}
+prior_hr_sd(mspline=sp,                              
+            prior_hsd = p_gamma(2,5),   
+            prior_hscale = p_meansurv(median=50, upper=80, mspline=sp),
+            prior_loghr = p_normal(0,1),
+            prior_hrsd = p_gamma(2,3),
+            X = list("rxLev+5FU"=0),
+            X0 = list("rxLev+5FU"=1),
+            quantiles = c(0.05, 0.95),
+            nsim=1000)
+```
+The `sd_hr` column is the standard deviation of the hazard ratio, and the `hrr` column is the ratio between a high and a low value (by default the 90% versus the 10% quantile, but these can be customised with the `hq` argument).  These quantities both have their own implicit prior distributions.  Since we supplied `quantiles=c(0.05,0.95)`, then 90% prior credible intervals for these two quantities are shown here.   These should be checked for consistency with beliefs, and the Gamma prior for $\tau$ (supplied as `p_gamma(2,3)` revised if necessary. 

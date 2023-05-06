@@ -34,7 +34,7 @@ Defaults to 2.5.}
 \item{rate}{Rate parameter (for Gamma distribution, defaults to 1).}
 }
 \value{
-A named list to be used internally by the \pkg{survextrap} model fitting functions.
+A named list to be used internally by the \code{\link{survextrap}} model fitting functions.
 }
 \description{
 The functions described on this page are used to specify the prior distributions for the parameters in a survextrap model.

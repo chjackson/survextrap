@@ -1,63 +1,60 @@
-### Utilities for illustrating M-spline models
+##' Documentation for arguments used in illustration of M-splines
+##'
+##' @name mspline_args
+##'
+##' @param knots Vector of knot locations. If not supplied, \code{df} has to be specified, in which case
+#' the default is \code{df - degree - 1} equally spaced knots between zero and the highest knot.
+##' @param bknot Location of the highest knot
+##'
+##' @param degree Spline polynomial degree (defaults to 3)
+##'
+##' @param df Desired number of basis terms, or "degrees of freedom"
+##'   in the spline.  If \code{knots} is not supplied, the number of
+##'   knots is then chosen to satisfy this.
+##'
+##' @param bsmooth If \code{TRUE} then the function is constrained to
+##'   also have zero derivative and second derivative at the boundary.
+##'
+NULL
 
+mspline_even_knots <- function(knots=NULL, bknot, degree=3, df, bsmooth=TRUE){
+  if (is.null(knots)) {
+    nik <- if (bsmooth) df - degree  + 1 else df - degree  - 1
+    knots <- seq(0, bknot, length.out=nik+2)[-1]
+  }
+  validate_knots(knots, name="knots")
+  knots
+}
 
-#' Get times and basis for an illustration of an M-spline with given knots.
+#' Get basis for an illustration of an M-spline with given knots.
 #'
 #' @inheritParams mspline_args
 #'
-#' @param tmin Minimum plotting time.  Defaults to lower boundary knot.
+#' @param tmin Minimum plotting time.  Defaults to zero.
 #'
-#' @param tmax Maximum plotting time.  Defaults to upper boundary knot.
+#' @param tmax Maximum plotting time.  Defaults to the highest knot.
 #'
-#' @param extrap_model If `"constant"` then the hazard after the final boundary
-#'  knot equals the hazard at this knot.  Otherwise the basis functions are simply
-#'  extended outside boundary knot.
-#'
-mspline_plotsetup <- function(iknots, bknots=c(0,10),
-                              tmin=NULL, tmax=NULL, degree=3, df=10,
-                              extrap_model = "constant"){
-    validate_knots(bknots, name="bknots")
-    bknots <- sort(bknots)
-    if (is.null(tmin)) tmin <- bknots[1]
-    if (is.null(tmax)) tmax <- bknots[2]
-    iknots <- mspline_default_iknots(iknots, bknots, degree, df)
-    time <- seq(tmin, tmax, length.out=1000)[-c(1,length(time))]
-    timeb <- time
-    if (extrap_model=="constant"){
-        timeb[timeb>bknots[2]] <- bknots[2]
-        timeb[timeb<bknots[1]] <- bknots[1]
-    }
-    ## could also use basis_matrix for this, but allow alternative extrapolation method
-    basis <- splines2::mSpline(timeb, knots = iknots, Boundary.knots = bknots,
-                               degree = degree, intercept = TRUE)
-    nlist(time, basis, iknots, bknots)
+mspline_plotsetup <- function(knots, bknot=10,
+                              tmin=NULL, tmax=NULL,
+                              degree=3, df=10, bsmooth=TRUE){
+    if (is.null(tmin)) tmin <- 0
+    if (is.null(tmax)) tmax <- bknot
+    knots <- mspline_even_knots(knots, bknot, degree, df)
+    time <- seq(tmin, tmax, length.out=1000)[-c(1,1000)]
+    basis <- mspline_basis(times=time, knots=knots, degree=degree, bsmooth=bsmooth)
+    basis
 }
-
-## Form the overall hazard function from summing basis terms
-## Return as a tidy dataframe with time attached.
-## ?? Do we need a version of this that returns a vector?
-mspline_sum_basis <- function(basis, coefs=NULL, scale=1, time) {
-    nvars <- ncol(basis)
-    if (is.null(coefs)){
-        coefs <- rep(1, nvars)
-    } else if (length(coefs) != nvars) stop(sprintf("length of `coefs` is %s, should be %s", length(coefs), nvars))
-    coefs <- coefs/sum(coefs)
-    haz <- rowSums(basis * rep(coefs, each=nrow(basis))) * scale
-    hazdf <- data.frame(haz=haz, time=time)
-}
-
 
 #' Plot a M-spline function, showing how it is built up from its basis
 #'
 #' @inheritParams mspline_plotdata
 #'
 #' @export
-plot_mspline <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs=NULL, scale=1,
+plot_mspline <- function(knots=NULL, bknot=10, df=10, degree=3, bsmooth=TRUE, coefs=NULL, scale=1,
                          tmin=0, tmax=10){
   haz <- term <- value <- NULL
-    bdf <- mspline_plotdata(iknots=iknots, bknots=bknots, df=df, degree=degree, coefs=coefs,
+    bdf <- mspline_plotdata(knots=knots, bknot=bknot, df=df, degree=degree, bsmooth=bsmooth, coefs=coefs,
                             scale=scale, tmin=tmin, tmax=tmax)
-    knots <- c(attr(bdf,"iknots"), attr(bdf,"bknots"))
     ggplot(bdf, aes(x=time, y=value, group=term)) +
         geom_line() +
         geom_line(aes(x=time, y=haz), col="blue", inherit.aes = FALSE, lwd=1.5) +
@@ -66,7 +63,7 @@ plot_mspline <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs=NUL
         theme_minimal() +
         theme(panel.grid.minor = element_blank()) +
         scale_x_continuous(breaks=knots, limits=c(tmin, tmax)) +
-        scale_y_continuous(breaks=knots, limits=c(0, max(c(bdf$value, bdf$haz)))) +
+        scale_y_continuous(limits=c(0, max(c(bdf$value, bdf$haz)))) +
         geom_vline(xintercept=knots, col="blue", lwd=0.6, alpha=0.3)
 }
 
@@ -82,35 +79,37 @@ plot_mspline <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs=NUL
 #' \code{alpha} in the results of a `survextrap` model, the intercept of the linear model on the log hazard.
 #'
 #' @export
-mspline_plotdata <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs=NULL, scale=1,
+mspline_plotdata <- function(knots=NULL, bknot=10,
+                             df=10, degree=3, bsmooth=TRUE, coefs=NULL, scale=1,
                              tmin=0, tmax=10){
     value <- term <- haz <- NULL
-    s <- mspline_plotsetup(iknots=iknots, bknots=bknots, tmin=tmin, tmax=tmax, degree=degree, df=df)
-    time <- s$time; basis <- s$basis
-    hazdf <- mspline_sum_basis(basis, coefs, scale, time)
+    basis <- mspline_plotsetup(knots=knots, bknot=bknot, tmin=tmin, tmax=tmax, degree=degree, df=df, bsmooth=bsmooth)
+    time <- attr(basis, "times")
+    hazdf <- data.frame(haz = mspline_sum_basis(basis, coefs, log(scale)),
+                        time = time)
     bdf <- as.data.frame(basis)
     bdf$time <- time
 
     ## base R equivalent of pivot_longer(cols=all_of(1:ncol(basis)), names_to="term")
     bdf <- reshape(bdf, direction = "long",
-                   varying = list(as.character(1:ncol(basis))),
+                   varying = 1:ncol(basis),
                    v.names = "value",
                    timevar = "term")
     bdf <- bdf[order(bdf$id, bdf$term),]
     bdf$id <- NULL
     bdf <- merge(bdf, hazdf, by="time")
 
-    attr(bdf,"iknots") <- s$iknots
-    attr(bdf,"bknots") <- s$bknots
+    attr(bdf,"knots") <- knots
     bdf
 }
 
 
 ##' Generate and/or plot a sample from the prior distribution of M-spline hazard curves
 ##'
-##' Generates and/or plots the hazard curves (as functions of time) implied by
-##' a prior mean for the spline coefficients (a constant hazard by default)
-##' and particular priors for the baseline log hazard and smoothness variance
+##' Generates and/or plots the hazard curves (as functions of time)
+##' implied by a prior mean for the spline coefficients (a constant
+##' hazard by default) and particular priors for the baseline log
+##' hazard and smoothness standard deviation.
 ##'
 ##' @aliases mspline_priorpred plot_mspline_priorpred
 ##'
@@ -119,45 +118,48 @@ mspline_plotdata <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3, coefs
 ##'
 ##' @param nsim Number of simulations to draw
 ##'
-##' @param X Either a list, vector or one-row matrix with one covariate value.
-##' Factors must be supplied as multiple numeric (0/1) contrasts. (TODO doc on how to
-##' match then with prior_loghr and prior_sdnp, and naming)
+##' @param X Either a list, vector or one-row matrix, with one value
+##'   for each covariate in the model.  Defaults to zero.  Factors
+##'   must be supplied as multiple numeric (0/1) contrasts.
+##'   If there are multiple covariates and a single prior given in
+##'   `prior_loghr`, then this prior will be used for all the covariates.
+##'   If a list of priors is provided, then both this list and \code{X}
+##'   must be named with the names of the covariates. 
 ##'
-##' @param X0 An alternative covariate value (optional).  The hazard
-##'   ratio between the hazards at X and X0 will also be returned.
+##' @param X0 An alternative set of "reference" covariate values
+##'   (optional).  The hazard ratio between the hazards at \code{X}
+##'   and \code{X0} will also be returned.
 ##'
-##' @return \code{mspline_priorpred} returns a data frame of the samples, and
-##' \code{plot_mspline_priorpred} generates a plot.
+##' @return \code{mspline_priorpred} returns a data frame of the
+##'   samples, and \code{plot_mspline_priorpred} generates a plot.  No
+##'   customisation options are provided for the plot function, which
+##'   is just intended as a quick check.
 ##'
 ##' @name mspline_priorpred
 ##' @export
-mspline_priorpred <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3,
+mspline_priorpred <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
                               coefs_mean = NULL,
-                              prior_smooth = p_gamma(2,1),
-                              prior_loghaz = NULL,
+                              prior_hsd = p_gamma(2,1),
+                              prior_hscale = NULL,
                               prior_loghr = NULL,
                               X = NULL,
-                              X0 = NULL, 
-                              prior_sdnp = NULL, 
+                              X0 = NULL,
+                              prior_hrsd = NULL,
                               tmin=0, tmax=10,
                               nsim=10){
-  ## TODO clean up args.  get knots from df, tmin and tmax.  How is this done?
-  ## it is default_iknots.  what does that depend on?  just bknots and degree
-  ## returns iknots.
-  ##   if (is.null(mspline$iknots)) mspline$iknots <- mspline_default_iknots(...)
-  
-  s <- mspline_plotsetup(iknots=iknots, bknots=bknots,
-                         tmin=tmin, tmax=tmax, degree=degree, df=df)
-  time <- s$time; basis <- s$basis; iknots <- s$iknots; bknots <- s$bknots
-  sam <- prior_sample(mspline = list(iknots=iknots, bknots=bknots, degree=degree),
-                      coefs_mean=coefs_mean, prior_smooth=prior_smooth,
-                      prior_loghaz=prior_loghaz,
-                      prior_sdnp=prior_sdnp,
+  basis <- mspline_plotsetup(knots=knots, tmin=tmin, tmax=tmax, degree=degree, df=df,
+                         bsmooth=bsmooth)
+  time <- attr(basis, "times")
+  sam <- prior_sample(mspline = list(knots=knots, degree=degree, bsmooth=bsmooth),
+                      coefs_mean=coefs_mean, prior_hsd=prior_hsd,
+                      prior_hscale=prior_hscale,
+                      prior_hrsd=prior_hrsd,
                       X = X, X0=X0, nsim=nsim)
   hazlist <- vector(nsim, mode="list")
   for (i in 1:nsim){
-    hazlist[[i]] <- mspline_sum_basis(basis, coefs=sam$coefs[i,],
-                                      scale=exp(sam$loghaz[i]), time=time)
+    haz <- mspline_sum_basis(basis, coefs=sam$coefs[i,],
+                             alpha = sam$alpha[i], time=time)
+    hazlist[[i]] <- data.frame(haz=haz, time=time)
     hazlist[[i]]$rep <- i
   }
   hazdf <- do.call("rbind", hazlist)
@@ -169,50 +171,47 @@ mspline_priorpred <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3,
     ## but different covariate values
     hazlist <- vector(nsim, mode="list")
     for (i in 1:nsim){
-      hazlist[[i]] <- mspline_sum_basis(basis, coefs=sam$coefs0[i,],
-                                        scale=exp(sam$loghaz0[i]), time=time)
+      haz <- mspline_sum_basis(basis, coefs=sam$coefs0[i,],
+                               alpha = sam$alpha0[i], time=time)
+      hazlist[[i]] <- data.frame(haz=haz, time=time)
       hazlist[[i]]$rep <- i
     }
     hazdf0 <- do.call("rbind", hazlist)
     hazdf$haz0 <- hazdf0$haz
     hazdf$hr <- hazdf$haz / hazdf$haz0
-  } 
+  }
 
-  attr(hazdf, "iknots") <- iknots
-  attr(hazdf, "bknots") <- bknots
+  attr(hazdf, "knots") <- knots
   hazdf
 }
 
-## TODO Do we need this function?  It's only included in the methods vignette
-
 ##' @rdname mspline_priorpred
 ##' @export
-plot_mspline_priorpred <- function(iknots=NULL, bknots=c(0,10), df=10, degree=3,
+plot_mspline_priorpred <- function(knots=NULL, df=10, degree=3,
                                    coefs_mean = NULL,
-                                   prior_smooth = p_gamma(2,1),
-                                   prior_loghaz = p_normal(0, 20),
+                                   prior_hsd = p_gamma(2,1),
+                                   prior_hscale = p_normal(0, 20),
                                    prior_loghr = NULL,
                                    X = NULL,
-                                   prior_sdnp = p_gamma(2,1),
-                                   tmin=0, tmax=10,
+                                   prior_hrsd = p_gamma(2,1),
+                                   tmin=0, tmax=NULL,
                                    nsim=10)
 {
   haz <- NULL
-  hazdf <- mspline_priorpred(iknots=iknots, bknots=bknots, df=df, degree=degree,
+  hazdf <- mspline_priorpred(knots=knots, df=df, degree=degree,
                              coefs_mean=coefs_mean,
-                             prior_smooth=prior_smooth,
-                             prior_loghaz=prior_loghaz,
+                             prior_hsd=prior_hsd,
+                             prior_hscale=prior_hscale,
                              prior_loghr=prior_loghr,
-                             X = X, 
-                             prior_sdnp=prior_sdnp,
+                             X = X,
+                             prior_hrsd=prior_hrsd,
                              tmin=tmin, tmax=tmax, nsim=nsim)
-  iknots <- attr(hazdf, "iknots")
-  bknots <- attr(hazdf, "bknots")
+  knots <- attr(hazdf, "knots")
   ggplot(hazdf, aes(x=time, y=haz, group=rep)) +
     geom_line(alpha=0.5) +
-    scale_x_continuous(breaks=c(iknots, bknots)) +
+    scale_x_continuous(breaks=knots) +
     theme_minimal() +
     theme(panel.grid.minor = element_blank()) +
-    geom_vline(xintercept = bknots, col="gray50") +
+    geom_vline(xintercept = max(knots), col="gray50") +
     xlab("Time") + ylab("Hazard")
 }

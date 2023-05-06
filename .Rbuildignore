@@ -10,5 +10,6 @@ man-roxygen
 web_assets
 tests/simulation
 vignettes/examples_cache
+vignettes/cetuximab*
 ^doc$
 ^Meta$

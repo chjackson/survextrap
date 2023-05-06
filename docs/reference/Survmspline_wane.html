@@ -20,7 +20,7 @@ hazard ratio and zero.'><!-- mathjax --><script src="https://cdnjs.cloudflare.co
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,11 +34,14 @@ hazard ratio and zero.'><!-- mathjax --><script src="https://cdnjs.cloudflare.co
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/cetuximab.html">Case study of using survextrap: cetuximab for head and neck cancer</a>
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
     <a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a>
-    <a class="dropdown-item" href="../articles/waning.html">Treatment effect waning in survextrap</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -76,14 +79,17 @@ hazard ratio and zero.</p>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">alpha1</span>,</span>
 <span>  <span class="va">alpha0</span>,</span>
-<span>  <span class="va">coefs</span>,</span>
+<span>  <span class="va">coefs1</span>,</span>
+<span>  <span class="va">coefs0</span>,</span>
 <span>  <span class="va">knots</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  <span class="va">wane_period</span>,</span>
 <span>  wane_nt <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  pcure <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure1 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure0 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  offsetH <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bsmooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  log <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -91,13 +97,16 @@ hazard ratio and zero.</p>
 <span>  <span class="va">q</span>,</span>
 <span>  <span class="va">alpha1</span>,</span>
 <span>  <span class="va">alpha0</span>,</span>
-<span>  <span class="va">coefs</span>,</span>
+<span>  <span class="va">coefs1</span>,</span>
+<span>  <span class="va">coefs0</span>,</span>
 <span>  <span class="va">knots</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  bsmooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">wane_period</span>,</span>
 <span>  wane_nt <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  lower.tail <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  pcure <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure1 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure0 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  offsetH <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  log.p <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -107,12 +116,15 @@ hazard ratio and zero.</p>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">alpha1</span>,</span>
 <span>  <span class="va">alpha0</span>,</span>
-<span>  <span class="va">coefs</span>,</span>
+<span>  <span class="va">coefs1</span>,</span>
+<span>  <span class="va">coefs0</span>,</span>
 <span>  <span class="va">knots</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  bsmooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">wane_period</span>,</span>
 <span>  wane_nt <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  pcure <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure1 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure0 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  offsetH <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  log <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -122,12 +134,15 @@ hazard ratio and zero.</p>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">alpha1</span>,</span>
 <span>  <span class="va">alpha0</span>,</span>
-<span>  <span class="va">coefs</span>,</span>
+<span>  <span class="va">coefs1</span>,</span>
+<span>  <span class="va">coefs0</span>,</span>
 <span>  <span class="va">knots</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  bsmooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">wane_period</span>,</span>
 <span>  wane_nt <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  pcure <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure1 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure0 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  offsetH <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  log <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -137,12 +152,15 @@ hazard ratio and zero.</p>
 <span>  <span class="va">p</span>,</span>
 <span>  <span class="va">alpha1</span>,</span>
 <span>  <span class="va">alpha0</span>,</span>
-<span>  <span class="va">coefs</span>,</span>
+<span>  <span class="va">coefs1</span>,</span>
+<span>  <span class="va">coefs0</span>,</span>
 <span>  <span class="va">knots</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  bsmooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  lower.tail <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  log.p <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  pcure <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure1 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure0 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  offsetH <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">wane_period</span>,</span>
@@ -153,10 +171,13 @@ hazard ratio and zero.</p>
 <span>  <span class="va">n</span>,</span>
 <span>  <span class="va">alpha1</span>,</span>
 <span>  <span class="va">alpha0</span>,</span>
-<span>  <span class="va">coefs</span>,</span>
+<span>  <span class="va">coefs1</span>,</span>
+<span>  <span class="va">coefs0</span>,</span>
 <span>  <span class="va">knots</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  pcure <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  bsmooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  pcure1 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure0 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  offsetH <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">wane_period</span>,</span>
@@ -167,11 +188,14 @@ hazard ratio and zero.</p>
 <span>  <span class="va">t</span>,</span>
 <span>  <span class="va">alpha1</span>,</span>
 <span>  <span class="va">alpha0</span>,</span>
-<span>  <span class="va">coefs</span>,</span>
+<span>  <span class="va">coefs1</span>,</span>
+<span>  <span class="va">coefs0</span>,</span>
 <span>  <span class="va">knots</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  pcure <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure1 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure0 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bsmooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">wane_period</span>,</span>
 <span>  wane_nt <span class="op">=</span> <span class="fl">10</span></span>
 <span><span class="op">)</span></span>
@@ -179,11 +203,14 @@ hazard ratio and zero.</p>
 <span><span class="fu">mean_survmspline_wane</span><span class="op">(</span></span>
 <span>  <span class="va">alpha1</span>,</span>
 <span>  <span class="va">alpha0</span>,</span>
-<span>  <span class="va">coefs</span>,</span>
+<span>  <span class="va">coefs1</span>,</span>
+<span>  <span class="va">coefs0</span>,</span>
 <span>  <span class="va">knots</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  pcure <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure1 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pcure0 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bsmooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">wane_period</span>,</span>
 <span>  wane_nt <span class="op">=</span> <span class="fl">10</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -195,17 +222,12 @@ hazard ratio and zero.</p>
 <dd><p>Vector of times.</p></dd>
 
 
-<dt>alpha1</dt>
-<dd><p>log hazard intercept before the start of the waning period ("treated")</p></dd>
+<dt>alpha1, coefs1, pcure1</dt>
+<dd><p>log hazard intercept, spline coefficients and cure probability before the start of the waning period ("treated")</p></dd>
 
 
-<dt>alpha0</dt>
-<dd><p>log hazard intercept after the end of the waning period ("untreated")</p></dd>
-
-
-<dt>coefs</dt>
-<dd><p>Spline basis coefficients. These should sum to 1,
-otherwise they are normalised internally to sum to 1.</p></dd>
+<dt>alpha0, coefs0, pcure0</dt>
+<dd><p>log hazard intercept, spline coefficients and cure probability after the end of the waning period ("untreated")</p></dd>
 
 
 <dt>knots</dt>
@@ -216,7 +238,7 @@ the same for all alternative times and parameter values.</p></dd>
 
 
 <dt>degree</dt>
-<dd><p>Spline polynomial degree.</p></dd>
+<dd><p>Spline polynomial degree (defaults to 3)</p></dd>
 
 
 <dt>wane_period</dt>
@@ -227,10 +249,6 @@ period</p></dd>
 <dt>wane_nt</dt>
 <dd><p>time resolution for piecewise constant hazard approximation in the
 waning period.  If this is not specified, defaults to dividing the waning period into 10 pieces.</p></dd>
-
-
-<dt>pcure</dt>
-<dd><p>Probability of "cure", which defaults to zero.  If this is non-zero, this defines a "mixture cure" version of the M-spline model.</p></dd>
 
 
 <dt>offsetH</dt>
@@ -246,12 +264,17 @@ specified time and the next time. The first element of
 times greater than the last element of <code>"time"</code>.</p></dd>
 
 
+<dt>bsmooth</dt>
+<dd><p>If <code>TRUE</code> then the function is constrained to
+also have zero derivative and second derivative at the boundary.</p></dd>
+
+
 <dt>log, log.p</dt>
 <dd><p>Return log density or probability.</p></dd>
 
 
 <dt>lower.tail</dt>
-<dd><p>logical; if TRUE (default), probabilities are \(P(X
+<dd><p>logical; if <code>TRUE</code> (default), probabilities are \(P(X
 \le x)\), otherwise, \(P(X &gt; x)\).</p></dd>
 
 
@@ -276,7 +299,7 @@ numbers from the distribution.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This distribution is defined as follows.</p><ul><li><p>Between time 0 and <code>wane_period[1]</code>, the "treated" hazard is used, as
 defined by an M-spline with intercept <code>alpha1</code>.</p></li>
-<li><p>Between <code>wane_period[1]</code> ahd <code>wane_period[2]</code>, the log hazard is defined
+<li><p>Between <code>wane_period[1]</code> and <code>wane_period[2]</code>, the log hazard is defined
 by linear interpolation.  The waning period is divided into a number
 of discrete pieces in which the hazard is assumed to be constant, defined by the
 hazard at the start of the piece.  These hazard values are obtained from
@@ -286,11 +309,14 @@ parameter <code>alpha</code> (log scale parameter) defined by linearly interpola
 then be deduced by adding up contributions on each piece.</p></li>
 <li><p>After <code>wane_period[2]</code>, the "untreated" hazard is used, as defined by an
 M-spline with intercept <code>alpha0</code>.</p></li>
-</ul><p>See <code><a href="../articles/waning.html">vignette("waning")</a></code> for more details and examples.</p>
+</ul><p>See the <a href="https://chjackson.github.io/survextrap/articles/methods.html">methods vignette</a> for more details and examples.</p>
 <p>This can be used to predict the hazard of a person treated with a treatment
 whose short-term effect is estimated from shorter-term data, but we wish to
 extrapolate this model over a longer period where the effect is assumed to
 diminish.</p>
+<p>This may not work if the hazard is zero or infinite at any point in the
+waning period (this the log hazard is indeterminate).  This might typically
+happen at time 0.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

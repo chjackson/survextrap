@@ -7,7 +7,7 @@
 plot_hazard(
   x,
   newdata = NULL,
-  times = NULL,
+  t = NULL,
   tmax = NULL,
   niter = NULL,
   newdata0 = NULL,
@@ -35,31 +35,35 @@ for each level of this factor.
 is computed at the mean of each numeric covariate in the original data, and at the
 baseline level of each factor covariate.
 
-Note caution is required about how treatment groups (for example) are stored in your data.
-If these are coded as numeric (0/1), then if \code{newdata} is not specified, then only one
-output will be shown, which relates to the average value of this numeric variable over
-the data, which doesn't correspond to either of the treatment groups.}
+Note caution is required about how treatment groups (for example)
+are stored in your data.  If these are coded as numeric (0/1),
+then if \code{newdata} is not specified only one output will be shown,
+which relates to the average value of this numeric variable over
+the data, which doesn't correspond to either of the treatment
+groups.  To avoid this, a treatment group should be stored as a
+factor.}
 
-\item{times}{Vector of times at which to compute the estimates.}
+\item{t}{Vector of times at which to compute the estimates.}
 
 \item{tmax}{Maximum time at which to compute the estimates.  If
-\code{times} is supplied, then this is ignored.  If \code{times} is not
-supplied, then \code{times} is set to a set of 100 equally spaced
-time points from 0 to \code{tmax}.  If both \code{tmax} and \code{times}
+\code{t} is supplied, then this is ignored.  If \code{t} is not
+supplied, then \code{t} is set to a set of 100 equally spaced
+time points from 0 to \code{tmax}.  If both \code{tmax} and \code{t}
 are not supplied, then \code{tmax} is set to the maximum follow up time
 in the data.}
 
 \item{niter}{Number of MCMC iterations to use to compute credible
 intervals.  Set to a low value to make this function quicker, at the cost of
-some approximation error (which may not be important for plotting).}
+some approximation error (which may not be important for plotting or model
+development).}
 
 \item{newdata0}{Data frame of covariate values defining the "untreated" group
-for use in treatment waning models, see \code{\link{Survmspline_wane}}.}
+for use in treatment waning models. See \code{\link{Survmspline_wane}}.}
 
 \item{wane_period}{Vector of two numbers, defining the time period over which
 the hazard is interpolated between the hazard of the "treated" group (taken from \code{newdata})
 and the hazard of the "untreated" group (taken from \code{newdata0}).  Optional - if
-not supplied then no waning is assumed.}
+this is not supplied, then no waning is assumed.}
 
 \item{wane_nt}{Number of intervals defining the piecewise constant approximation
 to the hazard during the waning period.}
@@ -78,5 +82,10 @@ drawing the intervals if the plot shows the curve for only one covariate value.}
 \item{show_knots}{Show the locations of the spline knots as vertical lines}
 }
 \description{
-Plot hazard curves from a survextrap model
+Plot hazard curves from a \code{\link{survextrap}} model.  This
+function is intended as a quick check of a fitted model, so it
+deliberately has limited options for customisation.  The data
+behind these plots can be extracted with \code{\link{hazard}} into
+a tidy data frame to enable custom plots to be constructed with
+\pkg{ggplot2}.  See the \href{https://chjackson.github.io/survextrap/articles/cetuximab.html}{case study} vignette for some examples.
 }

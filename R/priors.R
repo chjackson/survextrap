@@ -22,7 +22,7 @@
 #'
 #' @seealso \code{\link{survextrap}}.
 #'
-#' @return A named list to be used internally by the \pkg{survextrap} model fitting functions.
+#' @return A named list to be used internally by the \code{\link{survextrap}} model fitting functions.
 #'
 #'
 NULL
@@ -75,22 +75,35 @@ p_gamma <- function(shape = 2, rate = 1){
     res
 }
 
-#' Derive a normal prior for the hazard scale parameter based on a guess at survival times
+#' Derive a normal prior for the log hazard scale parameter based on a guess at survival times
 #'
-#' @inheritParams mspline_constant_weights
+#' Derive a normal prior for the log hazard scale parameter based on a
+#' guess at survival times.  The scale parameter is hard to interpret,
+#' and depends on the spline knots.  However for any scale parameter,
+#' we can determine the spline coefficients that give a constant
+#' hazard (\code{\link{mspline_constant_coefs}}).  Therefore if we can
+#' guess a typical survival time, we can guess a typical hazard (as 1
+#' divided by the survival time) and deduce the scale parameter.  The
+#' prior is then constructed by assuming normality on the log scale,
+#' and assuming the log upper credible limit is two SDs away from the
+#' log median.
+#'
+#' @inheritParams mspline_constant_coefs
 #'
 #' @param median Best guess (prior median) for a typical survival time
 #'
 #' @param upper Upper limit of 95% credible interval for a survival time
 #'
 #' @return A normal prior in the format returned by \code{\link{p_normal}}, which can
-#' be passed directly to the \code{prior_loghaz} argument in \code{\link{survextrap}}. 
+#' be passed directly to the \code{prior_hscale} argument in \code{\link{survextrap}}.
+#'
+#' @seealso \code{\link{prior_haz_const}}, \code{\link{mspline_constant_coefs}}
 #'
 #' @export
 p_meansurv <- function(median, upper, mspline=NULL){
-  coefs_mean <- mspline_constant_weights(mspline)
-  haz_std <-  hsurvmspline(x=mean(mspline$bknots), alpha=1, coefs=coefs_mean,
-                           knots=c(mspline$iknots,mspline$bknots), degree=mspline$degree)
+  coefs_mean <- mspline_constant_coefs(mspline)
+  haz_std <-  hsurvmspline(x=mean(mspline$knots), alpha=1, coefs=coefs_mean,
+                           knots=mspline$knots, degree=mspline$degree, bsmooth=mspline$bsmooth)
   haz_lower <- 1/upper
   haz_median <- 1/median
   logeta_lower <- log(haz_lower / haz_std)
@@ -101,12 +114,15 @@ p_meansurv <- function(median, upper, mspline=NULL){
 
 #' Derive a normal prior for the log hazard ratio parameter based on a guess at the hazard ratio
 #'
+#' Derive a normal prior for the log hazard ratio parameter based on a guess at the hazard ratio.
+#' This assumes that the log upper limit is 2 standard deviations away from the log median.
+#'
 #' @param median Best guess (prior median) for a typical hazard ratio
 #'
 #' @param upper Upper limit of 95% credible interval for hazard ratio
 #'
 #' @return A normal prior in the format returned by \code{\link{p_normal}}, which can
-#' be passed directly to the \code{prior_loghr} argument in \code{\link{survextrap}}. 
+#' be passed directly to the \code{prior_loghr} argument in \code{\link{survextrap}}.
 #'
 #' @export
 p_hr <- function(median, upper){
@@ -132,31 +148,31 @@ validate_positive_parameter <- function(x) {
   invisible(TRUE)
 }
 
-get_prior_loghaz <- function(loghaz){
-  if (is.null(loghaz)) loghaz <- p_normal(0, 20) # currently unused: default set in function headers
-  else validate_prior(loghaz)
-  loghaz
+get_prior_hscale <- function(hscale){
+  if (is.null(hscale)) hscale <- p_normal(0, 20) # currently unused: default set in function headers
+  else validate_prior(hscale)
+  hscale
 }
 
-get_priors <- function(loghaz, loghr, smooth, cure, logor_cure, x, xcure, est_smooth,
-                       nonprop, prior_sdnp){
-  loghaz <- get_prior_loghaz(loghaz)
+get_priors <- function(hscale, loghr, hsd, cure, logor_cure, x, xcure, est_hsd,
+                       nonprop, prior_hrsd){
+  hscale <- get_prior_hscale(hscale)
   loghr <- get_prior_coveffs(loghr, x, "loghr")
-  smooth <- get_prior_smooth(smooth, est_smooth)
+  hsd <- get_prior_hsd(hsd, est_hsd)
   validate_prior(cure)
   logor_cure <- get_prior_coveffs(logor_cure, xcure, "logor_cure")
-  sdnp <- get_prior_sdnp(prior_sdnp, x, nonprop)
-  nlist(loghaz, loghr, smooth, cure, logor_cure, sdnp)
+  sdnp <- get_prior_hrsd(prior_hrsd, x, nonprop)
+  nlist(hscale, loghr, hsd, cure, logor_cure, sdnp)
 }
 
 validate_prior <- function(prior, priorname=NULL, element=NULL){
     if (is.null(priorname)) priorname <- deparse(substitute(prior))
     priorfullname <- sprintf("prior_%s", priorname)
 
-    valid_priors <- list(loghaz = c("normal","t"),
+    valid_priors <- list(hscale = c("normal","t"),
                          loghr = c("normal","t"),
                          cure = "beta",
-                         smooth = "gamma",
+                         hsd = "gamma",
                          logor_cure = c("normal","t"),
                          sdnp = "gamma")
 
@@ -173,9 +189,9 @@ validate_prior <- function(prior, priorname=NULL, element=NULL){
     }
 }
 
-get_prior_smooth <- function(prior, est_smooth){
-    validate_prior(prior, "smooth")
-    if (!est_smooth) return(list(shape=aa(numeric()), rate=aa(numeric())))
+get_prior_hsd <- function(prior, est_hsd){
+    validate_prior(prior, "hsd")
+    if (!est_hsd) return(list(shape=aa(numeric()), rate=aa(numeric())))
     prior
 }
 
@@ -234,10 +250,10 @@ validate_prior_bycov <- function(prior, x, priorname){
   prior_list
 }
 
-get_prior_sdnp <- function(prior, x, nonprop){
+get_prior_hrsd <- function(prior, x, nonprop){
   if (!nonprop) return(array(dim=c(0,2)))
   if (is.null(prior)) prior <- p_gamma(2, 1)
-  prior_list <- validate_prior_bycov(prior, x, priorname="prior_sdnp")
+  prior_list <- validate_prior_bycov(prior, x, priorname="prior_hrsd")
   for (i in seq_len(x$ncovs)){
     validate_prior(prior_list[[i]], "sdnp", i)
   }
@@ -248,14 +264,14 @@ get_prior_sdnp <- function(prior, x, nonprop){
 
 prior_basehaz_sample <- function(mspline,
                                  coefs_mean = NULL,
-                                 prior_smooth = p_gamma(2,1), # no constants, as they are not allowed in the model
-                                 prior_loghaz,
+                                 prior_hsd = p_gamma(2,1), # no constants, as they are not allowed in the model
+                                 prior_hscale,
                                  nsim = 100){
   ## process using common code to survextrap
-  loghaz_prior <- get_prior_loghaz(prior_loghaz)
-  smooth_prior <- get_prior_smooth(prior_smooth, est_smooth=TRUE)
-  loghaz <- loghaz_prior$r(nsim)
-  smooth <- smooth_prior$r(nsim)
+  hscale_prior <- get_prior_hscale(prior_hscale)
+  hsd_prior <- get_prior_hsd(prior_hsd, est_hsd=TRUE)
+  alpha <- hscale_prior$r(nsim)
+  hsd <- hsd_prior$r(nsim)
 
   coefs_mean <- default_coefs_mean(mspline, coefs_mean)
   lcoefs_mean <- log(coefs_mean[-1] / coefs_mean[1])
@@ -263,20 +279,19 @@ prior_basehaz_sample <- function(mspline,
   beta <- matrix(nrow=nsim, ncol=np)
   beta[,1] <- 0
   for (j in 2:np){
-    beta[,j] <- rlogis(nsim, lcoefs_mean[j-1], smooth)
+    beta[,j] <- rlogis(nsim, lcoefs_mean[j-1], hsd)
   }
   coefs <- exp(beta) / rowSums(exp(beta))
-  nlist(loghaz, coefs, beta, smooth, haz=exp(loghaz))
+  nlist(alpha, coefs, beta, hsd, hscale=exp(alpha))
 }
 
-##' Draw a sample from the prior distribution of the parameters
-##' governing the hazard in a survextrap model for given covariates.
+##' Sample from the joint prior of parameters in a survextrap model
 ##'
-##' This is used, for example, in \code{\link{mspline_priorpred}} to visualise the
-##' prior distribution around hazard curves implied by a particular M-spline model
-##' and parameter priors.
-##'
-##' Cure and relative survival models are not currently handled.
+##' Draws a sample from the joint prior distribution of the parameters
+##' governing a survextrap model for given covariates.  This is used,
+##' for example, in \code{\link{mspline_priorpred}}, to visualise the
+##' prior distribution around hazard curves implied by a particular
+##' M-spline model and parameter priors.
 ##'
 ##' @aliases prior_sample
 ##'
@@ -285,56 +300,61 @@ prior_basehaz_sample <- function(mspline,
 ##'
 ##' @return A list with components:
 ##'
-##' `loghaz`: Baseline log scale parameter (`log(eta)` in the notation of the manual). For models with covariates, this is at the covariate values supplied in `X`, or at zero if `X` is not supplied.
+##' `alpha`: Baseline log hazard scale parameter (`log(eta)` in the notation of the manual). For models with covariates, this is at the covariate values supplied in `X`, or at zero if `X` is not supplied.
 ##'
-##' `haz`: Baseline scale parameter (`eta`).
+##' `hscale`: Baseline hazard scale parameter (`eta`).
 ##'
 ##' `coefs`: Spline coefficients. For non-proportional hazards model with covariates, these are returned at the suppled value of `X`, or at values of zero if `X` is not supplied.
 ##'
 ##' `beta`: Multinomial logit-transformed spline coefficients.
 ##'
-##' `smooth`: Smoothing standard deviation for spline coefficients.
+##' `hsd`: Smoothing standard deviation for spline coefficients.
+##'
+##' If `X0` is supplied, then `alpha0`, `hscale0`, `beta0`, `coefs0` are also returned, representing reference covariate values.
+##'
+##' `pcure` is returned in cure models (the cure probability).
 ##'
 ##' @name prior_sample
 prior_sample <- function(mspline,
                          coefs_mean = NULL,
-                         prior_smooth = p_gamma(2,1),
-                                        # no constants for the moment as they are not allowed in the model
-                         prior_loghaz,
+                         prior_hsd = p_gamma(2,1),
+                         ## no constants for the moment as they are not allowed in the model
+                         prior_hscale,
                          prior_loghr = NULL,
                          X = NULL,
                          X0 = NULL,
-                         prior_sdnp = NULL, 
+                         prior_hrsd = NULL,
+                         prior_cure = NULL,
                          nsim = 100){
   sam <- prior_basehaz_sample(mspline,
-                              coefs_mean = coefs_mean, prior_smooth = prior_smooth,
-                              prior_loghaz = prior_loghaz, nsim=nsim)
+                              coefs_mean = coefs_mean, prior_hsd = prior_hsd,
+                              prior_hscale = prior_hscale, nsim=nsim)
 
   if (is.null(X)) x <- list(ncovs=0, xnames=NULL)
   else {
     X <- validate_prior_X(X)
     x <- list(ncovs = length(X), xnames = names(X))
   }
-  
-  ## baseline hazard scale 
+
+  ## baseline hazard scale
   if (x$ncovs > 0){
     loghr_prior <- get_prior_coveffs(prior_loghr, x, "loghr")
     loghr <- lapply(attr(loghr_prior, "r"), function(x)x$r(nsim))
-    loghr <- do.call(cbind, loghr)
+    loghr <- do.call(cbind, loghr[x$xnames])
     if (!is.null(X0)){
       X0 <- validate_prior_X(X0)
       linpred0 <- loghr %*% X0
-      sam$loghaz0 <- sam$loghaz + linpred0
-      sam$haz0 <- exp(sam$loghaz0)
+      sam$alpha0 <- sam$alpha + linpred0
+      sam$hscale0 <- exp(sam$alpha0)
     }
     linpred <- loghr %*% X
-    sam$loghaz <- sam$loghaz + linpred
-    sam$haz <- exp(sam$loghaz)
+    sam$alpha <- sam$alpha + linpred
+    sam$hscale <- exp(sam$alpha)
   }
 
-  ## nonprop haz models 
-  if (!is.null(prior_sdnp)) {
-    sdnp_prior <- get_prior_sdnp(prior_sdnp, x, nonprop=TRUE)
+  ## nonprop haz models
+  if (!is.null(prior_hrsd)) {
+    sdnp_prior <- get_prior_hrsd(prior_hrsd, x, nonprop=TRUE)
     sdnp <- vector(x$ncovs, mode="list")
     nvars <- ncol(sam$coefs) # number of spline basis terms
     np_linpred <- matrix(0, nrow=nsim, ncol=nvars-1)
@@ -355,6 +375,9 @@ prior_sample <- function(mspline,
     sam$beta <- sam$beta + np_linpred
     sam$coefs <- exp(sam$beta) / rowSums(exp(sam$beta))
   }
+  if (!is.null(prior_cure)) {
+    sam$pcure <- prior_cure$r(nsim)
+  }
 
   sam
 }
@@ -364,57 +387,74 @@ prior_sample <- function(mspline,
 ##'
 ##' @inheritParams prior_haz
 ##'
+##' @seealso \code{\link{p_meansurv}}, \code{\link{mspline_constant_coefs}}
+##'
 ##' @export
 prior_haz_const <- function(mspline,
-                            prior_loghaz = p_normal(0, 20),
+                            prior_hscale = p_normal(0, 20),
                             nsim = 10000,
                             quantiles = c(0.025, 0.5, 0.975)){
-  loghaz_prior <- get_prior_loghaz(prior_loghaz)
-  coefs_mean <- mspline_constant_weights(mspline)
-  haz_std <-  hsurvmspline(x=mean(mspline$bknots), alpha=1, coefs=coefs_mean,
-                           knots=c(mspline$iknots,mspline$bknots), degree=mspline$degree)
-  haz <- haz_std * exp(loghaz_prior$q(quantiles))
+  hscale_prior <- get_prior_hscale(prior_hscale)
+  coefs_mean <- mspline_constant_coefs(mspline)
+  haz_std <-  hsurvmspline(x=mean(mspline$knots), alpha=1, coefs=coefs_mean,
+                           knots=mspline$knots, degree=mspline$degree, bsmooth=mspline$bsmooth)
+  haz <- haz_std * exp(hscale_prior$q(quantiles))
   names(haz) <- names(quantile(1, quantiles))
   data.frame(haz=haz, mean=rev(1/haz))
 }
 
+##' Summarises the prior for the hazard ratio implied by a particular
+##' prior on the log hazard ratio
+##'
+##' Summarises the prior for the hazard ratio implied by a particular
+##' prior on the log hazard ratio.   Simply applies an exponential
+##' transform to quantiles of the given prior.
+##'
+##' @inheritParams prior_haz
+##'
+##' @export
+prior_hr <- function(prior_loghr = p_normal(0, 2.5),
+                     quantiles = c(0.025, 0.5, 0.975)){
+  qh <- qnorm(quantiles, prior_loghr$location, prior_loghr$scale)
+  res <- exp(qh)
+  names(res) <- format_perc(quantiles)
+  res
+}
+
+## Copied from internal function in stats package, under GPL.  Copyright (c) R Core.
+format_perc <- function (x, digits = max(2L, getOption("digits")), probability = TRUE, 
+    use.fC = length(x) < 100, ...) 
+{
+    if (length(x)) {
+        if (probability) 
+            x <- 100 * x
+        ans <- paste0(if (use.fC) 
+            formatC(x, format = "fg", width = 1, digits = digits)
+        else format(x, trim = TRUE, digits = digits, ...), "%")
+        ans[is.na(x)] <- ""
+        ans
+    }
+    else character(0)
+}  
 
 validate_prior_X <- function(X){
   X <- unlist(X)
 }
 
-## TODO remove if unused  
-validate_prior_x <- function(x, X){
-  if (x$ncovs==0 && !is.null(X)) {
-    warning("Covariate values X supplied, but x$ncovs=0. Ignoring covariates.")
-  }
-  else {
-    if (!is.list(x) ||
-        (!("ncovs" %in% names(x))) ||
-        (!("xnames" %in% names(x))))
-      stop("x should be a list with names `ncovs` and `xnames`")
-    if (!is.numeric(x$ncovs)) stop("`x$ncovs` should be numeric")
-    if (x$ncovs > 0){
-      if (is.null(X))
-        stop("x$ncovs > 0, indicating that there are covariates in the model, but covariate values X not supplied")
-      if (!is.character(x$xnames)) stop("`x$xnames` should be character")
-      if (length(x$xnames) != x$ncovs) stop(sprintf("`x$xnames` is of length %s, but `x$ncovs` is %s",
-                                                    length(x$xnames), x$ncovs))
-    }
-  }
-}
 
-
-##' Compute consequences of priors chosen for a flexible hazard model in
-##' survextrap, in terms of a standard deviation measuring the
-##' variability over time of the hazard function or the hazard ratio
-##' function.
+##' Determine priors for time-varying hazards and hazard ratios
 ##'
-##' The spline model in survextrap allows the hazard to change over time in an
-##' arbitrarily flexible manner.  The prior distributions on the parameters of
-##' this model have implications for how much we expect the hazard to plausibly
-##' vary over time.  These priors are hard to interpret directly, but this
-##' function can be used to compute their implications on a more
+##' Computes consequences of priors chosen for the parameters `hsd`
+##'  and `hrsd` in a flexible hazard model \code{\link{survextrap}} on
+##'  an interpretable scale.  This can be used to calibrate Gamma
+##'  priors for these parameters to match interpretable beliefs.
+##'
+##' The spline model in \code{\link{survextrap}} allows the hazard to
+##' change over time in an arbitrarily flexible manner.  The prior
+##' distributions on the parameters of this model have implications
+##' for how much we expect the hazard to plausibly vary over time.
+##' These priors are hard to interpret directly, but this function can
+##' be used to compute their implications on a more
 ##' easily-understandable scale.
 ##'
 ##' This is done by:
@@ -432,9 +472,9 @@ validate_prior_x <- function(x, X){
 ##' variability.
 ##'
 ##' `prior_haz_sd` computes the SD of the hazard, and the SD of the inverse hazard is also
-##' computed.   The inverse hazard at time t is the expected time to the event given survival to t.
+##' computed.   The inverse hazard at time `t` is the expected time to the event given survival to `t`.
 ##' The hazard ratio between a high and low value (defined by quantiles of values at different times)
-##' is also computed. 
+##' is also computed.
 ##'
 ##' `prior_hr_sd` computes the SD of the hazard ratio between two covariate values
 ##' supplied by the user.
@@ -446,11 +486,12 @@ validate_prior_x <- function(x, X){
 ##' @inheritParams survextrap
 ##' @inheritParams mspline_priorpred
 ##'
-##' @param hq Quantiles which define the "low" and "high" values of a time-varying quantity (hazard in `prior_haz_sd` and the hazard ratio in `prior_hr_sd`).
-##' The ratio between the high and low values will be summarised, as a measure of
-##' time-dependence. 
-##' By default, this is `c(0.1, 0.9)`, so that the 10\% and 90\% quantiles are used
-##' respectively.
+##' @param hq Quantiles which define the "low" and "high" values of a
+##'   time-varying quantity (hazard in `prior_haz_sd` and the hazard
+##'   ratio in `prior_hr_sd`).  The ratio between the high and low
+##'   values will be summarised, as a measure of time-dependence.  By
+##'   default, this is `c(0.1, 0.9)`, so that the 10% and 90%
+##'   quantiles are used respectively.
 ##'
 ##' @param quantiles Quantiles used to summarise the prior predictive distribution
 ##' of the standard deviation.
@@ -459,25 +500,26 @@ validate_prior_x <- function(x, X){
 ##' @export
 prior_haz_sd <- function(mspline,
                          coefs_mean=NULL,
-                         prior_smooth=p_gamma(2,1),
-                         prior_loghaz = p_normal(0, 20),
+                         prior_hsd=p_gamma(2,1),
+                         prior_hscale = p_normal(0, 20),
                          prior_loghr = NULL,
                          X = NULL,
-                         prior_sdnp = NULL, 
-                         tmin=0, tmax=10,
-                         nsim = 100,
+                         prior_hrsd = NULL,
+                         tmin=0, tmax=NULL,
+                         nsim = 1000,
                          hq = c(0.1, 0.9),
                          quantiles = c(0.025, 0.5, 0.975)){
-  pred <- mspline_priorpred(iknots=mspline$iknots, bknots=mspline$bknots, degree=mspline$degree,
-                               coefs_mean=coefs_mean, prior_smooth=prior_smooth,
-                               prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
-                               X=X, prior_sdnp=prior_sdnp,
-                               tmin=tmin, tmax=tmax,
+  pred <- mspline_priorpred(knots=mspline$knots, degree=mspline$degree,
+                            bsmooth=mspline$bsmooth,
+                            coefs_mean=coefs_mean, prior_hsd=prior_hsd,
+                            prior_hscale=prior_hscale, prior_loghr=prior_loghr,
+                            X=X, prior_hrsd=prior_hrsd,
+                            tmin=tmin, tmax=tmax,
                             nsim=nsim)
   pred$mean <- 1 / pred$haz
   sd_haz <- tapply(pred$haz, pred$rep, sd)
   sd_mean <- tapply(pred$mean, pred$rep, sd)
-  cv_haz <- sd_haz / tapply(pred$haz, pred$rep, mean) # abandoned 
+  cv_haz <- sd_haz / tapply(pred$haz, pred$rep, mean) # abandoned
   cv_mean <- sd_mean / tapply(pred$mean, pred$rep, mean)
   hq <- tapply(pred$haz, pred$rep, quantile, probs = hq)
   hq <- do.call("rbind", hq)
@@ -487,40 +529,41 @@ prior_haz_sd <- function(mspline,
              hr = quantile(hr, quantiles))
 }
 
-## Should this be consistent with hr_survextrap , two rows of X, X0? 
+## Should this be consistent with hr_survextrap , two rows of X, X0?
 
 ##' @rdname prior_haz
 ##' @export
 prior_hr_sd <- function(mspline,
                         coefs_mean=NULL,
-                        prior_smooth=p_gamma(2,1),
-                        prior_loghaz = p_normal(0, 20),
+                        prior_hsd=p_gamma(2,1),
+                        prior_hscale = p_normal(0, 20),
                         prior_loghr = NULL,
                         X,
                         X0,
-                        prior_sdnp = NULL, 
+                        prior_hrsd = NULL,
                         tmin=0, tmax=10,
                         nsim = 100,
                         hq = c(0.1, 0.9),
                         quantiles = c(0.025, 0.5, 0.975)){
-  pred <- mspline_priorpred(iknots=mspline$iknots, bknots=mspline$bknots, degree=mspline$degree,
-                            coefs_mean=coefs_mean, prior_smooth=prior_smooth,
-                            prior_loghaz=prior_loghaz, prior_loghr=prior_loghr,
-                            X=X, X0=X0, prior_sdnp=prior_sdnp,
+  pred <- mspline_priorpred(knots=mspline$knots, degree=mspline$degree,
+                            bsmooth=mspline$bsmooth,
+                            coefs_mean=coefs_mean, prior_hsd=prior_hsd,
+                            prior_hscale=prior_hscale, prior_loghr=prior_loghr,
+                            X=X, X0=X0, prior_hrsd=prior_hrsd,
                             tmin=tmin, tmax=tmax,
                             nsim=nsim)
   sd_hr <- tapply(pred$hr, pred$rep, sd)
   hq <- tapply(pred$hr, pred$rep, quantile, probs = hq)
   hq <- do.call("rbind", hq)
   hrr <- hq[,2] / hq[,1]
-  
+
   data.frame(sd_hr = quantile(sd_hr, quantiles),
              hrr = quantile(hrr, quantiles))
 }
 
 default_coefs_mean <- function(mspline, coefs_mean=NULL, logit=FALSE){
   if (is.null(coefs_mean)){
-    coefs_mean <- mspline_constant_weights(mspline=mspline, logit=logit)
+    coefs_mean <- mspline_constant_coefs(mspline=mspline, logit=logit)
   } else {
     coefs_mean <- validate_coefs_mean(coefs_mean)
   }

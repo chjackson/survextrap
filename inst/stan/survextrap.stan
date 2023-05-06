@@ -133,8 +133,8 @@ data {
     matrix[nextern,ncurecovs] xcure_ext;
 
     vector[nvars-1] b_mean; // logit of prior guess at basis weights (by default, those that give a constant hazard)
-    int est_smooth;
-    vector<lower=0>[1-est_smooth] smooth_sd_fixed;
+    int est_hsd;
+    vector<lower=0>[1-est_hsd] hsd_fixed;
 
     int cure;
 
@@ -143,10 +143,10 @@ data {
     vector[nextern] backsurv_ext_start; 
     vector[nextern] backsurv_ext_stop; 
 
-    int prior_loghaz_dist;
-    vector[3] prior_loghaz;
+    int prior_hscale_dist;
+    vector[3] prior_hscale;
     vector<lower=0>[2] prior_cure;
-    vector<lower=0>[2*est_smooth] prior_smooth;
+    vector<lower=0>[2*est_hsd] prior_hsd;
     int<lower=0> prior_loghr_dist[ncovs];
     vector[ncovs] prior_loghr_location;
     vector[ncovs] prior_loghr_scale;
@@ -160,19 +160,19 @@ data {
     int nonprop;
 
     // EXTRA FOR NONPROP HAZ MODEL 
-    matrix[ncovs*nonprop,2] prior_sdnp;
+    matrix[ncovs*nonprop,2] prior_hrsd;
 }
 
 parameters {
     real gamma[1];
     vector[ncovs] loghr;
     vector[nvars-1] b_err;
-    vector<lower=0>[est_smooth] smooth_sd;
+    vector<lower=0>[est_hsd] hsd;
     vector<lower=0,upper=1>[cure] pcure;
     vector[ncurecovs] logor_cure;
 
     // STUFF FOR NON PROP HAZ MODEL 
-    vector<lower=0>[ncovs*nonprop] sd_np;  // NP shrinkage SD for each cov
+    vector<lower=0>[ncovs*nonprop] hrsd;  // NP shrinkage SD for each cov
     matrix[ncovs*nonprop,nvars-1] nperr;  // standard normal for departure from PH
 }
 
@@ -193,12 +193,12 @@ transformed parameters {
 
     if (nonprop) { 
 	for (r in 1:ncovs){
-	    b_np[r,1:(nvars-1)] = sd_np[r]*nperr[r,1:(nvars-1)];
+	    b_np[r,1:(nvars-1)] = hrsd[r]*nperr[r,1:(nvars-1)];
 	}
-	if (est_smooth) {
-	    ssd = smooth_sd[1];
+	if (est_hsd) {
+	    ssd = hsd[1];
 	} else {
-	    ssd = smooth_sd_fixed[1];
+	    ssd = hsd_fixed[1];
 	}
 	b = append_row(0, b_mean + b_err*ssd);
 	coefs = softmax(b);
@@ -230,10 +230,10 @@ transformed parameters {
 	    }
 	}
     } else {
-	if (est_smooth)
-	    b = append_row(0, b_mean + b_err*smooth_sd[1]);
+	if (est_hsd)
+	    b = append_row(0, b_mean + b_err*hsd[1]);
 	else
-	    b = append_row(0, b_mean + b_err*smooth_sd_fixed[1]);
+	    b = append_row(0, b_mean + b_err*hsd_fixed[1]);
 	coefs = softmax(b);
 	if (nevent > 0) {
 	    for (i in 1:nevent){
@@ -275,9 +275,9 @@ model {
     vector[nrcens] pcure_rcens; //
     vector[nextern] pcure_extern; //
 
-    if (nevent > 0) alpha_event = rep_vector(prior_loghaz[1] + gamma[1], nevent);
-    if (nrcens > 0) alpha_rcens = rep_vector(prior_loghaz[1] + gamma[1], nrcens);
-    if (nextern > 0) alpha_extern = rep_vector(prior_loghaz[1] + gamma[1], nextern);
+    if (nevent > 0) alpha_event = rep_vector(prior_hscale[1] + gamma[1], nevent);
+    if (nrcens > 0) alpha_rcens = rep_vector(prior_hscale[1] + gamma[1], nrcens);
+    if (nextern > 0) alpha_extern = rep_vector(prior_hscale[1] + gamma[1], nextern);
 
     if (ncovs > 0) {
         // does x * beta,    matrix[n,K] * vector[K], matrix product
@@ -304,15 +304,15 @@ model {
 
     if (nextern > 0) {
         p_ext_stop = exp(log_surv(alpha_extern, ibasis_ext_stop, coefs_extern, cure, pcure_extern,
-				  modelid) .* backsurv_ext_stop);
+				  modelid)) .* backsurv_ext_stop;
         p_ext_start = exp(log_surv(alpha_extern, ibasis_ext_start, coefs_extern, cure, pcure_extern,
-				   modelid) .* backsurv_ext_start);
+				   modelid)) .* backsurv_ext_start;
         target += binomial_lpmf(r_ext | n_ext, p_ext_stop ./ p_ext_start);
     }
 
     // log prior for baseline log hazard
-    dummy = loghaz_lp(gamma[1], prior_loghaz_dist, 0, 
-		      prior_loghaz[2], prior_loghaz[3]);
+    dummy = loghaz_lp(gamma[1], prior_hscale_dist, 0, 
+		      prior_hscale[2], prior_hscale[3]);
 
     // log prior for covariates on the log hazard
     dummy = loghr_lp(loghr, prior_loghr_dist, prior_loghr_location,
@@ -331,13 +331,13 @@ model {
 			 prior_logor_cure_scale, prior_logor_cure_df);
     }
     
-    if (est_smooth){
-        smooth_sd ~ gamma(prior_smooth[1], prior_smooth[2]);
+    if (est_hsd){
+        hsd ~ gamma(prior_hsd[1], prior_hsd[2]);
     }
 
     // Non-proportional haz model
     if (nonprop) { 
-	sd_np ~ gamma(prior_sdnp[,1], prior_sdnp[,2]);
+	hrsd ~ gamma(prior_hrsd[,1], prior_hrsd[,2]);
 	for (i in 1:ncovs){
 	    nperr[i,1:(nvars-1)] ~ std_normal();
 	}
@@ -345,7 +345,7 @@ model {
 }
 
 generated quantities {
-    real alpha = prior_loghaz[1] + gamma[1]; // log hazard, intercept, log(eta) in the docs
+    real alpha = prior_hscale[1] + gamma[1]; // log hazard, intercept, log(eta) in the docs
     vector[ncovs] hr = exp(loghr);
     vector[ncurecovs] or_cure = exp(logor_cure);
 }

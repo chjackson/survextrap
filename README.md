@@ -1,6 +1,6 @@
 # survextrap 
 
-`survextrap` is an R package under development, to model survival from a combination of 
+`survextrap` is an R package to model survival from a combination of 
 
 1. A standard individual-level, right-censored survival dataset, e.g.
 
@@ -72,7 +72,7 @@
 
 Any number of rows can be supplied for the "external" data, and the time intervals do not have to be distinct or exhaustive. 
 
-The package has been developed under the expectation that many forms of external data that might be useful for survival extrapolation (such as population data, registry data or elicited judgements) can be manipulated into this common "count" form.
+Many forms of external data that might be useful for survival extrapolation (such as population data, registry data or elicited judgements) can be manipulated into this common "count" form.
 
 ### Principles
 
@@ -97,17 +97,21 @@ The package has been developed under the expectation that many forms of external
 
 * [Stan](https://mc-stan.org/) is used under the surface to do MCMC (Hamiltonian Monte Carlo) sampling from the posterior distribution, in a similar fashion to [rstanarm](https://mc-stan.org/rstanarm/) and [survHE](https://CRAN.R-project.org/package=survHE). 
 
-* Estimates and posterior credible intervals / samples for survival, hazard, mean and restricted mean survival can easily be extracted.
+* Estimates and posterior summaries and samples for outputs, such as survival, hazard and (restricted) mean survival, can easily be extracted.
 
 
 ### Technical details of the methods
 
-See `vignette("methods")`
+See `vignette("methods")`.
+
+`vignette("priors")` goes into detail on how prior distributions and judgements can be specified in `survextrap` - an important but often-neglected part of Bayesian analysis. 
 
 
 ### Examples of how to use it 
 
-See `vignette("examples")`
+`vignette("examples")` gives a rapid tour of each feature, using simple textbook examples and simulated data.
+
+The [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetuximab.html) is a more in-depth demonstration of how `survextrap` could be used in a typical health technology evaluation, based on clinical trial, disease registry, general population and elicited data.  More details of this will be given in a forthcoming paper.
 
 
 ### Slides from presentations about survextrap
@@ -117,22 +121,15 @@ See `vignette("examples")`
 
 ## Development 
 
-The package is in active development.  It can currently fit a large range of useful models, but it is not finished and is subject to be changed without warning.
+The package is in "beta" status.  All major features are included, but it requires some polish here and there.
 
-Major things to do are:
+ A paper about it will soon be finished.  This will discuss the background and explain the methods in detail, and formally present the [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetuximab.html).
 
-* Empirical work to show the impact of priors and knot choice.  Can we derive more practically-meaningful default priors for changes in hazard through time, e.g. in terms of orders of magnitude?  How much does knot choice matter, in particular with external data?
-
-* More experience and examples of using it with real external data, including a vignette that lists how to implement other previously-suggested approaches for extrapolation with external data.
-
-* Thorough testing, documentation and error handling.
-
-* A paper about it.
-
-If you want to try it out - feel free to install the development version as: 
+The current version can be installed as:
 
 ```{r}
-install.packages("survextrap", repos=c('https://chjackson.r-universe.dev', 'https://cloud.r-project.org'))
+install.packages("survextrap", repos=c('https://chjackson.r-universe.dev',
+                                       'https://cloud.r-project.org'))
 ```
 
 Please give feedback and suggestions if you do.  These can be posted on [github issues](https://github.com/chjackson/survextrap/issues), or [email](mailto:chris.jackson@mrc-bsu.cam.ac.uk).
