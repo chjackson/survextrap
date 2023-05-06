@@ -1,6 +1,6 @@
-# survextrap version 0.8 
+# survextrap version 0.8 (2023/05/06)
 
-The GitHub commit [REF] [DATE] implemented several changes that are listed here.  `survextrap` is now in "beta" status.  All major features are now implemented, but there may still be some lack of polish.
+The [GitHub commit](https://github.com/chjackson/survextrap/commit/1668f40604d9dc62d83a698c735275506474aa03) on 6 May 2023 implemented several changes that are listed here.  `survextrap` is now in "beta" status.  All major features are now implemented, but there may still be some lack of polish.
 
 
 ## New features 
