@@ -276,7 +276,7 @@ To use a cure model and a relative survival model together, $h_c(t)$ is defined 
 This model is appropriate if we are sure that people with the disease are eventually "cured", or alternatively, their risk from the disease becomes negligible compared to their risk of death from other causes, and we have good information about general mortality and when this starts to dominate.  Therefore average survival is estimated by naturally combining short-term information on disease-specific survival with long-term data on general mortality.
 
 
-# Treatment effect waning models 
+# Treatment effect waning models {#waning}
 
 ### Principles 
 

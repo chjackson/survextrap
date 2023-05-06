@@ -79,7 +79,7 @@ In many practical situations of extrapolation in time-to-event models, we do hav
 The idea of the package is to make this external information as explicit as possible - ideally in the form of data. 
 
 
-### Note on computation settings 
+### Note on computation settings {#convergence}
 
 Most of the example models in this vignette have been specified using computational approximations allow the models to be fitted more quickly, but at the cost of some inaccuracy.  This has been done so that the vignettes build more quickly.   Specifically: 
 
@@ -91,8 +91,9 @@ Most of the example models in this vignette have been specified using computatio
 ```{r}
 head(summary(nd_mod))
 ```
+
 {#divergences}
-* If using MCMC, there may be a warning produced by Stan about `divergent transitions after warmup`.  This is a limitation of the sampling algorithm, and can happen when the posterior distribution is awkward to sample from.  If there are only one or two divergent transitions, the message is probably safe to ignore, but in any case the results should be examined to ensure they make sense.  With lots of divergent transitions, it is safer to simplify the model, e.g. by using stronger priors or fewer spline knots.
+* If using MCMC, there may be a warning produced by Stan about `divergent transitions after warmup`.  This is a limitation of the sampling algorithm, and can happen when the posterior distribution is awkward to sample from.  See the [Stan documentation](https://mc-stan.org/misc/warnings.html) for technical details.  If there are only one or two divergent transitions, the message is probably safe to ignore, but in any case the results should be examined to ensure they make sense.  With lots of divergent transitions, it is safer to simplify the model, e.g. by using stronger priors or fewer spline knots.
 
 
 ## Restricted mean survival 
