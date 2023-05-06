@@ -267,7 +267,7 @@ to MCMC with the default number of chains and iterations.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mc.cores <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="co"># CRAN check limits to 2 cores</span></span>
 <span><span class="co"># options(mc.cores = parallel::detectCores())</span></span>
-<span><span class="va">chains</span> <span class="op">&lt;-</span> <span class="fl">1</span>; <span class="va">iter</span> <span class="op">&lt;-</span> <span class="fl">1000</span></span></code></pre></div>
+<span><span class="va">chains</span> <span class="op">&lt;-</span> <span class="fl">2</span>; <span class="va">iter</span> <span class="op">&lt;-</span> <span class="fl">4000</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="models-for-the-trial-data-alone">Models for the trial data alone<a class="anchor" aria-label="anchor" href="#models-for-the-trial-data-alone"></a>
@@ -290,14 +290,11 @@ knot.</p>
 <span><span class="va">mod_con5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">control</span>, </span>
 <span>                       chains<span class="op">=</span><span class="va">chains</span>, iter<span class="op">=</span><span class="va">iter</span>, seed<span class="op">=</span><span class="fl">1</span>,         </span>
 <span>                       prior_hscale<span class="op">=</span><span class="va">prior_hscale</span>, prior_hsd <span class="op">=</span> <span class="va">prior_hsd</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.</span></span>
-<span><span class="co">## Running the chains for more iterations may help. See</span></span>
-<span><span class="co">## https://mc-stan.org/misc/warnings.html#bulk-ess</span></span></code></pre>
 <p>A plot comparing the survival and hazard curves from these models is
 then built. We use the <code><a href="../reference/survival.html">survival()</a></code> and <code><a href="../reference/hazard.html">hazard()</a></code>
 functions to extract survival and hazard estimates, and combine these to
 give a dataset that can be plotted with <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot()</a></code>.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">surv_const</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survival.html">survival</a></span><span class="op">(</span><span class="va">mod_con5</span>, tmax<span class="op">=</span><span class="fl">20</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>model<span class="op">=</span><span class="st">"Constant hazard"</span><span class="op">)</span></span>
 <span><span class="va">surv_ipd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survival.html">survival</a></span><span class="op">(</span><span class="va">mod_con</span>, tmax<span class="op">=</span><span class="fl">20</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>model<span class="op">=</span><span class="st">"Varying hazard"</span><span class="op">)</span></span>
 <span><span class="va">surv_single</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">surv_const</span>, <span class="va">surv_ipd</span><span class="op">)</span></span>
@@ -354,7 +351,7 @@ that the spline function has an appropriate amount of complexity to
 describe the data. Therefore we use LOOIC to compare a range of models
 with different numbers of spline basis functions (set via the
 <code>df</code> argument to <code>mspline_spec</code>).</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dfs</span> <span class="op">&lt;-</span> <span class="fl">5</span><span class="op">:</span><span class="fl">12</span></span>
 <span><span class="va">rescomp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span>nrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">dfs</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">7</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">dfs</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
@@ -393,13 +390,18 @@ simpler model by setting <code>df</code> to a lower value.</p>
 the treatment effect either through proportional hazards
 (<code>mod_ph</code>) or with <code>survextrap</code>’s novel flexible
 non-proportional hazards model (<code>mod_nph</code>).</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_ph</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">treat</span>, data<span class="op">=</span><span class="va">cetux</span>, </span>
 <span>                     mspline<span class="op">=</span><span class="va">mspline</span>, </span>
 <span>                     chains<span class="op">=</span><span class="va">chains</span>, iter<span class="op">=</span><span class="va">iter</span>,</span>
 <span>                     prior_hscale<span class="op">=</span><span class="va">prior_hscale</span>, prior_hsd <span class="op">=</span> <span class="va">prior_hsd</span>,</span>
-<span>                     prior_loghr<span class="op">=</span><span class="va">prior_loghr</span><span class="op">)</span></span>
-<span><span class="va">mod_nph</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">treat</span>, data<span class="op">=</span><span class="va">cetux</span>, mspline<span class="op">=</span><span class="va">mspline</span>, </span>
+<span>                     prior_loghr<span class="op">=</span><span class="va">prior_loghr</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: There were 1 divergent transitions after warmup. See</span></span>
+<span><span class="co">## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup</span></span>
+<span><span class="co">## to find out why this is a problem and how to eliminate them.</span></span></code></pre>
+<pre><code><span><span class="co">## Warning: Examine the pairs() plot to diagnose sampling problems</span></span></code></pre>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mod_nph</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">treat</span>, data<span class="op">=</span><span class="va">cetux</span>, mspline<span class="op">=</span><span class="va">mspline</span>, </span>
 <span>                      chains<span class="op">=</span><span class="va">chains</span>, iter<span class="op">=</span><span class="va">iter</span>,</span>
 <span>                      nonprop <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                      prior_hscale<span class="op">=</span><span class="va">prior_hscale</span>, prior_hsd <span class="op">=</span> <span class="va">prior_hsd</span>,</span>
@@ -407,12 +409,12 @@ non-proportional hazards model (<code>mod_nph</code>).</p>
 <p>We also fit a model for the cetuximab treatment arm alone, to couple
 with the model <code>mod_con</code> for the control arm that we fitted
 earlier.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_cet</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">cetuximab</span>, mspline<span class="op">=</span><span class="va">mspline</span>, </span>
 <span>                      chains<span class="op">=</span><span class="va">chains</span>, iter<span class="op">=</span><span class="va">iter</span>,</span>
 <span>                      prior_hscale<span class="op">=</span><span class="va">prior_hscale</span>, prior_hsd <span class="op">=</span> <span class="va">prior_hsd</span><span class="op">)</span></span></code></pre></div>
 <p>The survival curves for these three models are now compared.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">surv_ph</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survival.html">survival</a></span><span class="op">(</span><span class="va">mod_ph</span>, tmax<span class="op">=</span><span class="fl">7</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Model<span class="op">=</span><span class="st">"Proportional hazards"</span><span class="op">)</span></span>
 <span><span class="va">surv_nph</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survival.html">survival</a></span><span class="op">(</span><span class="va">mod_nph</span>, tmax<span class="op">=</span><span class="fl">7</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Model<span class="op">=</span><span class="st">"Non-proportional hazards"</span><span class="op">)</span></span>
 <span><span class="va">surv_cet</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survival.html">survival</a></span><span class="op">(</span><span class="va">mod_cet</span>, tmax<span class="op">=</span><span class="fl">7</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
@@ -449,7 +451,7 @@ out <code>newdata</code> in the call to <code><a href="../reference/irmst.html">
 for models with one factor covariate with two levels, it will calculate,
 by default, the mean for the second level minus the mean for the first
 level.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comp_fn</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">mod</span><span class="op">)</span><span class="op">{</span></span>
 <span>    <span class="va">rm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rmst.html">rmst</a></span><span class="op">(</span><span class="va">mod</span>, niter<span class="op">=</span><span class="fl">3</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>treat<span class="op">=</span><span class="st">"Control"</span><span class="op">)</span>, t<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">20</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>        <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>rm_med<span class="op">=</span><span class="st">"median"</span>,rm_lower<span class="op">=</span><span class="st">"2.5%"</span>, rm_upper<span class="op">=</span><span class="st">"97.5%"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
@@ -506,43 +508,43 @@ level.</p>
 <tr class="odd">
 <td align="left">(2a) Proportional hazards</td>
 <td align="right">5</td>
-<td align="left">2.9 (2.85,2.93)</td>
-<td align="left">0.33 (0.14,0.43)</td>
+<td align="left">2.95 (2.95,3)</td>
+<td align="left">0.12 (0.12,0.25)</td>
 <td align="right">1160</td>
 </tr>
 <tr class="even">
 <td align="left">(2b) Non-proportional hazards</td>
 <td align="right">5</td>
-<td align="left">3.12 (2.79,3.21)</td>
-<td align="left">0.03 (-0.11,0.6)</td>
+<td align="left">3.02 (2.95,3.06)</td>
+<td align="left">0.11 (-0.02,0.2)</td>
 <td align="right">1161</td>
 </tr>
 <tr class="odd">
 <td align="left">(2c) Separate arms</td>
 <td align="right">5</td>
-<td align="left">3.03 (2.79,3.3)</td>
-<td align="left">0.36 (0.02,0.71)</td>
+<td align="left">3.02 (2.75,3.28)</td>
+<td align="left">0.36 (-0.01,0.72)</td>
 <td align="right">1168</td>
 </tr>
 <tr class="even">
 <td align="left">(2a) Proportional hazards</td>
 <td align="right">20</td>
-<td align="left">4.87 (4.52,4.94)</td>
-<td align="left">1.26 (0.43,1.63)</td>
+<td align="left">6.21 (5.04,6.28)</td>
+<td align="left">0.55 (0.52,0.93)</td>
 <td align="right">1160</td>
 </tr>
 <tr class="odd">
 <td align="left">(2b) Non-proportional hazards</td>
 <td align="right">20</td>
-<td align="left">5.6 (4.88,7.2)</td>
-<td align="left">0.4 (-0.26,2.08)</td>
+<td align="left">5.72 (5.54,7.11)</td>
+<td align="left">-0.21 (-0.48,0.96)</td>
 <td align="right">1161</td>
 </tr>
 <tr class="even">
 <td align="left">(2c) Separate arms</td>
 <td align="right">20</td>
-<td align="left">6.34 (4.73,8.87)</td>
-<td align="left">1.46 (-1.73,4.6)</td>
+<td align="left">6.34 (4.59,8.65)</td>
+<td align="left">1.43 (-1.52,4.4)</td>
 <td align="right">1168</td>
 </tr>
 </tbody>
@@ -557,7 +559,7 @@ models.</p>
 <p>In this example, there are registry data giving counts of <span class="math inline">\(r_j\)</span> survivors to the next year out of
 <span class="math inline">\(n_j\)</span> alive at year <span class="math inline">\(j\)</span>, from from <span class="math inline">\(j=5\)</span> years onwards. This is supplied in
 the <code>survextrap</code> package as <code>cetux_seer</code>.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cetux_seer</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   start stop   r   n   treat        haz haz_upper  haz_lower</span></span>
 <span><span class="co">## 1     5    6 325 358 Control 0.09670780 0.1325969 0.06665828</span></span>
@@ -581,7 +583,7 @@ it would be impossible to identify variations in the hazard
 <em>within</em> the period from 6 to 25 years, so using multiple knots
 inside this period would be futile.</p>
 </blockquote>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mspline_seer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_spec.html">mspline_spec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">cetux</span>, df<span class="op">=</span><span class="fl">7</span>, </span>
 <span>                             add_knots<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>,<span class="fl">15</span>,<span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">mod_seer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">control</span>, </span>
@@ -592,7 +594,7 @@ inside this period would be futile.</p>
 <code>mod_con</code> for the trial data alone that allowed the hazard to
 change after the trial. The registry data makes the hazard
 extrapolations much more confident.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">haz_con</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hazard.html">hazard</a></span><span class="op">(</span><span class="va">mod_con</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Model<span class="op">=</span><span class="st">"No external data"</span><span class="op">)</span></span>
 <span><span class="va">haz_seer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hazard.html">hazard</a></span><span class="op">(</span><span class="va">mod_seer</span>,tmax<span class="op">=</span><span class="fl">30</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
@@ -640,7 +642,7 @@ to supply a data frame that describes the background hazard at all
 times. This describes the population of the USA but matched to the trial
 patients by age, sex and calendar year, and is supplied in the
 <code>survextrap</code> package as <code>cetux_bh</code>.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cetux_bh</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   time    hazard</span></span>
 <span><span class="co">## 1    0 0.0092656</span></span>
@@ -654,12 +656,12 @@ hazard for head and neck cancer patients. A model is fitted which
 assumes the overall hazard for the trial and registry patients is the
 sum of the background hazard (fixed from the data in
 <code>backhaz</code>) and an unknown excess hazard to be estimated.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_seer_pop</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">control</span>, mspline <span class="op">=</span> <span class="va">mspline_seer</span>,</span>
 <span>                           external<span class="op">=</span><span class="va">cetux_seer</span>, backhaz<span class="op">=</span><span class="va">cetux_bh</span>, </span>
 <span>                           chains<span class="op">=</span><span class="va">chains</span>,iter<span class="op">=</span><span class="va">iter</span>,</span>
 <span>                           prior_hscale<span class="op">=</span><span class="va">prior_hscale</span>, prior_hsd <span class="op">=</span> <span class="va">prior_hsd</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">haz_seer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hazard.html">hazard</a></span><span class="op">(</span><span class="va">mod_seer</span>,tmax<span class="op">=</span><span class="fl">20</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Model<span class="op">=</span><span class="st">"Without population data"</span><span class="op">)</span></span>
 <span><span class="va">haz_seer_pop</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hazard.html">hazard</a></span><span class="op">(</span><span class="va">mod_seer_pop</span>,tmax<span class="op">=</span><span class="fl">20</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Model<span class="op">=</span><span class="st">"With population data"</span><span class="op">)</span></span>
 <span><span class="va">haz_plot_reg_pop20</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">haz_seer</span>, <span class="va">haz_seer_pop</span><span class="op">)</span></span>
@@ -695,7 +697,7 @@ spline specification to include two further knots at 30 and 40 years, in
 addition to the ones already placed at 10, 15 and 20 years.</p>
 <p>Two models are then fitted, to show the impact of the population
 data. The first includes the trial and registry data.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mspline40</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_spec.html">mspline_spec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">treat</span>, data<span class="op">=</span><span class="va">cetux</span>, df<span class="op">=</span><span class="fl">7</span>, </span>
 <span>                          add_knots<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">15</span>, <span class="fl">20</span>, <span class="fl">30</span>, <span class="fl">40</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">mod_seer40</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">control</span>, mspline <span class="op">=</span> <span class="va">mspline40</span>,</span>
@@ -704,7 +706,7 @@ data. The first includes the trial and registry data.</p>
 <span>                         prior_hscale<span class="op">=</span><span class="va">prior_hscale</span>, prior_hsd <span class="op">=</span> <span class="va">prior_hsd</span><span class="op">)</span></span></code></pre></div>
 <p>The second includes the trial, registry and population data.
 {#popplot}</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_seer_pop40</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">control</span>, mspline <span class="op">=</span> <span class="va">mspline40</span>,</span>
 <span>                           external<span class="op">=</span><span class="va">cetux_seer</span>, backhaz<span class="op">=</span><span class="va">cetux_bh</span>,</span>
 <span>                           chains<span class="op">=</span><span class="va">chains</span>, iter<span class="op">=</span><span class="va">iter</span>, </span>
@@ -715,7 +717,7 @@ resulting estimates become more precise. There is still a lot of
 uncertainty, since (through the knots at 30 and 40 years) we have
 allowed for the possibility that the excess hazard changes beyond the
 point (25-26 years) where we actually have data about it.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">haz_seer40</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hazard.html">hazard</a></span><span class="op">(</span><span class="va">mod_seer40</span>,tmax<span class="op">=</span><span class="fl">40</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Model<span class="op">=</span><span class="st">"With registry data"</span><span class="op">)</span></span>
 <span><span class="va">haz_seer_pop40</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hazard.html">hazard</a></span><span class="op">(</span><span class="va">mod_seer_pop40</span>,tmax<span class="op">=</span><span class="fl">40</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
@@ -762,7 +764,7 @@ cure</em> model. This can also be used to model a decreasing
 <em>excess</em> hazard in an additive hazards model. This is simply
 specified by setting <code>cure=TRUE</code> in the call to
 <code>survextrap</code>.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_cure</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">control</span>, mspline <span class="op">=</span> <span class="va">mspline40</span>,</span>
 <span>                       external<span class="op">=</span><span class="va">cetux_seer</span>, backhaz<span class="op">=</span><span class="va">cetux_bh</span>, </span>
 <span>                       cure<span class="op">=</span><span class="cn">TRUE</span>, </span>
@@ -796,7 +798,7 @@ artificial external dataset that contains the same information as our
 judgement. Here the annual population survival probability is computed
 from the hazard stored in <code>cetux_bh</code>, and stored in
 <code>pops</code>.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cetux_bh</span> <span class="op">&lt;-</span> <span class="va">cetux_bh</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>surv1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="va">hazard</span><span class="op">*</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">pops</span> <span class="op">&lt;-</span> <span class="va">cetux_bh</span><span class="op">$</span><span class="va">surv1</span><span class="op">[</span><span class="fl">39</span><span class="op">]</span></span></code></pre></div>
@@ -804,7 +806,7 @@ from the hazard stored in <code>cetux_bh</code>, and stored in
 <code>n</code> will have a mean of <code>pops</code>, here 0.72. We then
 set <code>n</code> to control the amount of uncertainty around this
 prior guess.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">qbeta</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span><span class="op">)</span>, <span class="fl">1000</span><span class="op">*</span><span class="va">pops</span>, <span class="fl">1000</span><span class="op">*</span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">pops</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0.6961908 0.7244400 0.7515403</span></span></code></pre>
 <p>The information in this Beta prior is equivalent to having observed
@@ -813,7 +815,7 @@ numerator and denominator <code>n</code> and <code>r</code> for survival
 between <code>start=39</code> and <code>stop=40</code> years. We use
 these to construct a dataset in the format needed by the
 <code>external</code> argument to <code>survextrap</code>.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_elic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  start<span class="op">=</span><span class="fl">39</span>, stop<span class="op">=</span><span class="fl">40</span>,</span>
 <span>  n <span class="op">=</span> <span class="fl">1000</span>, </span>
@@ -822,7 +824,7 @@ these to construct a dataset in the format needed by the
 <span><span class="op">)</span></span></code></pre></div>
 <p>This can then be joined to the registry data <code>cetux_seer</code>,
 to give an external dataset to supply to <code>survextrap</code>.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pop_cured</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">cetux_seer</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">full_join</a></span><span class="op">(</span><span class="va">data_elic</span>, by <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/join_by.html" class="external-link">join_by</a></span><span class="op">(</span><span class="va">start</span>, <span class="va">stop</span>, <span class="va">r</span>, <span class="va">n</span>, <span class="va">treat</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">mod_cure_elic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">control</span>, mspline<span class="op">=</span><span class="va">mspline40</span>, </span>
@@ -835,7 +837,7 @@ population data. If we had expressed more confidence in the prior guess
 (through a bigger <code>n</code>) the posterior estimates of the hazard
 function from the model would have been pulled even closer to the
 population data. {#cureplot}</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">haz_cure</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hazard.html">hazard</a></span><span class="op">(</span><span class="va">mod_cure</span>, tmax<span class="op">=</span><span class="fl">40</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Model<span class="op">=</span><span class="st">"Mixture cure model"</span><span class="op">)</span></span>
 <span><span class="va">haz_cure_elic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hazard.html">hazard</a></span><span class="op">(</span><span class="va">mod_cure_elic</span>, tmax<span class="op">=</span><span class="fl">40</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Model<span class="op">=</span><span class="st">"Elicited survival"</span><span class="op">)</span></span>
 <span><span class="va">haz_plot_cure</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">haz_cure</span>, <span class="va">haz_cure_elic</span><span class="op">)</span></span>
@@ -870,7 +872,7 @@ compare restricted mean survival times, over various time horizons,
 estimated from the various models fitted to the control group data.</p>
 <p>The models are categorised by what data are included, and what
 assumptions are made about survival beyond the data.</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ni</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
 <span></span>
 <span><span class="va">rcon</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rmst.html">rmst</a></span><span class="op">(</span><span class="va">mod_con</span>, t<span class="op">=</span><span class="fl">5</span>, niter<span class="op">=</span><span class="va">ni</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
@@ -923,56 +925,56 @@ assumptions are made about survival beyond the data.</p>
 <td align="left">Trial</td>
 <td align="left">None</td>
 <td align="right">5</td>
-<td align="left">3.12 (2.99, 3.21)</td>
+<td align="left">3.11 (2.98, 3.16)</td>
 </tr>
 <tr class="even">
 <td align="left">(1a)</td>
 <td align="left">Trial</td>
 <td align="left">Uncertain hazard</td>
 <td align="right">20</td>
-<td align="left">6.49 (5.51, 7.73)</td>
+<td align="left">6.71 (6.14, 7.56)</td>
 </tr>
 <tr class="odd">
 <td align="left">(1b)</td>
 <td align="left">Trial</td>
 <td align="left">Constant hazard</td>
 <td align="right">20</td>
-<td align="left">6.17 (4.98, 7.12)</td>
+<td align="left">5.61 (4.85, 7.03)</td>
 </tr>
 <tr class="even">
 <td align="left">(1c)</td>
 <td align="left">Trial,registry</td>
 <td align="left">None</td>
 <td align="right">20</td>
-<td align="left">5.98 (5.56, 6.73)</td>
+<td align="left">5.7 (5.08, 6.35)</td>
 </tr>
 <tr class="odd">
 <td align="left">(1d)</td>
 <td align="left">Trial,registry</td>
 <td align="left">Uncertain hazard</td>
 <td align="right">40</td>
-<td align="left">6.88 (5.7, 7.86)</td>
+<td align="left">6.64 (5.33, 7.74)</td>
 </tr>
 <tr class="even">
 <td align="left">(1e)</td>
 <td align="left">Trial,registry,population</td>
 <td align="left">Uncertain excess hazard</td>
 <td align="right">40</td>
-<td align="left">6.63 (6.47, 7.22)</td>
+<td align="left">6.81 (6.41, 8.13)</td>
 </tr>
 <tr class="odd">
 <td align="left">(1f)</td>
 <td align="left">Trial,registry,population</td>
 <td align="left">Mixture cure</td>
 <td align="right">40</td>
-<td align="left">6.76 (6.09, 7.98)</td>
+<td align="left">6.87 (5.78, 7.34)</td>
 </tr>
 <tr class="even">
 <td align="left">(1g)</td>
 <td align="left">Trial,registry,population</td>
 <td align="left">Elicited survival</td>
 <td align="right">40</td>
-<td align="left">6.59 (5.75, 7.62)</td>
+<td align="left">7.11 (6.31, 7.86)</td>
 </tr>
 </tbody>
 </table>
@@ -988,7 +990,7 @@ model with trial and registry data, and secondly, the model with all
 three data sources (trial, registry and population, but no “cure”
 assumption). The proportional hazards model (which fitted the trial data
 best) is assumed.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_full_reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">treat</span>, data<span class="op">=</span><span class="va">cetux</span>, mspline <span class="op">=</span> <span class="va">mspline40</span>,</span>
 <span>                           external<span class="op">=</span><span class="va">cetux_seer</span>, </span>
 <span>                           chains<span class="op">=</span><span class="va">chains</span>, iter<span class="op">=</span><span class="va">iter</span>, </span>
@@ -1012,7 +1014,7 @@ include a <code>wane_period</code> (vector defining the start and end of
 the waning period). We also supply <code>newdata</code> and
 <code>newdata0</code>, which indicate respectively what covariate values
 in the model correspond to “treated” and “control” groups.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>treat<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cetuximab"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">nd0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>treat<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Control"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">ind</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>treat<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Control"</span>,<span class="st">"Cetuximab"</span><span class="op">)</span><span class="op">)</span></span>
@@ -1080,34 +1082,34 @@ in the model correspond to “treated” and “control” groups.</p>
 <tr class="odd">
 <td align="left">Trial,registry</td>
 <td align="left">(2d) No waning</td>
-<td align="left">6.07 (5.55, 6.68)</td>
-<td align="left">0.71 (0.27, 2.27)</td>
+<td align="left">6.07 (5.47, 6.56)</td>
+<td align="left">0.79 (0.3, 1.8)</td>
 </tr>
 <tr class="even">
 <td align="left">Trial,registry,population</td>
 <td align="left">(2e) No waning</td>
-<td align="left">6.62 (6.03, 7)</td>
-<td align="left">0.36 (-0.34, 2)</td>
+<td align="left">6.31 (5.48, 7.06)</td>
+<td align="left">0.89 (-0.67, 1.73)</td>
 </tr>
 <tr class="odd">
 <td align="left">Trial,registry,population</td>
 <td align="left">(2e) 5 to 6 years</td>
-<td align="left">6.62 (6.03, 7)</td>
-<td align="left">0.26 (-0.25, 1.42)</td>
+<td align="left">6.31 (5.48, 7.06)</td>
+<td align="left">0.67 (-0.5, 1.32)</td>
 </tr>
 <tr class="even">
 <td align="left">Trial,registry,population</td>
 <td align="left">(2e) 5 to 20 years</td>
-<td align="left">6.62 (6.03, 7)</td>
-<td align="left">0.34 (-0.32, 1.88)</td>
+<td align="left">6.31 (5.48, 7.06)</td>
+<td align="left">0.85 (-0.64, 1.64)</td>
 </tr>
 </tbody>
 </table>
 <p>Using all three data sources, with no waning, the incremental
-restricted mean survival over 20 years is estimated as 0.36 (-0.34, 2).
-This reduces to 0.34 (-0.32, 1.88) when waning is applied gradually from
-6 to 20 years, and even further to 0.26 (-0.25, 1.42) when the effect is
-assumed to wane rapidly from 5 to 6 years.</p>
+restricted mean survival over 20 years is estimated as 0.89 (-0.67,
+1.73). This reduces to 0.85 (-0.64, 1.64) when waning is applied
+gradually from 6 to 20 years, and even further to 0.67 (-0.5, 1.32) when
+the effect is assumed to wane rapidly from 5 to 6 years.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

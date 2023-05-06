@@ -135,7 +135,7 @@ When we are ready to produce the "final" results, we can switch back to MCMC wit
 ```{r mcmc_setup}
 options(mc.cores = 2) # CRAN check limits to 2 cores
 # options(mc.cores = parallel::detectCores())
-chains <- 1; iter <- 1000
+chains <- 2; iter <- 4000
 ```
 
 

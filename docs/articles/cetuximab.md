@@ -157,7 +157,7 @@ When we are ready to produce the "final" results, we can switch back to MCMC wit
 ```r
 options(mc.cores = 2) # CRAN check limits to 2 cores
 # options(mc.cores = parallel::detectCores())
-chains <- 1; iter <- 1000
+chains <- 2; iter <- 4000
 ```
 
 
@@ -177,12 +177,6 @@ mod_con <- survextrap(Surv(years, d) ~ 1, data=control, mspline=mspline,
 mod_con5 <- survextrap(Surv(years, d) ~ 1, data=control, 
                        chains=chains, iter=iter, seed=1,  		 
                        prior_hscale=prior_hscale, prior_hsd = prior_hsd)
-```
-
-```
-## Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
-## Running the chains for more iterations may help. See
-## https://mc-stan.org/misc/warnings.html#bulk-ess
 ```
 
 A plot comparing the survival and hazard curves from these models is then built.  We use the `survival()` and `hazard()` functions to extract survival and hazard estimates, and combine these to give a dataset that can be plotted with `ggplot()`. 
@@ -279,6 +273,19 @@ mod_ph <- survextrap(Surv(years, d) ~ treat, data=cetux,
                      chains=chains, iter=iter,
                      prior_hscale=prior_hscale, prior_hsd = prior_hsd,
                      prior_loghr=prior_loghr)
+```
+
+```
+## Warning: There were 1 divergent transitions after warmup. See
+## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+## to find out why this is a problem and how to eliminate them.
+```
+
+```
+## Warning: Examine the pairs() plot to diagnose sampling problems
+```
+
+```r
 mod_nph <- survextrap(Surv(years, d) ~ treat, data=cetux, mspline=mspline, 
                       chains=chains, iter=iter,
                       nonprop = TRUE,
@@ -373,12 +380,12 @@ knitr::kable(trtcompf, col.names=c("Model","Time horizon",
 
 |Model                         | Time horizon|Restricted mean survival |Increase in restricted mean survival | LOOIC|
 |:-----------------------------|------------:|:------------------------|:------------------------------------|-----:|
-|(2a) Proportional hazards     |            5|2.9 (2.85,2.93)          |0.33 (0.14,0.43)                     |  1160|
-|(2b) Non-proportional hazards |            5|3.12 (2.79,3.21)         |0.03 (-0.11,0.6)                     |  1161|
-|(2c) Separate arms            |            5|3.03 (2.79,3.3)          |0.36 (0.02,0.71)                     |  1168|
-|(2a) Proportional hazards     |           20|4.87 (4.52,4.94)         |1.26 (0.43,1.63)                     |  1160|
-|(2b) Non-proportional hazards |           20|5.6 (4.88,7.2)           |0.4 (-0.26,2.08)                     |  1161|
-|(2c) Separate arms            |           20|6.34 (4.73,8.87)         |1.46 (-1.73,4.6)                     |  1168|
+|(2a) Proportional hazards     |            5|2.95 (2.95,3)            |0.12 (0.12,0.25)                     |  1160|
+|(2b) Non-proportional hazards |            5|3.02 (2.95,3.06)         |0.11 (-0.02,0.2)                     |  1161|
+|(2c) Separate arms            |            5|3.02 (2.75,3.28)         |0.36 (-0.01,0.72)                    |  1168|
+|(2a) Proportional hazards     |           20|6.21 (5.04,6.28)         |0.55 (0.52,0.93)                     |  1160|
+|(2b) Non-proportional hazards |           20|5.72 (5.54,7.11)         |-0.21 (-0.48,0.96)                   |  1161|
+|(2c) Separate arms            |           20|6.34 (4.59,8.65)         |1.43 (-1.52,4.4)                     |  1168|
 
 There is very little difference between the fit of the three models. 
 
@@ -726,14 +733,14 @@ knitr::kable(rs, col.names=c("Model", "Observed data","Extrapolation assumptions
 
 |Model |Observed data             |Extrapolation assumptions | Time horizon|Restricted mean survival |
 |:-----|:-------------------------|:-------------------------|------------:|:------------------------|
-|(1a)  |Trial                     |None                      |            5|3.12 (2.99, 3.21)        |
-|(1a)  |Trial                     |Uncertain hazard          |           20|6.49 (5.51, 7.73)        |
-|(1b)  |Trial                     |Constant hazard           |           20|6.17 (4.98, 7.12)        |
-|(1c)  |Trial,registry            |None                      |           20|5.98 (5.56, 6.73)        |
-|(1d)  |Trial,registry            |Uncertain hazard          |           40|6.88 (5.7, 7.86)         |
-|(1e)  |Trial,registry,population |Uncertain excess hazard   |           40|6.63 (6.47, 7.22)        |
-|(1f)  |Trial,registry,population |Mixture cure              |           40|6.76 (6.09, 7.98)        |
-|(1g)  |Trial,registry,population |Elicited survival         |           40|6.59 (5.75, 7.62)        |
+|(1a)  |Trial                     |None                      |            5|3.11 (2.98, 3.16)        |
+|(1a)  |Trial                     |Uncertain hazard          |           20|6.71 (6.14, 7.56)        |
+|(1b)  |Trial                     |Constant hazard           |           20|5.61 (4.85, 7.03)        |
+|(1c)  |Trial,registry            |None                      |           20|5.7 (5.08, 6.35)         |
+|(1d)  |Trial,registry            |Uncertain hazard          |           40|6.64 (5.33, 7.74)        |
+|(1e)  |Trial,registry,population |Uncertain excess hazard   |           40|6.81 (6.41, 8.13)        |
+|(1f)  |Trial,registry,population |Mixture cure              |           40|6.87 (5.78, 7.34)        |
+|(1g)  |Trial,registry,population |Elicited survival         |           40|7.11 (6.31, 7.86)        |
 
 
 
@@ -818,12 +825,12 @@ knitr::kable(res_wane %>%
 
 |Data                      |Model              |Restricted mean survival |Increase in restricted mean survival |
 |:-------------------------|:------------------|:------------------------|:------------------------------------|
-|Trial,registry            |(2d) No waning     |6.07 (5.55, 6.68)        |0.71 (0.27, 2.27)                    |
-|Trial,registry,population |(2e) No waning     |6.62 (6.03, 7)           |0.36 (-0.34, 2)                      |
-|Trial,registry,population |(2e) 5 to 6 years  |6.62 (6.03, 7)           |0.26 (-0.25, 1.42)                   |
-|Trial,registry,population |(2e) 5 to 20 years |6.62 (6.03, 7)           |0.34 (-0.32, 1.88)                   |
+|Trial,registry            |(2d) No waning     |6.07 (5.47, 6.56)        |0.79 (0.3, 1.8)                      |
+|Trial,registry,population |(2e) No waning     |6.31 (5.48, 7.06)        |0.89 (-0.67, 1.73)                   |
+|Trial,registry,population |(2e) 5 to 6 years  |6.31 (5.48, 7.06)        |0.67 (-0.5, 1.32)                    |
+|Trial,registry,population |(2e) 5 to 20 years |6.31 (5.48, 7.06)        |0.85 (-0.64, 1.64)                   |
 
 
 
 
-Using all three data sources, with no waning, the incremental restricted mean survival over 20 years is estimated as 0.36 (-0.34, 2).  This reduces to 0.34 (-0.32, 1.88) when waning is applied gradually from 6 to 20 years, and even further to 0.26 (-0.25, 1.42) when the effect is assumed to wane rapidly from 5 to 6 years.
+Using all three data sources, with no waning, the incremental restricted mean survival over 20 years is estimated as 0.89 (-0.67, 1.73).  This reduces to 0.85 (-0.64, 1.64) when waning is applied gradually from 6 to 20 years, and even further to 0.67 (-0.5, 1.32) when the effect is assumed to wane rapidly from 5 to 6 years.
