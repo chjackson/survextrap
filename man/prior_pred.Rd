@@ -72,7 +72,7 @@ function.  This should be a call to \code{p_gamma()}.  The default is
 \code{p_gamma(2,1)}.  See \code{\link{prior_haz_sd}} for a way to
 calibrate this to represent a meaningful belief.}
 
-\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
+\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{alpha} or \code{log(eta)}).
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters

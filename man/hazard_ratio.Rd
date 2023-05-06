@@ -49,5 +49,10 @@ output.}
 of being summarised as a median and 95\% credible intervals.}
 }
 \description{
-Compute the hazard ratio at a series of time points.  Intended for use with non-proportional hazards models (\code{survextrap(...,nonprop=TRUE)}).  In proportional hazards models (which \code{\link{survextrap}} fits by default, the hazard ratio is constant with time.
+Compute the hazard ratio at a series of time points, estimated from
+a \code{\link{survextrap}} model.  Intended for use with
+non-proportional hazards models
+(\code{survextrap(...,nonprop=TRUE)}).  In proportional hazards
+models (which \code{\link{survextrap}} fits by default) the hazard
+ratio is constant with time.
 }

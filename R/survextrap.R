@@ -36,7 +36,7 @@
 #' there is no way to assume that some covariates have proportional hazards but others don't -
 #' it is all or none.
 #'
-#' @param prior_hscale Prior for the baseline log hazard scale parameter (`log(eta)`).
+#' @param prior_hscale Prior for the baseline log hazard scale parameter (`alpha` or `log(eta)`).
 #'   This should be a call to a prior constructor function, such as
 #'   `p_normal(0,1)` or `p_t(0,2,2)`.   Supported prior distribution families
 #'   are normal (parameters mean and SD) and t distributions (parameters
@@ -358,12 +358,13 @@ survextrap <- function(formula,
     xcure <- list(xcure = xcure[covinfo_names])
     prior_keep <- list(priors=priors)
     prioretc_keep <- nlist(coefs_mean, hsd)
-    prior_pred <- get_prior_pred(mspline=mspline,
-                                 coefs_mean=coefs_mean, prior_hsd=prior_hsd,
-                                 prior_hscale=prior_hscale, prior_loghr=prior_loghr,
-                                 nonprop=nonprop, prior_hrsd=prior_hrsd)
+    prior_sample <- get_prior_sample(mspline=mspline,
+                                     coefs_mean=coefs_mean, prior_hsd=prior_hsd,
+                                     prior_hscale=prior_hscale,
+                                     prior_loghr=prior_loghr,
+                                     nonprop=nonprop, prior_hrsd=prior_hrsd)
     res <- c(misc_keep, standata_keep, model_keep, spline_keep, x, xcure,
-             prior_keep, prioretc_keep, nlist(prior_pred), nlist(km))
+             prior_keep, prioretc_keep, nlist(prior_sample), nlist(km))
 
     class(res) <- "survextrap"
     if (loo) {
@@ -425,7 +426,7 @@ mspline_spec <- function(formula, data, cure=FALSE, backhaz=NULL, external=NULL,
 ## Construct functions to draw from the prior predictive distributions
 ## for interesting quantities in a model specified with survextrap()
 
-get_prior_pred <- function(mspline,
+get_prior_sample <- function(mspline,
                            coefs_mean, prior_hsd, prior_hscale, prior_loghr,
                            nonprop, prior_hrsd){
   ## Samples of basic parameters defining the spline

@@ -159,8 +159,8 @@ test_that("prior sampling functions returned with a fitted model",{
   X <- list(rxLev=1,"rxLev+5FU"=0)
   X0 <- list(rxLev=0,"rxLev+5FU"=0)
   expect_error({
-    mod$prior_pred$haz(X = X, nsim=4)
-    mod$prior_pred$haz_sd(X = X, quantiles = c(0.25, 0.75))
-    mod$prior_pred$hr_sd(X = X, X0 = X0)
+    mod$prior_sample$haz(X = X, nsim=4)
+    mod$prior_sample$haz_sd(X = X, quantiles = c(0.25, 0.75))
+    mod$prior_sample$hr_sd(X = X, X0 = X0)
   }, NA)
 })

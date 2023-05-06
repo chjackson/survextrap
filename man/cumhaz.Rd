@@ -74,5 +74,5 @@ this is not supplied, then no waning is assumed.}
 to the hazard during the waning period.}
 }
 \description{
-Estimates of cumulative hazard from a survextrap model
+Estimates of the cumulative hazard at particular times, from a \code{\link{survextrap}} model
 }

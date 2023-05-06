@@ -54,7 +54,7 @@ the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods 
 there is no way to assume that some covariates have proportional hazards but others don't -
 it is all or none.}
 
-\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{log(eta)}).
+\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{alpha} or \code{log(eta)}).
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters

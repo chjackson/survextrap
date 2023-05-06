@@ -72,13 +72,14 @@ for definitions of these).
 non-proportionality effects.
 }
 \description{
-The summary statistics presented by default include the posterior
-median and 95\% credible intervals, alongside the Rhat convergence
-diagnostic and the bulk effective sample size (as computed by the
-\code{posterior} package).  For models fitted by optimisation
-rather than MCMC, the posterior mode is always returned.
-}
-\details{
+Posterior summary statistics for parameters of
+survextrap models.  The summary statistics presented by default
+include the posterior median and 95\% credible intervals,
+alongside the Rhat convergence diagnostic and the bulk effective
+sample size (as computed by the \code{posterior} package).  For
+models fitted by optimisation rather than MCMC, the posterior
+mode is always returned.
+
 Any other posterior summary can be computed if the appropriate
 function to compute it is supplied in \code{summ_fns}.
 }

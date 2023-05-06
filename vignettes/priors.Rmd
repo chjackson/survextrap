@@ -135,7 +135,7 @@ Together, these knots and prior choices define the model to be fitted to the dat
 
 * how much the hazard tends to vary through time 
 
-The fitted model object (`nd_mod` here) has a component called `prior_pred`, which is a list of functions that can be used to simulate various interesting quantities from this prior specification.
+The fitted model object (`nd_mod` here) has a component called `prior_sample`, which is a list of functions that can be used to simulate various interesting quantities from this prior specification.
 
 
 #### Constant hazard level 
@@ -144,7 +144,7 @@ The first thing to verify is the typical level of the hazard.  If no prior for t
 
 The `haz_const` function returns a summary of the implied prior for this constant hazard, and the implied prior for the mean survival time $1/h(t)$.
 ```{r}
-nd_mod$prior_pred$haz_const()
+nd_mod$prior_sample$haz_const()
 ```
 
 These credible limits are extreme.   Perhaps this is reasonable if the dataset is large and would dominate any choice of prior.  In most applications, however, we have some idea of what a typical survival time should be, hence what a typical hazard should be, say within an order or two of magnitude.  
@@ -184,13 +184,13 @@ print_priors(ndi_mod)
 
 #### Hazard as a function of time 
 
-The `prior_pred` component includes a function called `haz` which simulates a desired number of hazard trajectories over time, given the prior.   This function returns a data frame (here called `haz_sim`) which contains the hazard value `haz`, time point `time` and simulation replicate `rep`.   
+The `prior_sample` component includes a function called `haz` which simulates a desired number of hazard trajectories over time, given the prior.   This function returns a data frame (here called `haz_sim`) which contains the hazard value `haz`, time point `time` and simulation replicate `rep`.   
 
 Here we simulate `nsim=30` prior hazard trajectories from the model `ndi_mod`, and plot them with `ggplot`. 
 
 ```{r}
 set.seed(1)
-haz_sim <- ndi_mod$prior_pred$haz(nsim=30)
+haz_sim <- ndi_mod$prior_sample$haz(nsim=30)
 ggplot(haz_sim, aes(x=time, y=haz, group=rep)) + 
   geom_line() + xlab("Years") + ylab("Hazard") + ylim(0,0.05)
 ```
@@ -236,7 +236,7 @@ These measures are computed by the `haz_sd()` function: the `sd_haz` component i
 
 ```{r}
 set.seed(1)
-ndi_mod$prior_pred$haz_sd()
+ndi_mod$prior_sample$haz_sd()
 ```
 
 This shows that the default Gamma$(a=2,b=1)$ prior used in this model is very vague.  We can make it less vague by reducing $a/b$.  A Gamma(2, 5), for example, leads to an upper 90\% credible limit of about 5 for the hazard ratio over time.  Trial and error is probably necessary to produce a prior that is judged plausible by this metric.
