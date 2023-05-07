@@ -54,7 +54,7 @@ drawing the intervals if the plot shows the curve for only one covariate value.}
 \item{ci_alpha}{Transparency for the credible interval ribbons}
 }
 \description{
-Intended for use with non-proportional hazards models (\code{survextrap(...,nonprop=TRUE)}).   Intended as a quick check of a model fit, so there are
+For use with non-proportional hazards models (\code{survextrap(...,nonprop=TRUE)}).   Intended as a quick check of a model fit, so there are
 limited customisation options.
 The underlying data can be extracted with \code{\link{hazard_ratio}}.
 }

@@ -174,7 +174,7 @@ plot_hazsurv <- function(x, newdata=NULL, ...){
 
 ##' Plot hazard ratio against time from a survextrap model
 ##'
-##' Intended for use with non-proportional hazards models (\code{survextrap(...,nonprop=TRUE)}).   Intended as a quick check of a model fit, so there are
+##' For use with non-proportional hazards models (\code{survextrap(...,nonprop=TRUE)}).   Intended as a quick check of a model fit, so there are
 ##' limited customisation options. 
 ##' The underlying data can be extracted with \code{\link{hazard_ratio}}.
 ##'

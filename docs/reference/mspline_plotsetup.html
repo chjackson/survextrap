@@ -74,12 +74,16 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>knots</dt>
-<dd><p>Vector of knot locations. If not supplied, <code>df</code> has to be specified, in which case
-the default is <code>df - degree - 1</code> equally spaced knots between zero and the highest knot.</p></dd>
+<dd><p>Vector of knot locations. If not supplied, <code>df</code>
+has to be specified, in which case the default is a set of
+equally spaced knots between zero and the highest knot.  The
+number of knots (excluding zero) is <code>df - degree + 1</code> if
+<code>bsmooth</code> is <code>TRUE</code>, or <code>df - degree - 1</code>
+otherwise.</p></dd>
 
 
 <dt>bknot</dt>
-<dd><p>Location of the highest knot</p></dd>
+<dd><p>Location of the highest knot.</p></dd>
 
 
 <dt>tmin</dt>
@@ -91,7 +95,8 @@ the default is <code>df - degree - 1</code> equally spaced knots between zero an
 
 
 <dt>degree</dt>
-<dd><p>Spline polynomial degree (defaults to 3)</p></dd>
+<dd><p>Spline polynomial degree.  Can only be changed from
+the default of 3 if <code>bsmooth</code> is <code>FALSE</code>.</p></dd>
 
 
 <dt>df</dt>

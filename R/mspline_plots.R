@@ -2,11 +2,17 @@
 ##'
 ##' @name mspline_args
 ##'
-##' @param knots Vector of knot locations. If not supplied, \code{df} has to be specified, in which case
-#' the default is \code{df - degree - 1} equally spaced knots between zero and the highest knot.
-##' @param bknot Location of the highest knot
+##' @param knots Vector of knot locations. If not supplied, \code{df}
+#'   has to be specified, in which case the default is a set of
+#'   equally spaced knots between zero and the highest knot.  The
+#'   number of knots (excluding zero) is \code{df - degree + 1} if
+#'   \code{bsmooth} is \code{TRUE}, or \code{df - degree - 1}
+#'   otherwise.
+#' 
+##' @param bknot Location of the highest knot.
 ##'
-##' @param degree Spline polynomial degree (defaults to 3)
+##' @param degree Spline polynomial degree.  Can only be changed from
+##' the default of 3 if \code{bsmooth} is \code{FALSE}. 
 ##'
 ##' @param df Desired number of basis terms, or "degrees of freedom"
 ##'   in the spline.  If \code{knots} is not supplied, the number of

@@ -42,7 +42,8 @@ plus the number of additional knots specified in
 overfit, because the function is smoothed through the prior.
 
 \code{degree}: Polynomial degree used for the basis function. The
-default is 3, giving a cubic.
+default is 3, giving a cubic. This can only be changed from 3
+if \code{bsmooth} is \code{FALSE}.
 
 \code{bsmooth}: If \code{TRUE} (on by default) the spline is smoother
 at the highest knot, by defining the derivative and second derivative
@@ -68,12 +69,14 @@ denote a typical value in the data, e.g. the mean.}
 
 \item{nsim}{Number of simulations to draw}
 
-\item{quantiles}{Quantiles used to summarise the prior predictive distribution
-of the standard deviation.}
+\item{quantiles}{Quantiles used to summarise the implied prior distributions
+of the simulated quantities.}
 }
 \description{
 Summarises the prior for the constant hazard implied by a particular
-prior on the hazard scale parameter and spline specification.
+prior on the hazard scale parameter and M-spline specification,
+when the spline coefficients are fixed to define a constant hazard
+using \code{\link{mspline_constant_coefs}}.
 }
 \seealso{
 \code{\link{p_meansurv}}, \code{\link{mspline_constant_coefs}}

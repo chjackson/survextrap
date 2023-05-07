@@ -482,8 +482,9 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL
 
 ##' Determine M-spline basis coefficients which give a constant function.
 ##'
-##' This works by transforming the coefficients of the corresponding B-spline basis,
-##' which are equal if the B-spline is a constant function.
+##' This works by obtaining the coefficients of the corresponding
+##' B-spline basis, which are equal if the B-spline is a constant
+##' function.
 ##'
 ##' @param mspline A list with components `knots` (vector of knots),
 ##' and `degree` (polynomial degree) defining an M-spline configuration.

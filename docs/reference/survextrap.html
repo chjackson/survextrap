@@ -106,7 +106,8 @@ versions of these models can also be used.</p>
 <dd><p>A survival formula in standard R formula syntax, with a call to <code>Surv()</code>
 on the left hand side.</p>
 <p>Covariates included on the right hand side of the formula with be modelled with
-proportional hazards.</p></dd>
+proportional hazards, or if <code>nonprop</code> is <code>TRUE</code> then a non-proportional
+hazards is used.</p></dd>
 
 
 <dt>data</dt>
@@ -115,11 +116,12 @@ in a data frame, and not in the working environment.</p></dd>
 
 
 <dt>external</dt>
-<dd><p>External data as a data frame of aggregate survival counts with columns:</p>
+<dd><p>External data as a data frame of aggregate survival counts with columns named:</p>
 <p><code>start</code>: Start time</p>
 <p><code>stop</code>: Follow-up time</p>
 <p><code>n</code>: Number of people alive at <code>start</code></p>
-<p><code>r</code>: Number of those people who are still alive at <code>stop</code></p></dd>
+<p><code>r</code>: Number of those people who are still alive at <code>stop</code></p>
+<p>If there are covariates in <code>formula</code>, then the values they take in the external data must be supplied as additional columns in <code>external</code>.</p></dd>
 
 
 <dt>cure</dt>
@@ -136,7 +138,7 @@ it is all or none.</p></dd>
 
 
 <dt>prior_hscale</dt>
-<dd><p>Prior for the baseline log hazard scale parameter (<code>log(eta)</code>).
+<dd><p>Prior for the baseline log hazard scale parameter (<code>alpha</code> or <code>log(eta)</code>).
 This should be a call to a prior constructor function, such as
 <code>p_normal(0,1)</code> or <code>p_t(0,2,2)</code>.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters
@@ -201,27 +203,26 @@ hazard.   The background hazard is assumed to be known, and the
 cause-specific hazard is modelled with the flexible parametric model.</p>
 <p>The background hazard can be supplied in two forms.  The meaning of predictions
 from the model depends on which of these is used.</p>
-<p>(a) A data frame with columns <code>"hazard"</code> and <code>"time"</code>, specifying
-the background hazard at all times as a piecewise-constant (step) function.
-Each row gives the background hazard between the specified time and the
-next time.  The first element of <code>"time"</code> should be 0, and the final row
-specifies the hazard at all times greater than the last element of
-<code>"time"</code>.</p>
-<p>Predictions from the modelled fitted by <code>survextrap</code> will then include this
-background hazard, because it is known at all times.</p>
-<p>(b) The (quoted) name of a variable in the data giving the background
-hazard.  For censored cases, the exact value does
-not matter.  The predictions from <code>survextrap</code> will
-then describe the excess hazard or survival on top of this background.
-The overall hazard cannot be predicted in general, because the background hazard is
-only specified over a limited range of time.</p>
-<p>If there is external data and <code>backhaz</code> is supplied in form (b), then the
+<p>(a) A data frame with columns <code>"hazard"</code> and <code>"time"</code>,
+specifying the background hazard at all times as a
+piecewise-constant (step) function.  Each row gives the background
+hazard between the specified time and the next time.  The first
+element of <code>"time"</code> should be 0, and the final row specifies
+the hazard at all times greater than the last element of
+<code>"time"</code>.  Predictions from the model fitted by <code>survextrap</code>
+will then include this background hazard, because it is known at
+all times.</p>
+<p>(b) The (quoted) name of a variable in the data giving the
+background hazard.  For censored cases, the exact value does not
+matter.  The predictions from <code>survextrap</code> will then describe the
+excess hazard or survival on top of this background.  The overall
+hazard cannot be predicted in general, because the background
+hazard is only specified over a limited range of time.</p>
+<p>If there is external data, and <code>backhaz</code> is supplied in form (b), then the
 user should also supply the background survival at the start and stop points
 in columns of the external data named <code>"backsurv_start"</code> and
 <code>"backsurv_stop"</code>.  This should describe the same reference population as
-<code>backhaz</code>, though the package does not check for consistency between these.</p>
-<p>Leave-one-out cross-validation currently does not take into account any
-background hazard (effectively assuming it to be zero).</p></dd>
+<code>backhaz</code>, though the package does not check for consistency between these.</p></dd>
 
 
 <dt>mspline</dt>
@@ -249,7 +250,8 @@ plus the number of additional knots specified in
 <code>add_knots</code>. <code>df</code> defaults to 10.  This does not necessarily
 overfit, because the function is smoothed through the prior.</p>
 <p><code>degree</code>: Polynomial degree used for the basis function. The
-default is 3, giving a cubic.</p>
+default is 3, giving a cubic. This can only be changed from 3
+if <code>bsmooth</code> is <code>FALSE</code>.</p>
 <p><code>bsmooth</code>: If <code>TRUE</code> (on by default) the spline is smoother
 at the highest knot, by defining the derivative and second derivative
 at this point to be zero.</p></dd>
@@ -257,31 +259,41 @@ at this point to be zero.</p></dd>
 
 <dt>hsd</dt>
 <dd><p>Smoothing parameter estimation.</p>
-<p><code>"bayes"</code>: the smoothing parameter is estimated by full Bayes.</p>
+<p><code>"bayes"</code>: the smoothing parameter is estimated by full Bayes (the default).</p>
 <p><code>"eb"</code>: empirical Bayes is used.</p>
 <p>Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number.</p></dd>
 
 
 <dt>coefs_mean</dt>
-<dd><p>Spline basis coefficients that define the prior mean for the hazard function. By
-default, these are set to values that define a constant hazard function.  They are normalised to
+<dd><p>Spline basis coefficients that define the prior
+mean for the hazard function. By default, these are set to values
+that define a constant hazard function (see
+<code><a href="mspline_constant_coefs.html">mspline_constant_coefs</a></code>).  They are normalised to
 sum to 1 internally (if they do not already).</p></dd>
 
 
 <dt>fit_method</dt>
-<dd><p>Method from <span class="pkg">rstan</span> used to fit the model.  Defaults to MCMC.</p>
-<p>If <code>fit_method="mcmc"</code> then a sample from the posterior is drawn using Markov Chain Monte Carlo
-sampling, via <span class="pkg">rstan</span>'s <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html" class="external-link">rstan::sampling()</a></code> function.
-This is the default.  It is the most accurate but the slowest method.</p>
-<p>If <code>fit_method="opt"</code>, then instead of an MCMC sample from the posterior,
-<code>survextrap</code> returns the posterior mode calculated using optimisation, via
-<span class="pkg">rstan</span>'s <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html" class="external-link">rstan::optimizing()</a></code> function.
-A sample from a normal approximation to the (real-line-transformed)
-posterior distribution is drawn in order to obtain credible intervals.</p>
-<p>If <code>fit_method="vb"</code>, then variational Bayes methods are used, via <span class="pkg">rstan</span>'s
-<code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-vb.html" class="external-link">rstan::vb()</a></code> function.  This is labelled as "experimental" by
-<span class="pkg">rstan</span>.  It might give a better approximation to the posterior
-than <code>fit_method="opt"</code>, but has not been investigated in depth for these models.</p></dd>
+<dd><p>Method from <span class="pkg">rstan</span> used to fit the model.</p>
+<p>If <code>fit_method="mcmc"</code> then a sample from the posterior is
+drawn using Markov Chain Monte Carlo sampling, via <span class="pkg">rstan</span>'s
+<code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html" class="external-link">rstan::sampling()</a></code>
+function.  This is the default.  It is the most accurate but the
+slowest method.</p>
+<p>If <code>fit_method="opt"</code>, then instead of an MCMC sample from
+the posterior, <code>survextrap</code> returns the posterior mode
+calculated using optimisation, via <span class="pkg">rstan</span>'s
+<code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html" class="external-link">rstan::optimizing()</a></code>
+function.  A sample from a normal approximation to the
+(real-line-transformed) posterior distribution is drawn in order
+to obtain credible intervals.</p>
+<p>If <code>fit_method="vb"</code>, then variational Bayes methods are
+used, via <span class="pkg">rstan</span>'s
+<code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-vb.html" class="external-link">rstan::vb()</a></code> function.
+This is labelled as "experimental" by <span class="pkg">rstan</span>.  It might
+give a better approximation to the posterior than
+<code>fit_method="opt"</code>, and is faster than MCMC, in particular
+for large datasets, but has not been investigated in depth for
+these models.</p></dd>
 
 
 <dt>loo</dt>
@@ -296,8 +308,9 @@ fit of the model to the individual-level data, and
 
 
 <dt>...</dt>
-<dd><p>Additional arguments to supply to control the Stan fit, passed to the appropriate
-<span class="pkg">rstan</span> function, depending on which is chosen through the <code>fit_method</code> argument.</p></dd>
+<dd><p>Additional arguments to supply to control the Stan fit,
+passed to the appropriate <span class="pkg">rstan</span> function, depending on
+which is chosen through the <code>fit_method</code> argument.</p></dd>
 
 </dl></div>
     <div class="section level2">

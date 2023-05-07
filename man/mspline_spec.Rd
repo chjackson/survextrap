@@ -21,7 +21,8 @@ mspline_spec(
 on the left hand side.
 
 Covariates included on the right hand side of the formula with be modelled with
-proportional hazards.}
+proportional hazards, or if \code{nonprop} is \code{TRUE} then a non-proportional
+hazards is used.}
 
 \item{data}{Data frame containing variables in \code{formula}.  Variables should be
 in a data frame, and not in the working environment.}
@@ -38,33 +39,30 @@ cause-specific hazard is modelled with the flexible parametric model.
 The background hazard can be supplied in two forms.  The meaning of predictions
 from the model depends on which of these is used.
 
-(a) A data frame with columns \code{"hazard"} and \code{"time"}, specifying
-the background hazard at all times as a piecewise-constant (step) function.
-Each row gives the background hazard between the specified time and the
-next time.  The first element of \code{"time"} should be 0, and the final row
-specifies the hazard at all times greater than the last element of
-\code{"time"}.
+(a) A data frame with columns \code{"hazard"} and \code{"time"},
+specifying the background hazard at all times as a
+piecewise-constant (step) function.  Each row gives the background
+hazard between the specified time and the next time.  The first
+element of \code{"time"} should be 0, and the final row specifies
+the hazard at all times greater than the last element of
+\code{"time"}.  Predictions from the model fitted by \code{survextrap}
+will then include this background hazard, because it is known at
+all times.
 
-Predictions from the modelled fitted by \code{survextrap} will then include this
-background hazard, because it is known at all times.
+(b) The (quoted) name of a variable in the data giving the
+background hazard.  For censored cases, the exact value does not
+matter.  The predictions from \code{survextrap} will then describe the
+excess hazard or survival on top of this background.  The overall
+hazard cannot be predicted in general, because the background
+hazard is only specified over a limited range of time.
 
-(b) The (quoted) name of a variable in the data giving the background
-hazard.  For censored cases, the exact value does
-not matter.  The predictions from \code{survextrap} will
-then describe the excess hazard or survival on top of this background.
-The overall hazard cannot be predicted in general, because the background hazard is
-only specified over a limited range of time.
-
-If there is external data and \code{backhaz} is supplied in form (b), then the
+If there is external data, and \code{backhaz} is supplied in form (b), then the
 user should also supply the background survival at the start and stop points
 in columns of the external data named \code{"backsurv_start"} and
 \code{"backsurv_stop"}.  This should describe the same reference population as
-\code{backhaz}, though the package does not check for consistency between these.
+\code{backhaz}, though the package does not check for consistency between these.}
 
-Leave-one-out cross-validation currently does not take into account any
-background hazard (effectively assuming it to be zero).}
-
-\item{external}{External data as a data frame of aggregate survival counts with columns:
+\item{external}{External data as a data frame of aggregate survival counts with columns named:
 
 \code{start}: Start time
 
@@ -72,7 +70,9 @@ background hazard (effectively assuming it to be zero).}
 
 \code{n}: Number of people alive at \code{start}
 
-\code{r}: Number of those people who are still alive at \code{stop}}
+\code{r}: Number of those people who are still alive at \code{stop}
+
+If there are covariates in \code{formula}, then the values they take in the external data must be supplied as additional columns in \code{external}.}
 
 \item{df}{Desired number of basis terms, or "degrees of freedom"
 in the spline.  If \code{knots} is not supplied, the number of
@@ -81,7 +81,8 @@ knots is then chosen to satisfy this.}
 \item{add_knots}{Additional knots, other than those determined from the quantiles of the individual data.
 Typically used to add a maximum knot at the time that we want to extrapolate to.}
 
-\item{degree}{Spline polynomial degree (defaults to 3)}
+\item{degree}{Spline polynomial degree.  Can only be changed from
+the default of 3 if \code{bsmooth} is \code{FALSE}.}
 
 \item{bsmooth}{If \code{TRUE} then the function is constrained to
 also have zero derivative and second derivative at the boundary.}

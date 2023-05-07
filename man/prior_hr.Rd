@@ -16,8 +16,8 @@ of each list component matches the name of the coefficient, e.g.
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
-\item{quantiles}{Quantiles used to summarise the prior predictive distribution
-of the standard deviation.}
+\item{quantiles}{Quantiles used to summarise the implied prior distributions
+of the simulated quantities.}
 }
 \description{
 Summarises the prior for the hazard ratio implied by a particular

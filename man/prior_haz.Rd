@@ -67,14 +67,17 @@ plus the number of additional knots specified in
 overfit, because the function is smoothed through the prior.
 
 \code{degree}: Polynomial degree used for the basis function. The
-default is 3, giving a cubic.
+default is 3, giving a cubic. This can only be changed from 3
+if \code{bsmooth} is \code{FALSE}.
 
 \code{bsmooth}: If \code{TRUE} (on by default) the spline is smoother
 at the highest knot, by defining the derivative and second derivative
 at this point to be zero.}
 
-\item{coefs_mean}{Spline basis coefficients that define the prior mean for the hazard function. By
-default, these are set to values that define a constant hazard function.  They are normalised to
+\item{coefs_mean}{Spline basis coefficients that define the prior
+mean for the hazard function. By default, these are set to values
+that define a constant hazard function (see
+\code{\link{mspline_constant_coefs}}).  They are normalised to
 sum to 1 internally (if they do not already).}
 
 \item{prior_hsd}{Gamma prior for the standard deviation that
@@ -138,12 +141,21 @@ values will be summarised, as a measure of time-dependence.  By
 default, this is \code{c(0.1, 0.9)}, so that the 10\% and 90\%
 quantiles are used respectively.}
 
-\item{quantiles}{Quantiles used to summarise the prior predictive distribution
-of the standard deviation.}
+\item{quantiles}{Quantiles used to summarise the implied prior distributions
+of the simulated quantities.}
 
 \item{X0}{An alternative set of "reference" covariate values
 (optional).  The hazard ratio between the hazards at \code{X}
 and \code{X0} will also be returned.}
+}
+\value{
+A data frame with columns \code{sd_haz} (SD of the hazard),
+\code{sd_mean} (SD of the inverse hazard) and \code{hr} (ratio between
+high/low hazards) (for \code{\link{prior_haz_sd}}), and rows
+giving prior quantiles of these.
+
+In \code{\link{prior_hr_sd}}, \code{sd_hr} is the SD of hazard ratios
+over time, and \code{hrr} is the ratio between high/low hazard ratios.
 }
 \description{
 Computes consequences of priors chosen for the parameters \code{hsd}

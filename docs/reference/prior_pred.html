@@ -117,7 +117,8 @@ plus the number of additional knots specified in
 <code>add_knots</code>. <code>df</code> defaults to 10.  This does not necessarily
 overfit, because the function is smoothed through the prior.</p>
 <p><code>degree</code>: Polynomial degree used for the basis function. The
-default is 3, giving a cubic.</p>
+default is 3, giving a cubic. This can only be changed from 3
+if <code>bsmooth</code> is <code>FALSE</code>.</p>
 <p><code>bsmooth</code>: If <code>TRUE</code> (on by default) the spline is smoother
 at the highest knot, by defining the derivative and second derivative
 at this point to be zero.</p></dd>
@@ -129,8 +130,10 @@ event times.</p></dd>
 
 
 <dt>coefs_mean</dt>
-<dd><p>Spline basis coefficients that define the prior mean for the hazard function. By
-default, these are set to values that define a constant hazard function.  They are normalised to
+<dd><p>Spline basis coefficients that define the prior
+mean for the hazard function. By default, these are set to values
+that define a constant hazard function (see
+<code><a href="mspline_constant_coefs.html">mspline_constant_coefs</a></code>).  They are normalised to
 sum to 1 internally (if they do not already).</p></dd>
 
 
@@ -143,7 +146,7 @@ calibrate this to represent a meaningful belief.</p></dd>
 
 
 <dt>prior_hscale</dt>
-<dd><p>Prior for the baseline log hazard scale parameter (<code>log(eta)</code>).
+<dd><p>Prior for the baseline log hazard scale parameter (<code>alpha</code> or <code>log(eta)</code>).
 This should be a call to a prior constructor function, such as
 <code>p_normal(0,1)</code> or <code>p_t(0,2,2)</code>.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters

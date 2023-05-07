@@ -105,8 +105,12 @@ hazard and smoothness standard deviation.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>knots</dt>
-<dd><p>Vector of knot locations. If not supplied, <code>df</code> has to be specified, in which case
-the default is <code>df - degree - 1</code> equally spaced knots between zero and the highest knot.</p></dd>
+<dd><p>Vector of knot locations. If not supplied, <code>df</code>
+has to be specified, in which case the default is a set of
+equally spaced knots between zero and the highest knot.  The
+number of knots (excluding zero) is <code>df - degree + 1</code> if
+<code>bsmooth</code> is <code>TRUE</code>, or <code>df - degree - 1</code>
+otherwise.</p></dd>
 
 
 <dt>df</dt>
@@ -116,7 +120,8 @@ knots is then chosen to satisfy this.</p></dd>
 
 
 <dt>degree</dt>
-<dd><p>Spline polynomial degree (defaults to 3)</p></dd>
+<dd><p>Spline polynomial degree.  Can only be changed from
+the default of 3 if <code>bsmooth</code> is <code>FALSE</code>.</p></dd>
 
 
 <dt>bsmooth</dt>
@@ -125,8 +130,10 @@ also have zero derivative and second derivative at the boundary.</p></dd>
 
 
 <dt>coefs_mean</dt>
-<dd><p>Spline basis coefficients that define the prior mean for the hazard function. By
-default, these are set to values that define a constant hazard function.  They are normalised to
+<dd><p>Spline basis coefficients that define the prior
+mean for the hazard function. By default, these are set to values
+that define a constant hazard function (see
+<code><a href="mspline_constant_coefs.html">mspline_constant_coefs</a></code>).  They are normalised to
 sum to 1 internally (if they do not already).</p></dd>
 
 
@@ -139,7 +146,7 @@ calibrate this to represent a meaningful belief.</p></dd>
 
 
 <dt>prior_hscale</dt>
-<dd><p>Prior for the baseline log hazard scale parameter (<code>log(eta)</code>).
+<dd><p>Prior for the baseline log hazard scale parameter (<code>alpha</code> or <code>log(eta)</code>).
 This should be a call to a prior constructor function, such as
 <code>p_normal(0,1)</code> or <code>p_t(0,2,2)</code>.   Supported prior distribution families
 are normal (parameters mean and SD) and t distributions (parameters

@@ -12,12 +12,13 @@
 #' on the left hand side.
 #'
 #' Covariates included on the right hand side of the formula with be modelled with
-#' proportional hazards.
+#' proportional hazards, or if \code{nonprop} is \code{TRUE} then a non-proportional
+#' hazards is used.
 #'
 #' @param data Data frame containing variables in `formula`.  Variables should be
 #' in a data frame, and not in the working environment.
 #'
-#' @param external External data as a data frame of aggregate survival counts with columns:
+#' @param external External data as a data frame of aggregate survival counts with columns named:
 #'
 #' `start`: Start time
 #'
@@ -26,6 +27,8 @@
 #' `n`: Number of people alive at `start`
 #'
 #' `r`: Number of those people who are still alive at `stop`
+#'
+#' If there are covariates in \code{formula}, then the values they take in the external data must be supplied as additional columns in \code{external}.
 #'
 #' @param cure If `TRUE`, a mixture cure model is used, where the "uncured" survival is defined by the
 #' M-spline model, and the cure probability is estimated.
@@ -94,31 +97,28 @@
 #' The background hazard can be supplied in two forms.  The meaning of predictions
 #' from the model depends on which of these is used.
 #'
-#' (a) A data frame with columns \code{"hazard"} and \code{"time"}, specifying
-#' the background hazard at all times as a piecewise-constant (step) function.
-#' Each row gives the background hazard between the specified time and the
-#' next time.  The first element of \code{"time"} should be 0, and the final row
-#' specifies the hazard at all times greater than the last element of
-#' \code{"time"}.
+#' (a) A data frame with columns \code{"hazard"} and \code{"time"},
+#' specifying the background hazard at all times as a
+#' piecewise-constant (step) function.  Each row gives the background
+#' hazard between the specified time and the next time.  The first
+#' element of \code{"time"} should be 0, and the final row specifies
+#' the hazard at all times greater than the last element of
+#' \code{"time"}.  Predictions from the model fitted by `survextrap`
+#' will then include this background hazard, because it is known at
+#' all times.
 #'
-#' Predictions from the modelled fitted by `survextrap` will then include this
-#' background hazard, because it is known at all times.
+#' (b) The (quoted) name of a variable in the data giving the
+#' background hazard.  For censored cases, the exact value does not
+#' matter.  The predictions from `survextrap` will then describe the
+#' excess hazard or survival on top of this background.  The overall
+#' hazard cannot be predicted in general, because the background
+#' hazard is only specified over a limited range of time.
 #'
-#' (b) The (quoted) name of a variable in the data giving the background
-#' hazard.  For censored cases, the exact value does
-#' not matter.  The predictions from `survextrap` will
-#' then describe the excess hazard or survival on top of this background.
-#' The overall hazard cannot be predicted in general, because the background hazard is
-#' only specified over a limited range of time.
-#'
-#' If there is external data and `backhaz` is supplied in form (b), then the
+#' If there is external data, and `backhaz` is supplied in form (b), then the
 #' user should also supply the background survival at the start and stop points
 #' in columns of the external data named `"backsurv_start"` and
 #' `"backsurv_stop"`.  This should describe the same reference population as
 #' `backhaz`, though the package does not check for consistency between these.
-#'
-#' Leave-one-out cross-validation currently does not take into account any
-#' background hazard (effectively assuming it to be zero).
 #'
 #' @param mspline A list of control parameters defining the spline model.
 #'
@@ -149,7 +149,8 @@
 #'    overfit, because the function is smoothed through the prior.
 #'
 #'   `degree`: Polynomial degree used for the basis function. The
-#'   default is 3, giving a cubic.
+#'   default is 3, giving a cubic. This can only be changed from 3
+#'   if `bsmooth` is \code{FALSE}.
 #'
 #'   `bsmooth`: If \code{TRUE} (on by default) the spline is smoother
 #'    at the highest knot, by defining the derivative and second derivative
@@ -157,32 +158,42 @@
 #'
 #' @param hsd Smoothing parameter estimation.
 #'
-#' `"bayes"`: the smoothing parameter is estimated by full Bayes.
+#' `"bayes"`: the smoothing parameter is estimated by full Bayes (the default).
 #'
 #'  `"eb"`: empirical Bayes is used.
 #'
 #' Alternatively, if a number is supplied here, then the smoothing parameter is fixed to this number.
 #'
-#' @param coefs_mean Spline basis coefficients that define the prior mean for the hazard function. By
-#' default, these are set to values that define a constant hazard function.  They are normalised to
-#' sum to 1 internally (if they do not already).
+#' @param coefs_mean Spline basis coefficients that define the prior
+#'   mean for the hazard function. By default, these are set to values
+#'   that define a constant hazard function (see
+#'   \code{\link{mspline_constant_coefs}}).  They are normalised to
+#'   sum to 1 internally (if they do not already).
 #'
-#' @param fit_method Method from \pkg{rstan} used to fit the model.  Defaults to MCMC.
+#' @param fit_method Method from \pkg{rstan} used to fit the model.
 #'
-#'  If \code{fit_method="mcmc"} then a sample from the posterior is drawn using Markov Chain Monte Carlo
-##' sampling, via \pkg{rstan}'s \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} function.
-##' This is the default.  It is the most accurate but the slowest method.
+##'  If \code{fit_method="mcmc"} then a sample from the posterior is
+##' drawn using Markov Chain Monte Carlo sampling, via \pkg{rstan}'s
+##' \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}
+##' function.  This is the default.  It is the most accurate but the
+##' slowest method.
 ##'
-##'   If \code{fit_method="opt"}, then instead of an MCMC sample from the posterior,
-##'   `survextrap` returns the posterior mode calculated using optimisation, via
-##'   \pkg{rstan}'s \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} function.
-##'   A sample from a normal approximation to the (real-line-transformed)
-##'   posterior distribution is drawn in order to obtain credible intervals.
+##'   If \code{fit_method="opt"}, then instead of an MCMC sample from
+##'   the posterior, `survextrap` returns the posterior mode
+##'   calculated using optimisation, via \pkg{rstan}'s
+##'   \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}}
+##'   function.  A sample from a normal approximation to the
+##'   (real-line-transformed) posterior distribution is drawn in order
+##'   to obtain credible intervals.
 ##'
-##'   If \code{fit_method="vb"}, then variational Bayes methods are used, via \pkg{rstan}'s
-##'   \code{\link[rstan:stanmodel-method-vb]{rstan::vb()}} function.  This is labelled as "experimental" by
-##'   \pkg{rstan}.  It might give a better approximation to the posterior
-##'   than \code{fit_method="opt"}, but has not been investigated in depth for these models.
+##'   If \code{fit_method="vb"}, then variational Bayes methods are
+##'   used, via \pkg{rstan}'s
+##'   \code{\link[rstan:stanmodel-method-vb]{rstan::vb()}} function.
+##'   This is labelled as "experimental" by \pkg{rstan}.  It might
+##'   give a better approximation to the posterior than
+##'   \code{fit_method="opt"}, and is faster than MCMC, in particular
+##'   for large datasets, but has not been investigated in depth for
+##'   these models.
 ##'
 ##' @param loo Compute leave-one-out cross-validation statistics.
 ##'   This is done by default. Set to \code{FALSE} to not compute
@@ -194,8 +205,9 @@
 ##' 
 ##' See the \code{"examples"} vignette for more explanation of these.
 ##'
-#' @param ... Additional arguments to supply to control the Stan fit, passed to the appropriate
-#' \pkg{rstan} function, depending on which is chosen through the `fit_method` argument.
+##' @param ... Additional arguments to supply to control the Stan fit,
+##'   passed to the appropriate \pkg{rstan} function, depending on
+##'   which is chosen through the `fit_method` argument.
 #'
 #' @return A list of objects defining the fitted model.  These are not
 #'   intended to be extracted directly by users.  Instead see

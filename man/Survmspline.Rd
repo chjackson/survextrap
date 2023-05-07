@@ -125,7 +125,8 @@ increasing order.  These include the two boundary knots.
 In vectorised usage of these functions, the knots and degree must be
 the same for all alternative times and parameter values.}
 
-\item{degree}{Spline polynomial degree (defaults to 3)}
+\item{degree}{Spline polynomial degree.  Can only be changed from
+the default of 3 if \code{bsmooth} is \code{FALSE}.}
 
 \item{lower.tail}{logical; if \code{TRUE} (default), probabilities are \eqn{P(X
 \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}

@@ -385,6 +385,11 @@ prior_sample <- function(mspline,
 ##' Summarises the prior for the constant hazard implied by a particular
 ##' prior on the hazard scale parameter and spline specification.
 ##'
+##' Summarises the prior for the constant hazard implied by a particular
+##' prior on the hazard scale parameter and M-spline specification,
+##' when the spline coefficients are fixed to define a constant hazard
+##' using \code{\link{mspline_constant_coefs}}.
+##' 
 ##' @inheritParams prior_haz
 ##'
 ##' @seealso \code{\link{p_meansurv}}, \code{\link{mspline_constant_coefs}}
@@ -493,8 +498,17 @@ validate_prior_X <- function(X){
 ##'   default, this is `c(0.1, 0.9)`, so that the 10% and 90%
 ##'   quantiles are used respectively.
 ##'
-##' @param quantiles Quantiles used to summarise the prior predictive distribution
-##' of the standard deviation.
+##' @param quantiles Quantiles used to summarise the implied prior distributions
+##' of the simulated quantities.
+##'
+##' @return A data frame with columns `sd_haz` (SD of the hazard),
+##'   `sd_mean` (SD of the inverse hazard) and `hr` (ratio between
+##'   high/low hazards) (for \code{\link{prior_haz_sd}}), and rows
+##'   giving prior quantiles of these.
+##'
+##' In \code{\link{prior_hr_sd}}, `sd_hr` is the SD of hazard ratios
+##'   over time, and `hrr` is the ratio between high/low hazard ratios.
+##' 
 ##'
 ##' @name prior_haz
 ##' @export

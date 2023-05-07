@@ -15,8 +15,9 @@ is returned.  This is a vector of length one less than the number of coefficient
 with the rth element defined by \eqn{log(coefs[r+1] / coefs[1])}.}
 }
 \description{
-This works by transforming the coefficients of the corresponding B-spline basis,
-which are equal if the B-spline is a constant function.
+This works by obtaining the coefficients of the corresponding
+B-spline basis, which are equal if the B-spline is a constant
+function.
 }
 \references{
 Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425-441.
