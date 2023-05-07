@@ -83,7 +83,7 @@ prior_haz_const(mspline, prior_hscale = prior_hscale)
 
 #### Hazard variability parameter $\sigma$.
 
-The prior for $\sigma$ is chosen so that the highest hazard values over the 20 year horizon (90\% quantile) are expected to be about $\rho=2$ times the lowest values (10\% quantile), but with a vague 95\% credible interval for $\rho$ of between about 1 and 15.    The function `prior_haz_sd()` uses simulation to estimate the beliefs implied by a particular Gamma prior for $\sigma$ (jointly with the prior specified for the hazard scale).
+The prior for $\sigma$ is chosen so that the highest hazard values over the 20 year horizon (90\% quantile) are expected to be about $\rho=2$ times the lowest values (10\% quantile), but with a vague 95\% credible interval for $\rho$ of between about 1 and 16.    The function `prior_haz_sd()` uses simulation to estimate the beliefs implied by a particular Gamma prior for $\sigma$ (jointly with the prior specified for the hazard scale).
 
 The choice of Gamma(2,5) here was arrived at through trial-and-error, until the distribution for $\rho$ (the quantity `hr` returned by `prior_haz_sd()`) matched our prior judgement.  Note that repeated simulations will give slightly different results unless the seed is set.
 
@@ -135,7 +135,7 @@ When we are ready to produce the "final" results, we can switch back to MCMC wit
 ```{r mcmc_setup}
 options(mc.cores = 2) # CRAN check limits to 2 cores
 # options(mc.cores = parallel::detectCores())
-chains <- 1; iter <- 1000
+chains <- 4; iter <- 2000
 ```
 
 The `rhat` convergence diagnostic shown when printing the results of a `survextrap` fit should be checked - this should be close to 1 if the MCMC fit has converged. 
@@ -202,7 +202,7 @@ grid::grid.draw(cbind(ggplotGrob(ps),
                       ggplotGrob(ph)))
 ```
 
-The plots show the posterior median and 95\% credible intervals. There is no data between 5 and 20 years, so the extrapolation of the trial data over this period depends on the model assumption - either that the hazard is constant, or that the hazard will change smoothly, but with an unknown direction and extent of change.   If we allow it to change, the uncertainty is appropriately greater. 
+The plots show the posterior median and 95\% credible intervals. There are no data between 5 and 20 years, so the extrapolation of the trial data over this period depends on the model assumption - either that the hazard is constant, or that the hazard will change smoothly, but with an unknown direction and extent of change.   If we allow it to change, the uncertainty is appropriately greater. 
 
 
 ## Determining an optimal number of knots
@@ -210,7 +210,7 @@ The plots show the posterior median and 95\% credible intervals. There is no dat
 The model seems to fit the trial data well, and the Bayesian procedure is designed to mitigate against overfitting from having too many spline knots.   Even so, we might still want reassurance that the spline function has an appropriate amount of complexity to describe the data.  Therefore we use LOOIC to compare a range of models with different numbers of spline basis functions (set via the `df` argument to `mspline_spec`).
 
 <details>
-```{r modcomp, class.source = 'fold-hide', eval=FALSE}
+```{r modcomp, class.source = 'fold-hide'}
 dfs <- 5:12
 rescomp <- as.data.frame(matrix(nrow=length(dfs), ncol=7))
 for (i in seq_along(dfs)){
@@ -262,6 +262,7 @@ mod_cet <- survextrap(Surv(years, d) ~ 1, data=cetuximab, mspline=mspline,
 
 The survival curves for these three models are now compared.
 
+<details>
 ```{r fig_trt, class.source = 'fold-hide'}
 surv_ph <- survival(mod_ph, tmax=7) %>% mutate(Model="Proportional hazards")
 surv_nph <- survival(mod_nph, tmax=7) %>% mutate(Model="Non-proportional hazards")
@@ -285,18 +286,20 @@ ggplot(surv_trt, aes(x=t, y=median, col=Model, lty=treat)) +
     geom_vline(xintercept = max(cetux$years)) +
     geom_vline(xintercept = mod_con5$mspline$iknots, col="gray80", lty=2)
 ```
+</details>
 
 
 The results and goodness-of fit are compared between these three models.  We compare estimates of restricted mean survival for the control group (`rmst()`), and the increase in mean survival time for the treated group (`irmst()` ). Both of these are restricted to the 5-year trial horizon (`t=5`).
 
 Note that when using functions like `rmst()` or `survival()` which extract outputs from models with covariates, we supply `newdata` to say what covariate values we want the outputs to be computed for.  In the call to `rmst()` we told it to compute for the control group.  We left out `newdata` in the call to `irmst()` because, for models with one factor covariate with two levels, it will calculate, by default, the mean for the second level minus the mean for the first level.
 
+<details>
 ```{r table_trt, class.source = 'fold-hide'}
 comp_fn <- function(mod){
-    rm <- rmst(mod, niter=3, newdata=data.frame(treat="Control"), t=c(5,20)) %>% 
+    rm <- rmst(mod, niter=1000, newdata=data.frame(treat="Control"), t=c(5,20)) %>% 
         rename(rm_med="median",rm_lower="2.5%", rm_upper="97.5%") %>% 
         select(t, rm_med, rm_lower, rm_upper)
-    irm <- irmst(mod, niter=3, t=c(5,20)) %>%
+    irm <- irmst(mod, niter=1000, t=c(5,20)) %>%
         rename(ir_med="median",ir_lower="2.5%", ir_upper="97.5%") %>%
         select(ir_med, ir_lower, ir_upper)
     cbind(name=deparse(substitute(mod)), rm, irm, 
@@ -308,17 +311,21 @@ rmst_con <- rmst(mod_con, t=c(5,20)) %>%
   rename(rm_med="median",rm_lower="2.5%", rm_upper="97.5%") %>% 
   select(t, rm_med, rm_lower, rm_upper)
 irmst_sep <- attr(rmst_cet,"sample")[[1]] - attr(rmst_con,"sample")[[1]]
-irmst_sep <- posterior::summarise_draws(irmst_sep, median, ~quantile(.x, probs=c(0.025, 0.975))) %>%
+irmst_sep <- posterior::summarise_draws(irmst_sep, median,
+                                        ~quantile(.x, probs=c(0.025, 0.975))) %>%
   rename(t=variable, ir_med="median",ir_lower="2.5%", ir_upper="97.5%") %>% 
   select(ir_med, ir_lower, ir_upper)
-loo_sep <- mod_con$loo$estimates["looic","Estimate"] + mod_cet$loo$estimates["looic","Estimate"]
+loo_sep <- mod_con$loo$estimates["looic","Estimate"] +
+  mod_cet$loo$estimates["looic","Estimate"]
 comp_sep <- cbind(list(name="mod_sep"), rmst_con, irmst_sep, list(looic=loo_sep))
 
 trtcomp <- rbind(comp_fn(mod_ph), comp_fn(mod_nph), comp_sep)
 trtcompf <- trtcomp %>%
   arrange(t) %>%
-  mutate(rm = sprintf("%s (%s,%s)", round(rm_med,2), round(rm_lower,2), round(rm_upper,2)),
-         ir = sprintf("%s (%s,%s)", round(ir_med,2), round(ir_lower,2), round(ir_upper,2)),
+  mutate(rm = sprintf("%s (%s,%s)", round(rm_med,2),
+                      round(rm_lower,2), round(rm_upper,2)),
+         ir = sprintf("%s (%s,%s)", round(ir_med,2),
+                      round(ir_lower,2), round(ir_upper,2)),
          looic = round(looic),
          model = forcats::fct_recode(name, 
                                      "(2a) Proportional hazards"="mod_ph",
@@ -332,11 +339,12 @@ knitr::kable(trtcompf, col.names=c("Model","Time horizon",
                                    "Increase in restricted mean survival",
                                    "LOOIC"))
 ```
+</details>
 
 There is very little difference between the fit of the three models. 
 
-```{r latex_table_trt,echo=FALSE,eval=FALSE,results="hide"}
-## Table in LaTeX format for the paper
+The following code formats the table in LaTeX format (for the paper).
+```{r latex_table_trt}
 write.table(trtcompf, sep="  &  ", eol="\\\\\n", quote=FALSE, row.names = FALSE)
 ```
 
@@ -354,7 +362,7 @@ We fit a model which assumes that people in the registry data have the same surv
 > **Note**: if instead there had been only one row in the external data, giving survivors to 25 years from those alive at 6 years, it would be impossible to identify variations in the hazard _within_ the period from 6 to 25 years, so using multiple knots inside this period would be futile.
 
 ```{r mod_seer,cache=TRUE,results="hide"}
-mspline_seer <- mspline_spec(Surv(years, d) ~ 1, data=cetux, df=7, 
+mspline_seer <- mspline_spec(Surv(years, d) ~ 1, data=cetux, df=6, 
                              add_knots=c(10,15,20))
 mod_seer <- survextrap(Surv(years, d) ~ 1, data=control, 
                        external=cetux_seer, mspline=mspline_seer, 
@@ -364,6 +372,7 @@ mod_seer <- survextrap(Surv(years, d) ~ 1, data=control,
 
 The results are illustrated, and compared to the model `mod_con` for the trial data alone that allowed the hazard to change after the trial.  The registry data makes the hazard extrapolations much more confident. 
 
+<details>
 ```{r fig_registry, class.source = 'fold-hide'}
 haz_con <- hazard(mod_con) %>%
     mutate(Model="No external data")
@@ -388,6 +397,7 @@ ggplot(haz_plot_reg, aes(x=t, y=median, col=Model, fill=Model)) +
           legend.background=element_blank()) + 
     labs(col=NULL, fill=NULL)
 ```
+</details>
 
 ## Knot selection for external data 
 
@@ -396,13 +406,13 @@ The hazard seems to fit the external data, even with just one knot designed to c
 Placing knots at 10,15 and 20 years gives the lowest (best) LOOIC from these alternatives.  Adding more knots is judged to be over-fitting, which hampers predictive ability, and fewer knots do not represent all hazard variations.  The changes in the RMST estimates between these models are small though. 
 
 <details>
-```{r modcomp_seer, cache=TRUE, eval=FALSE}
+```{r modcomp_seer, cache=TRUE}
 knot_list <- list(c(10,20), 
                   c(20),
                   seq(8,20,by=2))
 
 comp_fn <- function(mod){
-  rm <- rmst(mod, niter=3, newdata=data.frame(treat="Control"), t=c(20)) %>% 
+  rm <- rmst(mod, niter=1000, newdata=data.frame(treat="Control"), t=c(20)) %>% 
     rename(rm_med="median",rm_lower="2.5%", rm_upper="97.5%") %>% 
     mutate(rmf = sprintf("%s (%s, %s)", round(rm_med,2), 
                          round(rm_lower,2), round(rm_upper,2))) %>%
@@ -413,7 +423,7 @@ comp_fn <- function(mod){
 
 res <- vector(3, mode="list")
 for (i in 1:3){
-  mspex <- mspline_spec(Surv(years, d) ~ treat, data=cetux, df=7, 
+  mspex <- mspline_spec(Surv(years, d) ~ treat, data=cetux, df=6, 
                          add_knots = knot_list[[i]])
   mod <- survextrap(Surv(years, d) ~ 1, data=control, 
                     external=cetux_seer, mspline=mspex, 
@@ -450,6 +460,7 @@ mod_seer_pop <- survextrap(Surv(years, d) ~ 1, data=control, mspline = mspline_s
                            prior_hscale=prior_hscale, prior_hsd = prior_hsd)
 ```
 
+<details>
 ```{r fig_registry_pop20, class.source = 'fold-hide'}
 haz_seer <- hazard(mod_seer,tmax=20) %>% mutate(Model="Without population data")
 haz_seer_pop <- hazard(mod_seer_pop,tmax=20) %>% mutate(Model="With population data")
@@ -476,6 +487,7 @@ ggplot(haz_plot_reg_pop20, aes(x=t, y=median, col=Model, fill=Model)) +
           legend.background=element_blank()) + 
     labs(col=NULL, fill=NULL)
 ```
+</details>
 
 Including the population data does not make much difference to the estimated hazards over 20 years after diagnosis. 
 
@@ -484,7 +496,7 @@ The benefit of the population data in this example is to inform extrapolations o
 Two models are then fitted, to show the impact of the population data. The first includes the trial and registry data.
 
 ```{r mod_seer40, results="hide"}
-mspline40 <- mspline_spec(Surv(years, d) ~ treat, data=cetux, df=7, 
+mspline40 <- mspline_spec(Surv(years, d) ~ treat, data=cetux, df=6, 
                           add_knots=c(10, 15, 20, 30, 40))
 mod_seer40 <- survextrap(Surv(years, d) ~ 1, data=control, mspline = mspline40,
                          external=cetux_seer, 
@@ -503,6 +515,7 @@ mod_seer_pop40 <- survextrap(Surv(years, d) ~ 1, data=control, mspline = mspline
 
 The population data "anchors" the extrapolation - the hazard is constrained to be no less than that of the population, and the resulting estimates become more precise.  There is still a lot of uncertainty, since (through the knots at 30 and 40 years) we have allowed for the possibility that the excess hazard changes beyond the point (25-26 years) where we actually have data about it. 
 
+<details>
 ```{r fig_registry_pop40, class.source = 'fold-hide'}
 haz_seer40 <- hazard(mod_seer40,tmax=40) %>% 
     mutate(Model="With registry data")
@@ -530,6 +543,7 @@ ggplot(haz_plot_reg_pop, aes(x=t, y=median, col=Model, fill=Model)) +
     labs(col=NULL, fill=NULL) +
     geom_vline(xintercept = max(control$years)) 
 ```
+</details>
 
 
 # Mixture cure model
@@ -584,7 +598,7 @@ data_elic <- data.frame(
 
 This can then be joined to the registry data `cetux_seer`, to give an external dataset to supply to `survextrap`. 
 
-```{r fig_cure, results="hide"}
+```{r mod_cure_elic, results="hide"}
 pop_cured <- 
   cetux_seer %>% full_join(data_elic, by = join_by(start, stop, r, n, treat))
 mod_cure_elic <- survextrap(Surv(years, d) ~ 1, data=control, mspline=mspline40, 
@@ -595,7 +609,8 @@ mod_cure_elic <- survextrap(Surv(years, d) ~ 1, data=control, mspline=mspline40,
 
 The extrapolations of excess hazard from this model are clearly informed by the elicited survival probability, and pulled closer to the population data.  If we had expressed more confidence in the prior guess (through a bigger `n`) the posterior estimates of the hazard function from the model would have been pulled even closer to the population data.
 <a id="cureplot"></a>
-```{r, class.source = 'fold-hide'}
+<details>
+```{r fig_cure, class.source = 'fold-hide'}
 haz_cure <- hazard(mod_cure, tmax=40) %>% mutate(Model="Mixture cure model")
 haz_cure_elic <- hazard(mod_cure_elic, tmax=40) %>% mutate(Model="Elicited survival")
 haz_plot_cure <- rbind(haz_cure, haz_cure_elic)
@@ -621,6 +636,7 @@ ggplot(haz_plot_cure, aes(x=t, y=median, col=Model, fill=Model)) +
           legend.background=element_blank()) + 
     labs(col=NULL, fill=NULL) 
 ```
+</details>
 
 # Table of mean survival times
 
@@ -628,17 +644,18 @@ A table of results for the paper is now constructed and formatted.   We compare 
 
 The models are categorised by what data are included, and what assumptions are made about survival beyond the data.
 
+<details>
 ```{r rmst_con, cache=TRUE, class.source = 'fold-hide'}
-ni <- 10
+ni <- 4000
 
 rcon <- rmst(mod_con, t=5, niter=ni) %>% 
-  mutate(data="Trial",extrap="None")
+  mutate(data="Trial",extrap="No extrapolation")
 rcon20 <- rmst(mod_con, t=20, niter=ni) %>% 
   mutate(data="Trial", extrap="Uncertain hazard")
 rcon520 <- rmst(mod_con5, t=20, niter=ni) %>% 
   mutate(data="Trial", extrap="Constant hazard")
 rreg20 <- rmst(mod_seer, t=20, niter=ni) %>% 
-  mutate(data="Trial,registry",extrap="None")
+  mutate(data="Trial,registry",extrap="No extrapolation")
 rreg40 <- rmst(mod_seer40, t=40, niter=ni)  %>% 
   mutate(data="Trial,registry", extrap="Uncertain hazard")
 rpop40 <- rmst(mod_seer_pop40, t=40, niter=ni) %>%
@@ -661,9 +678,10 @@ rs <- list(rcon, rcon20, rcon520, rreg20, rreg40, rpop40, rcure40, relic40) %>%
 knitr::kable(rs, col.names=c("Model", "Observed data","Extrapolation assumptions",
                              "Time horizon","Restricted mean survival"))
 ```
+</details>
 
-```{r latex_table_rs,echo=FALSE,eval=FALSE,results="hide"}
-## Table in LaTeX format for the paper
+The following code formats the table in LaTeX format (for the paper).
+```{r latex_table_rs}
 write.table(rs, sep="  &  ", eol="\\\\\n", quote=FALSE, row.names = FALSE)
 ```
 
@@ -696,7 +714,7 @@ ind <- data.frame(treat=c("Control","Cetuximab"))
 ind0 <- data.frame(treat=c("Control","Control"))
 tmax <- max(cetux$years)
 
-ni <- 10
+ni <- 1000
 
 ## 20 year absolute survival
 rmnwr <- rmst(mod_full_reg, t=20, niter=ni) %>% mutate(wane=0)
@@ -742,8 +760,8 @@ knitr::kable(res_wane %>%
              col.names=c("Data","Model","Restricted mean survival",
                          "Increase in restricted mean survival"))
 ```
-
-```{r latex_wane, echo=FALSE, eval=FALSE, results="hide"}
+Table in LaTeX format (for the paper).
+```{r latex_wane}
 write.table(res_wane, eol="\\\\\n", sep="  &  ", row.names = FALSE, quote=FALSE)
 ```
 
