@@ -1,14 +1,20 @@
 #' Simulate a dataset from the prior predictive distribution of survival times 
 #' in an M-spline survival model.
 #'
-#' Simulate a dataset from the prior predictive distribution of survival times 
-#' in an M-spline survival model.  Mixture cure and additive hazards models
-#' not currently supported.
+#' Simulate a dataset from the prior predictive distribution of
+#' survival times in an M-spline survival model.  Additive hazards
+#' models not currently supported.
 #'
 #' @param n Sample size of the simulated dataset.  Each observation in
 #'   the dataset is generated from a model with the same parameters.
 #'   These parameters are generated from a single simulation from the
 #'   prior distribution.
+#'
+#' @param fix_prior If \code{TRUE}, then one value of the parameter
+#'   vector is drawn from the prior, followed by \code{n}
+#'   individual-level times given this common prior value.  If
+#'   \code{FALSE}, then to produce each sampled individual time, a
+#'   different sample from the prior is used.
 #'
 #' @param censtime Right-censoring time to impose on the simulated
 #'   event times.
@@ -26,25 +32,31 @@
 #'
 #' @export
 prior_pred <- function(n,
+                       fix_prior=FALSE,
                        mspline,
                        censtime = Inf,
                        coefs_mean = NULL,
+                       prior_hscale = p_normal(0,20),
                        prior_hsd = p_gamma(2,1),
-                       prior_hscale,
                        X = NULL,
                        prior_loghr = NULL,
                        prior_hrsd = NULL,
                        prior_cure = NULL)
 {
+  mspline <- mspline_default(mspline)
+  nprior <- if (fix_prior) 1 else n
   sam <- prior_sample(mspline = mspline,
                       coefs_mean = coefs_mean,
-                      prior_hsd = prior_hsd,
                       prior_hscale = prior_hscale,
+                      prior_hsd = prior_hsd,
+                      prior_loghr = prior_loghr,
                       prior_hrsd = prior_hrsd,
-                      X = X, X0=NULL, nsim=n)
+                      prior_cure = prior_cure,
+                      X = X, X0=NULL, nsim=nprior)
   sim <- rsurvmspline(n, alpha=sam$alpha, coefs=sam$coefs,
                       knots=mspline$knots, degree=mspline$degree,
-                      bsmooth=mspline$bsmooth) # TODO pcure.  backhaz too? 
+                      pcure=sam$pcure,
+                      bsmooth=mspline$bsmooth) # TODO backhaz 
   res <- data.frame(time = pmin(sim, censtime),
                     event = as.numeric(sim<=censtime))
   attr(res, "prior") <- sam

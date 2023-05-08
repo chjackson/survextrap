@@ -7,11 +7,12 @@ in an M-spline survival model.}
 \usage{
 prior_pred(
   n,
+  fix_prior = FALSE,
   mspline,
   censtime = Inf,
   coefs_mean = NULL,
+  prior_hscale = p_normal(0, 20),
   prior_hsd = p_gamma(2, 1),
-  prior_hscale,
   X = NULL,
   prior_loghr = NULL,
   prior_hrsd = NULL,
@@ -23,6 +24,12 @@ prior_pred(
 the dataset is generated from a model with the same parameters.
 These parameters are generated from a single simulation from the
 prior distribution.}
+
+\item{fix_prior}{If \code{TRUE}, then one value of the parameter
+vector is drawn from the prior, followed by \code{n}
+individual-level times given this common prior value.  If
+\code{FALSE}, then to produce each sampled individual time, a
+different sample from the prior is used.}
 
 \item{mspline}{A list of control parameters defining the spline model.
 
@@ -69,12 +76,6 @@ that define a constant hazard function (see
 \code{\link{mspline_constant_coefs}}).  They are normalised to
 sum to 1 internally (if they do not already).}
 
-\item{prior_hsd}{Gamma prior for the standard deviation that
-controls the variability over time (or smoothness) of the hazard
-function.  This should be a call to \code{p_gamma()}.  The default is
-\code{p_gamma(2,1)}.  See \code{\link{prior_haz_sd}} for a way to
-calibrate this to represent a meaningful belief.}
-
 \item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{alpha} or \code{log(eta)}).
 This should be a call to a prior constructor function, such as
 \code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
@@ -92,6 +93,12 @@ appropriately beforehand, so that a value of zero has a different
 meaning.  For continuous covariates, it helps for both
 computation and interpretation to define the value of zero to
 denote a typical value in the data, e.g. the mean.}
+
+\item{prior_hsd}{Gamma prior for the standard deviation that
+controls the variability over time (or smoothness) of the hazard
+function.  This should be a call to \code{p_gamma()}.  The default is
+\code{p_gamma(2,1)}.  See \code{\link{prior_haz_sd}} for a way to
+calibrate this to represent a meaningful belief.}
 
 \item{X}{Either a list, vector or one-row matrix, with one value
 for each covariate in the model.  Defaults to zero.  Factors
@@ -131,9 +138,9 @@ returned in the \code{prior} attribute as a list with components
 coefficients).
 }
 \description{
-Simulate a dataset from the prior predictive distribution of survival times
-in an M-spline survival model.  Mixture cure and additive hazards models
-not currently supported.
+Simulate a dataset from the prior predictive distribution of
+survival times in an M-spline survival model.  Additive hazards
+models not currently supported.
 }
 \seealso{
 \code{\link{prior_sample}}
