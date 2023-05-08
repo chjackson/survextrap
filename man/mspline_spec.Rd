@@ -72,7 +72,8 @@ in columns of the external data named \code{"backsurv_start"} and
 
 \code{r}: Number of those people who are still alive at \code{stop}
 
-If there are covariates in \code{formula}, then the values they take in the external data must be supplied as additional columns in \code{external}.}
+If there are covariates in \code{formula}, then the values they take in the external data must be supplied as additional columns in \code{external}.
+Therefore if there are external data, the covariates in \code{formula} and \code{data} should not be named \code{start},\code{stop},\code{n} or \code{r}.}
 
 \item{df}{Desired number of basis terms, or "degrees of freedom"
 in the spline.  If \code{knots} is not supplied, the number of

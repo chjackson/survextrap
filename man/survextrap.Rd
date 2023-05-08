@@ -46,7 +46,8 @@ in a data frame, and not in the working environment.}
 
 \code{r}: Number of those people who are still alive at \code{stop}
 
-If there are covariates in \code{formula}, then the values they take in the external data must be supplied as additional columns in \code{external}.}
+If there are covariates in \code{formula}, then the values they take in the external data must be supplied as additional columns in \code{external}.
+Therefore if there are external data, the covariates in \code{formula} and \code{data} should not be named \code{start},\code{stop},\code{n} or \code{r}.}
 
 \item{cure}{If \code{TRUE}, a mixture cure model is used, where the "uncured" survival is defined by the
 M-spline model, and the cure probability is estimated.}

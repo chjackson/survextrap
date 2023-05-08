@@ -29,6 +29,7 @@
 #' `r`: Number of those people who are still alive at `stop`
 #'
 #' If there are covariates in \code{formula}, then the values they take in the external data must be supplied as additional columns in \code{external}.
+#' Therefore if there are external data, the covariates in \code{formula} and \code{data} should not be named \code{start},\code{stop},\code{n} or \code{r}.
 #'
 #' @param cure If `TRUE`, a mixture cure model is used, where the "uncured" survival is defined by the
 #' M-spline model, and the cure probability is estimated.
@@ -379,7 +380,7 @@ survextrap <- function(formula,
              prior_keep, prioretc_keep, nlist(prior_sample), nlist(km))
 
     class(res) <- "survextrap"
-    if (loo) {
+    if (loo && (fit_method=="mcmc")) {
       res$loo <- loo_survextrap(res, standata, loglik_ipd)
       if (external$nextern > 0)
         res$loo_external <- loo_survextrap(res, standata, loglik_external)
