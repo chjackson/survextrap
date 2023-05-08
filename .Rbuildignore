@@ -13,3 +13,4 @@ vignettes/examples_cache
 vignettes/cetuximab*
 ^doc$
 ^Meta$
+vignettes/sbc*
