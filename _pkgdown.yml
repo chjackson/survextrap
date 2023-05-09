@@ -16,8 +16,8 @@ reference:
   - prior_haz_sd
   - prior_hr
   - prior_hr_sd
-  - mspline_priorpred
-  - plot_mspline_priorpred
+  - prior_sample_hazard
+  - plot_prior_hazard
   - prior_pred
   - print_priors
 - title: Getting results from fitted models

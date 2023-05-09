@@ -32,6 +32,7 @@ based on quantiles of event times observed in the individual data."><!-- mathjax
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
     <a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a>
+    <a class="dropdown-item" href="../articles/sbc.html">Simulation-based calibration of survextrap</a>
   </div>
 </li>
 <li class="nav-item">
@@ -82,7 +83,7 @@ based on quantiles of event times observed in the individual data.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>formula</dt>
-<dd><p>A survival formula in standard R formula syntax, with a call to <code>Surv()</code>
+<dd><p>A survival formula in standard R formula syntax, with a call to <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv()</a></code>
 on the left hand side.</p>
 <p>Covariates included on the right hand side of the formula with be modelled with
 proportional hazards, or if <code>nonprop</code> is <code>TRUE</code> then a non-proportional
@@ -135,7 +136,8 @@ in columns of the external data named <code>"backsurv_start"</code> and
 <p><code>stop</code>: Follow-up time</p>
 <p><code>n</code>: Number of people alive at <code>start</code></p>
 <p><code>r</code>: Number of those people who are still alive at <code>stop</code></p>
-<p>If there are covariates in <code>formula</code>, then the values they take in the external data must be supplied as additional columns in <code>external</code>.</p></dd>
+<p>If there are covariates in <code>formula</code>, then the values they take in the external data must be supplied as additional columns in <code>external</code>.
+Therefore if there are external data, the covariates in <code>formula</code> and <code>data</code> should not be named <code>start</code>,<code>stop</code>,<code>n</code> or <code>r</code>.</p></dd>
 
 
 <dt>df</dt>
