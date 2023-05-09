@@ -134,7 +134,7 @@ mspline_basis <- function(times, knots, degree=3, integrate = FALSE,
                                   degree=degree, integrate = integrate)
   attr(res, "times") <- times
   attr(res, "bsmooth") <- bsmooth
-  attr(res, "knots") <- times
+  attr(res, "knots") <- knots
   attr(res, "Boundary.knots") <- NULL
   ## note that this overwrites the knots attributes created by splines2
   ## which are the internal knots

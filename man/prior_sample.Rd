@@ -139,7 +139,7 @@ If \code{X0} is supplied, then \code{alpha0}, \code{hscale0}, \code{beta0}, \cod
 \description{
 Draws a sample from the joint prior distribution of the parameters
 governing a survextrap model for given covariates.  This is used,
-for example, in \code{\link{mspline_priorpred}}, to visualise the
+for example, in \code{\link{prior_sample_hazard}}, to visualise the
 prior distribution around hazard curves implied by a particular
 M-spline model and parameter priors.
 }

@@ -289,13 +289,13 @@ prior_basehaz_sample <- function(mspline,
 ##'
 ##' Draws a sample from the joint prior distribution of the parameters
 ##' governing a survextrap model for given covariates.  This is used,
-##' for example, in \code{\link{mspline_priorpred}}, to visualise the
+##' for example, in \code{\link{prior_sample_hazard}}, to visualise the
 ##' prior distribution around hazard curves implied by a particular
 ##' M-spline model and parameter priors.
 ##'
 ##' @aliases prior_sample
 ##'
-##' @inheritParams mspline_priorpred
+##' @inheritParams prior_sample_hazard
 ##' @inheritParams survextrap
 ##'
 ##' @return A list with components:
@@ -381,6 +381,89 @@ prior_sample <- function(mspline,
 
   sam
 }
+
+##' Generate and/or plot a sample from the prior distribution of M-spline hazard curves
+##'
+##' Generates and/or plots the hazard curves (as functions of time)
+##' implied by a prior mean for the spline coefficients (a constant
+##' hazard by default) and particular priors for the baseline log
+##' hazard and smoothness standard deviation.
+##'
+##' @aliases prior_sample_hazard plot_prior_hazard
+##'
+##' @inheritParams survextrap
+##' @inheritParams mspline_plotsetup
+##'
+##' @param nsim Number of simulations to draw
+##'
+##' @param X Either a list, vector or one-row matrix, with one value
+##'   for each covariate in the model.  Defaults to zero.  Factors
+##'   must be supplied as multiple numeric (0/1) contrasts.
+##'   If there are multiple covariates and a single prior given in
+##'   `prior_loghr`, then this prior will be used for all the covariates.
+##'   If a list of priors is provided, then both this list and \code{X}
+##'   must be named with the names of the covariates. 
+##'
+##' @param X0 An alternative set of "reference" covariate values
+##'   (optional).  The hazard ratio between the hazards at \code{X}
+##'   and \code{X0} will also be returned.
+##'
+##' @return \code{prior_sample_hazard} returns a data frame of the
+##'   samples, and \code{plot_prior_hazard} generates a plot.  No
+##'   customisation options are provided for the plot function, which
+##'   is just intended as a quick check.
+##'
+##' @name prior_sample_hazard
+##' @export
+prior_sample_hazard <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
+                                coefs_mean = NULL,
+                                prior_hsd = p_gamma(2,1),
+                                prior_hscale = NULL,
+                                prior_loghr = NULL,
+                                X = NULL,
+                                X0 = NULL,
+                                prior_hrsd = NULL,
+                                tmin=0, tmax=10,
+                                nsim=10){
+  basis <- mspline_plotsetup(knots=knots, tmin=tmin, tmax=tmax, degree=degree, df=df,
+                             bsmooth=bsmooth)
+  time <- attr(basis, "times")
+  knots <- attr(basis, "knots")
+  sam <- prior_sample(mspline = list(knots=knots, degree=degree, bsmooth=bsmooth),
+                      coefs_mean=coefs_mean, prior_hsd=prior_hsd,
+                      prior_hscale=prior_hscale,
+                      prior_hrsd=prior_hrsd,
+                      X = X, X0=X0, nsim=nsim)
+  hazlist <- vector(nsim, mode="list")
+  for (i in 1:nsim){
+    haz <- mspline_sum_basis(basis, coefs=sam$coefs[i,],
+                             alpha = sam$alpha[i], time=time)
+    hazlist[[i]] <- data.frame(haz=haz, time=time)
+    hazlist[[i]]$rep <- i
+  }
+  hazdf <- do.call("rbind", hazlist)
+  hazdf$mean <- 1/hazdf$haz
+  hazdf$rep <- factor(hazdf$rep)
+
+  if (!is.null(X0)){
+    ## comparator hazard using the same simulated parameter values
+    ## but different covariate values
+    hazlist <- vector(nsim, mode="list")
+    for (i in 1:nsim){
+      haz <- mspline_sum_basis(basis, coefs=sam$coefs0[i,],
+                               alpha = sam$alpha0[i], time=time)
+      hazlist[[i]] <- data.frame(haz=haz, time=time)
+      hazlist[[i]]$rep <- i
+    }
+    hazdf0 <- do.call("rbind", hazlist)
+    hazdf$haz0 <- hazdf0$haz
+    hazdf$hr <- hazdf$haz / hazdf$haz0
+  }
+
+  attr(hazdf, "knots") <- knots
+  hazdf
+}
+
 
 ##' Summarises the prior for the constant hazard implied by a particular
 ##' prior on the hazard scale parameter and spline specification.
@@ -489,7 +572,7 @@ validate_prior_X <- function(X){
 ##'
 ##' @inheritParams mspline_args
 ##' @inheritParams survextrap
-##' @inheritParams mspline_priorpred
+##' @inheritParams prior_sample_hazard
 ##'
 ##' @param hq Quantiles which define the "low" and "high" values of a
 ##'   time-varying quantity (hazard in `prior_haz_sd` and the hazard
@@ -523,13 +606,13 @@ prior_haz_sd <- function(mspline,
                          nsim = 1000,
                          hq = c(0.1, 0.9),
                          quantiles = c(0.025, 0.5, 0.975)){
-  pred <- mspline_priorpred(knots=mspline$knots, degree=mspline$degree,
-                            bsmooth=mspline$bsmooth,
-                            coefs_mean=coefs_mean, prior_hsd=prior_hsd,
-                            prior_hscale=prior_hscale, prior_loghr=prior_loghr,
-                            X=X, prior_hrsd=prior_hrsd,
-                            tmin=tmin, tmax=tmax,
-                            nsim=nsim)
+  pred <- prior_sample_hazard(knots=mspline$knots, degree=mspline$degree,
+                              bsmooth=mspline$bsmooth,
+                              coefs_mean=coefs_mean, prior_hsd=prior_hsd,
+                              prior_hscale=prior_hscale, prior_loghr=prior_loghr,
+                              X=X, prior_hrsd=prior_hrsd,
+                              tmin=tmin, tmax=tmax,
+                              nsim=nsim)
   pred$mean <- 1 / pred$haz
   sd_haz <- tapply(pred$haz, pred$rep, sd)
   sd_mean <- tapply(pred$mean, pred$rep, sd)
@@ -559,13 +642,13 @@ prior_hr_sd <- function(mspline,
                         nsim = 100,
                         hq = c(0.1, 0.9),
                         quantiles = c(0.025, 0.5, 0.975)){
-  pred <- mspline_priorpred(knots=mspline$knots, degree=mspline$degree,
-                            bsmooth=mspline$bsmooth,
-                            coefs_mean=coefs_mean, prior_hsd=prior_hsd,
-                            prior_hscale=prior_hscale, prior_loghr=prior_loghr,
-                            X=X, X0=X0, prior_hrsd=prior_hrsd,
-                            tmin=tmin, tmax=tmax,
-                            nsim=nsim)
+  pred <- prior_sample_hazard(knots=mspline$knots, degree=mspline$degree,
+                              bsmooth=mspline$bsmooth,
+                              coefs_mean=coefs_mean, prior_hsd=prior_hsd,
+                              prior_hscale=prior_hscale, prior_loghr=prior_loghr,
+                              X=X, X0=X0, prior_hrsd=prior_hrsd,
+                              tmin=tmin, tmax=tmax,
+                              nsim=nsim)
   sd_hr <- tapply(pred$hr, pred$rep, sd)
   hq <- tapply(pred$hr, pred$rep, quantile, probs = hq)
   hq <- do.call("rbind", hq)

@@ -458,12 +458,12 @@ get_prior_sample <- function(mspline,
   }
   ## Samples of hazard curves over time
   haz <- function(X=NULL, tmin=0, tmax=max(mspline$knots), nsim=10){
-    mspline_priorpred(knots=mspline$knots, degree=mspline$degree,
-                      coefs_mean=coefs_mean, prior_hsd=prior_hsd,
-                      prior_hscale=prior_hscale, prior_loghr=prior_loghr,
-                      X=X, prior_hrsd=prior_hrsd,
-                      tmin=tmin, tmax=tmax,
-                      nsim=nsim)
+    prior_sample_hazard(knots=mspline$knots, degree=mspline$degree,
+                        coefs_mean=coefs_mean, prior_hsd=prior_hsd,
+                        prior_hscale=prior_hscale, prior_loghr=prior_loghr,
+                        X=X, prior_hrsd=prior_hrsd,
+                        tmin=tmin, tmax=tmax,
+                        nsim=nsim)
   }
 
   ## SD describing variation in hazard function with time

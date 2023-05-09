@@ -45,6 +45,7 @@
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
     <a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a>
+    <a class="dropdown-item" href="../articles/sbc.html">Simulation-based calibration of survextrap</a>
   </div>
 </li>
 <li class="nav-item">
@@ -79,7 +80,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2023-05-06</h4>
+            <h4 data-toc-skip class="date">2023-05-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -342,17 +343,17 @@ Gamma(2,1)\)</span> allows a wide range of wiggly shapes.</p>
 <span><span class="va">mspline</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>knots<span class="op">=</span><span class="va">knots</span><span class="op">)</span></span>
 <span><span class="va">p_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_constant_coefs.html">mspline_constant_coefs</a></span><span class="op">(</span><span class="va">mspline</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_priorpred.html">plot_mspline_priorpred</a></span><span class="op">(</span>knots<span class="op">=</span><span class="va">knots</span>, tmax<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">knots</span><span class="op">)</span>, </span>
-<span>                              coefs_mean <span class="op">=</span> <span class="va">p_mean</span>,</span>
-<span>                              prior_hsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">40</span><span class="op">)</span>,        </span>
-<span>                              prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>                              nsim<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span>    </span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/bquote.html" class="external-link">bquote</a></span><span class="op">(</span><span class="va">sigma</span> <span class="op">~</span> <span class="st">" ~ Gamma(2,40)"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_priorpred.html">plot_mspline_priorpred</a></span><span class="op">(</span>knots<span class="op">=</span><span class="va">knots</span>, tmax<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">knots</span><span class="op">)</span>, </span>
-<span>                              coefs_mean <span class="op">=</span> <span class="va">p_mean</span>,</span>
-<span>                              prior_hsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,         </span>
-<span>                              prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>                              nsim<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span> </span>
+<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prior_sample_hazard.html">plot_prior_hazard</a></span><span class="op">(</span>knots<span class="op">=</span><span class="va">knots</span>, tmax<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">knots</span><span class="op">)</span>, </span>
+<span>                        coefs_mean <span class="op">=</span> <span class="va">p_mean</span>,</span>
+<span>                        prior_hsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">40</span><span class="op">)</span>,      </span>
+<span>                        prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                        nsim<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span>  </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/bquote.html" class="external-link">bquote</a></span><span class="op">(</span><span class="va">sigma</span> <span class="op">~</span> <span class="st">" ~ Gamma(2,40)"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prior_sample_hazard.html">plot_prior_hazard</a></span><span class="op">(</span>knots<span class="op">=</span><span class="va">knots</span>, tmax<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">knots</span><span class="op">)</span>, </span>
+<span>                        coefs_mean <span class="op">=</span> <span class="va">p_mean</span>,</span>
+<span>                        prior_hsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,       </span>
+<span>                        prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                        nsim<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/bquote.html" class="external-link">bquote</a></span><span class="op">(</span><span class="va">sigma</span> <span class="op">~</span> <span class="st">"~ Gamma(2,1)"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">gridExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html" class="external-link">grid.arrange</a></span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="methods_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
@@ -537,7 +538,7 @@ long-term data on general mortality.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="treatment-effect-waning-models">Treatment effect waning models<a class="anchor" aria-label="anchor" href="#treatment-effect-waning-models"></a>
+<h2 id="waning">Treatment effect waning models<a class="anchor" aria-label="anchor" href="#waning"></a>
 </h2>
 <div class="section level4">
 <h4 id="principles">Principles<a class="anchor" aria-label="anchor" href="#principles"></a>

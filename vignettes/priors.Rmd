@@ -101,7 +101,7 @@ A general way to ensure that the chosen priors represent meaningful beliefs is t
 
 ## Plotting plausible hazard trajectories
 
-Before fitting a model, we can use the `mspline_priorpred` function to check that hazard curves simulated from the prior would be considered plausible representations of the knowledge that exists outside the data. 
+Before fitting a model, we can use the `prior_sample_hazard` function to check that hazard curves simulated from the prior would be considered plausible representations of the knowledge that exists outside the data. 
 
 To use this before the model is fitted, we have to know the knots defining the spline, and choose a set of priors. `survextrap` provides a set of default priors, which may or may not be sensible in a given application. and a procedure for picking knots (see the [methods vignette](../methods.html#bayesspec)).
 
@@ -195,25 +195,25 @@ ggplot(haz_sim, aes(x=time, y=haz, group=rep)) +
   geom_line() + xlab("Years") + ylab("Hazard") + ylim(0,0.05)
 ```
 
-An alternative way is to use the `mspline_priorpred` function, which does not require a model to be specified with the `survextrap` function, but does require the knots and priors to be supplied explicitly. 
+An alternative way is to use the `prior_sample_hazard` function, which does not require a model to be specified with the `survextrap` function, but does require the knots and priors to be supplied explicitly. 
 
 ```{r,results="hide"}
 set.seed(1)
-haz_sim <- mspline_priorpred(knots=sp$knots, degree=sp$degree, 
-                             coefs_mean = ndi_mod$coefs_mean,   
-                             prior_hsd = p_gamma(2,1),   
-                             prior_hscale = p_meansurv(median=50, upper=80, mspline=sp),
-                             tmax=3, nsim=30)
+haz_sim <- prior_sample_hazard(knots=sp$knots, degree=sp$degree, 
+                               coefs_mean = ndi_mod$coefs_mean,   
+                               prior_hsd = p_gamma(2,1),   
+                               prior_hscale = p_meansurv(median=50, upper=80, mspline=sp),
+                               tmax=3, nsim=30)
 ```
 
 These plots can give some idea of how much risks might be expected to vary over time.   The parameter driving these variations is $\sigma$, whose prior can be defined with the `prior_hsd` argument to `survextrap`.  In the standard `survextrap` model, $\sigma=0$ means that we are sure that the hazard will be constant.   Therefore we might want to define the prior for $\sigma$ to rule out implausibly large changes.  For example, a Gamma(2,20):
 
 ```{r,results="hide"}
 set.seed(1)
-haz_sim <- mspline_priorpred(knots=sp$knots, degree=sp$degree, 
-                             coefs_mean = ndi_mod$coefs_mean,   
-                             prior_hsd = p_gamma(2,20),   
-                             prior_hscale = p_meansurv(median=50, upper=80, mspline=sp),
+haz_sim <- prior_sample_hazard(knots=sp$knots, degree=sp$degree, 
+                               coefs_mean = ndi_mod$coefs_mean,   
+                               prior_hsd = p_gamma(2,20),   
+                               prior_hscale = p_meansurv(median=50, upper=80, mspline=sp),
                              tmax=3, nsim=30)
 ggplot(haz_sim, aes(x=time, y=haz, group=rep)) + 
   geom_line() + xlab("Years") + ylab("Hazard") + ylim(0,0.05)

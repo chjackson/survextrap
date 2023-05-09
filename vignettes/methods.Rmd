@@ -165,17 +165,17 @@ knots <- 1:10
 mspline <- list(knots=knots)
 p_mean <- mspline_constant_coefs(mspline)
 set.seed(1)
-p1 <- plot_mspline_priorpred(knots=knots, tmax=max(knots), 
-                              coefs_mean = p_mean,
-                              prior_hsd = p_gamma(2, 40),	     
-                              prior_hscale = p_normal(0, 1),
-                              nsim=10) + 	
-    ylim(0, 1) + ggtitle(bquote(sigma ~ " ~ Gamma(2,40)"))
-p2 <- plot_mspline_priorpred(knots=knots, tmax=max(knots), 
-                              coefs_mean = p_mean,
-                              prior_hsd = p_gamma(2, 1),	     
-                              prior_hscale = p_normal(0, 1),
-                              nsim=10) + 
+p1 <- plot_prior_hazard(knots=knots, tmax=max(knots), 
+                        coefs_mean = p_mean,
+                        prior_hsd = p_gamma(2, 40),	     
+                        prior_hscale = p_normal(0, 1),
+                        nsim=10) + 	
+  ylim(0, 1) + ggtitle(bquote(sigma ~ " ~ Gamma(2,40)"))
+p2 <- plot_prior_hazard(knots=knots, tmax=max(knots), 
+                        coefs_mean = p_mean,
+                        prior_hsd = p_gamma(2, 1),	     
+                        prior_hscale = p_normal(0, 1),
+                        nsim=10) + 
   ylim(0, 1) + ggtitle(bquote(sigma ~ "~ Gamma(2,1)"))
 gridExtra::grid.arrange(p1, p2, nrow=1)
 ```
