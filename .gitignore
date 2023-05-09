@@ -12,3 +12,5 @@ vignettes/*_files*
 *~
 /doc/
 /Meta/
+man/figures
+docs/reference/figures
