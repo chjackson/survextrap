@@ -5,7 +5,7 @@ Authors@R:
     c(person("Christopher", "Jackson", , "chris.jackson@mrc-bsu.cam.ac.uk", role = c("aut", "cre", "cph"),
              comment = c(ORCID = "0000-0002-6656-8913")),
       person("Iain", "Timmins", , "", role = c("ctb"),
-             comment = c(ORCID = "0000-0002-6656-8913")))
+             comment = c(ORCID = "0000-0002-8761-582X")))
 Description: Survival extrapolation using an individual-level right-censored time-to-event dataset, supplemented with aggregated external data on longer-term survival.  A Bayesian spline-based parametric model is used, where the appropriate flexibility is automatically determined from the data.  The external data may be in the form of elicited judgements about survival probabilities at specific times, with credible intervals.
 License: GPL (>= 3)
 Encoding: UTF-8
