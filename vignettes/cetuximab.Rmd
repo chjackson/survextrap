@@ -232,7 +232,7 @@ rescomp %>%
   knitr::kable(col.names = c("df", "LOOIC", "Restricted mean survival (5 years)"))
 ```
 </details>
-The estimates of RMST within 5 years do not change within 0.1.   Note this is only one of many ad-hoc checks we could do - note we did not change the prior for the smoothness `prior_hsd`, which also governs the amount of smoothness of the hazard function.
+The estimates of RMST within 5 years do not change within 0.1.   Note this is only one of many ad-hoc checks we could do - note we did not change the prior for the smoothness `prior_hsd`, which also governs the amount of smoothness of the hazard function.  LOOCV is also lower for `df=7`.  In practice we might want to switch the `df` according to what data are included, but for simplicity of illustration in this article, we stick with `df=6` for all models, which in general gives slightly stabler computation without affecting the results.
 
 Using LOOIC for model choice may result in fitted hazard functions that wiggle a lot over time and appear to "overfit" the data - but this may not matter if we just want to use the model for estimating quantities averaged over time, such as restricted mean survival.   LOOIC is designed for _prediction_.  If instead we want to use it for _description_ of the hazard trajectory, we might want to pick a simpler model by setting `df` to a lower value. 
 
@@ -688,7 +688,7 @@ write.table(rs, sep="  &  ", eol="\\\\\n", quote=FALSE, row.names = FALSE)
 
 # Waning models for long-term treatment effects
 
-Finally, we estimate the effect of treatment with cetuximab on long-term survival.  We extend two of the models with external data (fitted earlier to just the control group) to include a treatment effect and fit them to the full trial data `cetux`.  Firstly, the model with trial and registry data, and secondly, the model with all three data sources (trial, registry and population, but no "cure" assumption).  The proportional hazards model is assumed.
+Finally, we estimate the effect of treatment with cetuximab on long-term survival.  We extend two of the models with external data (fitted earlier to just the control group) to include a treatment effect and fit them to the full trial data `cetux`.  Firstly, the model with trial and registry data, and secondly, the model with all three data sources (trial, registry and population, but no "cure" assumption).  The proportional hazards model is assumed, which was adequate to describe the short-term data.
 
 ```{r mod_full, cache=TRUE, results="hide"}
 mod_full_reg <- survextrap(Surv(years, d) ~ treat, data=cetux, mspline = mspline40,
