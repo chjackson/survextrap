@@ -1,6 +1,6 @@
 Package: survextrap
 Title: Survival Extrapolation with a Flexible Parametric Model and External Data
-Version: 0.8
+Version: 0.8.1
 Authors@R: 
     c(person("Christopher", "Jackson", , "chris.jackson@mrc-bsu.cam.ac.uk", role = c("aut", "cre", "cph"),
              comment = c(ORCID = "0000-0002-6656-8913")),
@@ -16,17 +16,17 @@ Depends:
     R (>= 3.5.0),
     survival
 Imports: 
-    methods,
-    Rcpp (>= 0.12.0),
-    rstan (>= 2.18.1),
-    posterior,
     ggplot2 (>= 3.4.0),
     gridExtra,
+    loo,
+    methods,
+    posterior,
+    Rcpp (>= 0.12.0),
+    rstan (>= 2.18.1),
     rstpm2,
     splines2,
     survminer,
-    tibble,
-    loo
+    tibble
 LinkingTo: 
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
@@ -36,7 +36,7 @@ LinkingTo:
     StanHeaders (>= 2.18.0)
 SystemRequirements: GNU make
 Suggests: 
-    rstantools (>= 2.2.0),
+    rstantools (>= 2.3.1),
     knitr,
     rmarkdown,
     testthat,

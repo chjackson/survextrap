@@ -191,7 +191,7 @@ transformed parameters {
     matrix[ncovs,nvars-1] b_np; // nonproportionality cov effect. should be centred around 0. no intercept
     real ssd;
 
-    if (nonprop) { 
+    if ((ncovs>0) && nonprop) { 
 	for (r in 1:ncovs){
 	    b_np[r,1:(nvars-1)] = hrsd[r]*nperr[r,1:(nvars-1)];
 	}
@@ -252,12 +252,12 @@ transformed parameters {
 	}
 	// these values are unused in the PH model but they still need to be defined
 	for (j in 1:nvars) {
-	    b_event[1:nevent,j] = rep_vector(0,nevent);
-	    b_rcens[1:nrcens,j] = rep_vector(0,nrcens);
-	    b_extern[1:nextern,j] = rep_vector(0,nextern);
+	    if (nevent>0) { b_event[1:nevent,j] = rep_vector(0,nevent); }
+	    if (nrcens>0) { b_rcens[1:nrcens,j] = rep_vector(0,nrcens); }
+	    if (nextern>0) { b_extern[1:nextern,j] = rep_vector(0,nextern); }
 	}
 	for (j in 1:(nvars-1)){
-	    b_np[1:ncovs,j] = rep_vector(0,ncovs);
+	    if (ncovs>0) { b_np[1:ncovs,j] = rep_vector(0,ncovs); }
 	}
 	ssd = 0;
     }
@@ -336,7 +336,7 @@ model {
     }
 
     // Non-proportional haz model
-    if (nonprop) { 
+    if ((ncovs > 0) && nonprop) { 
 	hrsd ~ gamma(prior_hrsd[,1], prior_hrsd[,2]);
 	for (i in 1:ncovs){
 	    nperr[i,1:(nvars-1)] ~ std_normal();
