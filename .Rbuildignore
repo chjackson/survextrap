@@ -1,5 +1,6 @@
 ^survextrap\.Rproj$
 ^\.Rproj\.user$
+^\.Rprofile$
 ^LICENSE\.md$
 ^_pkgdown\.yml$
 ^docs$
