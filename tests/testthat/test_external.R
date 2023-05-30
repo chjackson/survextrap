@@ -1,10 +1,10 @@
 ## TODO tests with external data
+extdat <- data.frame(start = c(5, 10, 15, 20),
+                     stop =  c(10, 15, 20, 25),
+                     n = c(100, 100, 100, 100),
+                     r = c(50, 40, 30, 20))
 
 test_that("External data gives precise extrapolation",{
-  extdat <- data.frame(start = c(5, 10, 15, 20),
-                       stop =  c(10, 15, 20, 25),
-                       n = c(100, 100, 100, 100),
-                       r = c(50, 40, 30, 20))
   nde_mod <- survextrap(Surv(years, status) ~ 1, data=colons,
                         chains=1, external = extdat,
                         add_knots=c(4, 10, 25), fit_method="opt")
