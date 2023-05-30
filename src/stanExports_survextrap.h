@@ -1306,7 +1306,7 @@ public:
             stan::math::fill(ssd, DUMMY_VAR__);
             // transformed parameters block statements
             current_statement_begin__ = 194;
-            if (as_bool(nonprop)) {
+            if (as_bool((primitive_value(logical_gt(ncovs, 0)) && primitive_value(nonprop)))) {
                 current_statement_begin__ = 195;
                 for (int r = 1; r <= ncovs; ++r) {
                     current_statement_begin__ = 196;
@@ -1446,28 +1446,40 @@ public:
                 current_statement_begin__ = 254;
                 for (int j = 1; j <= nvars; ++j) {
                     current_statement_begin__ = 255;
-                    stan::model::assign(b_event, 
-                                stan::model::cons_list(stan::model::index_min_max(1, nevent), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
-                                rep_vector(0, nevent), 
-                                "assigning variable b_event");
+                    if (as_bool(logical_gt(nevent, 0))) {
+                        current_statement_begin__ = 255;
+                        stan::model::assign(b_event, 
+                                    stan::model::cons_list(stan::model::index_min_max(1, nevent), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                    rep_vector(0, nevent), 
+                                    "assigning variable b_event");
+                    }
                     current_statement_begin__ = 256;
-                    stan::model::assign(b_rcens, 
-                                stan::model::cons_list(stan::model::index_min_max(1, nrcens), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
-                                rep_vector(0, nrcens), 
-                                "assigning variable b_rcens");
+                    if (as_bool(logical_gt(nrcens, 0))) {
+                        current_statement_begin__ = 256;
+                        stan::model::assign(b_rcens, 
+                                    stan::model::cons_list(stan::model::index_min_max(1, nrcens), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                    rep_vector(0, nrcens), 
+                                    "assigning variable b_rcens");
+                    }
                     current_statement_begin__ = 257;
-                    stan::model::assign(b_extern, 
-                                stan::model::cons_list(stan::model::index_min_max(1, nextern), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
-                                rep_vector(0, nextern), 
-                                "assigning variable b_extern");
+                    if (as_bool(logical_gt(nextern, 0))) {
+                        current_statement_begin__ = 257;
+                        stan::model::assign(b_extern, 
+                                    stan::model::cons_list(stan::model::index_min_max(1, nextern), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                    rep_vector(0, nextern), 
+                                    "assigning variable b_extern");
+                    }
                 }
                 current_statement_begin__ = 259;
                 for (int j = 1; j <= (nvars - 1); ++j) {
                     current_statement_begin__ = 260;
-                    stan::model::assign(b_np, 
-                                stan::model::cons_list(stan::model::index_min_max(1, ncovs), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
-                                rep_vector(0, ncovs), 
-                                "assigning variable b_np");
+                    if (as_bool(logical_gt(ncovs, 0))) {
+                        current_statement_begin__ = 260;
+                        stan::model::assign(b_np, 
+                                    stan::model::cons_list(stan::model::index_min_max(1, ncovs), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                    rep_vector(0, ncovs), 
+                                    "assigning variable b_np");
+                    }
                 }
                 current_statement_begin__ = 262;
                 stan::math::assign(ssd, 0);
@@ -1741,7 +1753,7 @@ public:
                 lp_accum__.add(gamma_log<propto__>(hsd, get_base1(prior_hsd, 1, "prior_hsd", 1), get_base1(prior_hsd, 2, "prior_hsd", 1)));
             }
             current_statement_begin__ = 339;
-            if (as_bool(nonprop)) {
+            if (as_bool((primitive_value(logical_gt(ncovs, 0)) && primitive_value(nonprop)))) {
                 current_statement_begin__ = 340;
                 lp_accum__.add(gamma_log<propto__>(hrsd, stan::model::rvalue(prior_hrsd, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), "prior_hrsd"), stan::model::rvalue(prior_hrsd, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(2), stan::model::nil_index_list())), "prior_hrsd")));
                 current_statement_begin__ = 341;
@@ -1995,7 +2007,7 @@ public:
             stan::math::fill(ssd, DUMMY_VAR__);
             // do transformed parameters statements
             current_statement_begin__ = 194;
-            if (as_bool(nonprop)) {
+            if (as_bool((primitive_value(logical_gt(ncovs, 0)) && primitive_value(nonprop)))) {
                 current_statement_begin__ = 195;
                 for (int r = 1; r <= ncovs; ++r) {
                     current_statement_begin__ = 196;
@@ -2135,28 +2147,40 @@ public:
                 current_statement_begin__ = 254;
                 for (int j = 1; j <= nvars; ++j) {
                     current_statement_begin__ = 255;
-                    stan::model::assign(b_event, 
-                                stan::model::cons_list(stan::model::index_min_max(1, nevent), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
-                                rep_vector(0, nevent), 
-                                "assigning variable b_event");
+                    if (as_bool(logical_gt(nevent, 0))) {
+                        current_statement_begin__ = 255;
+                        stan::model::assign(b_event, 
+                                    stan::model::cons_list(stan::model::index_min_max(1, nevent), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                    rep_vector(0, nevent), 
+                                    "assigning variable b_event");
+                    }
                     current_statement_begin__ = 256;
-                    stan::model::assign(b_rcens, 
-                                stan::model::cons_list(stan::model::index_min_max(1, nrcens), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
-                                rep_vector(0, nrcens), 
-                                "assigning variable b_rcens");
+                    if (as_bool(logical_gt(nrcens, 0))) {
+                        current_statement_begin__ = 256;
+                        stan::model::assign(b_rcens, 
+                                    stan::model::cons_list(stan::model::index_min_max(1, nrcens), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                    rep_vector(0, nrcens), 
+                                    "assigning variable b_rcens");
+                    }
                     current_statement_begin__ = 257;
-                    stan::model::assign(b_extern, 
-                                stan::model::cons_list(stan::model::index_min_max(1, nextern), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
-                                rep_vector(0, nextern), 
-                                "assigning variable b_extern");
+                    if (as_bool(logical_gt(nextern, 0))) {
+                        current_statement_begin__ = 257;
+                        stan::model::assign(b_extern, 
+                                    stan::model::cons_list(stan::model::index_min_max(1, nextern), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                    rep_vector(0, nextern), 
+                                    "assigning variable b_extern");
+                    }
                 }
                 current_statement_begin__ = 259;
                 for (int j = 1; j <= (nvars - 1); ++j) {
                     current_statement_begin__ = 260;
-                    stan::model::assign(b_np, 
-                                stan::model::cons_list(stan::model::index_min_max(1, ncovs), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
-                                rep_vector(0, ncovs), 
-                                "assigning variable b_np");
+                    if (as_bool(logical_gt(ncovs, 0))) {
+                        current_statement_begin__ = 260;
+                        stan::model::assign(b_np, 
+                                    stan::model::cons_list(stan::model::index_min_max(1, ncovs), stan::model::cons_list(stan::model::index_uni(j), stan::model::nil_index_list())), 
+                                    rep_vector(0, ncovs), 
+                                    "assigning variable b_np");
+                    }
                 }
                 current_statement_begin__ = 262;
                 stan::math::assign(ssd, 0);
