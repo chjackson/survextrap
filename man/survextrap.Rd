@@ -18,6 +18,7 @@ survextrap(
   prior_hrsd = p_gamma(2, 1),
   backhaz = NULL,
   mspline = NULL,
+  add_knots = NULL,
   hsd = "bayes",
   coefs_mean = NULL,
   fit_method = "mcmc",
@@ -146,8 +147,7 @@ of knots is taken from \code{df}, and their location is taken from
 equally-spaced quantiles of the observed event times in the
 individual-level data.
 
-\code{add_knots}: Any extra knots beyond those chosen from the
-individual-level data (or supplied in \code{knots}).  This is intended
+\code{add_knots}: This is intended
 to be used when there are \code{external} data included in the
 model.  External data are typically outside the time period
 covered by the individual data.  \code{add_knots} would then be chosen
@@ -174,6 +174,12 @@ if \code{bsmooth} is \code{FALSE}.
 \code{bsmooth}: If \code{TRUE} (on by default) the spline is smoother
 at the highest knot, by defining the derivative and second derivative
 at this point to be zero.}
+
+\item{add_knots}{Any extra knots beyond those chosen from the
+individual-level data (or supplied in \code{knots}).  All other spline
+specifications are set to their defaults, as described in
+\code{mspline}.  For example, \code{add_knots = 10} is a shorthand
+for \code{mspline = list(add_knots = 10)}.}
 
 \item{hsd}{Smoothing parameter estimation.
 

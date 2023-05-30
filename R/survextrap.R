@@ -128,8 +128,7 @@
 #'   equally-spaced quantiles of the observed event times in the
 #'   individual-level data.
 #'
-#'   `add_knots`: Any extra knots beyond those chosen from the
-#'   individual-level data (or supplied in `knots`).  This is intended
+#'   `add_knots`: This is intended
 #'   to be used when there are \code{external} data included in the
 #'   model.  External data are typically outside the time period
 #'   covered by the individual data.  `add_knots` would then be chosen
@@ -156,6 +155,12 @@
 #'   `bsmooth`: If \code{TRUE} (on by default) the spline is smoother
 #'    at the highest knot, by defining the derivative and second derivative
 #'    at this point to be zero.
+#'
+#' @param add_knots Any extra knots beyond those chosen from the
+#'   individual-level data (or supplied in `knots`).  All other spline
+#'   specifications are set to their defaults, as described in
+#'   \code{mspline}.  For example, `add_knots = 10` is a shorthand
+#'   for `mspline = list(add_knots = 10)`. 
 #'
 #' @param hsd Smoothing parameter estimation.
 #'
@@ -238,6 +243,7 @@ survextrap <- function(formula,
                        prior_hrsd = p_gamma(2,1),
                        backhaz = NULL,
                        mspline = NULL,
+                       add_knots = NULL,
                        hsd = "bayes",
                        coefs_mean = NULL,
                        fit_method = "mcmc",
@@ -250,7 +256,7 @@ survextrap <- function(formula,
     xcure <- make_xcure(cure, data, td)
     backhaz <- make_backhaz(backhaz, data, td)
     external <- make_external(external, formula, x, xcure, backhaz)
-    mspline <- make_mspline(mspline, td, external)
+    mspline <- make_mspline(mspline, td, external, add_knots)
 
     basis_event  <- make_basis(td$t_event, mspline)
     ibasis_event <- make_basis(td$t_event, mspline, integrate = TRUE)
@@ -708,7 +714,7 @@ make_basis <- function(times, mspline, integrate = FALSE) {
 aa <- function(x, ...) as.array(x,...)
 
 
-make_mspline <- function(mspline, td, external){
+make_mspline <- function(mspline, td, external, add_knots=NULL){
     mspline <- mspline_default(mspline)
     knots <- sort(mspline$knots)
     df     <- mspline$df
@@ -739,12 +745,13 @@ make_mspline <- function(mspline, td, external){
         tt <- td$t_end
     }
     ttk <- unique(tt)
-    if (!is.numeric(mspline$add_knots))
+    if (is.numeric(mspline$add_knots)) add_knots <- mspline$add_knots
+    if (!is.numeric(add_knots))
       ttk <- sort(c(ttk, unique(c(external$start, external$stop))))
     knots <- default_knots(ttk, df = df, knots = knots,
                            degree = degree, bsmooth = bsmooth)
-    if (is.numeric(mspline$add_knots)) {
-      add_knots <- setdiff(unique(mspline$add_knots), knots)
+    if (is.numeric(add_knots)) {
+      add_knots <- setdiff(unique(add_knots), knots)
       knots <- sort(c(knots, add_knots))
       df <- df + length(add_knots)
     }

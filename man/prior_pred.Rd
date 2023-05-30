@@ -38,8 +38,7 @@ of knots is taken from \code{df}, and their location is taken from
 equally-spaced quantiles of the observed event times in the
 individual-level data.
 
-\code{add_knots}: Any extra knots beyond those chosen from the
-individual-level data (or supplied in \code{knots}).  This is intended
+\code{add_knots}: This is intended
 to be used when there are \code{external} data included in the
 model.  External data are typically outside the time period
 covered by the individual data.  \code{add_knots} would then be chosen
