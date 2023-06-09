@@ -37,7 +37,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-This article is an in-depth demonstration of how `survextrap` could be used in a realistic application to a health technology evaluation.  A range of data sources and analysis choices are explored, and publication-style plots and tables are produced.  A more formal account of this analysis will be given in a forthcoming paper.  This article also serves the purpose of providing the code that was used in the paper, making the analysis reproducible and explaining how the code is used.
+This article is an in-depth demonstration of how `survextrap` could be used in a realistic application to a health technology evaluation.  A range of data sources and analysis choices are explored, and publication-style plots and tables are produced.
+
+A more formal account of this analysis is given in the preprint [paper](https://arxiv.org/abs/2306.03957) about the package and method.   This article also serves the purpose of providing the code that was used in the paper, making the analysis reproducible and explaining how the code is used.
 
 A more casual, quick tour of the package's features is given in the `survextrap` package vignette called [examples.html](examples.html), and the methods are explained in detail in [methods.html](methods.html).
 

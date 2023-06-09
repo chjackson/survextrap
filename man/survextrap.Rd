@@ -258,3 +258,7 @@ individual data.  A fixed background hazard can also be included in
 an additive hazards (relative survival) model.  Mixture cure
 versions of these models can also be used.
 }
+\references{
+Jackson, C. (2023) \code{survextrap}: a package for flexible and transparent
+survival extrapolation.  arXiV preprint, \url{https://arxiv.org/abs/2306.03957}.
+}

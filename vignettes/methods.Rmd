@@ -23,7 +23,7 @@ knitr::opts_chunk$set(eval=TRUE)
 ```
 
 See the [README](../index.html) for the design principles of the package, and the [examples vignette](examples.html) for examples of how to fit models.
-
+A more formal account of the methods is given in the preprint [paper](https://arxiv.org/abs/2306.03957).
 
 # M-splines 
 

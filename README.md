@@ -102,7 +102,7 @@ Many forms of external data that might be useful for survival extrapolation (suc
 
 ### Technical details of the methods
 
-See `vignette("methods")`.
+The model is fully described in a [preprint paper](https://arxiv.org/abs/2306.03957).   See also `vignette("methods")`.
 
 `vignette("priors")` goes into detail on how prior distributions and judgements can be specified in `survextrap` - an important but often-neglected part of Bayesian analysis. 
 
@@ -111,10 +111,12 @@ See `vignette("methods")`.
 
 `vignette("examples")` gives a rapid tour of each feature, using simple textbook examples and simulated data.
 
-The [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetuximab.html) is a more in-depth demonstration of how `survextrap` could be used in a typical health technology evaluation, based on clinical trial, disease registry, general population and elicited data.  More details of this will be given in a forthcoming paper.
+The [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetuximab.html) is a more in-depth demonstration of how `survextrap` could be used in a typical health technology evaluation, based on clinical trial, disease registry, general population and elicited data.  This vignette accompanies Section 4 of the preprint [paper](https://arxiv.org/abs/2306.03957).
 
 
 ### Slides from presentations about survextrap
+
+* [R-HTA, York, June 2023](https://chjackson.github.io/survextrap/cjackson_survextrap_rhta.pdf)
 
 * [Exeter, October 2022](https://chjackson.github.io/survextrap/cjackson_survextrap_exeter.pdf)
 

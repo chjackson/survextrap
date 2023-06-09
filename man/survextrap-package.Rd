@@ -7,5 +7,11 @@
 \description{
 For an introduction to and overview of the \code{survextrap} package, and full documentation, see
 
-\url{https://chjackson.github.io/survextrap/}
+\url{https://chjackson.github.io/survextrap/}.
+
+For details of the methods, see the paper by Jackson (2023).
+}
+\references{
+Jackson, C. (2023) \code{survextrap}: a package for flexible and transparent
+survival extrapolation.  arXiV preprint, \url{https://arxiv.org/abs/2306.03957}.
 }

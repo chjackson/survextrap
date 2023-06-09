@@ -229,6 +229,9 @@
 #' function \code{\link{get_draws}} is provided to convert this to a
 #' simple matrix of posterior samples with all chains collapsed.
 #'
+#' @references Jackson, C. (2023) \code{survextrap}: a package for flexible and transparent
+#' survival extrapolation.  arXiV preprint, \url{https://arxiv.org/abs/2306.03957}.
+#'
 #' @export
 survextrap <- function(formula,
                        data,
