@@ -22,7 +22,7 @@ versions of these models can also be used."><!-- mathjax --><script src="https:/
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,6 +93,7 @@ versions of these models can also be used.</p>
 <span>  prior_hrsd <span class="op">=</span> <span class="fu"><a href="priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  mspline <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  add_knots <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  hsd <span class="op">=</span> <span class="st">"bayes"</span>,</span>
 <span>  coefs_mean <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  fit_method <span class="op">=</span> <span class="st">"mcmc"</span>,</span>
@@ -104,7 +105,7 @@ versions of these models can also be used.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>formula</dt>
-<dd><p>A survival formula in standard R formula syntax, with a call to <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv()</a></code>
+<dd><p>A survival formula in standard R formula syntax, with a call to <code>Surv()</code>
 on the left hand side.</p>
 <p>Covariates included on the right hand side of the formula with be modelled with
 proportional hazards, or if <code>nonprop</code> is <code>TRUE</code> then a non-proportional
@@ -233,8 +234,7 @@ in columns of the external data named <code>"backsurv_start"</code> and
 of knots is taken from <code>df</code>, and their location is taken from
 equally-spaced quantiles of the observed event times in the
 individual-level data.</p>
-<p><code>add_knots</code>: Any extra knots beyond those chosen from the
-individual-level data (or supplied in <code>knots</code>).  This is intended
+<p><code>add_knots</code>: This is intended
 to be used when there are <code>external</code> data included in the
 model.  External data are typically outside the time period
 covered by the individual data.  <code>add_knots</code> would then be chosen
@@ -257,6 +257,14 @@ if <code>bsmooth</code> is <code>FALSE</code>.</p>
 <p><code>bsmooth</code>: If <code>TRUE</code> (on by default) the spline is smoother
 at the highest knot, by defining the derivative and second derivative
 at this point to be zero.</p></dd>
+
+
+<dt>add_knots</dt>
+<dd><p>Any extra knots beyond those chosen from the
+individual-level data (or supplied in <code>knots</code>).  All other spline
+specifications are set to their defaults, as described in
+<code>mspline</code>.  For example, <code>add_knots = 10</code> is a shorthand
+for <code>mspline = list(add_knots = 10)</code>.</p></dd>
 
 
 <dt>hsd</dt>
@@ -333,6 +341,11 @@ model is returned in the <code>stanfit</code> component.  See the
 <a href="https://mc-stan.org/rstan/index.html" class="external-link">rstan</a> documentation.  The
 function <code><a href="get_draws.html">get_draws</a></code> is provided to convert this to a
 simple matrix of posterior samples with all chains collapsed.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Jackson, C. (2023) <code>survextrap</code>: a package for flexible and transparent
+survival extrapolation.  arXiV preprint, <a href="https://arxiv.org/abs/2306.03957" class="external-link">https://arxiv.org/abs/2306.03957</a>.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

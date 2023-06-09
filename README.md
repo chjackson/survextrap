@@ -125,8 +125,6 @@ The [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetux
 
 The package is in "beta" status.  All major features are included, but it requires some polish here and there.
 
- A paper about it will soon be finished.  This will discuss the background and explain the methods in detail, and formally present the [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetuximab.html).
-
 The current version can be installed as:
 
 ```{r}
