@@ -123,7 +123,7 @@ The [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetux
 
 ## Development 
 
-The package is in "beta" status.  All major features are included, but it requires some polish here and there.
+The package is in "beta" status.  All major features are included, and there are no substantial changes expected, but further testing is planned before CRAN release.
 
 The current version can be installed as:
 
