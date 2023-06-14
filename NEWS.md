@@ -1,3 +1,13 @@
+# survextrap version 0.8.2 (2023/06/14)
+
+* Individual data can now be excluded, and model fitted to external data alone
+
+
+# survextrap version 0.8.1 (2023/05/25)
+
+* Update to work with StanHeaders 2.26
+
+
 # survextrap version 0.8 (2023/05/06)
 
 The [GitHub commit](https://github.com/chjackson/survextrap/commit/1668f40604d9dc62d83a698c735275506474aa03) on 6 May 2023 implemented several changes that are listed here.  `survextrap` is now in "beta" status.  All major features are now implemented, but there may still be some lack of polish.

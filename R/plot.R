@@ -111,7 +111,7 @@ plot_survival <- function(x, newdata=NULL, t=NULL, tmax=NULL, km=NULL, niter=NUL
         g <- g +
             geom_ribbon(aes(ymin=lower, ymax=upper), alpha=ci_alpha)
 
-    if (km){
+    if (km && !is.null(x$km)){
         aes_list <- list(x=sym("time"), y=sym("surv"))
         if (one_factor_cov(x) && !is.null(newdata)) {
             aes_list <- c(aes_list, list(col=sym(names(newdata))))

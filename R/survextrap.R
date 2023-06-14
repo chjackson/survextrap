@@ -15,8 +15,16 @@
 #' proportional hazards, or if \code{nonprop} is \code{TRUE} then a non-proportional
 #' hazards is used.
 #'
+#' If \code{data} is omitted, so that the model is being fitted to external aggregate data alone,
+#' without individual data, then the formula should not include a \code{Surv()} call.  The
+#' left-hand side of the formula will then be empty, and the right hand side specifies the covariates
+#' as usual.  For example, \code{formula = ~1} if there are no covariates.
+#'
 #' @param data Data frame containing variables in `formula`.  Variables should be
 #' in a data frame, and not in the working environment.
+#'
+#' This may be omitted, in which case \code{external} must be supplied.  This allows a model to be
+#' fitted to external aggregate data alone, without any individual-level data.
 #'
 #' @param external External data as a data frame of aggregate survival counts with columns named:
 #'
@@ -160,7 +168,7 @@
 #'   individual-level data (or supplied in `knots`).  All other spline
 #'   specifications are set to their defaults, as described in
 #'   \code{mspline}.  For example, `add_knots = 10` is a shorthand
-#'   for `mspline = list(add_knots = 10)`. 
+#'   for `mspline = list(add_knots = 10)`.
 #'
 #' @param hsd Smoothing parameter estimation.
 #'
@@ -208,7 +216,7 @@
 ##'   object returned by \code{survextrap}.  \code{loo} describes the
 ##'   fit of the model to the individual-level data, and
 ##'   \code{loo_external} describes fit to the external data.
-##' 
+##'
 ##' See the \code{"examples"} vignette for more explanation of these.
 ##'
 ##' @param ... Additional arguments to supply to control the Stan fit,
@@ -234,7 +242,7 @@
 #'
 #' @export
 survextrap <- function(formula,
-                       data,
+                       data=NULL,
                        external=NULL,
                        cure = FALSE,
                        nonprop = FALSE,
@@ -253,9 +261,9 @@ survextrap <- function(formula,
                        loo = (fit_method=="mcmc"),
                        ...)
 {
-    mf <- stats::model.frame(terms(formula), data)
-    td <- make_td(mf)
-    x <- make_x(formula, data, td)
+    td <- make_td(formula, data)
+    data_x <- if (td$indiv) data else external
+    x <- make_x(formula, data_x, td)
     xcure <- make_xcure(cure, data, td)
     backhaz <- make_backhaz(backhaz, data, td)
     external <- make_external(external, formula, x, xcure, backhaz)
@@ -366,9 +374,9 @@ survextrap <- function(formula,
                                pars = "beta", include=FALSE), stan_vb_ops(...)))
     else stop(sprintf("Unknown fit_method: %s",fit_method))
 
-    km <- survminer::surv_summary(survfit(formula, data=data), data=data)
+    km <- if (td$indiv) survminer::surv_summary(survfit(formula, data=data), data=data) else NULL
 
-    misc_keep <- nlist(formula, stanfit=fits,
+    misc_keep <- nlist(formula, indiv=td$indiv, stanfit=fits,
                        fit_method,
                        cure_formula = xcure$cure_formula,
                        backhaz=backhaz$df)
@@ -501,45 +509,45 @@ get_prior_sample <- function(mspline,
 ## around a meaningful value.   This corresponds to the intercept that the prior is placed on
 
 make_x <- function(formula, data, td, xlevs=NULL){
-    ## model frame containing x not factor(x), log(x) etc
-    mforig <- get_all_vars(delete.response(terms(formula)), data)
-    if (ncol(mforig) > 0){
-        factors <- names(mforig)[sapply(mforig, is.factor)]
-        numerics <- names(mforig)[sapply(mforig, is.numeric)]
-        tofactors <- names(mforig)[sapply(mforig, function(x){is.character(x)|is.logical(x)})]
-        for (i in tofactors)
-          mforig[[i]] <- factor(mforig[[i]])
-        factors <- c(factors, tofactors)
-        xlevs <- lapply(mforig[factors], levels)
-        if ((length(factors)==1) && (length(numerics)==0)){
-            ref_levs <- lapply(xlevs, function(x)x[1])
-            base_levs <- xlevs
-        }
-        else if (length(factors) > 0){
-            ref_levs <- lapply(xlevs, function(x)x[1])
-            base_levs <- ref_levs
-        } else base_levs <- ref_levs <- NULL
-        numeric_zeros <- lapply(mforig[numerics], function(x)0)
-        mfbase <- as.data.frame(c(numeric_zeros, base_levs))
-    } else factors <- numerics <- xlevs <- mfbase <- NULL
+  form <- delete.response(terms(formula))
+  mforig <- get_all_vars(form, data)
+  if (ncol(mforig) > 0){
+    factors <- names(mforig)[sapply(mforig, is.factor)]
+    numerics <- names(mforig)[sapply(mforig, is.numeric)]
+    tofactors <- names(mforig)[sapply(mforig, function(x){is.character(x)|is.logical(x)})]
+    for (i in tofactors)
+      mforig[[i]] <- factor(mforig[[i]])
+    factors <- c(factors, tofactors)
+    xlevs <- lapply(mforig[factors], levels)
+    if ((length(factors)==1) && (length(numerics)==0)){
+      ref_levs <- lapply(xlevs, function(x)x[1])
+      base_levs <- xlevs
+    }
+    else if (length(factors) > 0){
+      ref_levs <- lapply(xlevs, function(x)x[1])
+      base_levs <- ref_levs
+    } else base_levs <- ref_levs <- NULL
+    numeric_zeros <- lapply(mforig[numerics], function(x)0)
+    mfbase <- as.data.frame(c(numeric_zeros, base_levs))
+  } else factors <- numerics <- xlevs <- mfbase <- NULL
 
-    ## model frame containing  factor(x), log(x) etc not x
-    mf <- stats::model.frame(formula, data)
-    xlevs <- .getXlevels(terms(mf), mf)
-    X <- model.matrix(formula, mf, xlev = xlevs)
-    X <- drop_intercept(X)
-    ncovs <- NCOL(X)
-    xnames <- colnames(X)
+  ## model frame containing  factor(x), log(x) etc not x
+  mf <- stats::model.frame(form, data)
+  xlevs <- .getXlevels(terms(mf), mf)
+  X <- model.matrix(form, mf, xlev = xlevs)
+  X <- drop_intercept(X)
 
-    event <- X[td$ind_event, , drop = FALSE]
-    rcens <- X[td$ind_rcens, , drop = FALSE]
+  ncovs <- NCOL(X)
+  xnames <- colnames(X)
+  event <- X[td$ind_event, , drop = FALSE]
+  rcens <- X[td$ind_rcens, , drop = FALSE]
 
-    nlist(X, N = NROW(X),
-          ncovs = NCOL(X), xnames, factors, numerics, xlevs,
-          ## mfbase is used as the default "newdata" in output functions
-          ## i.e. zero values of continuous covariates, first levels of factors
-          mfbase,
-          event, rcens)
+  nlist(X, N = NROW(X),
+        ncovs = NCOL(X), xnames, factors, numerics, xlevs,
+        ## mfbase is used as the default "newdata" in output functions
+        ## i.e. zero values of continuous covariates, first levels of factors
+        mfbase,
+        event, rcens)
 }
 
 
@@ -574,8 +582,16 @@ validate_formula <- function(formula, needs_response = TRUE) {
   as.formula(formula)
 }
 
-
-make_td <- function(mf){
+make_td <- function(formula, data){
+  if (is.null(data)){
+    ## model is for external data alone
+    if (attr(terms(formula),"response"))
+      warning("`formula` has a left-hand side, but `data` not supplied")
+    return(nlist(indiv=FALSE,
+                 t_end=numeric(), status=numeric(), t_event=numeric(), t_rcens=numeric(),
+                 nevent=0, nrcens=0, ind_event=numeric(), ind_rcens=numeric()))
+  }
+  mf <- stats::model.frame(terms(formula), data)
   resp <- if (survival::is.Surv(mf)) mf else model.response(mf)
   surv <- attr(resp, "type")
   err  <- paste0("Cannot handle '", surv, "' Surv objects.")
@@ -588,7 +604,8 @@ make_td <- function(mf){
   nrcens <- sum(status == 0)
   ind_event <- which(status==1)
   ind_rcens <- which(status==0)
-  nlist(t_end, status,
+  nlist(indiv=TRUE, # is there any individual-level data
+        t_end, status,
         t_event, t_rcens, nevent, nrcens,
         ind_event, ind_rcens)
 }
@@ -743,9 +760,10 @@ make_mspline <- function(mspline, td, external, add_knots=NULL){
       }
     tt <- td$t_end[td$status == 1] # uncensored event times
     if (is.null(knots) && !length(tt)) {
+      tt <- td$t_end
+      if (length(tt)>0)
         warning2("No observed events found in the data. Censoring times will ",
                  "be used to evaluate default knot locations for splines.")
-        tt <- td$t_end
     }
     ttk <- unique(tt)
     if (is.numeric(mspline$add_knots)) add_knots <- mspline$add_knots
@@ -814,7 +832,7 @@ make_xcure <- function(cure, data, td){
         cure <- TRUE
     } else {
         xcure <- list(ncovs = 0,
-                      X = matrix(nrow=nrow(data), ncol=0),
+                      X = matrix(nrow=NROW(data), ncol=0),
                       event = matrix(nrow=td$nevent,ncol=0),
                       rcens = matrix(nrow=td$nrcens,ncol=0))
     }

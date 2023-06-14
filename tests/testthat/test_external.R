@@ -26,3 +26,24 @@ test_that("External data with covariates",{
   ## more precise estimate given external data with the desired covariate value
   expect_true(haz1$upper[haz1$sex==1] < haz0$upper[haz0$sex==1])
 })
+
+test_that("No individual-level data",{
+  nde_mod1 <- survextrap(~1, external = extdat,
+                         mspline = list(df=5), fit_method="opt")
+  nde_mod1$mspline
+  plot_hazsurv(nde_mod1)
+  expect_warning(nde_mod1 <- survextrap(Surv(time, event) ~1, external = extdat,
+                                        mspline = list(df=5), fit_method="opt"),
+                 "`formula` has a left-hand side, but `data` not supplied")
+  expect_error(survextrap(external = extdat), "argument \"formula\" is missing")
+})
+
+extdatc <- rbind(cbind(extdat, treat="no"),
+                 cbind(extdat, treat="yes"))
+extdatc$treat <- factor(extdatc$treat)
+
+test_that("No individual-level data, covariates",{
+  nde_mod2 <- survextrap(~treat, external = extdatc,
+                         mspline = list(df=5), fit_method="opt")
+  expect_false(nde_mod2$indiv)
+})

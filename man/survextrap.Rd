@@ -6,7 +6,7 @@
 \usage{
 survextrap(
   formula,
-  data,
+  data = NULL,
   external = NULL,
   cure = FALSE,
   nonprop = FALSE,
@@ -32,10 +32,18 @@ on the left hand side.
 
 Covariates included on the right hand side of the formula with be modelled with
 proportional hazards, or if \code{nonprop} is \code{TRUE} then a non-proportional
-hazards is used.}
+hazards is used.
+
+If \code{data} is omitted, so that the model is being fitted to external aggregate data alone,
+without individual data, then the formula should not include a \code{Surv()} call.  The
+left-hand side of the formula will then be empty, and the right hand side specifies the covariates
+as usual.  For example, \code{formula = ~1} if there are no covariates.}
 
 \item{data}{Data frame containing variables in \code{formula}.  Variables should be
-in a data frame, and not in the working environment.}
+in a data frame, and not in the working environment.
+
+This may be omitted, in which case \code{external} must be supplied.  This allows a model to be
+fitted to external aggregate data alone, without any individual-level data.}
 
 \item{external}{External data as a data frame of aggregate survival counts with columns named:
 
