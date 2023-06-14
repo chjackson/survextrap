@@ -1,11 +1,12 @@
 ---
 title: "Case study of using survextrap: cetuximab for head and neck cancer"
 author: "Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>"
-date: "2023-06-09"
+date: "2023-06-11"
 output: 
   rmarkdown::html_document:
     toc: true
     keep_md: true
+    self_contained: true
     toc_float: true
     theme: simplex
     code_folding: show

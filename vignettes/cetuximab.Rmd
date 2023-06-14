@@ -6,6 +6,8 @@ output:
   rmarkdown::html_document:
     toc: true
     keep_md: true
+    self_contained: true
+    embed_resources: true
     toc_float: true
     theme: simplex
     code_folding: show
