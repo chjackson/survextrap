@@ -87,12 +87,12 @@ Most of the example models in this vignette have been specified using computatio
 
 * Likewise, some models below are fitted using `fit.method="opt"`.  This uses an [approximation to the posterior](https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html).  This is OK for producing point estimates of the parameters (the posterior mode is used - note this is likely to differ from the mean or median) but the uncertainty will be only roughly approximated.  This is very useful for quick checks and model development.
 
-* If using MCMC, make sure to check the diagnostics to ensure that the fit has _converged_ - the values of `rhat` in the summary output (e.g. below) should not be more than 1.05 for each parameter ([see here](https://mc-stan.org/rstan/reference/Rhat.html) for technical details). {#convergence}
+* If using MCMC, make sure to check the diagnostics to ensure that the fit has _converged_ - the values of `rhat` in the summary output (e.g. below) should not be more than 1.05 for each parameter ([see here](https://mc-stan.org/rstan/reference/Rhat.html) for technical details).
 ```{r}
 head(summary(nd_mod))
 ```
 
-{#divergences}
+#### Divergent transitions {#divergences}
 * If using MCMC, there may be a warning produced by Stan about `divergent transitions after warmup`.  This is a limitation of the sampling algorithm, and can happen when the posterior distribution is awkward to sample from.  See the [Stan documentation](https://mc-stan.org/misc/warnings.html) for technical details.  If there are only one or two divergent transitions, the message is probably safe to ignore, but in any case the results should be examined to ensure they make sense.  With lots of divergent transitions, it is safer to simplify the model, e.g. by using stronger priors or fewer spline knots.
 
 

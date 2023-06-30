@@ -442,8 +442,7 @@ print.message <- function(x, ...){
 ##' @export
 mspline_spec <- function(formula, data, cure=FALSE, backhaz=NULL, external=NULL,
                          df=10, add_knots=NULL, degree=3, bsmooth=TRUE){
-  mf <- stats::model.frame(terms(formula), data)
-  td <- make_td(mf)
+  td <- make_td(formula, data)
   x <- make_x(formula, data, td)
   xcure <- make_xcure(cure, data, td)
   backhaz <- make_backhaz(backhaz, data, td)

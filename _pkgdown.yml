@@ -57,3 +57,7 @@ reference:
 - title: Package overview
 - contents:
   - survextrap-package
+home:
+  links:
+  - text: Questions, suggestions
+    href: https://github.com/chjackson/survextrap/issues

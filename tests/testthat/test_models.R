@@ -58,6 +58,9 @@ test_that("Changing the spline specification",{
                       mspline = list(degree=0, knots=c(1.5, 3),
                                      bsmooth=FALSE))
   expect_equivalent(mod0$mspline$knots, c(1.5, 3))
+
+  mspline <- mspline_spec(Surv(years, d) ~ 1, data=cetux, df=6, add_knots=20)
+  expect_equal(mspline$knots[[2]], 1.04)
 })
 
 test_that("Spline prior mean",{
