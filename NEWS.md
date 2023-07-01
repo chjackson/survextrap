@@ -1,3 +1,8 @@
+# survextrap version 0.8.3 (2023/06/30)
+
+* Fix for `mspline_spec` bug introduced in 0.8.2
+
+
 # survextrap version 0.8.2 (2023/06/14)
 
 * Individual data can now be excluded, and model fitted to external data alone
