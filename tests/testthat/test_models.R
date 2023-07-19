@@ -45,6 +45,11 @@ test_that("Changing the spline specification",{
   expect_error(survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
                           mspline = list(df=4, bsmooth=FALSE)),
                "df - degree should be >= 2")
+  expect_no_error(survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
+                          mspline = list(df=4, bsmooth=TRUE)))
+  expect_error(survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
+                          mspline = list(df=2, bsmooth=TRUE)),
+               "df - degree should be >= 0")
   mod2 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
                      mspline = list(degree=4, bsmooth=FALSE))
   mod1 <-  survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
