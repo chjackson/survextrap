@@ -750,7 +750,7 @@ make_mspline <- function(mspline, td, external, add_knots=NULL){
     }
     else if (is.null(df))
       df <- 10L
-    else
+    else {
       minddg <- if (bsmooth) 0 else 2
       if (df < degree + minddg){
         ## unsmooth: order k = d+1, degree d = k-1,  df = nik+k = nik+d+1 = nk+d
@@ -758,6 +758,7 @@ make_mspline <- function(mspline, td, external, add_knots=NULL){
         ## where nik is number of internal knots, which has to be at least 1
         stop(sprintf("df = %s and degree = %s, but df - degree should be >= %s", df, degree, minddg))
       }
+    }
     tt <- td$t_end[td$status == 1] # uncensored event times
     if (is.null(knots) && !length(tt)) {
       tt <- td$t_end
