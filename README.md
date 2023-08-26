@@ -137,5 +137,5 @@ Please give feedback and suggestions if you do.  These can be posted on [github 
 <!-- badges: start -->
 [![lifecycle](lifecycle-maturing.svg)](https://lifecycle.r-lib.org/articles/stages.html#maturing)
 [![R-CMD-check](https://github.com/chjackson/survextrap/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/chjackson/survextrap/actions/workflows/R-CMD-check.yaml)
-[![test-coverage](https://github.com/chjackson/survextrap/actions/workflows/test-coverage.yaml/badge.svg)](https://app.codecov.io/gh/chjackson/survextrap)
+[![test-coverage](https://codecov.io/gh/chjackson/survextrap/branch/master/graph/badge.svg)](https://app.codecov.io/gh/chjackson/survextrap)
 <!-- badges: end -->

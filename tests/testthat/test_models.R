@@ -23,6 +23,8 @@ test_that("Basic spline model, no covariates",{
     suppressWarnings(modm <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="mcmc",
                                         chains=1, iter=400, seed=1))
     expect_equal(coef(mod)["alpha"], coef(modm)["alpha"], tol=1e-01)
+    expect_true(is.numeric(mod$prior_sample$sample(nsim=4)$alpha))
+    expect_true(is.numeric(mod$prior_sample$haz_const()["50%","haz"]))
 })
 
 test_that("Basic spline model, with covariates",{
@@ -172,5 +174,19 @@ test_that("Cure model coupled with a background hazard data frame",{
                         backhaz=bh, fit_method="opt")
     plot_hazard(cmod1, tmax=12, niter=50) + coord_cartesian(ylim=c(0,1))
     plot_survival(cmod1, tmax=20, niter=50)
+  })
+})
+
+test_that("Cure and relative survival with MCMC",{
+  skip_on_cran()
+  suppressWarnings({
+    cmod0 <- survextrap(Surv(t, status) ~ 1, mspline=list(bsmooth=FALSE),
+                        data=curedata, cure=TRUE, fit_method="mcmc",chains=1, iter=1000)
+    expect_true(is.numeric(cmod0$loo$estimates["looic","Estimate"]))
+    colonse <- colons
+    colonse$bh <- rep(0.01, nrow(colons))
+    mod1 <- survextrap(Surv(years, status) ~ 1, data=colonse, backhaz="bh",
+                       fit_method="mcmc", chains=1, iter=1000)
+    expect_true(is.numeric(mod1$loo$estimates["looic","Estimate"]))
   })
 })

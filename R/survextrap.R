@@ -261,6 +261,7 @@ survextrap <- function(formula,
                        loo = (fit_method=="mcmc"),
                        ...)
 {
+    validate_formula(formula, needs_response=FALSE)
     td <- make_td(formula, data)
     data_x <- if (td$indiv) data else external
     x <- make_x(formula, data_x, td)
@@ -569,13 +570,13 @@ eb_smoothness <- function(standata, staninit, prior_hsd){
 validate_formula <- function(formula, needs_response = TRUE) {
 
   if (!inherits(formula, "formula")) {
-    stop2("'formula' must be a formula.")
+    stop("'formula' must be a formula.")
   }
 
   if (needs_response) {
     len <- length(formula)
     if (len < 3) {
-      stop2("'formula' must contain a response.")
+      stop("'formula' must contain a response.")
     }
   }
   as.formula(formula)
@@ -607,34 +608,6 @@ make_td <- function(formula, data){
         t_end, status,
         t_event, t_rcens, nevent, nrcens,
         ind_event, ind_rcens)
-}
-
-make_t <- function(model_frame, type = c("beg", "end", "gap", "upp")) {
-    type <- match.arg(type)
-    resp <- if (survival::is.Surv(model_frame))
-              model_frame else model.response(model_frame)
-    surv <- attr(resp, "type")
-    err  <- paste0("Bug found: cannot handle '", surv, "' Surv objects.")
-
-    t_beg <- switch(surv,
-                    "right"     = rep(0, nrow(model_frame)),
-                    stop(err))
-
-    t_end <- switch(surv,
-                    "right"     = as.vector(resp[, "time"]),
-                    stop(err))
-    if (any(t_end<0)) stop("Some survival times are negative")
-
-    t_upp <- switch(surv,
-                    "right"     = rep(NaN, nrow(model_frame)),
-                    stop(err))
-
-    switch(type,
-           "beg" = t_beg,
-           "end" = t_end,
-           "gap" = t_end - t_beg,
-           "upp" = t_upp,
-           stop("Bug found: cannot handle specified 'type'."))
 }
 
 make_d <- function(model_frame) {
@@ -763,7 +736,7 @@ make_mspline <- function(mspline, td, external, add_knots=NULL){
     if (is.null(knots) && !length(tt)) {
       tt <- td$t_end
       if (length(tt)>0)
-        warning2("No observed events found in the data. Censoring times will ",
+        warning("No observed events found in the data. Censoring times will ",
                  "be used to evaluate default knot locations for splines.")
     }
     ttk <- unique(tt)

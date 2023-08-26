@@ -1,7 +1,4 @@
 
-# Stop without printing call
-stop2    <- function(...) stop(..., call. = FALSE)
-
 # Check whether a vector/matrix/array contains an "(Intercept)"
 check_for_intercept <- function(x, logical = FALSE) {
   nms <- if (is.matrix(x)) colnames(x) else names(x)
@@ -20,6 +17,3 @@ drop_intercept <- function(x) {
     x
   }
 }
-
-warning2 <- function(...) warning(..., immediate. = TRUE, call. = FALSE)
-

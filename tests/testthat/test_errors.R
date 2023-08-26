@@ -1,4 +1,7 @@
-
+test_that("Errors in formula",{
+    expect_error(survextrap(formula="boo"), "must be a formula")
+    expect_error(survextrap(Surv(years, status, type="left") ~ rx, data=colons), "Cannot handle \'left\'")
+})
 
 test_that("Errors in external data",{
     external <- data.frame(x=1:2)

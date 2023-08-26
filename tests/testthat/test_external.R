@@ -27,6 +27,17 @@ test_that("External data with covariates",{
   expect_true(haz1$upper[haz1$sex==1] < haz0$upper[haz0$sex==1])
 })
 
+test_that("external data MCMC fit",{
+  skip_on_cran()
+  extdat$sex = 1
+  suppressWarnings({
+    nde_mod1 <- survextrap(Surv(years, status) ~ sex, data=colons,
+                           chains=1, external = extdat,
+                           add_knots=c(4, 10, 25), fit_method="mcmc", iter=1000)
+    expect_true(is.numeric(nde_mod1$loo$estimates["looic","Estimate"]))
+  })
+})
+
 test_that("No individual-level data",{
   nde_mod1 <- survextrap(~1, external = extdat,
                          mspline = list(df=5), fit_method="opt")
