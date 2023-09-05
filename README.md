@@ -116,6 +116,8 @@ The [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetux
 
 ### Slides from presentations about survextrap
 
+* [Royal Statistical Society, September 2023](https://chjackson.github.io/survextrap/cjackson_survextrap_rss23.pdf)
+
 * [R-HTA, York, June 2023](https://chjackson.github.io/survextrap/cjackson_survextrap_rhta.pdf)
 
 * [Exeter, October 2022](https://chjackson.github.io/survextrap/cjackson_survextrap_exeter.pdf)
