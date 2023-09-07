@@ -129,7 +129,7 @@ The package is in "beta" status.  All major features are included, and there are
 
 The current version can be installed as:
 
-```{r}
+```
 install.packages("survextrap", repos=c('https://chjackson.r-universe.dev',
                                        'https://cloud.r-project.org'))
 ```
