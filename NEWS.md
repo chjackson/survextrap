@@ -1,16 +1,21 @@
+# survextrap version 0.8.4 (2023/09/09)
+
+* Deprecated Stan array syntax updated.  The package now requires `rstan` version 2.26.
+
+
 # survextrap version 0.8.3 (2023/06/30)
 
-* Fix for `mspline_spec` bug introduced in 0.8.2
+* Fix for `mspline_spec` bug introduced in 0.8.2.
 
 
 # survextrap version 0.8.2 (2023/06/14)
 
-* Individual data can now be excluded, and model fitted to external data alone
+* Individual data can now be excluded, and model fitted to external data alone.
 
 
 # survextrap version 0.8.1 (2023/05/25)
 
-* Update to work with StanHeaders 2.26
+* Update to work with StanHeaders 2.26.
 
 
 # survextrap version 0.8 (2023/05/06)

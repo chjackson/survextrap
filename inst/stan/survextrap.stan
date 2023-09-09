@@ -127,8 +127,8 @@ data {
 
     // external data describing knowledge about long-term survival
     // expressed as binomial outcomes of r survivors by t2 out of n people alive at t1
-    int<lower=0> r_ext[nextern];
-    int<lower=0> n_ext[nextern];
+    array[nextern] int<lower=0> r_ext;
+    array[nextern] int<lower=0> n_ext;
     matrix[nextern,ncovs] x_ext;
     matrix[nextern,ncurecovs] xcure_ext;
 
@@ -147,11 +147,11 @@ data {
     vector[3] prior_hscale;
     vector<lower=0>[2] prior_cure;
     vector<lower=0>[2*est_hsd] prior_hsd;
-    int<lower=0> prior_loghr_dist[ncovs];
+    array[ncovs] int<lower=0> prior_loghr_dist;
     vector[ncovs] prior_loghr_location;
     vector[ncovs] prior_loghr_scale;
     vector[ncovs] prior_loghr_df;
-    int<lower=0> prior_logor_cure_dist[ncurecovs];
+    array[ncurecovs] int<lower=0> prior_logor_cure_dist;
     vector[ncurecovs] prior_logor_cure_location;
     vector[ncurecovs] prior_logor_cure_scale;
     vector[ncurecovs] prior_logor_cure_df;
@@ -164,7 +164,7 @@ data {
 }
 
 parameters {
-    real gamma[1];
+    array[1] real gamma;
     vector[ncovs] loghr;
     vector[nvars-1] b_err;
     vector<lower=0>[est_hsd] hsd;

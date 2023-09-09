@@ -1,7 +1,7 @@
 Package: survextrap
 Title: Survival Extrapolation with a Flexible Parametric Model and External Data
-Version: 0.8.3
-Date: 2023-06-14
+Version: 0.8.4
+Date: 2023-09-09
 Authors@R: 
     c(person("Christopher", "Jackson", , "chris.jackson@mrc-bsu.cam.ac.uk", role = c("aut", "cre", "cph"),
              comment = c(ORCID = "0000-0002-6656-8913")),
@@ -23,7 +23,7 @@ Imports:
     methods,
     posterior,
     Rcpp (>= 0.12.0),
-    rstan (>= 2.18.1),
+    rstan (>= 2.26.0),
     rstpm2,
     splines2,
     survminer,
@@ -33,8 +33,8 @@ LinkingTo:
     Rcpp (>= 0.12.0),
     RcppEigen (>= 0.3.3.3.0),
     RcppParallel (>= 5.0.1),
-    rstan (>= 2.18.1),
-    StanHeaders (>= 2.18.0)
+    rstan (>= 2.26.0),
+    StanHeaders (>= 2.26.0)
 SystemRequirements: GNU make
 Suggests: 
     rstantools (>= 2.3.1),
