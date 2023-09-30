@@ -43,7 +43,7 @@ prior_pred <- function(n,
                        prior_hrsd = NULL,
                        prior_cure = NULL)
 {
-  mspline <- mspline_default(mspline)
+  mspline <- mspline_list_init(mspline)
   nprior <- if (fix_prior) 1 else n
   sam <- prior_sample(mspline = mspline,
                       coefs_mean = coefs_mean,

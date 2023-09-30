@@ -570,7 +570,7 @@ validate_prior_X <- function(X){
 ##' All of these SDs refer to the variability over time, e.g. a SD of 0 indicates that the
 ##' hazard (or inverse hazard, or hazard ratio) is constant with time.
 ##'
-##' @inheritParams mspline_args
+##' @inheritParams mspline_init
 ##' @inheritParams survextrap
 ##' @inheritParams prior_sample_hazard
 ##'

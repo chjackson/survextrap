@@ -8,7 +8,8 @@ mspline_constant_coefs(mspline, logit = FALSE)
 }
 \arguments{
 \item{mspline}{A list with components \code{knots} (vector of knots),
-and \code{degree} (polynomial degree) defining an M-spline configuration.}
+\code{degree} (polynomial degree) and \code{bsmooth} (logical for smoothness
+constraint at boundary), defining an M-spline configuration.}
 
 \item{logit}{If \code{TRUE} then the multinomial logit transform of the coefficients
 is returned.  This is a vector of length one less than the number of coefficients,

@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,7 @@
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
     <a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a>
+    <a class="dropdown-item" href="../articles/sbc.html">Simulation-based calibration of survextrap</a>
   </div>
 </li>
 <li class="nav-item">
@@ -77,15 +78,18 @@
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>knots</dt>
 <dd><p>Vector of knot locations. If not supplied, <code>df</code>
-has to be specified, in which case the default is a set of
-equally spaced knots between zero and the highest knot.  The
-number of knots (excluding zero) is <code>df - degree + 1</code> if
+has to be specified.  One of two rules is then used to choose the
+knot locations.  If <code>bknots</code> is specified, a set of equally
+spaced knots between zero and <code>bknots</code> is used.  Otherwise
+if <code>obstimes</code> is supplied, the knots are chosen as equally
+spaced quantiles of <code>obstimes</code>.</p>
+<p>The number of knots (excluding zero) is <code>df - degree + 1</code> if
 <code>bsmooth</code> is <code>TRUE</code>, or <code>df - degree - 1</code>
 otherwise.</p></dd>
 
 
 <dt>bknot</dt>
-<dd><p>Location of the highest knot.</p></dd>
+<dd><p>Location of the final spline knot.</p></dd>
 
 
 <dt>df</dt>

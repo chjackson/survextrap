@@ -22,7 +22,7 @@ versions of these models can also be used."><!-- mathjax --><script src="https:/
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,7 +81,7 @@ versions of these models can also be used.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">survextrap</span><span class="op">(</span></span>
 <span>  <span class="va">formula</span>,</span>
-<span>  <span class="va">data</span>,</span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  external <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cure <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nonprop <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -109,12 +109,18 @@ versions of these models can also be used.</p>
 on the left hand side.</p>
 <p>Covariates included on the right hand side of the formula with be modelled with
 proportional hazards, or if <code>nonprop</code> is <code>TRUE</code> then a non-proportional
-hazards is used.</p></dd>
+hazards is used.</p>
+<p>If <code>data</code> is omitted, so that the model is being fitted to external aggregate data alone,
+without individual data, then the formula should not include a <code>Surv()</code> call.  The
+left-hand side of the formula will then be empty, and the right hand side specifies the covariates
+as usual.  For example, <code>formula = ~1</code> if there are no covariates.</p></dd>
 
 
 <dt>data</dt>
 <dd><p>Data frame containing variables in <code>formula</code>.  Variables should be
-in a data frame, and not in the working environment.</p></dd>
+in a data frame, and not in the working environment.</p>
+<p>This may be omitted, in which case <code>external</code> must be supplied.  This allows a model to be
+fitted to external aggregate data alone, without any individual-level data.</p></dd>
 
 
 <dt>external</dt>
@@ -225,7 +231,9 @@ hazard is only specified over a limited range of time.</p>
 user should also supply the background survival at the start and stop points
 in columns of the external data named <code>"backsurv_start"</code> and
 <code>"backsurv_stop"</code>.  This should describe the same reference population as
-<code>backhaz</code>, though the package does not check for consistency between these.</p></dd>
+<code>backhaz</code>, though the package does not check for consistency between these.</p>
+<p>If <code>backhaz</code> is <code>NULL</code> (the default) then no background hazard
+component is included in the model.</p></dd>
 
 
 <dt>mspline</dt>

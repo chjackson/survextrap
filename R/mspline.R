@@ -30,7 +30,7 @@
 ##' In vectorised usage of these functions, the knots and degree must be
 ##' the same for all alternative times and parameter values.
 ##'
-##' @inheritParams mspline_args
+##' @inheritParams mspline_init
 ##'
 ##' @param log,log.p Return log density or probability.
 ##'
@@ -487,7 +487,8 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL
 ##' function.
 ##'
 ##' @param mspline A list with components `knots` (vector of knots),
-##' and `degree` (polynomial degree) defining an M-spline configuration.
+##' `degree` (polynomial degree) and `bsmooth` (logical for smoothness
+##' constraint at boundary), defining an M-spline configuration.
 ##'
 ##' @param logit If \code{TRUE} then the multinomial logit transform of the coefficients
 ##' is returned.  This is a vector of length one less than the number of coefficients,
@@ -497,7 +498,7 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL
 ##'
 ##' @export
 mspline_constant_coefs <- function(mspline, logit=FALSE){
-  mspline <- mspline_default(mspline)
+  mspline <- mspline_list_init(mspline)
   iknots <- mspline$knots[-length(mspline$knots)]
   bknots <- c(0, max(mspline$knots))
   degree <- mspline$degree
@@ -519,31 +520,6 @@ mspline_constant_coefs <- function(mspline, logit=FALSE){
   p_const <- p_const/sum(p_const)
 
   if (logit) log(p_const[-1]/p_const[1]) else p_const
-}
-
-## Validate and initialise a mspline list object
-## Set default bsmooth and degree
-mspline_default <- function(mspline){
-  if (!is.null(mspline)){
-    if (!is.list(mspline)) stop("`mspline` should be a list")
-    bh_names <- c("df","knots","degree","nvars","knots","bsmooth","add_knots")
-    bad_names <- setdiff(names(mspline), bh_names)
-    if (length(bad_names) > 0) {
-      blist <- paste(bad_names, collapse=",")
-      plural <- if (length(bad_names) > 1) "s" else ""
-      warning(sprintf("Element%s `%s` of `mspline` is unused. Ignoring.", plural, blist))
-    }
-  } else mspline <- list()
-  if (is.null(mspline$bsmooth))
-    mspline$bsmooth <- TRUE
-  else 
-    if (!is.logical(mspline$bsmooth))
-      stop("mspline$bsmooth should be NULL, TRUE or FALSE")
-  if (is.null(mspline$degree))
-    mspline$degree <- 3
-  else if (mspline$degree!=3 && mspline$bsmooth)
-    stop("M-spline degree must be 3 unless bsmooth=FALSE")
-  mspline
 }
 
 ## @param basis Matrix giving spline basis

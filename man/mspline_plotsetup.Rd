@@ -16,13 +16,17 @@ mspline_plotsetup(
 }
 \arguments{
 \item{knots}{Vector of knot locations. If not supplied, \code{df}
-has to be specified, in which case the default is a set of
-equally spaced knots between zero and the highest knot.  The
-number of knots (excluding zero) is \code{df - degree + 1} if
+has to be specified.  One of two rules is then used to choose the
+knot locations.  If \code{bknots} is specified, a set of equally
+spaced knots between zero and \code{bknots} is used.  Otherwise
+if \code{obstimes} is supplied, the knots are chosen as equally
+spaced quantiles of \code{obstimes}.
+
+The number of knots (excluding zero) is \code{df - degree + 1} if
 \code{bsmooth} is \code{TRUE}, or \code{df - degree - 1}
 otherwise.}
 
-\item{bknot}{Location of the highest knot.}
+\item{bknot}{Location of the final spline knot.}
 
 \item{tmin}{Minimum plotting time.  Defaults to zero.}
 

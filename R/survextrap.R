@@ -129,6 +129,9 @@
 #' `"backsurv_stop"`.  This should describe the same reference population as
 #' `backhaz`, though the package does not check for consistency between these.
 #'
+#' If `backhaz` is \code{NULL} (the default) then no background hazard
+#' component is included in the model.
+#'
 #' @param mspline A list of control parameters defining the spline model.
 #'
 #'   `knots`: Spline knots.  If this is not supplied, then the number
@@ -428,7 +431,7 @@ print.message <- function(x, ...){
 ##'
 ##' @inheritParams survextrap
 ##'
-##' @inheritParams mspline_args
+##' @inheritParams mspline_init
 ##'
 ##' @param add_knots Additional knots, other than those determined from the quantiles of the individual data.
 ##' Typically used to add a maximum knot at the time that we want to extrapolate to.
@@ -705,91 +708,47 @@ make_basis <- function(times, mspline, integrate = FALSE) {
 
 aa <- function(x, ...) as.array(x,...)
 
+validate_df <- function(df, degree, bsmooth){
+  minddg <- if (bsmooth) 0 else 2
+  if (df < degree + minddg){
+    ## unsmooth: order k = d+1, degree d = k-1,  df = nik+k = nik+d+1 = nk+d
+    ## smooth:   df - degree >= nik - 1,  unsmooth: df - degree >= nik + 1
+    ## where nik is number of internal knots, which has to be at least 1
+    stop(sprintf("df = %s and degree = %s, but df - degree should be >= %s", df, degree, minddg))
+  }  
+}
 
 make_mspline <- function(mspline, td, external, add_knots=NULL){
-    mspline <- mspline_default(mspline)
-    knots <- sort(mspline$knots)
-    df     <- mspline$df
-    degree <- mspline$degree
-    bsmooth <- mspline$bsmooth
-    tmax <- max(c(td$t_end,external$tmax), na.rm = TRUE)
-    if (!is.null(knots)) {
-      validate_knots(knots, "knots")
-      df_correct <- if (bsmooth) length(knots) + degree - 2 else length(knots) + degree
-      if (!is.null(df)) {
-        if (df != df_correct)
-          stop(sprintf("df should equal %s given knots and bsmooth=%s",df_correct,bsmooth))
-      } else df <- df_correct
-    }
-    else if (is.null(df))
-      df <- 10L
-    else {
-      minddg <- if (bsmooth) 0 else 2
-      if (df < degree + minddg){
-        ## unsmooth: order k = d+1, degree d = k-1,  df = nik+k = nik+d+1 = nk+d
-        ## smooth:   df - degree >= nik - 1,  unsmooth: df - degree >= nik + 1
-        ## where nik is number of internal knots, which has to be at least 1
-        stop(sprintf("df = %s and degree = %s, but df - degree should be >= %s", df, degree, minddg))
-      }
-    }
-    tt <- td$t_end[td$status == 1] # uncensored event times
-    if (is.null(knots) && !length(tt)) {
-      tt <- td$t_end
-      if (length(tt)>0)
-        warning("No observed events found in the data. Censoring times will ",
-                 "be used to evaluate default knot locations for splines.")
-    }
-    ttk <- unique(tt)
-    if (is.numeric(mspline$add_knots)) add_knots <- mspline$add_knots
-    if (!is.numeric(add_knots))
-      ttk <- sort(c(ttk, unique(c(external$start, external$stop))))
-    knots <- default_knots(ttk, df = df, knots = knots,
-                           degree = degree, bsmooth = bsmooth)
-    if (is.numeric(add_knots)) {
-      add_knots <- setdiff(unique(add_knots), knots)
-      knots <- sort(c(knots, add_knots))
-      df <- df + length(add_knots)
-    }
-    nvars  <- df
-    nlist(nvars, knots, degree, bsmooth, df)
+  
+  ## observed times to choose default knots to span
+  tmax <- max(c(td$t_end,external$tmax), na.rm = TRUE)
+  tt <- td$t_end[td$status == 1] # uncensored event times
+  if (is.null(mspline$knots) && !length(tt)) {
+    tt <- td$t_end
+    if (length(tt)>0)
+      warning("No observed events found in the data. Censoring times will ",
+              "be used to evaluate default knot locations for splines.")
+  }
+  obstimes <- unique(tt)
+  if (is.numeric(mspline$add_knots)) add_knots <- mspline$add_knots
+  if (!is.numeric(add_knots))
+    obstimes <- sort(c(obstimes, unique(c(external$start, external$stop))))
+
+  mspline <- mspline_list_init(mspline, obstimes)
+
+  if (is.numeric(add_knots)) {
+    add_knots <- setdiff(unique(add_knots), mspline$knots)
+    mspline$knots <- sort(c(mspline$knots, add_knots))
+    mspline$df <- mspline$df + length(add_knots)
+  }
+  mspline$nvars  <- mspline$df
+  mspline[c("nvars","knots","degree","bsmooth","df")]
 }
 
 validate_coefs_mean <- function(coefs){
   if (!is.numeric(coefs)) stop("`coefs_mean` must be numeric")
   if (!all(coefs > 0)) stop("`coefs_mean` must all be > 0")
   coefs / sum(coefs)
-}
-
-# Return a vector with knots for 'x', based on evenly spaced quantiles
-#
-# @param x A numeric vector.
-# @param df The degrees of freedom. If specified, then 'df - degree - 1'.
-#   knots are placed at evenly spaced percentiles of 'x'. If 'iknots' is
-#   specified then 'df' is ignored.
-# @param degree Non-negative integer. The degree for the spline basis.
-# @param knots Optional vector of knots.
-# @return A numeric vector of knot locations, or NULL if there are
-#   no internal knots.
-default_knots <- function(x, df = 5L, degree = 3L, knots = NULL, bsmooth = TRUE) {
-  # obtain number of internal knots
-  if (is.null(knots)) {
-    nk <- if (bsmooth) df - degree + 2 else df - degree
-  } else {
-    nk <- length(knots)
-  }
-  # validate number of knots
-    if (nk < 0) {
-    stop("Number of knots cannot be negative.")
-  }
-  # if no knots then return empty vector
-  if (nk == 0) {
-    return(numeric(0))
-  }
-  # obtain default knot locations if necessary
-  if (is.null(knots)) {
-    knots <- quantile(x, probs=seq(1, nk)/nk) # evenly spaced percentiles
-  }
-  return(knots)
 }
 
 make_xcure <- function(cure, data, td){

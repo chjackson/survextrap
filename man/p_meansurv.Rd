@@ -12,7 +12,8 @@ p_meansurv(median, upper, mspline = NULL)
 \item{upper}{Upper limit of 95\% credible interval for a survival time}
 
 \item{mspline}{A list with components \code{knots} (vector of knots),
-and \code{degree} (polynomial degree) defining an M-spline configuration.}
+\code{degree} (polynomial degree) and \code{bsmooth} (logical for smoothness
+constraint at boundary), defining an M-spline configuration.}
 }
 \value{
 A normal prior in the format returned by \code{\link{p_normal}}, which can

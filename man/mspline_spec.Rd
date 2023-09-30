@@ -68,7 +68,10 @@ If there is external data, and \code{backhaz} is supplied in form (b), then the
 user should also supply the background survival at the start and stop points
 in columns of the external data named \code{"backsurv_start"} and
 \code{"backsurv_stop"}.  This should describe the same reference population as
-\code{backhaz}, though the package does not check for consistency between these.}
+\code{backhaz}, though the package does not check for consistency between these.
+
+If \code{backhaz} is \code{NULL} (the default) then no background hazard
+component is included in the model.}
 
 \item{external}{External data as a data frame of aggregate survival counts with columns named:
 

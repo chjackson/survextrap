@@ -28,7 +28,7 @@ log median."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,7 @@ log median."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
     <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
     <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
     <a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a>
+    <a class="dropdown-item" href="../articles/sbc.html">Simulation-based calibration of survextrap</a>
   </div>
 </li>
 <li class="nav-item">
@@ -102,7 +103,8 @@ log median.</p>
 
 <dt>mspline</dt>
 <dd><p>A list with components <code>knots</code> (vector of knots),
-and <code>degree</code> (polynomial degree) defining an M-spline configuration.</p></dd>
+<code>degree</code> (polynomial degree) and <code>bsmooth</code> (logical for smoothness
+constraint at boundary), defining an M-spline configuration.</p></dd>
 
 </dl></div>
     <div class="section level2">

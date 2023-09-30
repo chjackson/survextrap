@@ -1,7 +1,7 @@
 ---
 title: "Case study of using survextrap: cetuximab for head and neck cancer"
 author: "Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>"
-date: "2023-06-30"
+date: "2023-09-30"
 output: 
   rmarkdown::html_document:
     toc: true
@@ -183,13 +183,9 @@ mod_con <- survextrap(Surv(years, d) ~ 1, data=control, mspline=mspline,
 ```
 
 ```
-## Warning: There were 1 divergent transitions after warmup. See
-## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
-## to find out why this is a problem and how to eliminate them.
-```
-
-```
-## Warning: Examine the pairs() plot to diagnose sampling problems
+## Warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+## Running the chains for more iterations may help. See
+## https://mc-stan.org/misc/warnings.html#tail-ess
 ```
 
 ```r
@@ -270,7 +266,7 @@ for (i in seq_along(dfs)){
 ```
 
 ```
-## Warning: There were 3 divergent transitions after warmup. See
+## Warning: There were 1 divergent transitions after warmup. See
 ## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
 ## to find out why this is a problem and how to eliminate them.
 ```
@@ -293,14 +289,14 @@ rescomp %>%
 
 | df| LOOIC|Restricted mean survival (5 years) |
 |--:|-----:|:----------------------------------|
-|  5| 596.6|2.88 (2.62, 3.14)                  |
-|  6| 597.4|2.88 (2.62, 3.13)                  |
-|  7| 591.4|2.88 (2.61, 3.13)                  |
-|  8| 591.9|2.87 (2.62, 3.14)                  |
-|  9| 593.8|2.88 (2.62, 3.14)                  |
-| 10| 594.3|2.88 (2.62, 3.14)                  |
-| 11| 592.2|2.88 (2.62, 3.13)                  |
-| 12| 593.0|2.89 (2.63, 3.15)                  |
+|  5| 596.5|2.88 (2.62, 3.14)                  |
+|  6| 597.4|2.88 (2.62, 3.14)                  |
+|  7| 590.8|2.87 (2.62, 3.14)                  |
+|  8| 591.8|2.88 (2.62, 3.14)                  |
+|  9| 593.8|2.89 (2.62, 3.13)                  |
+| 10| 594.1|2.88 (2.61, 3.13)                  |
+| 11| 592.2|2.89 (2.63, 3.13)                  |
+| 12| 592.8|2.88 (2.62, 3.15)                  |
 </details>
 The estimates of RMST within 5 years do not change within 0.1.   Note this is only one of many ad-hoc checks we could do - note we did not change the prior for the smoothness `prior_hsd`, which also governs the amount of smoothness of the hazard function.  LOOCV is also lower for `df=7`.  In practice we might want to switch the `df` according to what data are included, but for simplicity of illustration in this article, we stick with `df=6` for all models, which in general gives slightly stabler computation without affecting the results.
 
@@ -317,19 +313,6 @@ mod_ph <- survextrap(Surv(years, d) ~ treat, data=cetux,
                      chains=chains, iter=iter,
                      prior_hscale=prior_hscale, prior_hsd = prior_hsd,
                      prior_loghr=prior_loghr)
-```
-
-```
-## Warning: There were 2 divergent transitions after warmup. See
-## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
-## to find out why this is a problem and how to eliminate them.
-```
-
-```
-## Warning: Examine the pairs() plot to diagnose sampling problems
-```
-
-```r
 mod_nph <- survextrap(Surv(years, d) ~ treat, data=cetux, mspline=mspline, 
                       chains=chains, iter=iter,
                       nonprop = TRUE,
@@ -341,7 +324,9 @@ mod_nph <- survextrap(Surv(years, d) ~ treat, data=cetux, mspline=mspline,
 ## Warning: There were 1 divergent transitions after warmup. See
 ## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
 ## to find out why this is a problem and how to eliminate them.
+```
 
+```
 ## Warning: Examine the pairs() plot to diagnose sampling problems
 ```
 
@@ -441,12 +426,12 @@ knitr::kable(trtcompf, col.names=c("Model","Time horizon",
 
 |Model                         | Time horizon|Restricted mean survival |Increase in restricted mean survival | LOOIC|
 |:-----------------------------|------------:|:------------------------|:------------------------------------|-----:|
-|(2a) Proportional hazards     |            5|2.88 (2.61,3.16)         |0.32 (-0.05,0.71)                    |  1156|
-|(2b) Non-proportional hazards |            5|2.88 (2.62,3.14)         |0.3 (-0.06,0.67)                     |  1158|
-|(2c) Separate arms            |            5|2.88 (2.62,3.13)         |0.37 (0.01,0.73)                     |  1160|
-|(2a) Proportional hazards     |           20|4.94 (3.72,6.96)         |1.15 (-0.13,2.82)                    |  1156|
-|(2b) Non-proportional hazards |           20|4.96 (3.73,6.84)         |1.05 (-0.6,3.13)                     |  1158|
-|(2c) Separate arms            |           20|5.07 (3.77,7.11)         |1.39 (-1.17,4.07)                    |  1160|
+|(2a) Proportional hazards     |            5|2.88 (2.64,3.13)         |0.33 (-0.02,0.68)                    |  1156|
+|(2b) Non-proportional hazards |            5|2.88 (2.62,3.12)         |0.3 (-0.07,0.65)                     |  1157|
+|(2c) Separate arms            |            5|2.88 (2.62,3.14)         |0.36 (-0.02,0.74)                    |  1161|
+|(2a) Proportional hazards     |           20|4.97 (3.76,6.68)         |1.19 (-0.08,2.71)                    |  1156|
+|(2b) Non-proportional hazards |           20|4.92 (3.7,6.81)          |1.04 (-0.57,2.95)                    |  1157|
+|(2c) Separate arms            |           20|5.1 (3.76,7.19)          |1.39 (-1.44,4.19)                    |  1161|
 </details>
 
 There is very little difference between the fit of the three models. 
@@ -459,12 +444,12 @@ write.table(trtcompf, sep="  &  ", eol="\\\\\n", quote=FALSE, row.names = FALSE)
 
 ```
 ## model  &  t  &  rm  &  ir  &  looic\\
-## (2a) Proportional hazards  &  5  &  2.88 (2.61,3.16)  &  0.32 (-0.05,0.71)  &  1156\\
-## (2b) Non-proportional hazards  &  5  &  2.88 (2.62,3.14)  &  0.3 (-0.06,0.67)  &  1158\\
-## (2c) Separate arms  &  5  &  2.88 (2.62,3.13)  &  0.37 (0.01,0.73)  &  1160\\
-## (2a) Proportional hazards  &  20  &  4.94 (3.72,6.96)  &  1.15 (-0.13,2.82)  &  1156\\
-## (2b) Non-proportional hazards  &  20  &  4.96 (3.73,6.84)  &  1.05 (-0.6,3.13)  &  1158\\
-## (2c) Separate arms  &  20  &  5.07 (3.77,7.11)  &  1.39 (-1.17,4.07)  &  1160\\
+## (2a) Proportional hazards  &  5  &  2.88 (2.64,3.13)  &  0.33 (-0.02,0.68)  &  1156\\
+## (2b) Non-proportional hazards  &  5  &  2.88 (2.62,3.12)  &  0.3 (-0.07,0.65)  &  1157\\
+## (2c) Separate arms  &  5  &  2.88 (2.62,3.14)  &  0.36 (-0.02,0.74)  &  1161\\
+## (2a) Proportional hazards  &  20  &  4.97 (3.76,6.68)  &  1.19 (-0.08,2.71)  &  1156\\
+## (2b) Non-proportional hazards  &  20  &  4.92 (3.7,6.81)  &  1.04 (-0.57,2.95)  &  1157\\
+## (2c) Separate arms  &  20  &  5.1 (3.76,7.19)  &  1.39 (-1.44,4.19)  &  1161\\
 ```
 
 
@@ -499,6 +484,16 @@ mod_seer <- survextrap(Surv(years, d) ~ 1, data=control,
                        external=cetux_seer, mspline=mspline_seer, 
                        chains=chains, iter=iter, 
                        prior_hscale=prior_hscale, prior_hsd = prior_hsd)
+```
+
+```
+## Warning: There were 1 divergent transitions after warmup. See
+## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+## to find out why this is a problem and how to eliminate them.
+```
+
+```
+## Warning: Examine the pairs() plot to diagnose sampling problems
 ```
 
 The results are illustrated, and compared to the model `mod_con` for the trial data alone that allowed the hazard to change after the trial.  The registry data makes the hazard extrapolations much more confident. 
@@ -566,7 +561,19 @@ for (i in 1:3){
                     prior_hscale=prior_hscale, prior_hsd = prior_hsd)
   res[[i]] <- comp_fn(mod)
 }
+```
 
+```
+## Warning: There were 7 divergent transitions after warmup. See
+## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+## to find out why this is a problem and how to eliminate them.
+```
+
+```
+## Warning: Examine the pairs() plot to diagnose sampling problems
+```
+
+```r
 do.call("rbind", c(list(comp_fn(mod_seer)), res)) %>%
   mutate(knots = c("10,15,20",
                    unlist(lapply(knot_list, paste, collapse=",")))) %>%
@@ -579,10 +586,10 @@ do.call("rbind", c(list(comp_fn(mod_seer)), res)) %>%
 
 |Additional knots    |Restricted mean survival over 20 years | LOOIC|
 |:-------------------|:--------------------------------------|-----:|
-|10,15,20            |5.79 (5.03, 6.58)                      |  1484|
-|10,20               |5.74 (4.99, 6.55)                      |  1506|
-|20                  |5.77 (4.97, 6.6)                       |  1515|
-|8,10,12,14,16,18,20 |5.81 (5.05, 6.56)                      |  1509|
+|10,15,20            |5.82 (5.07, 6.62)                      |  1484|
+|10,20               |5.7 (4.97, 6.49)                       |  1504|
+|20                  |5.77 (5.07, 6.53)                      |  1514|
+|8,10,12,14,16,18,20 |5.81 (5.07, 6.66)                      |  1508|
 </details>
 
 
@@ -662,6 +669,16 @@ mod_seer40 <- survextrap(Surv(years, d) ~ 1, data=control, mspline = mspline40,
                          external=cetux_seer, 
                          chains=chains, iter=iter, 
                          prior_hscale=prior_hscale, prior_hsd = prior_hsd)
+```
+
+```
+## Warning: There were 1 divergent transitions after warmup. See
+## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+## to find out why this is a problem and how to eliminate them.
+```
+
+```
+## Warning: Examine the pairs() plot to diagnose sampling problems
 ```
 
 The second includes the trial, registry and population data.
@@ -860,14 +877,14 @@ knitr::kable(rs, col.names=c("Model", "Observed data","Extrapolation assumptions
 
 |Model |Observed data             |Extrapolation assumptions | Time horizon|Restricted mean survival |
 |:-----|:-------------------------|:-------------------------|------------:|:------------------------|
-|(1a)  |Trial                     |No extrapolation          |            5|2.88 (2.62, 3.13)        |
-|(1a)  |Trial                     |Uncertain hazard          |           20|5.07 (3.77, 7.11)        |
-|(1b)  |Trial                     |Constant hazard           |           20|5.11 (3.94, 6.76)        |
-|(1c)  |Trial,registry            |No extrapolation          |           20|5.78 (5.04, 6.55)        |
-|(1d)  |Trial,registry            |Uncertain hazard          |           40|6.19 (5.3, 7.13)         |
-|(1e)  |Trial,registry,population |Uncertain excess hazard   |           40|6.21 (5.38, 7.12)        |
-|(1f)  |Trial,registry,population |Mixture cure              |           40|6.26 (5.42, 7.26)        |
-|(1g)  |Trial,registry,population |Elicited survival         |           40|6.25 (5.38, 7.21)        |
+|(1a)  |Trial                     |No extrapolation          |            5|2.88 (2.62, 3.14)        |
+|(1a)  |Trial                     |Uncertain hazard          |           20|5.1 (3.76, 7.19)         |
+|(1b)  |Trial                     |Constant hazard           |           20|5.12 (3.99, 6.68)        |
+|(1c)  |Trial,registry            |No extrapolation          |           20|5.78 (5.04, 6.58)        |
+|(1d)  |Trial,registry            |Uncertain hazard          |           40|6.2 (5.35, 7.13)         |
+|(1e)  |Trial,registry,population |Uncertain excess hazard   |           40|6.2 (5.36, 7.14)         |
+|(1f)  |Trial,registry,population |Mixture cure              |           40|6.27 (5.41, 7.18)        |
+|(1g)  |Trial,registry,population |Elicited survival         |           40|6.25 (5.42, 7.23)        |
 </details>
 
 The following code formats the table in LaTeX format (for the paper).
@@ -878,14 +895,14 @@ write.table(rs, sep="  &  ", eol="\\\\\n", quote=FALSE, row.names = FALSE)
 
 ```
 ## modlabs  &  data  &  extrap  &  t  &  rmst\\
-## (1a)  &  Trial  &  No extrapolation  &  5  &  2.88 (2.62, 3.13)\\
-## (1a)  &  Trial  &  Uncertain hazard  &  20  &  5.07 (3.77, 7.11)\\
-## (1b)  &  Trial  &  Constant hazard  &  20  &  5.11 (3.94, 6.76)\\
-## (1c)  &  Trial,registry  &  No extrapolation  &  20  &  5.78 (5.04, 6.55)\\
-## (1d)  &  Trial,registry  &  Uncertain hazard  &  40  &  6.19 (5.3, 7.13)\\
-## (1e)  &  Trial,registry,population  &  Uncertain excess hazard  &  40  &  6.21 (5.38, 7.12)\\
-## (1f)  &  Trial,registry,population  &  Mixture cure  &  40  &  6.26 (5.42, 7.26)\\
-## (1g)  &  Trial,registry,population  &  Elicited survival  &  40  &  6.25 (5.38, 7.21)\\
+## (1a)  &  Trial  &  No extrapolation  &  5  &  2.88 (2.62, 3.14)\\
+## (1a)  &  Trial  &  Uncertain hazard  &  20  &  5.1 (3.76, 7.19)\\
+## (1b)  &  Trial  &  Constant hazard  &  20  &  5.12 (3.99, 6.68)\\
+## (1c)  &  Trial,registry  &  No extrapolation  &  20  &  5.78 (5.04, 6.58)\\
+## (1d)  &  Trial,registry  &  Uncertain hazard  &  40  &  6.2 (5.35, 7.13)\\
+## (1e)  &  Trial,registry,population  &  Uncertain excess hazard  &  40  &  6.2 (5.36, 7.14)\\
+## (1f)  &  Trial,registry,population  &  Mixture cure  &  40  &  6.27 (5.41, 7.18)\\
+## (1g)  &  Trial,registry,population  &  Elicited survival  &  40  &  6.25 (5.42, 7.23)\\
 ```
 
 
@@ -970,10 +987,10 @@ knitr::kable(res_wane %>%
 
 |Data                      |Model              |Restricted mean survival |Increase in restricted mean survival |
 |:-------------------------|:------------------|:------------------------|:------------------------------------|
-|Trial,registry            |(2d) No waning     |5.79 (5.03, 6.58)        |1.27 (-0.32, 2.77)                   |
-|Trial,registry,population |(2e) No waning     |5.88 (5.11, 6.67)        |1.08 (-0.33, 2.62)                   |
-|Trial,registry,population |(2e) 5 to 6 years  |5.88 (5.11, 6.67)        |0.82 (-0.25, 1.95)                   |
-|Trial,registry,population |(2e) 5 to 20 years |5.88 (5.11, 6.67)        |1.03 (-0.32, 2.48)                   |
+|Trial,registry            |(2d) No waning     |5.82 (5.07, 6.65)        |1.2 (-0.4, 2.75)                     |
+|Trial,registry,population |(2e) No waning     |5.88 (5.14, 6.67)        |1.11 (-0.3, 2.57)                    |
+|Trial,registry,population |(2e) 5 to 6 years  |5.88 (5.14, 6.67)        |0.83 (-0.23, 1.9)                    |
+|Trial,registry,population |(2e) 5 to 20 years |5.88 (5.14, 6.67)        |1.05 (-0.29, 2.44)                   |
 Table in LaTeX format (for the paper).
 
 ```r
@@ -982,11 +999,11 @@ write.table(res_wane, eol="\\\\\n", sep="  &  ", row.names = FALSE, quote=FALSE)
 
 ```
 ## model  &  rmf  &  irmf  &  looic\\
-## (2d) No waning  &  5.79 (5.03, 6.58)  &  1.27 (-0.32, 2.77)  &  \\
-## (2e) No waning  &  5.88 (5.11, 6.67)  &  1.08 (-0.33, 2.62)  &  \\
-## (2e) 5 to 6 years  &  5.88 (5.11, 6.67)  &  0.82 (-0.25, 1.95)  &  \\
-## (2e) 5 to 20 years  &  5.88 (5.11, 6.67)  &  1.03 (-0.32, 2.48)  &  \\
+## (2d) No waning  &  5.82 (5.07, 6.65)  &  1.2 (-0.4, 2.75)  &  \\
+## (2e) No waning  &  5.88 (5.14, 6.67)  &  1.11 (-0.3, 2.57)  &  \\
+## (2e) 5 to 6 years  &  5.88 (5.14, 6.67)  &  0.83 (-0.23, 1.9)  &  \\
+## (2e) 5 to 20 years  &  5.88 (5.14, 6.67)  &  1.05 (-0.29, 2.44)  &  \\
 ```
 
 
-Using all three data sources, with no waning, the incremental restricted mean survival over 20 years is estimated as 1.08 (-0.33, 2.62).  This reduces to 1.03 (-0.32, 2.48) when waning is applied gradually from 6 to 20 years, and even further to 0.82 (-0.25, 1.95) when the effect is assumed to wane rapidly from 5 to 6 years.
+Using all three data sources, with no waning, the incremental restricted mean survival over 20 years is estimated as 1.11 (-0.3, 2.57).  This reduces to 1.05 (-0.29, 2.44) when waning is applied gradually from 6 to 20 years, and even further to 0.83 (-0.23, 1.9) when the effect is assumed to wane rapidly from 5 to 6 years.

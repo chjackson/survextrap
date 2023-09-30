@@ -1,40 +1,7 @@
-##' Documentation for arguments used in illustration of M-splines
-##'
-##' @name mspline_args
-##'
-##' @param knots Vector of knot locations. If not supplied, \code{df}
-#'   has to be specified, in which case the default is a set of
-#'   equally spaced knots between zero and the highest knot.  The
-#'   number of knots (excluding zero) is \code{df - degree + 1} if
-#'   \code{bsmooth} is \code{TRUE}, or \code{df - degree - 1}
-#'   otherwise.
-#' 
-##' @param bknot Location of the highest knot.
-##'
-##' @param degree Spline polynomial degree.  Can only be changed from
-##' the default of 3 if \code{bsmooth} is \code{FALSE}. 
-##'
-##' @param df Desired number of basis terms, or "degrees of freedom"
-##'   in the spline.  If \code{knots} is not supplied, the number of
-##'   knots is then chosen to satisfy this.
-##'
-##' @param bsmooth If \code{TRUE} then the function is constrained to
-##'   also have zero derivative and second derivative at the boundary.
-##'
-NULL
-
-mspline_even_knots <- function(knots=NULL, bknot, degree=3, df, bsmooth=TRUE){
-  if (is.null(knots)) {
-    nik <- if (bsmooth) df - degree  + 1 else df - degree  - 1
-    knots <- seq(0, bknot, length.out=nik+2)[-1]
-  }
-  validate_knots(knots, name="knots")
-  knots
-}
 
 #' Get basis for an illustration of an M-spline with given knots.
 #'
-#' @inheritParams mspline_args
+#' @inheritParams mspline_init
 #'
 #' @param tmin Minimum plotting time.  Defaults to zero.
 #'
@@ -45,9 +12,11 @@ mspline_plotsetup <- function(knots, bknot=10,
                               degree=3, df=10, bsmooth=TRUE){
     if (is.null(tmin)) tmin <- 0
     if (is.null(tmax)) tmax <- bknot
-    knots <- mspline_even_knots(knots, bknot, degree, df)
+    mspline <- mspline_init(knots=knots, bknot=bknot,
+                            degree=degree, df=df, bsmooth=bsmooth)
     time <- seq(tmin, tmax, length.out=1000)[-c(1,1000)]
-    basis <- mspline_basis(times=time, knots=knots, degree=degree, bsmooth=bsmooth)
+    basis <- mspline_basis(times=time, knots=mspline$knots,
+                           degree=mspline$degree, bsmooth=mspline$bsmooth)
     basis
 }
 

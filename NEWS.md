@@ -1,24 +1,29 @@
-# survextrap version 0.8.4 (2023/09/09)
+# Version 0.8.5 (2023/09/30)
+
+* Code for constructing `mspline` specification objects tidied, with new `mspline_init` and `mspline_list_init` functions.
+
+
+# Version 0.8.4 (2023/09/09)
 
 * Deprecated Stan array syntax updated.  The package now requires `rstan` version 2.26.
 
 
-# survextrap version 0.8.3 (2023/06/30)
+# Version 0.8.3 (2023/06/30)
 
 * Fix for `mspline_spec` bug introduced in 0.8.2.
 
 
-# survextrap version 0.8.2 (2023/06/14)
+# Version 0.8.2 (2023/06/14)
 
 * Individual data can now be excluded, and model fitted to external data alone.
 
 
-# survextrap version 0.8.1 (2023/05/25)
+# Version 0.8.1 (2023/05/25)
 
 * Update to work with StanHeaders 2.26.
 
 
-# survextrap version 0.8 (2023/05/06)
+# Version 0.8 (2023/05/06)
 
 The [GitHub commit](https://github.com/chjackson/survextrap/commit/1668f40604d9dc62d83a698c735275506474aa03) on 6 May 2023 implemented several changes that are listed here.  `survextrap` is now in "beta" status.  All major features are now implemented, but there may still be some lack of polish.
 
@@ -59,7 +64,7 @@ The [GitHub commit](https://github.com/chjackson/survextrap/commit/1668f40604d9d
 * Thorough documentation polishing and code tidying.
 
 
-# survextrap version 0.1
+# Version 0.1
 
 ## Changes
 
