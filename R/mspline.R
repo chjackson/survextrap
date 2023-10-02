@@ -99,7 +99,7 @@ NULL
 ##'
 ##' Evaluate an M-spline basis matrix at the specified times.
 ##' Extrapolation beyond the boundary knots is done by assuming that
-##' each basis term is constant beyond the boundary. 
+##' each basis term is constant beyond the boundary.
 ##'
 ##' The lower boundary is fixed to zero, and each basis term is
 ##' assumed to be zero at times less than zero, since these models are
@@ -526,7 +526,7 @@ mspline_constant_coefs <- function(mspline, logit=FALSE){
 ## @param coefs Vector or matrix giving coefficients.  If matrix, it should
 ## have the same number of rows as coefs
 mspline_sum_basis <- function(basis, coefs=NULL, alpha=0, time, log=FALSE) {
-  coefs <- validate_coefs(coefs, basis)
+  coefs <- validate_coefs(coefs, ncol(basis))
   if (!is.matrix(coefs)) coefs <- rep(coefs, each=nrow(basis))
   if (log)
     haz <- alpha + log(rowSums(basis * coefs))
@@ -535,8 +535,7 @@ mspline_sum_basis <- function(basis, coefs=NULL, alpha=0, time, log=FALSE) {
   haz
 }
 
-validate_coefs <- function(coefs=NULL, basis){
-  nvars <- ncol(basis)
+validate_coefs <- function(coefs=NULL, nvars){
   if (is.null(coefs))
     coefs <- rep(1, nvars)
   else {
@@ -549,4 +548,9 @@ validate_coefs <- function(coefs=NULL, basis){
   else
     coefs <- coefs / sum(coefs)
   coefs
+}
+
+validate_hscale <- function(hscale){
+  if (!is.numeric(hscale)) stop("`hscale` should be numeric")
+  if (hscale < 0) stop("`hscale` should be a non-negative number")
 }

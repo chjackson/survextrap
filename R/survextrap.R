@@ -418,7 +418,7 @@ print.message <- function(x, ...){
   message(x)
 }
 
-##' Make default M-spline knot specification.
+##' Make default M-spline knot specification given a survival dataset.
 ##'
 ##' Choose default M-spline knot locations given a dataset and desired
 ##' number of spline parameters.  Assumes a cubic spline, and knots
@@ -428,6 +428,15 @@ print.message <- function(x, ...){
 ##' of a vector defined by concatenating the event times in the
 ##' individual data with the unique start and stop times in the
 ##' external data.
+##'
+##' This is designed to have the same arguments as
+##' \code{\link{survextrap}}.  It is intended for use when we want to
+##' fit a set of \code{\link{survextrap}} models with the same spline
+##' specification.
+##'
+##' See also \code{\link{mspline_list_init}} and \code{\link{mspline_init}},
+##' which have lower-level interfaces, and are designed for use without
+##' data, e.g. when illustrating a theoretical M-spline model.
 ##'
 ##' @inheritParams survextrap
 ##'

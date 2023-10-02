@@ -2,7 +2,7 @@
 % Please edit documentation in R/survextrap.R
 \name{mspline_spec}
 \alias{mspline_spec}
-\title{Make default M-spline knot specification.}
+\title{Make default M-spline knot specification given a survival dataset.}
 \usage{
 mspline_spec(
   formula,
@@ -117,4 +117,13 @@ If there are also external data, then these are based on quantiles
 of a vector defined by concatenating the event times in the
 individual data with the unique start and stop times in the
 external data.
+
+This is designed to have the same arguments as
+\code{\link{survextrap}}.  It is intended for use when we want to
+fit a set of \code{\link{survextrap}} models with the same spline
+specification.
+
+See also \code{\link{mspline_list_init}} and \code{\link{mspline_init}},
+which have lower-level interfaces, and are designed for use without
+data, e.g. when illustrating a theoretical M-spline model.
 }

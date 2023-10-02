@@ -80,7 +80,7 @@ mspline_init <- function(df = 10,
 }
 
 ##' Validate an M-spline object supplied as a list, choosing defaults
-##' if needed
+##' if needed.
 ##'
 ##' @param mspline A list with any or none of the following components:
 ##' \code{df}, \code{degree}, \code{bsmooth}, \code{knots}, \code{bknot},
@@ -113,18 +113,23 @@ mspline_list_init <- function(mspline, obstimes=NULL){
   mspline
 }
 
-##' Create an mspline model, both structure and parameters.
-##' Default settings are used if some components are not specified.
+##' Create an M-spline survival model, both structure and parameters.
 ##'
-##' \code{\link{mspline_init}} is first used to create the
-##' model structure.
+##' \code{\link{mspline_init}} is first used to create the M-spline
+##' model structure, including knot positions.  Parameters including
+##' basis coefficients and scale are either supplied or set to a
+##' default that defines a constant hazard model.
 ##'
-##' The parameters are 
+##' This function is not for fitting models to data, but for setting
+##' up a theoretical M-spline model for illustration.
 ##'
 ##' @inheritParams mspline_init
-##' @param coefs Coefficients 
-##' @param scale Scale 
-##' @noRd
+##' 
+##' @param coefs Basis coefficients 
+##'
+##' @param hscale Hazard scale parameter 
+##'
+##' @export
 msplinemodel_init <- function(df = 10,
                               degree = 3,
                               bsmooth = TRUE,
@@ -132,14 +137,16 @@ msplinemodel_init <- function(df = 10,
                               bknot = 10,
                               obstimes = NULL,
                               coefs = NULL,
-                              scale = 1)
+                              hscale = 1)
 {
   mspline <- mspline_init(df=df, degree=degree,
                           bsmooth=bsmooth, knots=knots,
                           bknot=bknot, obstimes=obstimes)
   if (is.null(coefs))
     mspline$coefs <- mspline_constant_coefs(mspline)
-  ## else TODO validate coefs and scale
-  mspline$scale <- scale
+  else 
+    validate_coefs(coefs, nvars=mspline$df)
+  validate_hscale(hscale)
+  mspline$hscale <- hscale
   mspline
 }

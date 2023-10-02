@@ -3,7 +3,7 @@
 \name{mspline_list_init}
 \alias{mspline_list_init}
 \title{Validate an M-spline object supplied as a list, choosing defaults
-if needed}
+if needed.}
 \usage{
 mspline_list_init(mspline, obstimes = NULL)
 }
@@ -25,5 +25,5 @@ so that default locations can be obtained.
 }
 \description{
 Validate an M-spline object supplied as a list, choosing defaults
-if needed
+if needed.
 }
