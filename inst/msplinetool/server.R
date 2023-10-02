@@ -1,15 +1,18 @@
-render_dt = function(data, editable = 'cell', server = TRUE, ...) {
-  renderDT(data, selection = 'none', server = server, editable = editable, ...)
+render_dt = function(data, ...) {
+  renderDT(data, selection = 'none', server = TRUE,
+           editable = "column", options=list(info=FALSE, dom="t"), ...)
 }
 
 function(input, output, session) {
 
+  ## default spline on startup 
   m <- reactiveValues()
   md <- msplinemodel_init()
   for (i in names(md)) m[[i]] <- md[[i]] # TODO nicer?
   m$knots_df <- data.frame(knots=md$knots)
   m$coefs_df <- data.frame(coefs=md$coefs)
 
+  ## main plot 
   output$main_plot <- renderPlot({
     plot_mspline(knots = m$knots,
                  bknot = 10,
@@ -19,12 +22,19 @@ function(input, output, session) {
                  coefs = m$coefs)
   })
 
-  output$coefs_df <- render_dt(m$coefs_df, 'column')
-  output$knots_df <- render_dt(m$knots_df, 'column')
+  ## table of knots and coefficients (updated if spline changes)
+  observeEvent(m$coefs_df, {
+    output$coefs_df <- render_dt(m$coefs_df)
+  })
 
-  an <- function(x){if(is.null(x)) NULL else as.numeric(x)}
+  observeEvent(m$knots_df, {
+    output$knots_df <- render_dt(m$knots_df)
+  })
+  
+  ## make spline specification consistent if one component changes
 
   update_spline <- function(m, ...){
+    an <- function(x){if(is.null(x)) NULL else as.numeric(x)}
     args <- list(...)
     for (i in names(args)) m[[i]] <- args[[i]]
     md <- msplinemodel_init(df = an(m$df), degree = an(m$degree),
@@ -34,10 +44,11 @@ function(input, output, session) {
     m$coefs_df <- data.frame(coefs=m$coefs)
   }
 
-  ## interface changes
+  ## monitor if user changes spline components
+
   observeEvent(input$bsmooth, {
-    degree_opts <- if (input$bsmooth) 3 else 2:4 # TODO abstract
-    df_opts <- 5:12
+    degree_opts <- if (input$bsmooth) 3 else selection_defaults$degree_unsmooth
+    df_opts <- selection_defaults$df
     update_spline(m, bsmooth = input$bsmooth, knots=NULL, coefs=NULL)
     updateSelectInput(session, "degree", choices=degree_opts, selected=3)
     updateSelectInput(session, "df", choices=df_opts, selected=m$df)

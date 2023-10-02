@@ -7,35 +7,36 @@ dt_output = function(title, id) {
 }
 
 bootstrapPage(
-
-  selectInput(inputId = "df",
-      label = "Knots df",
-      choices = 5:12,
-      selected = mspline_defaults$df),
-
-  selectInput(inputId = "degree",
-      label = "Polynomial degree",
-      choices = c(2,3,4),
-      selected = mspline_defaults$degree),
-
-  checkboxInput(inputId = "bsmooth",
-      label = "Boundary smoothness",
-      value = mspline_defaults$bsmooth),
-
-  dt_output('Knots', 'knots_df'),
-  dt_output('Coefs', 'coefs_df'),
-
   plotOutput(outputId = "main_plot", height = "300px"),
+  fluidRow(
+    column(3,
+           selectInput(inputId = "df",
+                       label = "Knots df",
+                       choices = selection_defaults$df,
+                       selected = mspline_defaults$df),
 
+           selectInput(inputId = "degree",
+                       label = "Polynomial degree",
+                       choices = 3,
+                       selected = mspline_defaults$degree),
+
+           checkboxInput(inputId = "bsmooth",
+                         label = "Boundary smoothness",
+                         value = mspline_defaults$bsmooth)
+           ),
+    column(4,
+           DTOutput('knots_df',width="25%")
+           ),
+    column(4,
+           DTOutput('coefs_df',width="25%")
+           )
+  )  
 )
 
 ## TODO
-
-## coefficients 
-
-## knot positions 
-
+## format
 ## why no x axis? 
 ## y axis scaling
 ## line colors, widths
 ## ggplot code to paste
+## algebra explanations and language for model
