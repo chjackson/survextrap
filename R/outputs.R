@@ -229,14 +229,13 @@ newdata_to_X <- function(newdata, x, formula=NULL, xlevs=NULL){
   else {
     X <- model.matrix(form, newdata, xlev=xlevs)
   }
-  X
+  drop_intercept(X)
 }
 
 get_alpha_bycovs <- function(x, stanmat, newdata=NULL){
     if (is.null(newdata) && (x$ncovs > 0)) newdata <- x$x$mfbase
     if (NROW(newdata) > 0){
         X <- newdata_to_X(newdata, x, x$formula, x$x$xlevs) # nvals x npars
-        X <- drop_intercept(X)
     } else X <- NULL
     X <- cbind("(Intercept)"=1, X)
     loghr_names <- grep("loghr", colnames(stanmat), value=TRUE)
@@ -249,7 +248,6 @@ get_cureprob_bycovs <- function(x, stanmat, newdata=NULL){
     pcure <- if (x$cure) stanmat[, "pcure[1]"] else NULL
     if (x$cure && NROW(newdata) > 0){
         X <- newdata_to_X(newdata, x, x$cure_formula, x$xcure$xlevs)
-        X <- drop_intercept(X)
         X <- cbind("(Intercept)"=1, X)
         logor_names <- grep("logor_cure", colnames(stanmat), value=TRUE)
         logit_intercept <- qlogis(pcure)
@@ -537,7 +535,6 @@ get_coefs_bycovs <- function(x, stanmat, newdata=NULL, X=NULL){
     if (is.null(newdata) && (x$ncovs > 0)) newdata <- x$x$mfbase
     if (NROW(newdata) > 0){
       X <- newdata_to_X(newdata, x, x$formula, x$x$xlevs) # nvals x ncovs
-      X <- drop_intercept(X)
     } else X <- NULL
   }
   niter <- nrow(stanmat)

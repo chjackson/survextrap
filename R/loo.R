@@ -1,5 +1,6 @@
-# Leave-one-out cross-validation for survextrap models
-#
+## Leave-one-out cross-validation for survextrap models
+## Implemented by mimicking the Stan code for likelihood computation in R 
+
 loo_survextrap <- function(x, standata, loglik_fn){
     ll <- loglik_fn(x, standata)
     chains <- x$stanfit@sim$chains
@@ -10,7 +11,7 @@ loo_survextrap <- function(x, standata, loglik_fn){
     res
 }
 
-# Mimic the Stan code
+## Log-likelihood for the individual-level data
 
 loglik_ipd <- function(x, standata){
     pars <- get_pars(x, newdata=NULL)
@@ -32,7 +33,6 @@ loglik_ipd <- function(x, standata){
     alpha_event <- unclass(alpha_event)
     alpha_rcens <- unclass(alpha_rcens)
     pcure <- as.numeric(pars$pcure)
-## TODO include standata$backhaz_event
     ll_event <- log_dens(alpha_event,  standata$basis_event,
                          coefs_event, standata$cure, pcure,
                          standata$ibasis_event, modelid=1,

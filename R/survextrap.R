@@ -546,8 +546,7 @@ make_x <- function(formula, data, td, xlevs=NULL){
   ## model frame containing  factor(x), log(x) etc not x
   mf <- stats::model.frame(form, data)
   xlevs <- .getXlevels(terms(mf), mf)
-  X <- model.matrix(form, mf, xlev = xlevs)
-  X <- drop_intercept(X)
+  X <- drop_intercept(model.matrix(form, mf, xlev = xlevs))
 
   ncovs <- NCOL(X)
   xnames <- colnames(X)
@@ -580,7 +579,6 @@ eb_smoothness <- function(standata, staninit, prior_hsd){
 }
 
 validate_formula <- function(formula, needs_response = TRUE) {
-
   if (!inherits(formula, "formula")) {
     stop("'formula' must be a formula.")
   }
@@ -782,7 +780,14 @@ make_xcure <- function(cure, data, td){
     res
 }
 
-
+# Drop intercept from a model matrix
+drop_intercept <- function(x) { 
+  sel <- which("(Intercept)" %in% colnames(x))
+  if (length(sel) && is.matrix(x)) {
+    x <- x[, -sel, drop = FALSE]
+  }
+  x
+}
 
 ## Named arguments to Stan computation functions
 

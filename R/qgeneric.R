@@ -1,7 +1,8 @@
 ## Generic function to find quantiles of a distribution
 ##
 ## Generic function to find the quantiles of a distribution, given the
-## equivalent probability distribution function.
+## equivalent probability distribution function.   Copied from the version
+## distributed in the flexsurv package. 
 ##
 ## This function is used by default for custom distributions for which a
 ## quantile function is not provided.
