@@ -189,6 +189,7 @@ test_that("prior hazard function samples", {
                            prior_hsd = p_gamma(10, 10),
                            formula = ~treatment,
                            newdata = list(treatment=-5),
+                           nonprop = ~treatment,
                            prior_hrsd = p_gamma(2,1),
                            tmin=0, tmax=10, nsim=10)
     p
@@ -241,6 +242,7 @@ test_that("prior hazard SD over time", {
                  prior_hscale = p_normal(0,1),
                  formula = ~ treatment,
                  newdata = list(treatment=1),
+                 nonprop = ~treatment,
                  prior_hrsd = p_gamma(2,1),
                  nsim = 100, quantiles=c(0.25, 0.75))
 
@@ -277,5 +279,13 @@ test_that("prior sampling functions returned with a fitted model",{
     mod$prior_sample$haz(newdata=newdata, nsim=4)
     mod$prior_sample$haz_sd(newdata=newdata, quantiles = c(0.25, 0.75))
     mod$prior_sample$hr_sd(newdata=newdata, newdata0=newdata0)
+  }, NA)
+  mod <- survextrap(Surv(years, status) ~ rx, data=colons, cure=TRUE, fit_method="opt")
+  expect_error({
+    mod$prior_sample$haz_sd(newdata=newdata, nsim=4)
+  }, NA)
+  mod <- survextrap(Surv(years, status) ~ rx, data=colons, cure=~rx, fit_method="opt")
+  expect_error({
+    mod$prior_sample$haz_sd(newdata=newdata, nsim=4)
   }, NA)
 })

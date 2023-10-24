@@ -77,35 +77,3 @@ mspline_plotdata <- function(knots=NULL, bknot=10,
     attr(bdf,"knots") <- knots
     bdf
 }
-
-##' @rdname prior_sample_hazard
-##' @export
-plot_prior_hazard <- function(knots=NULL, df=10, degree=3,
-                              coefs_mean = NULL,
-                              prior_hsd = p_gamma(2,1),
-                              prior_hscale = p_normal(0, 20),
-                              prior_loghr = NULL,
-                              newdata = NULL,
-                              formula = NULL,
-                              prior_hrsd = p_gamma(2,1),
-                              tmin=0, tmax=NULL,
-                              nsim=10)
-{
-  haz <- NULL
-  hazdf <- prior_sample_hazard(knots=knots, df=df, degree=degree,
-                               coefs_mean=coefs_mean,
-                               prior_hsd=prior_hsd,
-                               prior_hscale=prior_hscale,
-                               prior_loghr=prior_loghr,
-                               newdata=newdata, formula=formula,
-                               prior_hrsd=prior_hrsd,
-                               tmin=tmin, tmax=tmax, nsim=nsim)
-  knots <- attr(hazdf, "knots")
-  ggplot(hazdf, aes(x=time, y=haz, group=rep)) +
-    geom_line(alpha=0.5) +
-    scale_x_continuous(breaks=knots) +
-    theme_minimal() +
-    theme(panel.grid.minor = element_blank()) +
-    geom_vline(xintercept = max(knots), col="gray50") +
-    xlab("Time") + ylab("Hazard")
-}

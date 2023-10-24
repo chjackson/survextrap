@@ -265,29 +265,6 @@ get_prior_hrsd <- function(prior, xnph){
   cbind(shapes, rates)
 }
 
-prior_basehaz_sample <- function(mspline,
-                                 coefs_mean = NULL,
-                                 prior_hsd = p_gamma(2,1), # no constants, as they are not allowed in the model
-                                 prior_hscale,
-                                 nsim = 100){
-  ## process using common code to survextrap
-  hscale_prior <- get_prior_hscale(prior_hscale)
-  hsd_prior <- get_prior_hsd(prior_hsd, est_hsd=TRUE)
-  alpha <- hscale_prior$r(nsim)
-  hsd <- hsd_prior$r(nsim)
-
-  coefs_mean <- default_coefs_mean(mspline, coefs_mean)
-  lcoefs_mean <- log(coefs_mean[-1] / coefs_mean[1])
-  np <- length(lcoefs_mean) + 1
-  beta <- matrix(nrow=nsim, ncol=np)
-  beta[,1] <- 0
-  for (j in 2:np){
-    beta[,j] <- rlogis(nsim, lcoefs_mean[j-1], hsd)
-  }
-  coefs <- exp(beta) / rowSums(exp(beta))
-  nlist(alpha, coefs, beta, hsd, hscale=exp(alpha))
-}
-
 ##' Sample from the joint prior of parameters in a survextrap model
 ##'
 ##' Draws a sample from the joint prior distribution of the parameters
@@ -359,7 +336,7 @@ prior_sample <- function(mspline,
                          prior_cure = NULL,
                          prior_logor_cure = NULL, 
                          nsim = 100){
-  sam <- prior_basehaz_sample(mspline,
+  sam <- prior_sample_basehaz(mspline,
                               coefs_mean = coefs_mean, prior_hsd = prior_hsd,
                               prior_hscale = prior_hscale, nsim=nsim)
 
@@ -378,32 +355,65 @@ prior_sample <- function(mspline,
   }
   if (!is.null(newdata0)){
     if (is.null(newdata)) stop("if `newdata0` is supplied, `newdata` should also be supplied")
+    X0 <- drop_intercept(model.matrix(formula, newdata0))
+  } else X0 <- NULL
+
+  if (x$ncovs > 0){
+    sam <- prior_sample_hscale(sam, nsim, x, prior_loghr, X, X0)
   }
-  if (is.null(cure)) {
-    xcure <- list(ncovs=0, xnames=NULL)
-    if (!is.null(prior_logor_cure)) stop("If `prior_logor_cure` is supplied, a regression formula should be supplied in `cure`")
-  }
-  else {
+
+  if (!is.null(nonprop)) {
+    Xnph <- drop_intercept(model.matrix(nonprop, newdata))
+    xnph <- list(ncovs = ncol(X), xnames = colnames(Xnph))
+    if (!is.null(newdata0))
+      Xnph0 <- drop_intercept(model.matrix(nonprop, newdata0))
+    else Xnph0 <- NULL
+    sam <- prior_sample_nonprop(sam, nsim, x, xnph, prior_hrsd, Xnph, Xnph0)
+  } 
+
+  if (!is.null(cure)) {
     if (inherits(cure, "formula")){
       if (is.null(newdata)) stop("If `cure` is a formula, covariate values should be supplied in `newdata`")
     }
     cure_formula <- make_cure_formula(cure)
     Xcure <- drop_intercept(model.matrix(cure, newdata))
     xcure <- list(ncovs = ncol(Xcure), xnames = colnames(Xcure)) # Repetition here? 
-  }
-  if (is.null(nonprop)) xnph <- list(ncovs=0, xnames=NULL)
-  else {
-    Xnph <- drop_intercept(model.matrix(nonprop, newdata))
-    xnph <- list(ncovs = ncol(X), xnames = colnames(Xnph))
-  }
+    sam <- prior_sample_cure(sam, nsim, xcure, prior_cure, prior_logor_cure, Xcure)
+  } else {
+    if (!is.null(prior_logor_cure)) stop("If `prior_logor_cure` is supplied, a regression formula should be supplied in `cure`")
+  }    
 
-  ## baseline hazard scale
-  if (x$ncovs > 0){
+  sam
+}
+
+prior_sample_basehaz <- function(mspline,
+                                 coefs_mean = NULL,
+                                 prior_hsd = p_gamma(2,1), # no constants, as they are not allowed in the model
+                                 prior_hscale,
+                                 nsim = 100){
+  ## process using common code to survextrap
+  hscale_prior <- get_prior_hscale(prior_hscale)
+  hsd_prior <- get_prior_hsd(prior_hsd, est_hsd=TRUE)
+  alpha <- hscale_prior$r(nsim)
+  hsd <- hsd_prior$r(nsim)
+
+  coefs_mean <- default_coefs_mean(mspline, coefs_mean)
+  lcoefs_mean <- log(coefs_mean[-1] / coefs_mean[1])
+  np <- length(lcoefs_mean) + 1
+  beta <- matrix(nrow=nsim, ncol=np)
+  beta[,1] <- 0
+  for (j in 2:np){
+    beta[,j] <- rlogis(nsim, lcoefs_mean[j-1], hsd)
+  }
+  coefs <- exp(beta) / rowSums(exp(beta))
+  nlist(alpha, coefs, beta, hsd, hscale=exp(alpha))
+}
+
+prior_sample_hscale <- function(sam, nsim, x, prior_loghr, X, X0){
     loghr_prior <- get_prior_coveffs(prior_loghr, x, "loghr")
     loghr <- lapply(attr(loghr_prior, "r"), function(x)x$r(nsim))
     loghr <- do.call(cbind, loghr[x$xnames])
-    if (!is.null(newdata0)){
-      X0 <- drop_intercept(model.matrix(formula, newdata0))
+    if (!is.null(X0)){
       linpred0 <- loghr %*% t(X0)
       sam$alpha0 <- sam$alpha + linpred0
       sam$hscale0 <- exp(sam$alpha0)
@@ -411,25 +421,23 @@ prior_sample <- function(mspline,
     linpred <- loghr %*% t(X)
     sam$alpha <- sam$alpha + linpred
     sam$hscale <- exp(sam$alpha)
-  }
+    sam
+}
 
-  ## nonprop haz models
-  if (!is.null(nonprop)) {
+prior_sample_nonprop <- function(sam, nsim, x, xnph, prior_hrsd, Xnph, Xnph0){
     hrsd_prior <- get_prior_hrsd(prior_hrsd, xnph)
     hrsd <- vector(x$ncovs, mode="list")
     nvars <- ncol(sam$coefs) # number of spline basis terms
     np_linpred <- matrix(0, nrow=nsim, ncol=nvars-1)
-    if (!is.null(newdata0))
-      Xnph0 <- drop_intercept(model.matrix(nonprop, newdata0))
     for (i in seq_len(x$ncovs)){
       hrsd[[i]] <- rgamma(nsim, shape=hrsd_prior[i,1], rate=hrsd_prior[i,2])
       b_np <- matrix(rnorm(nsim *(nvars - 1), 0, hrsd[[i]]),
                      nrow=nsim, ncol=nvars-1)
-      if (!is.null(newdata0))
+      if (!is.null(Xnph0))
         np_linpred0 <- np_linpred + b_np * Xnph0[i]
       np_linpred <- np_linpred + b_np * Xnph[i]
     }
-    if (!is.null(newdata0)){
+    if (!is.null(Xnph0)){
       np_linpred0 <- cbind(0, np_linpred0)
       sam$beta0 <- sam$beta + np_linpred0
       sam$coefs0 <- exp(sam$beta0) / rowSums(exp(sam$beta0))
@@ -437,13 +445,11 @@ prior_sample <- function(mspline,
     np_linpred <- cbind(0, np_linpred)
     sam$beta <- sam$beta + np_linpred
     sam$coefs <- exp(sam$beta) / rowSums(exp(sam$beta))
-  }
+    sam
+}
 
-  if (!is.null(cure)) {
-    if (!is.null(newdata0))
-      Xnph0 <- drop_intercept(model.matrix(cure, newdata0))
+prior_sample_cure <- function(sam, nsim, xcure, prior_cure, prior_logor_cure, Xcure){
     sam$pcure <- prior_cure$r(nsim)
-
     if (xcure$ncovs > 0) { 
       logor_cure_prior <- get_prior_coveffs(prior_logor_cure, xcure, "logor_cure")
       logor_cure <- lapply(attr(logor_cure_prior, "r"), function(x)x$r(nsim))
@@ -451,9 +457,7 @@ prior_sample <- function(mspline,
       linpred <- logor_cure %*% t(Xcure)
       sam$pcure <- plogis(qlogis(sam$pcure) + linpred)
     }
-  }
-
-  sam
+    sam
 }
 
 ##' Generate and/or plot a sample from the prior distribution of M-spline hazard curves
@@ -522,6 +526,41 @@ prior_sample_hazard <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
 
   attr(hazdf, "knots") <- knots
   hazdf
+}
+
+##' @rdname prior_sample_hazard
+##' @export
+plot_prior_hazard <- function(knots=NULL, df=10, degree=3,bsmooth=TRUE,
+                              coefs_mean = NULL,
+                              prior_hsd = p_gamma(2,1),
+                              prior_hscale = p_normal(0, 20),
+                              prior_loghr = NULL,
+                              formula = NULL,
+                              cure = NULL,
+                              nonprop = NULL,
+                              newdata = NULL,
+                              prior_hrsd = p_gamma(2,1),
+                              tmin=0, tmax=NULL,
+                              nsim=10)
+{
+  haz <- NULL
+  hazdf <- prior_sample_hazard(knots=knots, df=df, degree=degree,bsmooth=bsmooth,
+                               coefs_mean=coefs_mean,
+                               prior_hsd=prior_hsd,
+                               prior_hscale=prior_hscale,
+                               prior_loghr=prior_loghr,
+                               formula=formula, cure=cure,
+                               nonprop=nonprop, newdata=newdata, 
+                               prior_hrsd=prior_hrsd,
+                               tmin=tmin, tmax=tmax, nsim=nsim)
+  knots <- attr(hazdf, "knots")
+  ggplot(hazdf, aes(x=time, y=haz, group=rep)) +
+    geom_line(alpha=0.5) +
+    scale_x_continuous(breaks=knots) +
+    theme_minimal() +
+    theme(panel.grid.minor = element_blank()) +
+    geom_vline(xintercept = max(knots), col="gray50") +
+    xlab("Time") + ylab("Hazard")
 }
 
 
