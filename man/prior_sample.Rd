@@ -10,10 +10,14 @@ prior_sample(
   prior_hsd = p_gamma(2, 1),
   prior_hscale,
   prior_loghr = NULL,
-  X = NULL,
-  X0 = NULL,
+  formula = NULL,
+  cure = NULL,
+  nonprop = NULL,
+  newdata = NULL,
+  newdata0 = NULL,
   prior_hrsd = NULL,
   prior_cure = NULL,
+  prior_logor_cure = NULL,
   nsim = 100
 )
 }
@@ -91,17 +95,25 @@ of each list component matches the name of the coefficient, e.g.
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
-\item{X}{Either a list, vector or one-row matrix, with one value
-for each covariate in the model.  Defaults to zero.  Factors
-must be supplied as multiple numeric (0/1) contrasts.
-If there are multiple covariates and a single prior given in
-\code{prior_loghr}, then this prior will be used for all the covariates.
-If a list of priors is provided, then both this list and \code{X}
-must be named with the names of the covariates.}
+\item{formula}{A model formula with no response, defining the
+covariates on the hazard scale.}
 
-\item{X0}{An alternative set of "reference" covariate values
-(optional).  The hazard ratio between the hazards at \code{X}
-and \code{X0} will also be returned.}
+\item{cure}{A model formula with no response, giving any covariates
+on the cure proportion.}
+
+\item{nonprop}{A model formula with no response, defining any
+covariates affecting the spline basis coefficients, which gives
+a nonproportional hazards model.}
+
+\item{newdata}{A data frame with one row, containing variables in
+the model formulae.  Samples will then be drawn, for any
+covariate-dependent parameters, with covariates set to the
+values given here.}
+
+\item{newdata0}{A data frame with one row, containing "reference"
+values of variables in the model formulae.  The hazard ratio
+between the hazards at \code{newdata} and \code{newdata0} will
+be returned.}
 
 \item{prior_hrsd}{Prior for the standard deviation parameters that
 smooth the non-proportionality effects over time in
@@ -116,9 +128,18 @@ call to \code{p_beta()}.  The default is a uniform prior, \code{p_beta(1,1)}.
 Baseline is defined by the mean of continuous covariates and the reference
 level of factor covariates.}
 
+\item{prior_logor_cure}{Priors for log odds ratios on cure probabilities.
+This should be a call to \code{p_normal()} or \code{p_t()}.  The default is
+\code{p_normal(0,2.5)}.}
+
 \item{nsim}{Number of simulations to draw}
 }
 \value{
+\code{prior_sample_hazard} returns a data frame of the
+samples, and \code{plot_prior_hazard} generates a plot.  No
+customisation options are provided for the plot function, which
+is just intended as a quick check.
+
 A list with components:
 
 \code{alpha}: Baseline log hazard scale parameter (\code{log(eta)} in the notation of the manual). For models with covariates, this is at the covariate values supplied in \code{X}, or at zero if \code{X} is not supplied.

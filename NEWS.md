@@ -1,3 +1,10 @@
+# Version 0.8.6 (2023/10/24)
+
+* Non-proportional hazards models can now be applied to a subset of the covariates, by supplying a formula as the `nonprop` argument to `survextrap`. 
+
+* Prior simulation functions such as `prior_sample` now require an explicit covariate model, specified through `formula` and `newdata`, rather than a design matrix `X`.  These functions now fully support nonproportional hazards models and cure probabilities with associated regression models.
+
+
 # Version 0.8.5 (2023/09/30)
 
 * Code for constructing `mspline` specification objects tidied, with new `mspline_init` and `mspline_list_init` functions.

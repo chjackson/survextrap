@@ -46,6 +46,12 @@ used to choose knot locations}
 
 \item{hscale}{Hazard scale parameter}
 }
+\value{
+A list defining the M-spline, with any omitted list
+components set to defaults.  See \code{\link{mspline_init}} for
+details.  The parameters are included as the \code{coefs} and
+\code{hscale} components.
+}
 \description{
 \code{\link{mspline_init}} is first used to create the M-spline
 model structure, including knot positions.  Parameters including

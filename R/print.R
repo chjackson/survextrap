@@ -138,9 +138,10 @@ parnames_to_df <- function(x){
   for (i in udn){
     if (all(is.na(pardf[[i]]))) pardf[[i]] <- NULL
   }
-  has_xterm <- pardf$variable %in% c("loghr", "hr", "nperr", "hrsd")
+  has_xterm <- pardf$variable %in% c("loghr", "hr")
   pardf$term[has_xterm] <- x$x$xnames[pardf$term[has_xterm]]
   pardf$term[pardf$variable %in% c("logor_cure","or_cure")] <- x$xcure$xnames
+  pardf$term[pardf$variable %in% c("nperr", "hrsd")] <- x$xnph$xnames
   pardf$basis_num[pardf$variable=="nperr"] <- pardf$basis_num[pardf$variable=="nperr"] + 1
   pardf$variable <- factor(pardf$variable, levels=.parlist$name)
   pardf <- pardf[order(pardf$variable),]

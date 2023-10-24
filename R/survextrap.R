@@ -42,11 +42,17 @@
 #' @param cure If `TRUE`, a mixture cure model is used, where the "uncured" survival is defined by the
 #' M-spline model, and the cure probability is estimated.
 #'
-#' @param nonprop If \code{TRUE} then a non-proportional hazards model is fitted.
+#' @param nonprop Non-proportional hazards model specification.
 #' This is achieved by modelling the spline basis coefficients in terms of the covariates.  See
-#' the [methods vignette](https://chjackson.github.io/survextrap/articles/methods.html) for more details.   In models with multiple covariates, currently
-#' there is no way to assume that some covariates have proportional hazards but others don't -
-#' it is all or none.
+#' the [methods vignette](https://chjackson.github.io/survextrap/articles/methods.html) for more details.
+#'
+#' If \code{TRUE}, then all covariates are modelled with non-proportional hazards, using the same model formula as \code{formula}.
+#'
+#' If this is a formula, then this is assumed to define a model
+#' for the dependence of the basis coefficients on the covariates.
+#'
+#' IF this is \code{NULL} or \code{FALSE} (the default) then any covariates are modelled with proportional
+#' hazards.
 #'
 #' @param prior_hscale Prior for the baseline log hazard scale parameter (`alpha` or `log(eta)`).
 #'   This should be a call to a prior constructor function, such as
@@ -269,8 +275,9 @@ survextrap <- function(formula,
     data_x <- if (td$indiv) data else external
     x <- make_x(formula, data_x, td)
     xcure <- make_xcure(cure, data, td)
+    xnph <- make_nonprop(nonprop, data, td, formula)
     backhaz <- make_backhaz(backhaz, data, td)
-    external <- make_external(external, formula, x, xcure, backhaz)
+    external <- make_external(external, formula, x, xcure, xnph, backhaz)
     mspline <- make_mspline(mspline, td, external, add_knots)
 
     basis_event  <- make_basis(td$t_event, mspline)
@@ -291,15 +298,14 @@ survextrap <- function(formula,
     ibasis_ext_stop <- if (external$nextern>0) make_basis(external$stop, mspline, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
     ibasis_ext_start <- if (external$nextern>0) make_basis(external$start, mspline, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
 
-    if (nonprop) {
+    if (xnph$ncovs > 0) {
       if (x$ncovs==0) {
         warning("Ignoring non-proportional hazards model specification, since no covariates in model. ")
-        nonprop <- FALSE
       }
     }
 
     priors <- get_priors(prior_hscale, prior_loghr, prior_hsd, prior_cure, prior_logor_cure,
-                         x, xcure, est_hsd, nonprop, prior_hrsd)
+                         x, xcure, xnph, est_hsd, prior_hrsd)
 
     standata <- nlist(nevent=td$nevent, nrcens=td$nrcens,
                       nvars, nextern=external$nextern, ncovs = x$ncovs,
@@ -310,8 +316,11 @@ survextrap <- function(formula,
                       n_ext = external$n,
                       x_ext = external$X,
                       ncurecovs = xcure$ncovs,
+                      nnphcovs = xnph$ncovs,
                       xcure_event = xcure$event, xcure_rcens = xcure$rcens,
                       xcure_ext = external$Xcure,
+                      xnph_event = xnph$event, xnph_rcens = xnph$rcens,
+                      xnph_ext = external$Xnph,
                       b_mean,
                       est_hsd,
                       cure = xcure$cure,
@@ -332,8 +341,7 @@ survextrap <- function(formula,
                       prior_hsd = as.numeric(unlist(priors$hsd[c("shape","rate")])),
                       prior_cure = as.numeric(unlist(priors$cure[c("shape1","shape2")])),
                       modelid = 1,
-                      nonprop,
-                      prior_hrsd = priors$sdnp
+                      prior_hrsd = priors$hrsd
                       )
     pcure_init <- if (xcure$cure) 0.5 else numeric()
     staninit <- list(gamma = aa(0),
@@ -383,22 +391,31 @@ survextrap <- function(formula,
     misc_keep <- nlist(formula, indiv=td$indiv, stanfit=fits,
                        fit_method,
                        cure_formula = xcure$cure_formula,
+                       nph_formula = xnph$nph_formula,
                        backhaz=backhaz$df)
-    standata_keep <- standata[c("nvars","ncovs","ncurecovs","nevent","nrcens","nextern")]
-    model_keep <- nlist(cure=xcure$cure, est_hsd, nonprop)
+    standata_keep <- standata[c("nvars","ncovs","ncurecovs","nnphcovs","nevent","nrcens","nextern")]
+    model_keep <- nlist(cure=xcure$cure, est_hsd)
     spline_keep <- nlist(mspline)
     covinfo_names <- c("xnames","xlevs","xinds","mfbase")
     x <- list(x = x[covinfo_names])
     xcure <- list(xcure = xcure[covinfo_names])
+    xnph <- list(xnph = xnph[covinfo_names])
     prior_keep <- list(priors=priors)
     prioretc_keep <- nlist(coefs_mean, hsd)
+    res <- c(misc_keep, standata_keep, model_keep, spline_keep, x, xcure, xnph,
+             prior_keep, prioretc_keep, nlist(km))
     prior_sample <- get_prior_sample(mspline=mspline,
-                                     coefs_mean=coefs_mean, prior_hsd=prior_hsd,
+                                     coefs_mean=coefs_mean,
+                                     prior_hsd=prior_hsd,
                                      prior_hscale=prior_hscale,
                                      prior_loghr=prior_loghr,
-                                     nonprop=nonprop, prior_hrsd=prior_hrsd)
-    res <- c(misc_keep, standata_keep, model_keep, spline_keep, x, xcure,
-             prior_keep, prioretc_keep, nlist(prior_sample), nlist(km))
+                                     formula = if (res$ncovs==0) NULL else as.formula(delete.response(terms(formula))),
+                                     cure_formula=xcure$cure_formula,
+                                     nph_formula=xnph$nph_formula,
+                                     prior_hrsd=prior_hrsd,
+                                     default_newdata = default_newdata(res),
+                                     xlevs=x$x$xlevs)
+    res <- c(res, nlist(prior_sample))
 
     class(res) <- "survextrap"
     if (loo && (fit_method=="mcmc")) {
@@ -453,30 +470,40 @@ print.message <- function(x, ...){
 ##' \code{nvars} Number of basis variables (an alias for \code{df})
 ##'
 ##' @export
-mspline_spec <- function(formula, data, cure=FALSE, backhaz=NULL, external=NULL,
+mspline_spec <- function(formula, data, cure=FALSE, nonprop=NULL, backhaz=NULL, external=NULL,
                          df=10, add_knots=NULL, degree=3, bsmooth=TRUE){
   td <- make_td(formula, data)
   x <- make_x(formula, data, td)
   xcure <- make_xcure(cure, data, td)
+  xnph <- make_nonprop(nonprop, data, td)
   backhaz <- make_backhaz(backhaz, data, td)
-  external <- make_external(external, formula, x, xcure, backhaz)
+  external <- make_external(external, formula, x, xcure, xnph, backhaz)
   mspline <- list(df=df,degree=degree,bsmooth=bsmooth,add_knots=add_knots)
   mspline <- make_mspline(mspline, td, external)
   mspline
+}
+
+apply_factor_levels <- function(newdata, xlevs){
+  for (i in names(xlevs))
+    newdata[[i]] <- factor(newdata[[i]], levels=xlevs[[i]])
+  newdata
 }
 
 ## Construct functions to draw from the prior predictive distributions
 ## for interesting quantities in a model specified with survextrap()
 
 get_prior_sample <- function(mspline,
-                           coefs_mean, prior_hsd, prior_hscale, prior_loghr,
-                           nonprop, prior_hrsd){
+                             coefs_mean, prior_hsd, prior_hscale, prior_loghr,
+                             formula, cure_formula, nph_formula,
+                             prior_hrsd, default_newdata, xlevs){
   ## Samples of basic parameters defining the spline
-  sample <- function(X=NULL, nsim=100){
+  sample <- function(newdata=default_newdata, nsim=100){
     prior_sample(mspline=mspline,
                  coefs_mean=coefs_mean, prior_hsd=prior_hsd,
                  prior_hscale=prior_hscale, prior_loghr=prior_loghr,
-                 X=X, prior_hrsd=prior_hrsd,
+                 newdata=apply_factor_levels(newdata,xlevs),
+                 prior_hrsd=prior_hrsd,
+                 formula=formula, cure=cure_formula, nonprop=nph_formula,
                  nsim=nsim)
   }
   ## Summary of the hazard if coefs_mean was set to a constant hazard
@@ -486,32 +513,39 @@ get_prior_sample <- function(mspline,
                     nsim=nsim, quantiles=quantiles)
   }
   ## Samples of hazard curves over time
-  haz <- function(X=NULL, tmin=0, tmax=max(mspline$knots), nsim=10){
+  haz <- function(newdata=default_newdata, tmin=0, tmax=max(mspline$knots), nsim=10){
     prior_sample_hazard(knots=mspline$knots, degree=mspline$degree,
                         coefs_mean=coefs_mean, prior_hsd=prior_hsd,
                         prior_hscale=prior_hscale, prior_loghr=prior_loghr,
-                        X=X, prior_hrsd=prior_hrsd,
+                        newdata=apply_factor_levels(newdata,xlevs),
+                        prior_hrsd=prior_hrsd,
+                        formula=formula, cure=cure_formula, nonprop=nph_formula,
                         tmin=tmin, tmax=tmax,
                         nsim=nsim)
   }
 
   ## SD describing variation in hazard function with time
-  haz_sd <- function(X=NULL, tmin=0, tmax=max(mspline$knots), nsim=100,
+  haz_sd <- function(newdata=default_newdata, tmin=0, tmax=max(mspline$knots), nsim=100,
                      hq = c(0.1, 0.9),
                      quantiles = c(0.025, 0.5, 0.975)){
     prior_haz_sd(mspline=mspline,
                  coefs_mean=coefs_mean, prior_hsd=prior_hsd,
                  prior_hscale=prior_hscale, prior_loghr=prior_loghr,
-                 X=X, prior_hrsd=prior_hrsd,
+                 newdata=apply_factor_levels(newdata,xlevs),
+                 prior_hrsd=prior_hrsd,
+                 formula=formula, cure=cure_formula, nonprop=nph_formula,
                  tmin=tmin, tmax=tmax, nsim=nsim, hq=hq, quantiles=quantiles)
   }
   ## SD describing variation in hazard ratio function with time
-  hr_sd <- function(X, X0, tmin=0, tmax=max(mspline$knots), nsim=100,
+  hr_sd <- function(newdata, newdata0, tmin=0, tmax=max(mspline$knots), nsim=100,
                     quantiles = c(0.025, 0.5, 0.975)){
     prior_hr_sd(mspline=mspline,
                 coefs_mean=coefs_mean, prior_hsd=prior_hsd,
                 prior_hscale=prior_hscale, prior_loghr=prior_loghr,
-                X=X, X0=X0, prior_hrsd=prior_hrsd,
+                newdata=apply_factor_levels(newdata, xlevs),
+                newdata0=apply_factor_levels(newdata0, xlevs),
+                prior_hrsd=prior_hrsd,
+                formula=formula, cure=cure_formula, nonprop=nph_formula,
                 tmin=tmin, tmax=tmax, nsim=nsim, quantiles=quantiles)
   }
   nlist(sample, haz, haz_const, haz_sd, hr_sd)
@@ -632,7 +666,7 @@ make_d <- function(model_frame) {
          stop(err))
 }
 
-make_external <- function(external, formula, x, xcure, backhaz){
+make_external <- function(external, formula, x, xcure, xnph, backhaz){
   if (is.null(external))
     extl <- list(nextern=0, stop=numeric(), start=numeric(),
                  r=integer(), n=integer(),
@@ -663,16 +697,23 @@ make_external <- function(external, formula, x, xcure, backhaz){
       mf <- model.frame(formula, external, xlev = xcure$xlevs)
       Xcure <- drop_intercept(model.matrix(form, mf))
     }
+    if (xnph$ncovs>0){
+      form <- delete.response(terms(xnph$nph_formula))
+      mf <- model.frame(formula, external, xlev = xnph$xlevs)
+      Xnph <- drop_intercept(model.matrix(form, mf))
+    }
   }
   if ((extl$nextern==0) || (x$ncovs==0))
     X <- array(dim=c(extl$nextern, x$ncovs))
   if ((extl$nextern==0) || (xcure$ncovs==0))
     Xcure <- array(dim=c(extl$nextern, xcure$ncovs))
+  if ((extl$nextern==0) || (xnph$ncovs==0))
+    Xnph <- array(dim=c(extl$nextern, xnph$ncovs))
   extl$stop <- aa(extl$stop)
   extl$start <- aa(extl$start)
   extl$r <- aa(extl$r)
   extl$n <- aa(extl$n)
-  extl <- c(extl, nlist(X), nlist(Xcure))
+  extl <- c(extl, nlist(X), nlist(Xcure), nlist(Xnph))
   extl
 }
 
@@ -722,11 +763,11 @@ validate_df <- function(df, degree, bsmooth){
     ## smooth:   df - degree >= nik - 1,  unsmooth: df - degree >= nik + 1
     ## where nik is number of internal knots, which has to be at least 1
     stop(sprintf("df = %s and degree = %s, but df - degree should be >= %s", df, degree, minddg))
-  }  
+  }
 }
 
 make_mspline <- function(mspline, td, external, add_knots=NULL){
-  
+
   ## observed times to choose default knots to span
   tmax <- max(c(td$t_end,external$tmax), na.rm = TRUE)
   tt <- td$t_end[td$status == 1] # uncensored event times
@@ -758,30 +799,54 @@ validate_coefs_mean <- function(coefs){
   coefs / sum(coefs)
 }
 
+make_cure_formula <- function(cure){
+  if (isTRUE(cure)) {
+    cure_formula <- ~1
+  } else if (inherits(cure,"formula")) {
+    cure_formula <- cure
+  } else if (isFALSE(cure)) {
+    cure_formula <- NULL
+  } else stop("`cure` must either be TRUE, FALSE or a model formula")
+  cure_formula
+}
+
 make_xcure <- function(cure, data, td){
-    if (isTRUE(cure)) {
-        cure_formula <- ~1
-    } else if (inherits(cure,"formula")) {
-        cure_formula <- cure
-    } else if (isFALSE(cure)) {
-        cure_formula <- NULL
-    } else stop("`cure` must either be TRUE, FALSE or a model formula")
-    if (!is.null(cure_formula)){
-        Terms <- terms(cure_formula)
-        xcure <- make_x(cure_formula, data, td)
-        cure <- TRUE
-    } else {
-        xcure <- list(ncovs = 0,
-                      X = matrix(nrow=NROW(data), ncol=0),
-                      event = matrix(nrow=td$nevent,ncol=0),
-                      rcens = matrix(nrow=td$nrcens,ncol=0))
-    }
-    res <- c(nlist(cure, cure_formula), xcure)
-    res
+  cure_formula <- make_cure_formula(cure)
+  if (!is.null(cure_formula)){
+    xcure <- make_x(cure_formula, data, td)
+    cure <- TRUE
+  } else {
+    xcure <- list(ncovs = 0,
+                  X = matrix(nrow=NROW(data), ncol=0),
+                  event = matrix(nrow=td$nevent,ncol=0),
+                  rcens = matrix(nrow=td$nrcens,ncol=0))
+  }
+  res <- c(nlist(cure, cure_formula), xcure)
+  res
+}
+
+make_nonprop <- function(nonprop, data, td, formula){
+  if (isTRUE(nonprop)) {
+    nph_formula <- formula
+  } else if (inherits(nonprop,"formula")) {
+    nph_formula <- nonprop
+  } else if (isFALSE(nonprop) || is.null(nonprop)) {
+    nph_formula <- NULL
+  } else stop("`nonprop` must either be TRUE, FALSE, NULL or a model formula")
+  if (!is.null(nph_formula)){
+    xnph <- make_x(nph_formula, data, td)
+  } else {
+    xnph <- list(ncovs = 0,
+                 X = matrix(nrow=NROW(data), ncol=0),
+                 event = matrix(nrow=td$nevent,ncol=0),
+                 rcens = matrix(nrow=td$nrcens,ncol=0))
+  }
+  res <- c(nlist(nph_formula), xnph)
+  res
 }
 
 # Drop intercept from a model matrix
-drop_intercept <- function(x) { 
+drop_intercept <- function(x) {
   sel <- which("(Intercept)" %in% colnames(x))
   if (length(sel) && is.matrix(x)) {
     x <- x[, -sel, drop = FALSE]

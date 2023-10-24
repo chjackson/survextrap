@@ -15,8 +15,8 @@ loo_survextrap <- function(x, standata, loglik_fn){
 
 loglik_ipd <- function(x, standata){
     pars <- get_pars(x, newdata=NULL)
-    coefs_event <- get_coefs_bycovs(x, get_draws(x), X=standata$x_event)
-    coefs_rcens <- get_coefs_bycovs(x, get_draws(x), X=standata$x_rcens)
+    coefs_event <- get_coefs_bycovs(x, get_draws(x), X=standata$xnph_event)
+    coefs_rcens <- get_coefs_bycovs(x, get_draws(x), X=standata$xnph_rcens)
 
     if (standata$ncovs>0){
         if (standata$nevent > 0) alpha_event <- pars$loghr %*% t(standata$x_event)
@@ -51,7 +51,7 @@ loglik_ipd <- function(x, standata){
 
 loglik_external <- function(x, standata){
   pars <- get_pars(x, newdata=NULL)
-  coefs <- get_coefs_bycovs(x, get_draws(x), X=standata$x_ext)
+  coefs <- get_coefs_bycovs(x, get_draws(x), X=standata$xnph_ext)
   if (standata$ncovs>0){
     alpha <- pars$loghr %*% t(standata$x_ext)
   } else alpha <-0

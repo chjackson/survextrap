@@ -154,6 +154,50 @@ rmst(nde_mod, c(3, 10, 1000), niter=100)
 Including the external data gives a more confident extrapolation.   The mean is finite.  RMST converges to the mean, as it is supposed to. 
 
 
+### Modelling differences between the trial and external data 
+
+The external data need not be from an identical population to one of the arms of the trial
+data.   If we can assume that the datasets are related through a model, we can perform
+extrapolations under the assumptions of that model. 
+
+A simple example is where the hazards are assumed to be proportional
+between the trial and external data.  To implement this, we could define a
+binary factor covariate called `dataset` to identify each of the two datasets.  
+
+```{r,results="hide"}
+levs <- c("trial", "external")
+colons$dataset <- factor("trial", level=levs)
+extdat$dataset <- factor("external", level=levs)
+```
+
+A proportional hazards model is defined by including this covariate on the right 
+hand side of the model formula in the `survextrap` command.     (See [Covariates](#covariates) below for more about models with covariates).
+
+```{r,results="hide"}
+ndec_mod <- survextrap(Surv(years, status) ~ dataset, data=colons, 
+                      chains=1, external = extdat,
+                      mspline = list(add_knots=c(4, 10, 25)))
+```
+
+The effect of this covariate then describes the hazard ratio for the
+external data compared to the trial data - in this artificial example, no 
+difference between the datasets is discernible. 
+
+```{r}
+summary(ndec_mod) %>% filter(variable=="hr")
+```
+
+Different predictions are now available for the trial and external population, 
+so in decision-making contexts you would need to consider which is more relevant. 
+
+```{r}
+rmst(ndec_mod, t=3, niter=100)
+```
+
+If there are more covariates observed in the datasets, these might be added to the model 
+to explain any differences between the datasets.   Though caution is required as always
+when extrapolating outside the data, to different populations as well as over time.   To extrapolate we would need to assume that all parameter estimates are valid outside the data that they were estimated from. 
+
 
 ## Expert elicitation on the long term
 
@@ -207,7 +251,7 @@ This approach might be extended to include elicited values from multiple time po
 
 
 
-## Covariates
+## Covariates {#covariates}
 
 `survextrap` uses a proportional hazards model to represent covariates by default.    In the example here, we model survival by treatment group `rx`, which is a factor with three levels.  First fit a standard Cox model: 
 
@@ -247,7 +291,7 @@ plot_hazard(rxphe_mod, niter=100, tmax=20)
 
 ### Non-proportional hazards model {#nonprop}
 
-The flexible non-proportional hazards model described in the [methods vignette](methods.html#nonprop) can be specified with `nonprop=TRUE`.
+The flexible non-proportional hazards model described in the [methods vignette](methods.html#nonprop) can be specified with the `nonprop` argument.   `nonprop=TRUE` gives all covariates in the main model formula non-proportional hazards.  A subset of covariates can be given non-proportional hazards by passing a different model formula as the `nonprop` argument.
 
 ```{r,results="hide"}
 rxnph_mod <- survextrap(Surv(years, status) ~ rx, data=colons, nonprop=TRUE, chains=1)
@@ -260,7 +304,7 @@ In this example, the sample size in each treatment group and time period is smal
 
 The non-proportional hazards model is experimental. In theory, it can be "tuned" by changing the number of spline basis terms and the knot positions (through the `mspline` argument to `survextrap`), or by changing the prior on the parameter $\sigma^{(np)}_s$ that controls the smoothness of the departures from proportional hazards (`prior_sdnp` argument).   But this has not been tested much in practice. 
 
-If a plot of the posterior hazard ratio against time is desired, this might be constructed by extracting samples from the posterior of the hazard for different covariate values by using `hazard(..., sample=TRUE)`, converting to samples from the hazard ratio, and then summarising and plotting.   
+If a plot of the posterior hazard ratio against time is desired, this might be constructed by extracting samples from the posterior of the hazard for different covariate values by using `hazard(..., sample=TRUE)`, converting to samples from the hazard ratio, and then summarising and plotting.
 
 The functions `hazard_ratio()` and `plot_hazard_ratio()` can be used to calculate or plot the ratio of hazards between two covariate values, as a function of time.  The covariate values are supplied in a data frame with two rows - all covariates in the model should be included here (there is currently no facility for standardised effect estimation).
 

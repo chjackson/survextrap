@@ -166,14 +166,14 @@ number of times in <code>t</code>.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu">Surv</span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">rx</span>, data<span class="op">=</span><span class="va">colons</span>, fit_method<span class="op">=</span><span class="st">"opt"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">rmst</span><span class="op">(</span><span class="va">mod</span>, t<span class="op">=</span><span class="fl">3</span>, niter<span class="op">=</span><span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        rx variable t   median     2.5%    97.5%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     Obs     rmst 3 1.972776 1.593548 2.296442</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     Lev     rmst 3 2.245645 1.948855 2.522777</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 Lev+5FU     rmst 3 2.393723 2.066781 2.629866</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     Obs     rmst 3 2.000349 1.648446 2.202234</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     Lev     rmst 3 2.253376 1.923934 2.468985</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 Lev+5FU     rmst 3 2.366284 1.965521 2.545192</span>
 <span class="r-in"><span><span class="fu">rmst</span><span class="op">(</span><span class="va">mod</span>, t<span class="op">=</span><span class="fl">3</span>, summ_fns<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean<span class="op">=</span><span class="va">mean</span><span class="op">)</span>, niter<span class="op">=</span><span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        rx variable t     mean</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     Obs     rmst 3 1.964668</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     Lev     rmst 3 2.244362</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 Lev+5FU     rmst 3 2.384037</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     Obs     rmst 3 1.969757</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     Lev     rmst 3 2.235516</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 Lev+5FU     rmst 3 2.359449</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

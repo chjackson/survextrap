@@ -112,7 +112,8 @@ data {
     int<lower=0> nvars;      // num. aux parameters for baseline hazard
     int<lower=0> nextern;    // number of time points with external data
     int<lower=0> ncovs;      // number of covariate effects on the hazard
-    int<lower=0> ncurecovs;      // number of covariate effects on the cure probability
+    int<lower=0> ncurecovs;  // number of covariate effects on the cure probability
+    int<lower=0> nnphcovs;   // number of covariates considered to have nonproportional hazards
 
     // basis matrices for M-splines / I-splines, without quadrature
     matrix[nevent,nvars] basis_event;  // at event time
@@ -124,6 +125,8 @@ data {
     matrix[nrcens,ncovs] x_rcens;
     matrix[nevent,ncurecovs] xcure_event; // matrix of covariate values on cure prob
     matrix[nrcens,ncurecovs] xcure_rcens;
+    matrix[nevent,nnphcovs] xnph_event; // matrix of covariate values on basis coefficients
+    matrix[nrcens,nnphcovs] xnph_rcens; //   in nonproportional hazards models
 
     // external data describing knowledge about long-term survival
     // expressed as binomial outcomes of r survivors by t2 out of n people alive at t1
@@ -131,6 +134,7 @@ data {
     array[nextern] int<lower=0> n_ext;
     matrix[nextern,ncovs] x_ext;
     matrix[nextern,ncurecovs] xcure_ext;
+    matrix[nextern,nnphcovs] xnph_ext;
 
     vector[nvars-1] b_mean; // logit of prior guess at basis weights (by default, those that give a constant hazard)
     int est_hsd;
@@ -157,10 +161,9 @@ data {
     vector[ncurecovs] prior_logor_cure_df;
 
     int modelid;
-    int nonprop;
 
     // EXTRA FOR NONPROP HAZ MODEL 
-    matrix[ncovs*nonprop,2] prior_hrsd;
+    matrix[nnphcovs,2] prior_hrsd;
 }
 
 parameters {
@@ -172,8 +175,8 @@ parameters {
     vector[ncurecovs] logor_cure;
 
     // STUFF FOR NON PROP HAZ MODEL 
-    vector<lower=0>[ncovs*nonprop] hrsd;  // NP shrinkage SD for each cov
-    matrix[ncovs*nonprop,nvars-1] nperr;  // standard normal for departure from PH
+    vector<lower=0>[nnphcovs] hrsd;  // NP shrinkage SD for each cov
+    matrix[nnphcovs,nvars-1] nperr;  // standard normal for departure from PH
 }
 
 transformed parameters {
@@ -188,11 +191,11 @@ transformed parameters {
     matrix[nevent,nvars] b_event; // was vector[nvars]
     matrix[nrcens,nvars] b_rcens; 
     matrix[nextern,nvars] b_extern; 
-    matrix[ncovs,nvars-1] b_np; // nonproportionality cov effect. should be centred around 0. no intercept
+    matrix[nnphcovs,nvars-1] b_np; // nonproportionality cov effect. should be centred around 0. no intercept
     real ssd;
 
-    if ((ncovs>0) && nonprop) { 
-	for (r in 1:ncovs){
+    if (nnphcovs>0) { 
+	for (r in 1:nnphcovs){
 	    b_np[r,1:(nvars-1)] = hrsd[r]*nperr[r,1:(nvars-1)];
 	}
 	if (est_hsd) {
@@ -205,7 +208,7 @@ transformed parameters {
 	if (nevent > 0) {
 	    b_event[1:nevent,1] = rep_vector(0,nevent);
 	    for (j in 1:(nvars-1)) {
-		b_event[1:nevent,j+1] = b_mean[j] + x_event*b_np[,j] + b_err[j]*ssd;
+		b_event[1:nevent,j+1] = b_mean[j] + xnph_event*b_np[,j] + b_err[j]*ssd;
 	    }
 	    for (i in 1:nevent){
 		coefs_event[i,1:nvars] = to_row_vector(softmax(to_vector(b_event[i,1:nvars])));
@@ -214,7 +217,7 @@ transformed parameters {
 	if (nrcens > 0) {
 	    b_rcens[1:nrcens,1] = rep_vector(0,nrcens);
 	    for (j in 1:(nvars-1)) {
-		b_rcens[1:nrcens,j+1] = b_mean[j] + x_rcens*b_np[,j] + b_err[j]*ssd;
+		b_rcens[1:nrcens,j+1] = b_mean[j] + xnph_rcens*b_np[,j] + b_err[j]*ssd;
 	    }
 	    for (i in 1:nrcens){
 		coefs_rcens[i,1:nvars] = to_row_vector(softmax(to_vector(b_rcens[i,1:nvars])));
@@ -223,7 +226,7 @@ transformed parameters {
 	if (nextern > 0) {
 	    b_extern[1:nextern,1] = rep_vector(0,nextern);
 	    for (j in 1:(nvars-1)) {
-		b_extern[1:nextern,j+1] = b_mean[j] + x_ext*b_np[,j] + b_err[j]*ssd;
+		b_extern[1:nextern,j+1] = b_mean[j] + xnph_ext*b_np[,j] + b_err[j]*ssd;
 	    }
 	    for (i in 1:nextern){
 		coefs_extern[i,1:nvars] = to_row_vector(softmax(to_vector(b_extern[i,1:nvars])));
@@ -255,9 +258,6 @@ transformed parameters {
 	    if (nevent>0) { b_event[1:nevent,j] = rep_vector(0,nevent); }
 	    if (nrcens>0) { b_rcens[1:nrcens,j] = rep_vector(0,nrcens); }
 	    if (nextern>0) { b_extern[1:nextern,j] = rep_vector(0,nextern); }
-	}
-	for (j in 1:(nvars-1)){
-	    if (ncovs>0) { b_np[1:ncovs,j] = rep_vector(0,ncovs); }
 	}
 	ssd = 0;
     }
@@ -336,9 +336,9 @@ model {
     }
 
     // Non-proportional haz model
-    if ((ncovs > 0) && nonprop) { 
+    if (nnphcovs > 0) { 
 	hrsd ~ gamma(prior_hrsd[,1], prior_hrsd[,2]);
-	for (i in 1:ncovs){
+	for (i in 1:nnphcovs){
 	    nperr[i,1:(nvars-1)] ~ std_normal();
 	}
     }

@@ -12,7 +12,10 @@ prior_haz_sd(
   prior_hsd = p_gamma(2, 1),
   prior_hscale = p_normal(0, 20),
   prior_loghr = NULL,
-  X = NULL,
+  formula = NULL,
+  cure = NULL,
+  nonprop = NULL,
+  newdata = NULL,
   prior_hrsd = NULL,
   tmin = 0,
   tmax = NULL,
@@ -27,8 +30,11 @@ prior_hr_sd(
   prior_hsd = p_gamma(2, 1),
   prior_hscale = p_normal(0, 20),
   prior_loghr = NULL,
-  X,
-  X0,
+  formula = NULL,
+  cure = NULL,
+  nonprop = NULL,
+  newdata = NULL,
+  newdata0 = NULL,
   prior_hrsd = NULL,
   tmin = 0,
   tmax = 10,
@@ -111,13 +117,37 @@ of each list component matches the name of the coefficient, e.g.
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
-\item{X}{Either a list, vector or one-row matrix, with one value
-for each covariate in the model.  Defaults to zero.  Factors
-must be supplied as multiple numeric (0/1) contrasts.
-If there are multiple covariates and a single prior given in
-\code{prior_loghr}, then this prior will be used for all the covariates.
-If a list of priors is provided, then both this list and \code{X}
-must be named with the names of the covariates.}
+\item{formula}{A survival formula in standard R formula syntax, with a call to \code{Surv()}
+on the left hand side.
+
+Covariates included on the right hand side of the formula with be modelled with
+proportional hazards, or if \code{nonprop} is \code{TRUE} then a non-proportional
+hazards is used.
+
+If \code{data} is omitted, so that the model is being fitted to external aggregate data alone,
+without individual data, then the formula should not include a \code{Surv()} call.  The
+left-hand side of the formula will then be empty, and the right hand side specifies the covariates
+as usual.  For example, \code{formula = ~1} if there are no covariates.}
+
+\item{cure}{If \code{TRUE}, a mixture cure model is used, where the "uncured" survival is defined by the
+M-spline model, and the cure probability is estimated.}
+
+\item{nonprop}{Non-proportional hazards model specification.
+This is achieved by modelling the spline basis coefficients in terms of the covariates.  See
+the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette} for more details.
+
+If \code{TRUE}, then all covariates are modelled with non-proportional hazards, using the same model formula as \code{formula}.
+
+If this is a formula, then this is assumed to define a model
+for the dependence of the basis coefficients on the covariates.
+
+IF this is \code{NULL} or \code{FALSE} (the default) then any covariates are modelled with proportional
+hazards.}
+
+\item{newdata}{A data frame with one row, containing variables in
+the model formulae.  Samples will then be drawn, for any
+covariate-dependent parameters, with covariates set to the
+values given here.}
 
 \item{prior_hrsd}{Prior for the standard deviation parameters that
 smooth the non-proportionality effects over time in
@@ -143,9 +173,10 @@ quantiles are used respectively.}
 \item{quantiles}{Quantiles used to summarise the implied prior distributions
 of the simulated quantities.}
 
-\item{X0}{An alternative set of "reference" covariate values
-(optional).  The hazard ratio between the hazards at \code{X}
-and \code{X0} will also be returned.}
+\item{newdata0}{A data frame with one row, containing "reference"
+values of variables in the model formulae.  The hazard ratio
+between the hazards at \code{newdata} and \code{newdata0} will
+be returned.}
 }
 \value{
 A data frame with columns \code{sd_haz} (SD of the hazard),

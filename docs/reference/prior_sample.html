@@ -79,10 +79,14 @@ M-spline model and parameter priors.</p>
 <span>  prior_hsd <span class="op">=</span> <span class="fu"><a href="priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  <span class="va">prior_hscale</span>,</span>
 <span>  prior_loghr <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  X <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  X0 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cure <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  nonprop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  newdata0 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  prior_hrsd <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  prior_cure <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  prior_logor_cure <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nsim <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -163,20 +167,34 @@ of each list component matches the name of the coefficient, e.g.
 <p>The default is <code>p_normal(0,2.5)</code> for all coefficients.</p></dd>
 
 
-<dt>X</dt>
-<dd><p>Either a list, vector or one-row matrix, with one value
-for each covariate in the model.  Defaults to zero.  Factors
-must be supplied as multiple numeric (0/1) contrasts.
-If there are multiple covariates and a single prior given in
-<code>prior_loghr</code>, then this prior will be used for all the covariates.
-If a list of priors is provided, then both this list and <code>X</code>
-must be named with the names of the covariates.</p></dd>
+<dt>formula</dt>
+<dd><p>A model formula with no response, defining the
+covariates on the hazard scale.</p></dd>
 
 
-<dt>X0</dt>
-<dd><p>An alternative set of "reference" covariate values
-(optional).  The hazard ratio between the hazards at <code>X</code>
-and <code>X0</code> will also be returned.</p></dd>
+<dt>cure</dt>
+<dd><p>A model formula with no response, giving any covariates
+on the cure proportion.</p></dd>
+
+
+<dt>nonprop</dt>
+<dd><p>A model formula with no response, defining any
+covariates affecting the spline basis coefficients, which gives
+a nonproportional hazards model.</p></dd>
+
+
+<dt>newdata</dt>
+<dd><p>A data frame with one row, containing variables in
+the model formulae.  Samples will then be drawn, for any
+covariate-dependent parameters, with covariates set to the
+values given here.</p></dd>
+
+
+<dt>newdata0</dt>
+<dd><p>A data frame with one row, containing "reference"
+values of variables in the model formulae.  The hazard ratio
+between the hazards at <code>newdata</code> and <code>newdata0</code> will
+be returned.</p></dd>
 
 
 <dt>prior_hrsd</dt>
@@ -196,6 +214,12 @@ Baseline is defined by the mean of continuous covariates and the reference
 level of factor covariates.</p></dd>
 
 
+<dt>prior_logor_cure</dt>
+<dd><p>Priors for log odds ratios on cure probabilities.
+This should be a call to <code><a href="priors.html">p_normal()</a></code> or <code><a href="priors.html">p_t()</a></code>.  The default is
+<code>p_normal(0,2.5)</code>.</p></dd>
+
+
 <dt>nsim</dt>
 <dd><p>Number of simulations to draw</p></dd>
 
@@ -203,6 +227,12 @@ level of factor covariates.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
+
+<p><code>prior_sample_hazard</code> returns a data frame of the
+samples, and <code>plot_prior_hazard</code> generates a plot.  No
+customisation options are provided for the plot function, which
+is just intended as a quick check.</p>
+
 
 <p>A list with components:</p>
 

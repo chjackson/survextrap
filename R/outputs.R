@@ -532,18 +532,19 @@ deconstruct_mspline <- function(x, scale=1, tmax=NULL){
 
 get_coefs_bycovs <- function(x, stanmat, newdata=NULL, X=NULL){
   if (is.null(X)){
-    if (is.null(newdata) && (x$ncovs > 0)) newdata <- x$x$mfbase
+    if (is.null(newdata) && (x$nnphcovs > 0)) newdata <- x$x$mfbase
     if (NROW(newdata) > 0){
-      X <- newdata_to_X(newdata, x, x$formula, x$x$xlevs) # nvals x ncovs
+      X <- newdata_to_X(newdata, x, x$nph_formula, x$xnph$xlevs) # nvals x nnphcovs
     } else X <- NULL
   }
   niter <- nrow(stanmat)
   nvals <- if (is.null(X)) 1 else nrow(X)
 
-  if (x$nonprop){
+  if (x$nnphcovs > 0){
+
     b_np_names <- grep("b_np", colnames(stanmat), value=TRUE)
     nvars <- x$mspline$nvars
-    b_np <- array(stanmat[,b_np_names], dim=c(niter, x$ncovs, nvars-1))
+    b_np <- array(stanmat[,b_np_names], dim=c(niter, x$nnphcovs, nvars-1))
 
     b_mean <- log(x$coefs_mean[-1] / x$coefs_mean[1])
     b_mean_mat <- matrix(rep(b_mean, niter), nrow=niter, byrow=TRUE)
@@ -555,7 +556,7 @@ get_coefs_bycovs <- function(x, stanmat, newdata=NULL, X=NULL){
     coefs <- array(dim=c(niter, nvals, nvars))
     for (i in 1:nvals){
       locoefs <- array(0, dim=c(niter, nvars-1))
-      for (j in 1:x$ncovs){
+      for (j in 1:x$nnphcovs){
         locoefs <- locoefs + b_mean_mat + b_np[,j,] * X[i,j] + b_err*ssd
       }
       ocoefs <- exp(cbind(0, locoefs))

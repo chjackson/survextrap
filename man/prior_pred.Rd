@@ -13,7 +13,8 @@ prior_pred(
   coefs_mean = NULL,
   prior_hscale = p_normal(0, 20),
   prior_hsd = p_gamma(2, 1),
-  X = NULL,
+  newdata = NULL,
+  formula = NULL,
   prior_loghr = NULL,
   prior_hrsd = NULL,
   prior_cure = NULL
@@ -99,13 +100,13 @@ function.  This should be a call to \code{p_gamma()}.  The default is
 \code{p_gamma(2,1)}.  See \code{\link{prior_haz_sd}} for a way to
 calibrate this to represent a meaningful belief.}
 
-\item{X}{Either a list, vector or one-row matrix, with one value
-for each covariate in the model.  Defaults to zero.  Factors
-must be supplied as multiple numeric (0/1) contrasts.
-If there are multiple covariates and a single prior given in
-\code{prior_loghr}, then this prior will be used for all the covariates.
-If a list of priors is provided, then both this list and \code{X}
-must be named with the names of the covariates.}
+\item{newdata}{A data frame with one row, containing variables in
+the model formulae.  Samples will then be drawn, for any
+covariate-dependent parameters, with covariates set to the
+values given here.}
+
+\item{formula}{A model formula with no response, defining the
+covariates on the hazard scale.}
 
 \item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
 \code{p_normal()} or \code{p_t()}.  A list of calls can also be provided, to give

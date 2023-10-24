@@ -154,15 +154,15 @@ get_prior_hscale <- function(hscale){
   hscale
 }
 
-get_priors <- function(hscale, loghr, hsd, cure, logor_cure, x, xcure, est_hsd,
-                       nonprop, prior_hrsd){
+get_priors <- function(hscale, loghr, hsd, cure, logor_cure, x, xcure, xnph, est_hsd,
+                       prior_hrsd){
   hscale <- get_prior_hscale(hscale)
   loghr <- get_prior_coveffs(loghr, x, "loghr")
   hsd <- get_prior_hsd(hsd, est_hsd)
   validate_prior(cure)
   logor_cure <- get_prior_coveffs(logor_cure, xcure, "logor_cure")
-  sdnp <- get_prior_hrsd(prior_hrsd, x, nonprop)
-  nlist(hscale, loghr, hsd, cure, logor_cure, sdnp)
+  hrsd <- get_prior_hrsd(prior_hrsd, xnph)
+  nlist(hscale, loghr, hsd, cure, logor_cure, hrsd)
 }
 
 validate_prior <- function(prior, priorname=NULL, element=NULL){
@@ -174,7 +174,7 @@ validate_prior <- function(prior, priorname=NULL, element=NULL){
                          cure = "beta",
                          hsd = "gamma",
                          logor_cure = c("normal","t"),
-                         sdnp = "gamma")
+                         hrsd = "gamma")
 
     element <- if (is.null(element)) "" else sprintf("[[%s]]",element)
     if (!inherits(prior, "prior")){
@@ -200,17 +200,18 @@ get_prior_hsd <- function(prior, est_hsd){
 ## Can either be like p_normal(0,1) or list(cov1=p_normal(0,2), cov2=p_normal(1, 3))
 ##
 ## @param x  List of information describing the linear model , as returned by make_x
-get_prior_coveffs <- function(prior, x, modelname){
-    priorname <- sprintf("prior_%s", deparse(substitute(prior)))
+get_prior_coveffs <- function(prior, x, priorname=NULL){
+    if (is.null(priorname)) priorname <- sprintf("%s", deparse(substitute(prior)))
+    priorfullname <- paste0("prior_",priorname)
     if (x$ncovs==0)
         return(list(dist=aa(numeric()),distid=aa(numeric()),
                     location=aa(numeric()), scale=aa(numeric()),
                     df=aa(numeric())))
     else if (is.null(prior))
       prior <- p_normal(0, 2.5)
-    prior_list <- validate_prior_bycov(prior, x, priorname)
+    prior_list <- validate_prior_bycov(prior, x, priorfullname)
     for (i in seq_len(x$ncovs)){
-      validate_prior(prior_list[[i]], modelname, i)
+      validate_prior(prior_list[[i]], priorname, i)
     }
     dist <- sapply(prior_list, function(x)x$dist)
     distid <- sapply(prior_list, function(x)x$distid)
@@ -236,9 +237,11 @@ validate_prior_bycov <- function(prior, x, priorname){
       stop(sprintf("%s should be a call (or list of calls) to a prior constructor function",
                    priorname))
     if (length(prior)!=x$ncovs){
-      plural <- if (length(prior)>1) "s" else ""
-      stop(sprintf("%s has %s component%s, but there are %s coefficients in the model",
-                   priorname, length(prior), plural, x$ncovs))
+      plural_p <- if (length(prior)>1) "s" else ""
+      plural_n <- if (x$ncovs>1) "s" else ""
+      isare <- if(x$ncovs==1) "is" else "are"
+      stop(sprintf("%s has %s component%s, but there %s %s coefficient%s in the model",
+                   priorname, length(prior), plural_p, isare, x$ncovs, plural_n))
     }
     if (!identical(sort(names(prior)), sort(x$xnames))){
       quoted_names <- sprintf("\"%s\"", x$xnames)
@@ -250,12 +253,12 @@ validate_prior_bycov <- function(prior, x, priorname){
   prior_list
 }
 
-get_prior_hrsd <- function(prior, x, nonprop){
-  if (!nonprop) return(array(dim=c(0,2)))
+get_prior_hrsd <- function(prior, xnph){
+  if (xnph$ncovs==0) return(array(dim=c(0,2)))
   if (is.null(prior)) prior <- p_gamma(2, 1)
-  prior_list <- validate_prior_bycov(prior, x, priorname="prior_hrsd")
-  for (i in seq_len(x$ncovs)){
-    validate_prior(prior_list[[i]], "sdnp", i)
+  prior_list <- validate_prior_bycov(prior, xnph, priorname="prior_hrsd")
+  for (i in seq_len(xnph$ncovs)){
+    validate_prior(prior_list[[i]], "hrsd", i)
   }
   shapes <- sapply(prior_list, function(x)x$shape)
   rates <- sapply(prior_list, function(x)x$rate)
@@ -295,8 +298,34 @@ prior_basehaz_sample <- function(mspline,
 ##'
 ##' @aliases prior_sample
 ##'
-##' @inheritParams prior_sample_hazard
 ##' @inheritParams survextrap
+##'
+##' @param nsim Number of simulations to draw
+##'
+##' @param formula A model formula with no response, defining the
+##'   covariates on the hazard scale.
+##'
+##' @param nonprop A model formula with no response, defining any
+##'   covariates affecting the spline basis coefficients, which gives
+##'   a nonproportional hazards model.
+##'
+##' @param cure A model formula with no response, giving any covariates
+##'  on the cure proportion.
+##'
+##' @param newdata A data frame with one row, containing variables in
+##'   the model formulae.  Samples will then be drawn, for any
+##'   covariate-dependent parameters, with covariates set to the
+##'   values given here.
+##'
+##' @param newdata0 A data frame with one row, containing "reference"
+##'   values of variables in the model formulae.  The hazard ratio
+##'   between the hazards at \code{newdata} and \code{newdata0} will
+##'   be returned.
+##'
+##' @return \code{prior_sample_hazard} returns a data frame of the
+##'   samples, and \code{plot_prior_hazard} generates a plot.  No
+##'   customisation options are provided for the plot function, which
+##'   is just intended as a quick check.
 ##'
 ##' @return A list with components:
 ##'
@@ -321,19 +350,51 @@ prior_sample <- function(mspline,
                          ## no constants for the moment as they are not allowed in the model
                          prior_hscale,
                          prior_loghr = NULL,
-                         X = NULL,
-                         X0 = NULL,
+                         formula = NULL,
+                         cure = NULL,
+                         nonprop = NULL,
+                         newdata = NULL,
+                         newdata0 = NULL,
                          prior_hrsd = NULL,
                          prior_cure = NULL,
+                         prior_logor_cure = NULL, 
                          nsim = 100){
   sam <- prior_basehaz_sample(mspline,
                               coefs_mean = coefs_mean, prior_hsd = prior_hsd,
                               prior_hscale = prior_hscale, nsim=nsim)
 
-  if (is.null(X)) x <- list(ncovs=0, xnames=NULL)
+  if (is.null(formula)) {
+    x <- list(ncovs=0, xnames=NULL)
+    if (!is.null(prior_loghr)) stop("If `prior_loghr` is supplied, a regression formula should be supplied in `formula`")
+  }
   else {
-    X <- validate_prior_X(X)
-    x <- list(ncovs = length(X), xnames = names(X))
+    if (is.null(newdata)) stop("If `formula` is specified, then covariate values should be supplied in `newdata`")
+    X <- drop_intercept(model.matrix(formula, newdata))
+    x <- list(ncovs = ncol(X), xnames = colnames(X))
+  }
+  if (!is.null(newdata) || !is.null(newdata0)){
+    if (is.null(formula) && is.null(cure))
+      stop("If `newdata` or `newdata0` are supplied, a regression formula should be supplied in `formula` or `cure`")
+  }
+  if (!is.null(newdata0)){
+    if (is.null(newdata)) stop("if `newdata0` is supplied, `newdata` should also be supplied")
+  }
+  if (is.null(cure)) {
+    xcure <- list(ncovs=0, xnames=NULL)
+    if (!is.null(prior_logor_cure)) stop("If `prior_logor_cure` is supplied, a regression formula should be supplied in `cure`")
+  }
+  else {
+    if (inherits(cure, "formula")){
+      if (is.null(newdata)) stop("If `cure` is a formula, covariate values should be supplied in `newdata`")
+    }
+    cure_formula <- make_cure_formula(cure)
+    Xcure <- drop_intercept(model.matrix(cure, newdata))
+    xcure <- list(ncovs = ncol(Xcure), xnames = colnames(Xcure)) # Repetition here? 
+  }
+  if (is.null(nonprop)) xnph <- list(ncovs=0, xnames=NULL)
+  else {
+    Xnph <- drop_intercept(model.matrix(nonprop, newdata))
+    xnph <- list(ncovs = ncol(X), xnames = colnames(Xnph))
   }
 
   ## baseline hazard scale
@@ -341,32 +402,34 @@ prior_sample <- function(mspline,
     loghr_prior <- get_prior_coveffs(prior_loghr, x, "loghr")
     loghr <- lapply(attr(loghr_prior, "r"), function(x)x$r(nsim))
     loghr <- do.call(cbind, loghr[x$xnames])
-    if (!is.null(X0)){
-      X0 <- validate_prior_X(X0)
-      linpred0 <- loghr %*% X0
+    if (!is.null(newdata0)){
+      X0 <- drop_intercept(model.matrix(formula, newdata0))
+      linpred0 <- loghr %*% t(X0)
       sam$alpha0 <- sam$alpha + linpred0
       sam$hscale0 <- exp(sam$alpha0)
     }
-    linpred <- loghr %*% X
+    linpred <- loghr %*% t(X)
     sam$alpha <- sam$alpha + linpred
     sam$hscale <- exp(sam$alpha)
   }
 
   ## nonprop haz models
-  if (!is.null(prior_hrsd)) {
-    sdnp_prior <- get_prior_hrsd(prior_hrsd, x, nonprop=TRUE)
-    sdnp <- vector(x$ncovs, mode="list")
+  if (!is.null(nonprop)) {
+    hrsd_prior <- get_prior_hrsd(prior_hrsd, xnph)
+    hrsd <- vector(x$ncovs, mode="list")
     nvars <- ncol(sam$coefs) # number of spline basis terms
     np_linpred <- matrix(0, nrow=nsim, ncol=nvars-1)
+    if (!is.null(newdata0))
+      Xnph0 <- drop_intercept(model.matrix(nonprop, newdata0))
     for (i in seq_len(x$ncovs)){
-      sdnp[[i]] <- rgamma(nsim, shape=sdnp_prior[i,1], rate=sdnp_prior[i,2])
-      b_np <- matrix(rnorm(nsim *(nvars - 1), 0, sdnp[[i]]),
+      hrsd[[i]] <- rgamma(nsim, shape=hrsd_prior[i,1], rate=hrsd_prior[i,2])
+      b_np <- matrix(rnorm(nsim *(nvars - 1), 0, hrsd[[i]]),
                      nrow=nsim, ncol=nvars-1)
-      if (!is.null(X0))
-        np_linpred0 <- np_linpred + b_np * X0[i]
-      np_linpred <- np_linpred + b_np * X[i]
+      if (!is.null(newdata0))
+        np_linpred0 <- np_linpred + b_np * Xnph0[i]
+      np_linpred <- np_linpred + b_np * Xnph[i]
     }
-    if (!is.null(X0)){
+    if (!is.null(newdata0)){
       np_linpred0 <- cbind(0, np_linpred0)
       sam$beta0 <- sam$beta + np_linpred0
       sam$coefs0 <- exp(sam$beta0) / rowSums(exp(sam$beta0))
@@ -375,8 +438,19 @@ prior_sample <- function(mspline,
     sam$beta <- sam$beta + np_linpred
     sam$coefs <- exp(sam$beta) / rowSums(exp(sam$beta))
   }
-  if (!is.null(prior_cure)) {
+
+  if (!is.null(cure)) {
+    if (!is.null(newdata0))
+      Xnph0 <- drop_intercept(model.matrix(cure, newdata0))
     sam$pcure <- prior_cure$r(nsim)
+
+    if (xcure$ncovs > 0) { 
+      logor_cure_prior <- get_prior_coveffs(prior_logor_cure, xcure, "logor_cure")
+      logor_cure <- lapply(attr(logor_cure_prior, "r"), function(x)x$r(nsim))
+      logor_cure <- do.call(cbind, logor_cure[xcure$xnames])
+      linpred <- logor_cure %*% t(Xcure)
+      sam$pcure <- plogis(qlogis(sam$pcure) + linpred)
+    }
   }
 
   sam
@@ -393,25 +467,7 @@ prior_sample <- function(mspline,
 ##'
 ##' @inheritParams survextrap
 ##' @inheritParams mspline_plotsetup
-##'
-##' @param nsim Number of simulations to draw
-##'
-##' @param X Either a list, vector or one-row matrix, with one value
-##'   for each covariate in the model.  Defaults to zero.  Factors
-##'   must be supplied as multiple numeric (0/1) contrasts.
-##'   If there are multiple covariates and a single prior given in
-##'   `prior_loghr`, then this prior will be used for all the covariates.
-##'   If a list of priors is provided, then both this list and \code{X}
-##'   must be named with the names of the covariates. 
-##'
-##' @param X0 An alternative set of "reference" covariate values
-##'   (optional).  The hazard ratio between the hazards at \code{X}
-##'   and \code{X0} will also be returned.
-##'
-##' @return \code{prior_sample_hazard} returns a data frame of the
-##'   samples, and \code{plot_prior_hazard} generates a plot.  No
-##'   customisation options are provided for the plot function, which
-##'   is just intended as a quick check.
+##' @inheritParams prior_sample
 ##'
 ##' @name prior_sample_hazard
 ##' @export
@@ -420,8 +476,11 @@ prior_sample_hazard <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
                                 prior_hsd = p_gamma(2,1),
                                 prior_hscale = NULL,
                                 prior_loghr = NULL,
-                                X = NULL,
-                                X0 = NULL,
+                                formula = NULL,
+                                cure = NULL,
+                                nonprop = NULL,
+                                newdata = NULL,
+                                newdata0 = NULL,
                                 prior_hrsd = NULL,
                                 tmin=0, tmax=10,
                                 nsim=10){
@@ -433,7 +492,8 @@ prior_sample_hazard <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
                       coefs_mean=coefs_mean, prior_hsd=prior_hsd,
                       prior_hscale=prior_hscale,
                       prior_hrsd=prior_hrsd,
-                      X = X, X0=X0, nsim=nsim)
+                      formula=formula, cure=cure, nonprop=nonprop,
+                      newdata = newdata, newdata0=newdata0, nsim=nsim)
   hazlist <- vector(nsim, mode="list")
   for (i in 1:nsim){
     haz <- mspline_sum_basis(basis, coefs=sam$coefs[i,],
@@ -445,7 +505,7 @@ prior_sample_hazard <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
   hazdf$mean <- 1/hazdf$haz
   hazdf$rep <- factor(hazdf$rep)
 
-  if (!is.null(X0)){
+  if (!is.null(newdata0)){
     ## comparator hazard using the same simulated parameter values
     ## but different covariate values
     hazlist <- vector(nsim, mode="list")
@@ -472,7 +532,7 @@ prior_sample_hazard <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
 ##' prior on the hazard scale parameter and M-spline specification,
 ##' when the spline coefficients are fixed to define a constant hazard
 ##' using \code{\link{mspline_constant_coefs}}.
-##' 
+##'
 ##' @inheritParams prior_haz
 ##'
 ##' @seealso \code{\link{p_meansurv}}, \code{\link{mspline_constant_coefs}}
@@ -510,23 +570,19 @@ prior_hr <- function(prior_loghr = p_normal(0, 2.5),
 }
 
 ## Copied from internal function in stats package, under GPL.  Copyright (c) R Core.
-format_perc <- function (x, digits = max(2L, getOption("digits")), probability = TRUE, 
-    use.fC = length(x) < 100, ...) 
+format_perc <- function (x, digits = max(2L, getOption("digits")), probability = TRUE,
+    use.fC = length(x) < 100, ...)
 {
     if (length(x)) {
-        if (probability) 
+        if (probability)
             x <- 100 * x
-        ans <- paste0(if (use.fC) 
+        ans <- paste0(if (use.fC)
             formatC(x, format = "fg", width = 1, digits = digits)
         else format(x, trim = TRUE, digits = digits, ...), "%")
         ans[is.na(x)] <- ""
         ans
     }
     else character(0)
-}  
-
-validate_prior_X <- function(X){
-  X <- unlist(X)
 }
 
 
@@ -591,7 +647,7 @@ validate_prior_X <- function(X){
 ##'
 ##' In \code{\link{prior_hr_sd}}, `sd_hr` is the SD of hazard ratios
 ##'   over time, and `hrr` is the ratio between high/low hazard ratios.
-##' 
+##'
 ##'
 ##' @name prior_haz
 ##' @export
@@ -600,7 +656,10 @@ prior_haz_sd <- function(mspline,
                          prior_hsd=p_gamma(2,1),
                          prior_hscale = p_normal(0, 20),
                          prior_loghr = NULL,
-                         X = NULL,
+                         formula = NULL,
+                         cure = NULL,
+                         nonprop = NULL,
+                         newdata = NULL,
                          prior_hrsd = NULL,
                          tmin=0, tmax=NULL,
                          nsim = 1000,
@@ -610,7 +669,8 @@ prior_haz_sd <- function(mspline,
                               bsmooth=mspline$bsmooth,
                               coefs_mean=coefs_mean, prior_hsd=prior_hsd,
                               prior_hscale=prior_hscale, prior_loghr=prior_loghr,
-                              X=X, prior_hrsd=prior_hrsd,
+                              formula=formula, cure=cure, nonprop=nonprop,
+                              newdata=newdata, prior_hrsd=prior_hrsd,
                               tmin=tmin, tmax=tmax,
                               nsim=nsim)
   pred$mean <- 1 / pred$haz
@@ -626,8 +686,6 @@ prior_haz_sd <- function(mspline,
              hr = quantile(hr, quantiles))
 }
 
-## Should this be consistent with hr_survextrap , two rows of X, X0?
-
 ##' @rdname prior_haz
 ##' @export
 prior_hr_sd <- function(mspline,
@@ -635,8 +693,11 @@ prior_hr_sd <- function(mspline,
                         prior_hsd=p_gamma(2,1),
                         prior_hscale = p_normal(0, 20),
                         prior_loghr = NULL,
-                        X,
-                        X0,
+                        formula = NULL,
+                        cure = NULL,
+                        nonprop = NULL,
+                        newdata = NULL,
+                        newdata0 = NULL,
                         prior_hrsd = NULL,
                         tmin=0, tmax=10,
                         nsim = 100,
@@ -646,7 +707,8 @@ prior_hr_sd <- function(mspline,
                               bsmooth=mspline$bsmooth,
                               coefs_mean=coefs_mean, prior_hsd=prior_hsd,
                               prior_hscale=prior_hscale, prior_loghr=prior_loghr,
-                              X=X, X0=X0, prior_hrsd=prior_hrsd,
+                              formula=formula, cure=cure, nonprop=nonprop,
+                              newdata=newdata, newdata0=newdata0, prior_hrsd=prior_hrsd,
                               tmin=tmin, tmax=tmax,
                               nsim=nsim)
   sd_hr <- tapply(pred$hr, pred$rep, sd)

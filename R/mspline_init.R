@@ -88,7 +88,7 @@ mspline_init <- function(df = 10,
 ##'
 ##' @inheritParams mspline_init
 ##'
-##' @return A list defining the M-spline, with any list components set
+##' @return A list defining the M-spline, with any omitted list components set
 ##'   to defaults.  See \code{\link{mspline_init}} for details.
 ##'
 ##' If \code{mspline$knots} is not supplied, giving knot locations, then
@@ -127,7 +127,12 @@ mspline_list_init <- function(mspline, obstimes=NULL){
 ##' 
 ##' @param coefs Basis coefficients 
 ##'
-##' @param hscale Hazard scale parameter 
+##' @param hscale Hazard scale parameter
+##'
+##' @return A list defining the M-spline, with any omitted list
+##'   components set to defaults.  See \code{\link{mspline_init}} for
+##'   details.  The parameters are included as the \code{coefs} and
+##'   \code{hscale} components.
 ##'
 ##' @export
 msplinemodel_init <- function(df = 10,

@@ -18,7 +18,7 @@ editor_options:
 
 The flexible survival models in `survextrap` are **Bayesian**.
 
-This means that they analyse data under a **parametric** model, which assumes that each data point $x$ comes from a sampling distribution with probability density function $f(x|\theta)$.  The parameters $\theta$ are estimated by combining a "prior" distribution $p(\theta)$, representing beliefs about model parameters external to the data, with a "likelihood" that represents the information from a set of data $\boldsymbol{x}$, producing a posterior distribution $p(\theta | \boldsymbol{x})$. 
+This means that they analyse data under a **parametric** model, which assumes that each data point $x$ comes from a sampling distribution with probability density function $f(x|\theta)$.  The parameters $\theta$ are estimated by combining a **prior** distribution $p(\theta)$, representing beliefs about model parameters external to the data, with a **"likelihood"** that represents the information from a set of data $\boldsymbol{x}$, producing a posterior distribution $p(\theta | \boldsymbol{x})$. 
 
 The principle behind the package is that any information that is relevant to extrapolation should be represented transparently.  This is arguably clearest if expressed through **data** or **parametric mechanisms**.
 
@@ -297,7 +297,7 @@ The parameters that relate the covariates to the spline coefficients do not have
 
 The parameter $\tau$ governs the amount of flexibility in the hazard ratio function. With $\tau=0$ the model is a proportional hazards model, and as $\tau$ increases the hazard ratio becomes a more flexible function of time.   The exact value of $\tau$ does not have an interpretation, but as we did for $\sigma$ [above](#hrsd), we can use _simulation_ to calibrate the prior so that it matches plausible judgements. 
 
-This is done with the `prior_hr_sd` function, which works for $\tau$ in the same way as `prior_haz_sd` does for $\sigma$.   The new requirement here is that covariate values `X` and reference covariate values `X0` should be supplied, most easily as lists.  The hazard ratio between these will be computed.
+This is done with the `prior_hr_sd` function, which works for $\tau$ in the same way as `prior_haz_sd` does for $\sigma$.   The new requirement here is that the values of covariates should be supplied in `newdata` and `newdata0`, and the associated regression model formula in `formula`.   The hazard ratio between `newdata` and `newdata0` will be computed.
 
 All the other priors should be supplied: `prior_hscale` for $\eta$, `prior_hsd` for $\sigma$, and `prior_loghr` for the "baseline" hazard ratio to which the non-proportionality effects are applied.  The function will simulate from the joint prior distribution of hazard ratios implied by all these priors together with the one that we want to calibrate: `prior_hrsd`, the Gamma prior for $\tau$. 
 
@@ -307,8 +307,9 @@ prior_hr_sd(mspline=sp,
             prior_hscale = p_meansurv(median=50, upper=80, mspline=sp),
             prior_loghr = p_normal(0,1),
             prior_hrsd = p_gamma(2,3),
-            X = list("rxLev+5FU"=0),
-            X0 = list("rxLev+5FU"=1),
+            formula = ~ treat,
+            newdata = list(treat = 1),
+            newdata0 = list(treat = 0),
             quantiles = c(0.05, 0.95),
             nsim=1000)
 ```

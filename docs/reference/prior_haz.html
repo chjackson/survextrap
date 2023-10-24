@@ -76,7 +76,10 @@ priors for these parameters to match interpretable beliefs.</p>
 <span>  prior_hsd <span class="op">=</span> <span class="fu"><a href="priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  prior_hscale <span class="op">=</span> <span class="fu"><a href="priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span><span class="op">)</span>,</span>
 <span>  prior_loghr <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  X <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cure <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  nonprop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  prior_hrsd <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tmin <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  tmax <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -91,8 +94,11 @@ priors for these parameters to match interpretable beliefs.</p>
 <span>  prior_hsd <span class="op">=</span> <span class="fu"><a href="priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  prior_hscale <span class="op">=</span> <span class="fu"><a href="priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span><span class="op">)</span>,</span>
 <span>  prior_loghr <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">X</span>,</span>
-<span>  <span class="va">X0</span>,</span>
+<span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cure <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  nonprop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  newdata0 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  prior_hrsd <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tmin <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  tmax <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -178,14 +184,39 @@ of each list component matches the name of the coefficient, e.g.
 <p>The default is <code>p_normal(0,2.5)</code> for all coefficients.</p></dd>
 
 
-<dt>X</dt>
-<dd><p>Either a list, vector or one-row matrix, with one value
-for each covariate in the model.  Defaults to zero.  Factors
-must be supplied as multiple numeric (0/1) contrasts.
-If there are multiple covariates and a single prior given in
-<code>prior_loghr</code>, then this prior will be used for all the covariates.
-If a list of priors is provided, then both this list and <code>X</code>
-must be named with the names of the covariates.</p></dd>
+<dt>formula</dt>
+<dd><p>A survival formula in standard R formula syntax, with a call to <code>Surv()</code>
+on the left hand side.</p>
+<p>Covariates included on the right hand side of the formula with be modelled with
+proportional hazards, or if <code>nonprop</code> is <code>TRUE</code> then a non-proportional
+hazards is used.</p>
+<p>If <code>data</code> is omitted, so that the model is being fitted to external aggregate data alone,
+without individual data, then the formula should not include a <code>Surv()</code> call.  The
+left-hand side of the formula will then be empty, and the right hand side specifies the covariates
+as usual.  For example, <code>formula = ~1</code> if there are no covariates.</p></dd>
+
+
+<dt>cure</dt>
+<dd><p>If <code>TRUE</code>, a mixture cure model is used, where the "uncured" survival is defined by the
+M-spline model, and the cure probability is estimated.</p></dd>
+
+
+<dt>nonprop</dt>
+<dd><p>Non-proportional hazards model specification.
+This is achieved by modelling the spline basis coefficients in terms of the covariates.  See
+the <a href="https://chjackson.github.io/survextrap/articles/methods.html">methods vignette</a> for more details.</p>
+<p>If <code>TRUE</code>, then all covariates are modelled with non-proportional hazards, using the same model formula as <code>formula</code>.</p>
+<p>If this is a formula, then this is assumed to define a model
+for the dependence of the basis coefficients on the covariates.</p>
+<p>IF this is <code>NULL</code> or <code>FALSE</code> (the default) then any covariates are modelled with proportional
+hazards.</p></dd>
+
+
+<dt>newdata</dt>
+<dd><p>A data frame with one row, containing variables in
+the model formulae.  Samples will then be drawn, for any
+covariate-dependent parameters, with covariates set to the
+values given here.</p></dd>
 
 
 <dt>prior_hrsd</dt>
@@ -224,10 +255,11 @@ quantiles are used respectively.</p></dd>
 of the simulated quantities.</p></dd>
 
 
-<dt>X0</dt>
-<dd><p>An alternative set of "reference" covariate values
-(optional).  The hazard ratio between the hazards at <code>X</code>
-and <code>X0</code> will also be returned.</p></dd>
+<dt>newdata0</dt>
+<dd><p>A data frame with one row, containing "reference"
+values of variables in the model formulae.  The hazard ratio
+between the hazards at <code>newdata</code> and <code>newdata0</code> will
+be returned.</p></dd>
 
 </dl></div>
     <div class="section level2">

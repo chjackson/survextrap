@@ -139,11 +139,14 @@ M-spline model, and the cure probability is estimated.</p></dd>
 
 
 <dt>nonprop</dt>
-<dd><p>If <code>TRUE</code> then a non-proportional hazards model is fitted.
+<dd><p>Non-proportional hazards model specification.
 This is achieved by modelling the spline basis coefficients in terms of the covariates.  See
-the <a href="https://chjackson.github.io/survextrap/articles/methods.html">methods vignette</a> for more details.   In models with multiple covariates, currently
-there is no way to assume that some covariates have proportional hazards but others don't -
-it is all or none.</p></dd>
+the <a href="https://chjackson.github.io/survextrap/articles/methods.html">methods vignette</a> for more details.</p>
+<p>If <code>TRUE</code>, then all covariates are modelled with non-proportional hazards, using the same model formula as <code>formula</code>.</p>
+<p>If this is a formula, then this is assumed to define a model
+for the dependence of the basis coefficients on the covariates.</p>
+<p>IF this is <code>NULL</code> or <code>FALSE</code> (the default) then any covariates are modelled with proportional
+hazards.</p></dd>
 
 
 <dt>prior_hscale</dt>

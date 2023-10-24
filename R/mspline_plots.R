@@ -85,7 +85,8 @@ plot_prior_hazard <- function(knots=NULL, df=10, degree=3,
                               prior_hsd = p_gamma(2,1),
                               prior_hscale = p_normal(0, 20),
                               prior_loghr = NULL,
-                              X = NULL,
+                              newdata = NULL,
+                              formula = NULL,
                               prior_hrsd = p_gamma(2,1),
                               tmin=0, tmax=NULL,
                               nsim=10)
@@ -96,7 +97,7 @@ plot_prior_hazard <- function(knots=NULL, df=10, degree=3,
                                prior_hsd=prior_hsd,
                                prior_hscale=prior_hscale,
                                prior_loghr=prior_loghr,
-                               X = X,
+                               newdata=newdata, formula=formula,
                                prior_hrsd=prior_hrsd,
                                tmin=tmin, tmax=tmax, nsim=nsim)
   knots <- attr(hazdf, "knots")

@@ -16,7 +16,7 @@ as documented in \code{\link{mspline_init}}.}
 used to choose knot locations}
 }
 \value{
-A list defining the M-spline, with any list components set
+A list defining the M-spline, with any omitted list components set
 to defaults.  See \code{\link{mspline_init}} for details.
 
 If \code{mspline$knots} is not supplied, giving knot locations, then

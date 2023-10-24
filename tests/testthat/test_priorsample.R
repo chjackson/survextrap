@@ -21,15 +21,84 @@ test_that("prior hazard parameter samples", {
                  coefs_mean = NULL,
                  prior_hsd = p_gamma(2,1),
                  prior_hscale = p_normal(0,1),
-                 X = list(treatment=1),
+                 formula = ~ treatment,
+                 newdata = list(treatment=1),
                  nsim = 100)
-    ## prop haz model, 2 covs
+
+    ## 2 covs
+    sam1 <- prior_sample(mspline=sp,
+                 coefs_mean = NULL,
+                 prior_hsd = p_gamma(2,1),
+                 prior_hscale = p_normal(0,1),
+                 prior_loghr = list(treatment=p_normal(0,1),
+                                    age=p_normal(1,2)),
+                 newdata = list(treatment=1, age=1),
+                 formula = ~treatment + age,
+                 nsim = 100)
+
+    ## newdata with more than one value is OK
+    sam <-  prior_sample(mspline=sp,
+                         coefs_mean = NULL,
+                         prior_hsd = p_gamma(2,1),
+                         prior_hscale = p_normal(0,1),
+                         prior_loghr = list(treatment=p_normal(0,1),
+                                            age=p_normal(1,2)),
+                         newdata = list(treatment=c(0,1), age=1:2),
+                         formula = ~treatment + age,
+                         nsim = 100)
+
+    ## .. with an interaction
     prior_sample(mspline=sp,
                  coefs_mean = NULL,
                  prior_hsd = p_gamma(2,1),
                  prior_hscale = p_normal(0,1),
-                 X = list(treatment=1, age=60),
+                 prior_loghr = list(treatment=p_normal(0,1),
+                                    age=p_normal(1,2),
+                                    "treatment:age"=p_normal(0,0.1)),
+                 newdata = list(treatment=1, age=1),
+                 formula = ~treatment*age,
                  nsim = 100)
+
+    expect_error(prior_sample(mspline=sp,
+                 coefs_mean = NULL,
+                 prior_hsd = p_gamma(2,1),
+                 prior_hscale = p_normal(0,1),
+                 prior_loghr = list(age=p_normal(0,1)),
+                 newdata = list(treatment=1),
+                 formula = ~treatment,
+                 nsim = 100), "names of prior_loghr do not match")
+
+    expect_error(prior_sample(mspline=sp,
+                 coefs_mean = NULL,
+                 prior_hsd = p_gamma(2,1),
+                 prior_hscale = p_normal(0,1),
+                 prior_loghr = list(treatment=p_normal(1, 2), age=p_normal(0,1)),
+                 newdata = list(treatment=1),
+                 formula = ~treatment,
+                 nsim = 100), "loghr has 2 components, but there is 1 coefficient")
+
+    expect_error(prior_sample(mspline=sp,
+                 coefs_mean = NULL,
+                 prior_hsd = p_gamma(2,1),
+                 prior_hscale = p_normal(0,1),
+                 prior_loghr = list(treatment=p_normal(1, 2)),
+                 newdata = list(treatment=1),
+                 nsim = 100), "regression formula should be supplied in `formula`")
+
+    expect_error(prior_sample(mspline=sp,
+                 coefs_mean = NULL,
+                 prior_hsd = p_gamma(2,1),
+                 prior_hscale = p_normal(0,1),
+                 prior_loghr = list(treatment=p_normal(1, 2)),
+                 formula = ~treatment,
+                 nsim = 100), "covariate values should be supplied in `newdata`")
+
+    expect_error(prior_sample(mspline=sp,
+                              coefs_mean = NULL,
+                              prior_hsd = p_gamma(2,1),
+                              prior_hscale = p_normal(0,1),
+                              prior_loghr = list(treatment=p_normal(1, 2)),
+                              nsim = 100), "regression formula should be supplied in `formula`")
 
     ## nonprop haz model, 1 cov
     prior_sample(mspline=sp,
@@ -37,22 +106,60 @@ test_that("prior hazard parameter samples", {
                  prior_hsd = p_gamma(2,1),
                  prior_hscale = p_normal(0,1),
                  prior_hrsd = p_gamma(2,1),
-                 X = list(treatment=1),
+                 newdata = list(treatment=1),
+                 formula = ~treatment,
+                 nonprop = ~treatment,
                  nsim = 100)
+
     ## nonprop haz model, 2 covs
     prior_sample(mspline=sp,
                  coefs_mean = NULL,
                  prior_hsd = p_gamma(2,1),
                  prior_hscale = p_normal(0,1),
                  prior_hrsd = p_gamma(2,1),
-                 X = list(treatment=1),
+                 newdata = list(treatment=1),
+                 formula = ~treatment,
+                 nonprop = ~treatment,
                  nsim = 100)
 
+    ## cure, no covs
     prior_sample(mspline = sp,
                  coefs_mean = NULL,
                  prior_hsd = p_gamma(2,1),
                  prior_hscale = p_normal(0,1),
                  prior_cure = p_beta(2,10),
+                 nsim = 100)
+
+    ## errors with cure and covs
+    expect_error(
+    prior_sample(mspline = sp,
+                 coefs_mean = NULL,
+                 prior_hsd = p_gamma(2,1),
+                 prior_hscale = p_normal(0,1),
+                 prior_cure = p_beta(2,10),
+                 prior_logor_cure = p_normal(0,2),
+                 nsim = 100), "a regression formula should be supplied in `cure`")
+
+    expect_error(
+      prior_sample(mspline = sp,
+                 coefs_mean = NULL,
+                 prior_hsd = p_gamma(2,1),
+                 prior_hscale = p_normal(0,1),
+                 cure = ~treatment,
+                 prior_cure = p_beta(2,10),
+                 prior_logor_cure = p_normal(0,2),
+                 nsim = 100), "covariate values should be supplied"
+    )
+
+    ## cure with covs
+    prior_sample(mspline = sp,
+                 coefs_mean = NULL,
+                 prior_hsd = p_gamma(2,1),
+                 prior_hscale = p_normal(0,1),
+                 cure = ~treatment,
+                 newdata = list(treatment = 1),
+                 prior_cure = p_beta(2,10),
+                 prior_logor_cure = p_normal(0,2),
                  nsim = 100)
 
   },NA)
@@ -71,7 +178,8 @@ test_that("prior hazard function samples", {
     pdf <- prior_sample_hazard(knots = c(1,2,3,5), degree=3,
                                prior_hscale = p_normal(0,1),
                                prior_hsd = p_gamma(10, 10),
-                               X = list(treatment=-5),
+                               formula = ~ treatment,
+                               newdata = list(treatment=-5),
                                tmin=0, tmax=10, nsim=10)
     ggplot(pdf, aes(x=time, y=haz, group=rep)) + geom_line() + ylim(0,2)
 
@@ -79,7 +187,8 @@ test_that("prior hazard function samples", {
     p <- plot_prior_hazard(knots = c(1,2,3,5), degree=3,
                            prior_hscale = p_normal(0,1),
                            prior_hsd = p_gamma(10, 10),
-                           X = list(treatment=-5),
+                           formula = ~treatment,
+                           newdata = list(treatment=-5),
                            prior_hrsd = p_gamma(2,1),
                            tmin=0, tmax=10, nsim=10)
     p
@@ -90,7 +199,8 @@ test_that("prior hazard function samples", {
                          prior_hsd = p_gamma(10, 10),
                          prior_loghr = list(age=p_normal(2,3),
                                             treatment=p_normal(0,0.01)),
-                         X = list(treatment=-5, age=50),
+                         formula = ~treatment + age,
+                         newdata = list(treatment=-5, age=50),
                          nsim=10)
 
   }, NA)
@@ -120,7 +230,8 @@ test_that("prior hazard SD over time", {
                  coefs_mean = NULL,
                  prior_hsd = p_gamma(1,40),
                  prior_hscale = p_normal(0,1),
-                 X = list(treatment=1),
+                 formula = ~ treatment,
+                 newdata = list(treatment=1),
                  nsim = 100, quantiles=c(0.25, 0.75))
 
     ## non proportional hazards model with one covariate. Even more uncertainty
@@ -128,7 +239,8 @@ test_that("prior hazard SD over time", {
                  coefs_mean = NULL,
                  prior_hsd = p_gamma(1,40),
                  prior_hscale = p_normal(0,1),
-                 X = list(treatment=1),
+                 formula = ~ treatment,
+                 newdata = list(treatment=1),
                  prior_hrsd = p_gamma(2,1),
                  nsim = 100, quantiles=c(0.25, 0.75))
 
@@ -146,8 +258,10 @@ test_that("prior hazard ratio SD over time", {
                      coefs_mean = NULL,
                      prior_hsd = p_gamma(1,400),
                      prior_hscale = p_normal(0,1),
-                     X = list(treatment=1),
-                     X0 = list(treatment=0),
+                     newdata = list(treatment=1),
+                     newdata0 = list(treatment=0),
+                     formula = ~treatment,
+                     nonprop = ~treatment,
                      prior_hrsd = p_gamma(1, 100),
                      nsim = 100, quantiles=c(0.25, 0.75))
   expect_lt(psd$sd_hr[2], 0.5)
@@ -156,11 +270,12 @@ test_that("prior hazard ratio SD over time", {
 
 test_that("prior sampling functions returned with a fitted model",{
   mod <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt")
-  X <- list(rxLev=1,"rxLev+5FU"=0)
-  X0 <- list(rxLev=0,"rxLev+5FU"=0)
+  levs <- c("Obs","Lev","Lev+5FU")
+  newdata <- data.frame(rx=factor("Lev", levels = levs))
+  newdata0 <- data.frame(rx=factor("Lev+5FU", levels = levs))
   expect_error({
-    mod$prior_sample$haz(X = X, nsim=4)
-    mod$prior_sample$haz_sd(X = X, quantiles = c(0.25, 0.75))
-    mod$prior_sample$hr_sd(X = X, X0 = X0)
+    mod$prior_sample$haz(newdata=newdata, nsim=4)
+    mod$prior_sample$haz_sd(newdata=newdata, quantiles = c(0.25, 0.75))
+    mod$prior_sample$hr_sd(newdata=newdata, newdata0=newdata0)
   }, NA)
 })

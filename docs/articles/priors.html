@@ -80,7 +80,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2023-09-30</h4>
+            <h4 data-toc-skip class="date">2023-10-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/priors.Rmd" class="external-link"><code>vignettes/priors.Rmd</code></a></small>
       <div class="d-none name"><code>priors.Rmd</code></div>
@@ -93,10 +93,11 @@ Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jac
 <p>This means that they analyse data under a <strong>parametric</strong>
 model, which assumes that each data point <span class="math inline">\(x\)</span> comes from a sampling distribution with
 probability density function <span class="math inline">\(f(x|\theta)\)</span>. The parameters <span class="math inline">\(\theta\)</span> are estimated by combining a
-“prior” distribution <span class="math inline">\(p(\theta)\)</span>,
-representing beliefs about model parameters external to the data, with a
-“likelihood” that represents the information from a set of data <span class="math inline">\(\boldsymbol{x}\)</span>, producing a posterior
-distribution <span class="math inline">\(p(\theta |
+<strong>prior</strong> distribution <span class="math inline">\(p(\theta)\)</span>, representing beliefs about
+model parameters external to the data, with a
+<strong>“likelihood”</strong> that represents the information from a set
+of data <span class="math inline">\(\boldsymbol{x}\)</span>, producing a
+posterior distribution <span class="math inline">\(p(\theta |
 \boldsymbol{x})\)</span>.</p>
 <p>The principle behind the package is that any information that is
 relevant to extrapolation should be represented transparently. This is
@@ -529,9 +530,10 @@ plausible judgements.</p>
 <p>This is done with the <code>prior_hr_sd</code> function, which works
 for <span class="math inline">\(\tau\)</span> in the same way as
 <code>prior_haz_sd</code> does for <span class="math inline">\(\sigma\)</span>. The new requirement here is that
-covariate values <code>X</code> and reference covariate values
-<code>X0</code> should be supplied, most easily as lists. The hazard
-ratio between these will be computed.</p>
+the values of covariates should be supplied in <code>newdata</code> and
+<code>newdata0</code>, and the associated regression model formula in
+<code>formula</code>. The hazard ratio between <code>newdata</code> and
+<code>newdata0</code> will be computed.</p>
 <p>All the other priors should be supplied: <code>prior_hscale</code>
 for <span class="math inline">\(\eta\)</span>, <code>prior_hsd</code>
 for <span class="math inline">\(\sigma\)</span>, and
@@ -546,13 +548,14 @@ priors together with the one that we want to calibrate:
 <span>            prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span>,</span>
 <span>            prior_loghr <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>,</span>
 <span>            prior_hrsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">3</span><span class="op">)</span>,</span>
-<span>            X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"rxLev+5FU"</span><span class="op">=</span><span class="fl">0</span><span class="op">)</span>,</span>
-<span>            X0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"rxLev+5FU"</span><span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span>
+<span>            formula <span class="op">=</span> <span class="op">~</span> <span class="va">treat</span>,</span>
+<span>            newdata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>treat <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>            newdata0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>treat <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
 <span>            quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
 <span>            nsim<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##            sd_hr      hrr</span></span>
-<span><span class="co">## 5%   0.002741409 1.046165</span></span>
-<span><span class="co">## 95% 25.903734169 7.497514</span></span></code></pre>
+<pre><code><span><span class="co">##           sd_hr       hrr</span></span>
+<span><span class="co">## 5%   0.01502037  1.453464</span></span>
+<span><span class="co">## 95% 53.42515945 12.894767</span></span></code></pre>
 <p>The <code>sd_hr</code> column is the standard deviation of the hazard
 ratio, and the <code>hrr</code> column is the ratio between a high and a
 low value (by default the 90% versus the 10% quantile, but these can be

@@ -64,7 +64,7 @@ cetuximab <- cetux[cetux$treat=="Cetuximab",]
 
 # Spline specification
 
-First we set up an M-spline, specifying only that we expect 6 spline coefficients to be sufficient to describe hazard variations, and we want to allow hazards to change up to 20 years.  The resulting default spline knots are saved in the `mspline` object here.  The default knots are based on quantiles of the event times in the data (which is why we supply the data in this command).
+First we set up an M-spline, specifying only that we expect a maximum of 6 spline coefficients to be sufficient to describe hazard variations, and we want to allow hazards to change up to 20 years.  The resulting default spline knots are saved in the `mspline` object here.  The default knots are based on quantiles of the event times in the data (which is why we supply the data in this command).
 
 ```{r}
 mspline <- mspline_spec(Surv(years, d) ~ 1, data=cetux, df=6, add_knots=20)
@@ -114,7 +114,7 @@ prior_hr(prior_loghr)
 
 In a similar way, we can calibrate the Gamma prior for the parameter $\tau$, which is only used in non-proportional hazards models. This governs the size of departure from proportional hazards, i.e. the variability in the hazard ratio over time.  $\tau$ itself does not have a direct interpretation, but we can simulate hazard curves under different treatment groups, and compute the ratio $\rho$ between the "highest" (90\% quantile) and "lowest" (10\% quantile) hazard ratio over time.   If hazards are proportional, then $\rho=1$. 
 
-Here a Gamma(2,3) prior is used, which represents a judgement that the hazard ratio could vary up to 7-fold at different points over 20 years.
+Here a Gamma(2,3) prior is used, which represents a judgement that the hazard ratio could vary about 10-fold (to an order of magnitude) at different points over 20 years.
 
 ```{r prior_hr_sd}
 set.seed(1)
@@ -124,7 +124,9 @@ prior_hr_sd(mspline = mspline,
             prior_loghr = prior_loghr,
             prior_hscale = prior_hscale,
             prior_hrsd = prior_hrsd,
-            X = list(treat=1), X0 = list(treat=0))
+            formula = ~treat,
+            newdata = data.frame(treat=1), 
+            newdata0 = data.frame(treat=0))
 ```
 
 
@@ -402,6 +404,7 @@ ggplot(haz_plot_reg, aes(x=t, y=median, col=Model, fill=Model)) +
     labs(col=NULL, fill=NULL)
 ```
 </details>
+
 
 ## Knot selection for external data 
 

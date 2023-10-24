@@ -55,6 +55,7 @@ reference:
   - plot_mspline
   - mspline_init
   - mspline_list_init
+  - msplinemodel_init
 - title: Package overview
 - contents:
   - survextrap-package

@@ -8,6 +8,7 @@ mspline_spec(
   formula,
   data,
   cure = FALSE,
+  nonprop = NULL,
   backhaz = NULL,
   external = NULL,
   df = 10,
@@ -37,6 +38,18 @@ fitted to external aggregate data alone, without any individual-level data.}
 
 \item{cure}{If \code{TRUE}, a mixture cure model is used, where the "uncured" survival is defined by the
 M-spline model, and the cure probability is estimated.}
+
+\item{nonprop}{Non-proportional hazards model specification.
+This is achieved by modelling the spline basis coefficients in terms of the covariates.  See
+the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette} for more details.
+
+If \code{TRUE}, then all covariates are modelled with non-proportional hazards, using the same model formula as \code{formula}.
+
+If this is a formula, then this is assumed to define a model
+for the dependence of the basis coefficients on the covariates.
+
+IF this is \code{NULL} or \code{FALSE} (the default) then any covariates are modelled with proportional
+hazards.}
 
 \item{backhaz}{Background hazard, that is, for causes of death other than the
 cause of interest. This defines a "relative survival" model where the

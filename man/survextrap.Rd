@@ -61,11 +61,17 @@ Therefore if there are external data, the covariates in \code{formula} and \code
 \item{cure}{If \code{TRUE}, a mixture cure model is used, where the "uncured" survival is defined by the
 M-spline model, and the cure probability is estimated.}
 
-\item{nonprop}{If \code{TRUE} then a non-proportional hazards model is fitted.
+\item{nonprop}{Non-proportional hazards model specification.
 This is achieved by modelling the spline basis coefficients in terms of the covariates.  See
-the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette} for more details.   In models with multiple covariates, currently
-there is no way to assume that some covariates have proportional hazards but others don't -
-it is all or none.}
+the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette} for more details.
+
+If \code{TRUE}, then all covariates are modelled with non-proportional hazards, using the same model formula as \code{formula}.
+
+If this is a formula, then this is assumed to define a model
+for the dependence of the basis coefficients on the covariates.
+
+IF this is \code{NULL} or \code{FALSE} (the default) then any covariates are modelled with proportional
+hazards.}
 
 \item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{alpha} or \code{log(eta)}).
 This should be a call to a prior constructor function, such as
