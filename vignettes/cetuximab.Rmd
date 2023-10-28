@@ -125,6 +125,7 @@ prior_hr_sd(mspline = mspline,
             prior_hscale = prior_hscale,
             prior_hrsd = prior_hrsd,
             formula = ~treat,
+            nonprop = ~treat,
             newdata = data.frame(treat=1), 
             newdata0 = data.frame(treat=0))
 ```

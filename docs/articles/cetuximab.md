@@ -11,6 +11,13 @@ output:
     toc_float: true
     theme: simplex
     code_folding: show
+  rmarkdown::pdf_document:
+    toc: true
+    keep_md: true
+    self_contained: true
+    embed_resources: true
+    toc_float: true
+    theme: simplex
 vignette: >
   %\VignetteIndexEntry{Case study of using survextrap: cetuximab for head and neck cancer}
   %\VignetteEncoding{UTF-8}
