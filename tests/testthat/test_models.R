@@ -25,6 +25,7 @@ test_that("Basic spline model, no covariates",{
     expect_equal(coef(mod)["alpha"], coef(modm)["alpha"], tol=1e-01)
     expect_true(is.numeric(mod$prior_sample$sample(nsim=4)$alpha))
     expect_true(is.numeric(mod$prior_sample$haz_const()["50%","haz"]))
+    modr <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt", smooth_model = "random_walk")
 })
 
 test_that("Basic spline model, with covariates",{

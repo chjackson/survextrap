@@ -144,9 +144,9 @@ All priors in the package can be chosen by the user (within given distribution f
 
 A log-normal prior is used for the scale $\eta$.   The default in the package is normal(0, 20) for $\log(\eta)$. 
 
-A multinomial logistic distribution defines the prior for the coefficients $p_i$ that define the mass of the hazard in each region: $log(p_i / p_1) = \gamma_i$, with $\gamma_1=0$ and $\gamma_i \sim Logistic(\mu_i, \sigma)$ for $i = 2, \ldots, n$.  This prior is defined by:
+The prior for the basis coefficients $p_i$, that describe the mass of the hazard in each region, is specified on the multinomial logistic scale, since $\sum_i p_i = 1$.   Define $log(p_i / p_1) = \gamma_i$, with $\gamma_1=0$,  and $\gamma_i = \mu_i + \sigma\epsilon_i$, for $i = 2, \ldots, n$.  The prior has the following parameters: 
 
-(a) **Prior mean**: $\boldsymbol{\mu} = (\mu_2,\ldots,\mu_n)$.  By default, this is determined from the special set of $p_i$ that result in a _constant hazard_ $h(t)$.  (see the `mspline_constant_coefs()` function in the package to compute this).
+(a) **Prior mean**: $\boldsymbol{\mu} = (\mu_2,\ldots,\mu_n)$.  By default, this is determined from the special set of $p_i$ that result in a _constant hazard_ $h(t)$.  See the `mspline_constant_coefs()` function in the package to compute this.
 
 (b) **Prior variability**: $\sigma$ controls the smoothness of the fitted hazard curve.
 
@@ -156,7 +156,10 @@ A multinomial logistic distribution defines the prior for the coefficients $p_i$
 
     * For _very_ high values of $\sigma$, the hazard is dominated by a random one of the $n$ basis functions, which will not typically be useful in practice.
 
-> **Sidenote**. This is similar to the Dirichlet distribution for the $p_i$, but is slightly better behaved for how MCMC estimation is done in Stan.  The interpretation of $\sigma$ is not completely intuitive, but there is a function in the package (`prior_hsd()`) to choose the prior on $\sigma$ to match judgements about how much the hazard might vary over time.
+(c) **A "random effect"**: $\epsilon_i$, which describes how much the $i$th basis coefficient departs from the mean, compared to the other basis coefficients.   The default is an "exchangeable" model, with $\epsilon_i \sim Logistic(0,1)$, so that the $\gamma_i$ are conditionally independent given $\mu_i$ and $\sigma$. 
+    An alternative, smoother model can be specified to relate the basis coefficients, using a second-order random walk that constrains the $\gamma_i$ closer to each other in time to be more similar to each other.  This model is generated as $\epsilon_1=0$, $\epsilon_2 \sim Logistic(0, 1)$, and $\epsilon_i \sim Logistic(2\epsilon_{i-1} - \epsilon_{i-2}, 1)$ for any $i \geq 3$, so that the expected value of $\epsilon_i$ is the average of its two neighbours on either side in time. 
+
+> **Sidenote**. This multinomial logistic distribution is similar to a Dirichlet distribution for the $p_i$, but is slightly better behaved for how MCMC estimation is done in Stan.  The interpretation of $\sigma$ is not completely intuitive, but there is a function in the package (`prior_hsd()`) to choose the prior on $\sigma$ to match judgements about how much the hazard might vary over time.
 
 The plots below show samples from the prior distribution for the hazard functions implied by two choices of the joint prior distribution for $\eta$ and $p$.  In both, $\eta$ is log normal(0,1), which supports hazard rates between about 0.1 and 7, and the prior mean for $p$ is the special set that is centred around a constant hazard.  The two samples differ by the choice of prior variability.  $\sigma \sim Gamma(2,40)$ strongly favours low values of $\sigma$, which forces the hazard to be nearly uniform, while $\sigma \sim Gamma(2,1)$ allows a wide range of wiggly shapes.   
 

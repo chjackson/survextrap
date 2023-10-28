@@ -179,7 +179,18 @@
 #'   \code{mspline}.  For example, `add_knots = 10` is a shorthand
 #'   for `mspline = list(add_knots = 10)`.
 #'
-#' @param hsd Smoothing parameter estimation.
+#' @param smooth_model The default \code{"exchangeable"} uses
+#'   independent logistic priors on the multinomial-logit spline
+#'   coefficients, conditionally on a common smoothing variance
+#'   parameter.
+#'
+#'   The alternative, \code{"random_walk"}, specifies a second-order
+#'   random walk for the multinomial-logit spline coefficients, based
+#'   on logistic distributions with a common smoothing variance.  See
+#'   the [methods vignette](https://chjackson.github.io/survextrap/articles/methods.html)
+#'   for full details.
+#'
+#' @param hsd Smoothing variance parameter estimation.
 #'
 #' `"bayes"`: the smoothing parameter is estimated by full Bayes (the default).
 #'
@@ -264,6 +275,7 @@ survextrap <- function(formula,
                        backhaz = NULL,
                        mspline = NULL,
                        add_knots = NULL,
+                       smooth_model = "exchangeable",
                        hsd = "bayes",
                        coefs_mean = NULL,
                        fit_method = "mcmc",
@@ -292,6 +304,9 @@ survextrap <- function(formula,
     }
     b_mean <- aa(log(coefs_mean[-1] / coefs_mean[1]))
 
+    smooth_models <- c("exchangeable","random_walk")
+    smooth_model <- match.arg(smooth_model, smooth_models)
+    smooth_model_id <- match(smooth_model, smooth_models)
     est_hsd <- (hsd == "bayes")
     if (est_hsd) hsd_init <- 1
 
@@ -323,6 +338,7 @@ survextrap <- function(formula,
                       xnph_ext = external$Xnph,
                       b_mean,
                       est_hsd,
+                      smooth_model = smooth_model_id,
                       cure = xcure$cure,
                       relative=backhaz$relative,
                       backhaz_event = backhaz$event,

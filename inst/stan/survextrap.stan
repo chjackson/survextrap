@@ -139,6 +139,7 @@ data {
     vector[nvars-1] b_mean; // logit of prior guess at basis weights (by default, those that give a constant hazard)
     int est_hsd;
     vector<lower=0>[1-est_hsd] hsd_fixed;
+    int<lower=1> smooth_model;
 
     int cure;
 
@@ -318,8 +319,22 @@ model {
     dummy = loghr_lp(loghr, prior_loghr_dist, prior_loghr_location,
         		     prior_loghr_scale, prior_loghr_df);
 
-    // prior for spline coefficient random effect term
+  // smoothing prior for spline coefficients
+  if (smooth_model==1){
+    // exchangeable
     b_err ~ logistic(0, 1);
+  }
+  else if (smooth_model==2) {
+    // second-order random walk
+    b_err[1] ~ logistic(0, 1); 
+    if (nvars-1 >= 2)
+      b_err[2] ~ logistic(2*b_err[1] - 0, 1); 
+    if (nvars-1 >= 3){ 
+      for (k in 3:(nvars-1)){
+	b_err[k] ~ logistic(2*b_err[k-1] - b_err[k-2], 1);
+      }
+    }
+  }
 
     // prior for cure fraction
     if (cure) {

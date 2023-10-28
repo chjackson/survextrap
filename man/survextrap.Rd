@@ -19,6 +19,7 @@ survextrap(
   backhaz = NULL,
   mspline = NULL,
   add_knots = NULL,
+  smooth_model = "exchangeable",
   hsd = "bayes",
   coefs_mean = NULL,
   fit_method = "mcmc",
@@ -198,7 +199,18 @@ specifications are set to their defaults, as described in
 \code{mspline}.  For example, \code{add_knots = 10} is a shorthand
 for \code{mspline = list(add_knots = 10)}.}
 
-\item{hsd}{Smoothing parameter estimation.
+\item{smooth_model}{The default \code{"exchangeable"} uses
+independent logistic priors on the multinomial-logit spline
+coefficients, conditionally on a common smoothing variance
+parameter.
+
+The alternative, \code{"random_walk"}, specifies a second-order
+random walk for the multinomial-logit spline coefficients, based
+on logistic distributions with a common smoothing variance.  See
+the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette}
+for full details.}
+
+\item{hsd}{Smoothing variance parameter estimation.
 
 \code{"bayes"}: the smoothing parameter is estimated by full Bayes (the default).
 
