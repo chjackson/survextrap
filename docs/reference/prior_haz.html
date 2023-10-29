@@ -16,7 +16,7 @@ priors for these parameters to match interpretable beliefs."><!-- mathjax --><sc
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.7</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,6 +75,7 @@ priors for these parameters to match interpretable beliefs.</p>
 <span>  coefs_mean <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  prior_hsd <span class="op">=</span> <span class="fu"><a href="priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  prior_hscale <span class="op">=</span> <span class="fu"><a href="priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span><span class="op">)</span>,</span>
+<span>  smooth_model <span class="op">=</span> <span class="st">"exchangeable"</span>,</span>
 <span>  prior_loghr <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cure <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -93,6 +94,7 @@ priors for these parameters to match interpretable beliefs.</p>
 <span>  coefs_mean <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  prior_hsd <span class="op">=</span> <span class="fu"><a href="priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  prior_hscale <span class="op">=</span> <span class="fu"><a href="priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span><span class="op">)</span>,</span>
+<span>  smooth_model <span class="op">=</span> <span class="st">"exchangeable"</span>,</span>
 <span>  prior_loghr <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cure <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -173,6 +175,18 @@ appropriately beforehand, so that a value of zero has a different
 meaning.  For continuous covariates, it helps for both
 computation and interpretation to define the value of zero to
 denote a typical value in the data, e.g. the mean.</p></dd>
+
+
+<dt>smooth_model</dt>
+<dd><p>The default <code>"exchangeable"</code> uses
+independent logistic priors on the multinomial-logit spline
+coefficients, conditionally on a common smoothing variance
+parameter.</p>
+<p>The alternative, <code>"random_walk"</code>, specifies a second-order
+random walk for the multinomial-logit spline coefficients, based
+on logistic distributions with a common smoothing variance.  See
+the <a href="https://chjackson.github.io/survextrap/articles/methods.html">methods vignette</a>
+for full details.</p></dd>
 
 
 <dt>prior_loghr</dt>

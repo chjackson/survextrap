@@ -1,3 +1,8 @@
+# Version 0.8.7 (2023/10/29)
+
+* A random walk prior can now be specified for the spline coefficients, by `smooth_model = "random_walk"`. 
+
+
 # Version 0.8.6 (2023/10/24)
 
 * Non-proportional hazards models can now be applied to a subset of the covariates, by supplying a formula as the `nonprop` argument to `survextrap`. 
