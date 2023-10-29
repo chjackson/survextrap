@@ -326,6 +326,7 @@ prior_sample <- function(mspline,
                          prior_hsd = p_gamma(2,1),
                          ## no constants for the moment as they are not allowed in the model
                          prior_hscale,
+                         smooth_model = "exchangeable",
                          prior_loghr = NULL,
                          formula = NULL,
                          cure = NULL,
@@ -338,7 +339,8 @@ prior_sample <- function(mspline,
                          nsim = 100){
   sam <- prior_sample_basehaz(mspline,
                               coefs_mean = coefs_mean, prior_hsd = prior_hsd,
-                              prior_hscale = prior_hscale, nsim=nsim)
+                              prior_hscale = prior_hscale,
+                              smooth_model = smooth_model, nsim=nsim)
 
   if (is.null(formula)) {
     x <- list(ncovs=0, xnames=NULL)
@@ -390,6 +392,7 @@ prior_sample_basehaz <- function(mspline,
                                  coefs_mean = NULL,
                                  prior_hsd = p_gamma(2,1), # no constants, as they are not allowed in the model
                                  prior_hscale,
+                                 smooth_model = "exchangeable",
                                  nsim = 100){
   ## process using common code to survextrap
   hscale_prior <- get_prior_hscale(prior_hscale)
@@ -400,11 +403,24 @@ prior_sample_basehaz <- function(mspline,
   coefs_mean <- default_coefs_mean(mspline, coefs_mean)
   lcoefs_mean <- log(coefs_mean[-1] / coefs_mean[1])
   np <- length(lcoefs_mean) + 1
-  beta <- matrix(nrow=nsim, ncol=np)
-  beta[,1] <- 0
-  for (j in 2:np){
-    beta[,j] <- rlogis(nsim, lcoefs_mean[j-1], hsd)
-  }
+  beta <- b_err <- matrix(nrow=nsim, ncol=np)
+  beta[,1] <- b_err[,1] <- 0
+  if (smooth_model=="exchangeable"){
+    if (np >= 2){
+      for (j in 2:np){
+        beta[,j] <- rlogis(nsim, lcoefs_mean[j-1], hsd)
+      }
+    }
+  } else if (smooth_model=="random_walk"){
+    b_err[,2] <- rlogis(nsim, 0, 1)
+    if (np >= 3){
+      for (j in 3:np){
+        b_err[,j] <- rlogis(nsim, 2*b_err[,j-1] - b_err[,j-2], 1)
+      }
+    }
+    lcmat <- matrix(rep(c(0,lcoefs_mean), nsim), nrow=nsim, ncol=np, byrow=TRUE)
+    beta <- lcmat + b_err*hsd 
+  } else stop("unknown `smooth_model` \"%s\"",smooth_model)
   coefs <- exp(beta) / rowSums(exp(beta))
   nlist(alpha, coefs, beta, hsd, hscale=exp(alpha))
 }
@@ -479,6 +495,7 @@ prior_sample_hazard <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
                                 coefs_mean = NULL,
                                 prior_hsd = p_gamma(2,1),
                                 prior_hscale = NULL,
+                                smooth_model = "exchangeable",
                                 prior_loghr = NULL,
                                 formula = NULL,
                                 cure = NULL,
@@ -495,6 +512,7 @@ prior_sample_hazard <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
   sam <- prior_sample(mspline = list(knots=knots, degree=degree, bsmooth=bsmooth),
                       coefs_mean=coefs_mean, prior_hsd=prior_hsd,
                       prior_hscale=prior_hscale,
+                      smooth_model = smooth_model,
                       prior_hrsd=prior_hrsd,
                       formula=formula, cure=cure, nonprop=nonprop,
                       newdata = newdata, newdata0=newdata0, nsim=nsim)
@@ -534,6 +552,7 @@ plot_prior_hazard <- function(knots=NULL, df=10, degree=3,bsmooth=TRUE,
                               coefs_mean = NULL,
                               prior_hsd = p_gamma(2,1),
                               prior_hscale = p_normal(0, 20),
+                              smooth_model = "exchangeable",
                               prior_loghr = NULL,
                               formula = NULL,
                               cure = NULL,
@@ -548,6 +567,7 @@ plot_prior_hazard <- function(knots=NULL, df=10, degree=3,bsmooth=TRUE,
                                coefs_mean=coefs_mean,
                                prior_hsd=prior_hsd,
                                prior_hscale=prior_hscale,
+                               smooth_model=smooth_model,
                                prior_loghr=prior_loghr,
                                formula=formula, cure=cure,
                                nonprop=nonprop, newdata=newdata, 
@@ -694,6 +714,7 @@ prior_haz_sd <- function(mspline,
                          coefs_mean=NULL,
                          prior_hsd=p_gamma(2,1),
                          prior_hscale = p_normal(0, 20),
+                         smooth_model = "exchangeable",
                          prior_loghr = NULL,
                          formula = NULL,
                          cure = NULL,
@@ -707,7 +728,8 @@ prior_haz_sd <- function(mspline,
   pred <- prior_sample_hazard(knots=mspline$knots, degree=mspline$degree,
                               bsmooth=mspline$bsmooth,
                               coefs_mean=coefs_mean, prior_hsd=prior_hsd,
-                              prior_hscale=prior_hscale, prior_loghr=prior_loghr,
+                              prior_hscale=prior_hscale,
+                              smooth_model=smooth_model, prior_loghr=prior_loghr,
                               formula=formula, cure=cure, nonprop=nonprop,
                               newdata=newdata, prior_hrsd=prior_hrsd,
                               tmin=tmin, tmax=tmax,
@@ -731,6 +753,7 @@ prior_hr_sd <- function(mspline,
                         coefs_mean=NULL,
                         prior_hsd=p_gamma(2,1),
                         prior_hscale = p_normal(0, 20),
+                        smooth_model = "exchangeable",
                         prior_loghr = NULL,
                         formula = NULL,
                         cure = NULL,
@@ -745,7 +768,9 @@ prior_hr_sd <- function(mspline,
   pred <- prior_sample_hazard(knots=mspline$knots, degree=mspline$degree,
                               bsmooth=mspline$bsmooth,
                               coefs_mean=coefs_mean, prior_hsd=prior_hsd,
-                              prior_hscale=prior_hscale, prior_loghr=prior_loghr,
+                              prior_hscale=prior_hscale,
+                              smooth_model = smooth_model,
+                              prior_loghr=prior_loghr,
                               formula=formula, cure=cure, nonprop=nonprop,
                               newdata=newdata, newdata0=newdata0, prior_hrsd=prior_hrsd,
                               tmin=tmin, tmax=tmax,

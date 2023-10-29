@@ -13,6 +13,7 @@ prior_sample_hazard(
   coefs_mean = NULL,
   prior_hsd = p_gamma(2, 1),
   prior_hscale = NULL,
+  smooth_model = "exchangeable",
   prior_loghr = NULL,
   formula = NULL,
   cure = NULL,
@@ -33,6 +34,7 @@ plot_prior_hazard(
   coefs_mean = NULL,
   prior_hsd = p_gamma(2, 1),
   prior_hscale = p_normal(0, 20),
+  smooth_model = "exchangeable",
   prior_loghr = NULL,
   formula = NULL,
   cure = NULL,
@@ -95,6 +97,17 @@ appropriately beforehand, so that a value of zero has a different
 meaning.  For continuous covariates, it helps for both
 computation and interpretation to define the value of zero to
 denote a typical value in the data, e.g. the mean.}
+
+\item{smooth_model}{The default \code{"exchangeable"} uses
+independent logistic priors on the multinomial-logit spline
+coefficients, conditionally on a common smoothing variance
+parameter.
+
+The alternative, \code{"random_walk"}, specifies a second-order
+random walk for the multinomial-logit spline coefficients, based
+on logistic distributions with a common smoothing variance.  See
+the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette}
+for full details.}
 
 \item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
 \code{p_normal()} or \code{p_t()}.  A list of calls can also be provided, to give
