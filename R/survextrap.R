@@ -402,7 +402,7 @@ survextrap <- function(formula,
                                pars = "beta", include=FALSE), stan_vb_ops(...)))
     else stop(sprintf("Unknown fit_method: %s",fit_method))
 
-    km <- if (td$indiv) survminer::surv_summary(survfit(formula, data=data), data=data) else NULL
+    km <- if (td$indiv) surv_summary(survfit(formula, data=data), data=data) else NULL
 
     misc_keep <- nlist(formula, indiv=td$indiv, stanfit=fits,
                        fit_method,
