@@ -190,6 +190,10 @@
 #'   the [methods vignette](https://chjackson.github.io/survextrap/articles/methods.html)
 #'   for full details.
 #'
+#'   In non-proportional hazards models, setting \code{smooth_model} also
+#'   determines whether an exchangeable or random walk model is used for the
+#'   non-proportionality parameters (\eqn{delta}).
+#'
 #' @param hsd Smoothing variance parameter estimation.
 #'
 #' `"bayes"`: the smoothing parameter is estimated by full Bayes (the default).

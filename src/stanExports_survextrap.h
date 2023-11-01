@@ -164,9 +164,9 @@ static const std::vector<string> locations_array__ = {" (found before start of p
                                                       " (in 'string', line 202, column 1 to line 210, column 2)",
                                                       " (in 'string', line 173, column 20 to line 211, column 5)",
                                                       " (in 'string', line 173, column 4 to line 239, column 5)",
-                                                      " (in 'string', line 325, column 4 to column 44)",
-                                                      " (in 'string', line 326, column 4 to column 34)",
-                                                      " (in 'string', line 327, column 4 to column 48)",
+                                                      " (in 'string', line 337, column 4 to column 44)",
+                                                      " (in 'string', line 338, column 4 to column 34)",
+                                                      " (in 'string', line 339, column 4 to column 48)",
                                                       " (in 'string', line 242, column 11 to column 17)",
                                                       " (in 'string', line 242, column 4 to column 31)",
                                                       " (in 'string', line 243, column 11 to column 17)",
@@ -246,12 +246,24 @@ static const std::vector<string> locations_array__ = {" (found before start of p
                                                       " (in 'string', line 314, column 8 to column 48)",
                                                       " (in 'string', line 313, column 16 to line 315, column 5)",
                                                       " (in 'string', line 313, column 4 to line 315, column 5)",
-                                                      " (in 'string', line 318, column 1 to column 46)",
-                                                      " (in 'string', line 320, column 5 to column 41)",
-                                                      " (in 'string', line 319, column 22 to line 321, column 2)",
-                                                      " (in 'string', line 319, column 1 to line 321, column 2)",
-                                                      " (in 'string', line 317, column 22 to line 322, column 5)",
-                                                      " (in 'string', line 317, column 4 to line 322, column 5)",
+                                                      " (in 'string', line 318, column 4 to column 49)",
+                                                      " (in 'string', line 325, column 6 to column 30)",
+                                                      " (in 'string', line 327, column 1 to column 38)",
+                                                      " (in 'string', line 326, column 6 to line 327, column 38)",
+                                                      " (in 'string', line 330, column 3 to column 51)",
+                                                      " (in 'string', line 329, column 22 to line 331, column 2)",
+                                                      " (in 'string', line 329, column 1 to line 331, column 2)",
+                                                      " (in 'string', line 328, column 24 to line 332, column 7)",
+                                                      " (in 'string', line 328, column 6 to line 332, column 7)",
+                                                      " (in 'string', line 323, column 31 to line 333, column 5)",
+                                                      " (in 'string', line 323, column 11 to line 333, column 5)",
+                                                      " (in 'string', line 321, column 1 to column 37)",
+                                                      " (in 'string', line 320, column 27 to line 322, column 7)",
+                                                      " (in 'string', line 320, column 6 to line 322, column 7)",
+                                                      " (in 'string', line 319, column 24 to line 323, column 5)",
+                                                      " (in 'string', line 319, column 4 to line 333, column 5)",
+                                                      " (in 'string', line 317, column 20 to line 334, column 3)",
+                                                      " (in 'string', line 317, column 2 to line 334, column 3)",
                                                       " (in 'string', line 99, column 4 to column 24)",
                                                       " (in 'string', line 100, column 4 to column 24)",
                                                       " (in 'string', line 101, column 4 to column 23)",
@@ -368,8 +380,8 @@ static const std::vector<string> locations_array__ = {" (found before start of p
                                                       " (in 'string', line 170, column 19 to column 24)",
                                                       " (in 'string', line 171, column 11 to column 19)",
                                                       " (in 'string', line 171, column 20 to column 27)",
-                                                      " (in 'string', line 326, column 11 to column 16)",
-                                                      " (in 'string', line 327, column 11 to column 20)",
+                                                      " (in 'string', line 338, column 11 to column 16)",
+                                                      " (in 'string', line 339, column 11 to column 20)",
                                                       " (in 'string', line 3, column 8 to column 59)",
                                                       " (in 'string', line 2, column 69 to line 4, column 5)",
                                                       " (in 'string', line 6, column 15 to column 26)",
@@ -460,7 +472,7 @@ mspline_log_haz(const T0__& alpha_arg__, const T1__& basis_arg__,
   (void) DUMMY_VAR__;  // suppress unused var warning
   
   try {
-    current_statement__ = 296;
+    current_statement__ = 308;
     return add(stan::math::log(rows_dot_product(basis, coefs)), alpha);
   } catch (const std::exception& e) {
     stan::lang::rethrow_located(e, locations_array__[current_statement__]);
@@ -496,24 +508,24 @@ mspline_log_surv(const T0__& alpha_arg__, const T1__& ibasis_arg__,
   (void) DUMMY_VAR__;  // suppress unused var warning
   
   try {
-    current_statement__ = 298;
+    current_statement__ = 310;
     validate_non_negative_index("res", "rows(alpha)", rows(alpha));
     Eigen::Matrix<local_scalar_t__, -1, 1> res;
     res = Eigen::Matrix<local_scalar_t__, -1, 1>(rows(alpha));
     stan::math::fill(res, DUMMY_VAR__);
     
-    current_statement__ = 300;
+    current_statement__ = 312;
     assign(res, nil_index_list(),
       elt_multiply(minus(rows_dot_product(ibasis, coefs)),
         stan::math::exp(alpha)), "assigning variable res");
-    current_statement__ = 303;
+    current_statement__ = 315;
     if (logical_gt(stan::math::exp(res[(1 - 1)]), 1)) {
-      current_statement__ = 301;
+      current_statement__ = 313;
       std::stringstream errmsg_stream__;
       errmsg_stream__ << "Probability > 1 computed. Not your fault - report a bug to the developer.";
       throw std::domain_error(errmsg_stream__.str());
     } 
-    current_statement__ = 304;
+    current_statement__ = 316;
     return res;
   } catch (const std::exception& e) {
     stan::lang::rethrow_located(e, locations_array__[current_statement__]);
@@ -553,18 +565,18 @@ mspline_log_dens(const T0__& alpha_arg__, const T1__& basis_arg__,
   (void) DUMMY_VAR__;  // suppress unused var warning
   
   try {
-    current_statement__ = 306;
+    current_statement__ = 318;
     validate_non_negative_index("res", "rows(alpha)", rows(alpha));
     Eigen::Matrix<local_scalar_t__, -1, 1> res;
     res = Eigen::Matrix<local_scalar_t__, -1, 1>(rows(alpha));
     stan::math::fill(res, DUMMY_VAR__);
     
-    current_statement__ = 308;
+    current_statement__ = 320;
     assign(res, nil_index_list(),
       add(mspline_log_haz(alpha, basis, coefs, pstream__),
         mspline_log_surv(alpha, ibasis, coefs, pstream__)),
       "assigning variable res");
-    current_statement__ = 309;
+    current_statement__ = 321;
     return res;
   } catch (const std::exception& e) {
     stan::lang::rethrow_located(e, locations_array__[current_statement__]);
@@ -605,37 +617,37 @@ log_surv(const T0__& alpha_arg__, const T1__& ibasis_arg__,
   (void) DUMMY_VAR__;  // suppress unused var warning
   
   try {
-    current_statement__ = 311;
+    current_statement__ = 323;
     validate_non_negative_index("res", "rows(alpha)", rows(alpha));
     Eigen::Matrix<local_scalar_t__, -1, 1> res;
     res = Eigen::Matrix<local_scalar_t__, -1, 1>(rows(alpha));
     stan::math::fill(res, DUMMY_VAR__);
     
-    current_statement__ = 313;
+    current_statement__ = 325;
     validate_non_negative_index("base_logsurv", "rows(alpha)", rows(alpha));
     Eigen::Matrix<local_scalar_t__, -1, 1> base_logsurv;
     base_logsurv = Eigen::Matrix<local_scalar_t__, -1, 1>(rows(alpha));
     stan::math::fill(base_logsurv, DUMMY_VAR__);
     
-    current_statement__ = 315;
+    current_statement__ = 327;
     assign(base_logsurv, nil_index_list(),
       mspline_log_surv(alpha, ibasis, coefs, pstream__),
       "assigning variable base_logsurv");
-    current_statement__ = 322;
+    current_statement__ = 334;
     if (cure) {
-      current_statement__ = 320;
+      current_statement__ = 332;
       for (int i = 1; i <= rows(alpha); ++i) {
-        current_statement__ = 318;
+        current_statement__ = 330;
         assign(res, cons_list(index_uni(i), nil_index_list()),
           stan::math::log(
             (pcure[(i - 1)] +
               ((1 - pcure[(i - 1)]) * stan::math::exp(base_logsurv[(i - 1)])))),
           "assigning variable res");}
     } else {
-      current_statement__ = 316;
+      current_statement__ = 328;
       assign(res, nil_index_list(), base_logsurv, "assigning variable res");
     }
-    current_statement__ = 323;
+    current_statement__ = 335;
     return res;
   } catch (const std::exception& e) {
     stan::lang::rethrow_located(e, locations_array__[current_statement__]);
@@ -682,64 +694,64 @@ log_haz(const T0__& alpha_arg__, const T1__& basis_arg__,
   (void) DUMMY_VAR__;  // suppress unused var warning
   
   try {
-    current_statement__ = 325;
+    current_statement__ = 337;
     validate_non_negative_index("res", "rows(alpha)", rows(alpha));
     Eigen::Matrix<local_scalar_t__, -1, 1> res;
     res = Eigen::Matrix<local_scalar_t__, -1, 1>(rows(alpha));
     stan::math::fill(res, DUMMY_VAR__);
     
-    current_statement__ = 327;
+    current_statement__ = 339;
     validate_non_negative_index("base_logdens", "rows(alpha)", rows(alpha));
     Eigen::Matrix<local_scalar_t__, -1, 1> base_logdens;
     base_logdens = Eigen::Matrix<local_scalar_t__, -1, 1>(rows(alpha));
     stan::math::fill(base_logdens, DUMMY_VAR__);
     
-    current_statement__ = 329;
+    current_statement__ = 341;
     validate_non_negative_index("base_loghaz", "rows(alpha)", rows(alpha));
     Eigen::Matrix<local_scalar_t__, -1, 1> base_loghaz;
     base_loghaz = Eigen::Matrix<local_scalar_t__, -1, 1>(rows(alpha));
     stan::math::fill(base_loghaz, DUMMY_VAR__);
     
-    current_statement__ = 331;
+    current_statement__ = 343;
     validate_non_negative_index("logsurv", "rows(alpha)", rows(alpha));
     Eigen::Matrix<local_scalar_t__, -1, 1> logsurv;
     logsurv = Eigen::Matrix<local_scalar_t__, -1, 1>(rows(alpha));
     stan::math::fill(logsurv, DUMMY_VAR__);
     
-    current_statement__ = 342;
+    current_statement__ = 354;
     if (cure) {
-      current_statement__ = 336;
+      current_statement__ = 348;
       assign(base_logdens, nil_index_list(),
         mspline_log_dens(alpha, basis, ibasis, coefs, pstream__),
         "assigning variable base_logdens");
-      current_statement__ = 337;
+      current_statement__ = 349;
       assign(logsurv, nil_index_list(),
         log_surv(alpha, ibasis, coefs, cure, pcure, modelid, pstream__),
         "assigning variable logsurv");
-      current_statement__ = 340;
+      current_statement__ = 352;
       for (int i = 1; i <= rows(alpha); ++i) {
-        current_statement__ = 338;
+        current_statement__ = 350;
         assign(res, cons_list(index_uni(i), nil_index_list()),
           ((stan::math::log((1 - pcure[(i - 1)])) + base_logdens[(i - 1)]) -
             logsurv[(i - 1)]), "assigning variable res");}
     } else {
-      current_statement__ = 333;
+      current_statement__ = 345;
       assign(base_loghaz, nil_index_list(),
         mspline_log_haz(alpha, basis, coefs, pstream__),
         "assigning variable base_loghaz");
-      current_statement__ = 334;
+      current_statement__ = 346;
       assign(res, nil_index_list(), base_loghaz, "assigning variable res");
     }
-    current_statement__ = 347;
+    current_statement__ = 359;
     if (relative) {
-      current_statement__ = 345;
+      current_statement__ = 357;
       for (int i = 1; i <= rows(alpha); ++i) {
-        current_statement__ = 343;
+        current_statement__ = 355;
         assign(res, cons_list(index_uni(i), nil_index_list()),
           stan::math::log((backhaz[(i - 1)] + stan::math::exp(res[(i - 1)]))),
           "assigning variable res");}
     } 
-    current_statement__ = 348;
+    current_statement__ = 360;
     return res;
   } catch (const std::exception& e) {
     stan::lang::rethrow_located(e, locations_array__[current_statement__]);
@@ -789,20 +801,20 @@ log_dens(const T0__& alpha_arg__, const T1__& basis_arg__,
   (void) DUMMY_VAR__;  // suppress unused var warning
   
   try {
-    current_statement__ = 350;
+    current_statement__ = 362;
     validate_non_negative_index("res", "rows(alpha)", rows(alpha));
     Eigen::Matrix<local_scalar_t__, -1, 1> res;
     res = Eigen::Matrix<local_scalar_t__, -1, 1>(rows(alpha));
     stan::math::fill(res, DUMMY_VAR__);
     
-    current_statement__ = 352;
+    current_statement__ = 364;
     assign(res, nil_index_list(),
       add(
         log_haz(alpha, basis, coefs, cure, pcure, ibasis, modelid, relative,
           backhaz, pstream__),
         log_surv(alpha, ibasis, coefs, cure, pcure, modelid, pstream__)),
       "assigning variable res");
-    current_statement__ = 353;
+    current_statement__ = 365;
     return res;
   } catch (const std::exception& e) {
     stan::lang::rethrow_located(e, locations_array__[current_statement__]);
@@ -838,18 +850,18 @@ loghaz_lp(const T0__& gamma, const int& dist, const T2__& location,
   (void) DUMMY_VAR__;  // suppress unused var warning
   
   try {
-    current_statement__ = 358;
+    current_statement__ = 370;
     if (logical_eq(dist, 1)) {
-      current_statement__ = 357;
+      current_statement__ = 369;
       lp_accum__.add(normal_lpdf<false>(gamma, location, scale));
     } else {
-      current_statement__ = 356;
+      current_statement__ = 368;
       if (logical_eq(dist, 2)) {
-        current_statement__ = 355;
+        current_statement__ = 367;
         lp_accum__.add(student_t_lpdf<false>(gamma, df, location, scale));
       } 
     }
-    current_statement__ = 359;
+    current_statement__ = 371;
     return get_lp(lp__, lp_accum__);
   } catch (const std::exception& e) {
     stan::lang::rethrow_located(e, locations_array__[current_statement__]);
@@ -892,24 +904,24 @@ loghr_lp(const T0__& loghr_arg__, const std::vector<int>& dist,
   (void) DUMMY_VAR__;  // suppress unused var warning
   
   try {
-    current_statement__ = 366;
+    current_statement__ = 378;
     for (int i = 1; i <= rows(loghr); ++i) {
-      current_statement__ = 364;
+      current_statement__ = 376;
       if (logical_eq(dist[(i - 1)], 1)) {
-        current_statement__ = 363;
+        current_statement__ = 375;
         lp_accum__.add(
           normal_lpdf<false>(loghr[(i - 1)], location[(i - 1)],
             scale[(i - 1)]));
       } else {
-        current_statement__ = 362;
+        current_statement__ = 374;
         if (logical_eq(dist[(i - 1)], 2)) {
-          current_statement__ = 361;
+          current_statement__ = 373;
           lp_accum__.add(
             student_t_lpdf<false>(loghr[(i - 1)], df[(i - 1)],
               location[(i - 1)], scale[(i - 1)]));
         } 
       }}
-    current_statement__ = 367;
+    current_statement__ = 379;
     return get_lp(lp__, lp_accum__);
   } catch (const std::exception& e) {
     stan::lang::rethrow_located(e, locations_array__[current_statement__]);
@@ -1011,81 +1023,81 @@ public:
       pos__ = std::numeric_limits<int>::min();
       
       pos__ = 1;
-      current_statement__ = 178;
+      current_statement__ = 190;
       context__.validate_dims("data initialization","nevent","int",
           context__.to_vec());
       nevent = std::numeric_limits<int>::min();
       
-      current_statement__ = 178;
+      current_statement__ = 190;
       nevent = context__.vals_i("nevent")[(1 - 1)];
-      current_statement__ = 178;
-      current_statement__ = 178;
+      current_statement__ = 190;
+      current_statement__ = 190;
       check_greater_or_equal(function__, "nevent", nevent, 0);
-      current_statement__ = 179;
+      current_statement__ = 191;
       context__.validate_dims("data initialization","nrcens","int",
           context__.to_vec());
       nrcens = std::numeric_limits<int>::min();
       
-      current_statement__ = 179;
+      current_statement__ = 191;
       nrcens = context__.vals_i("nrcens")[(1 - 1)];
-      current_statement__ = 179;
-      current_statement__ = 179;
+      current_statement__ = 191;
+      current_statement__ = 191;
       check_greater_or_equal(function__, "nrcens", nrcens, 0);
-      current_statement__ = 180;
+      current_statement__ = 192;
       context__.validate_dims("data initialization","nvars","int",
           context__.to_vec());
       nvars = std::numeric_limits<int>::min();
       
-      current_statement__ = 180;
+      current_statement__ = 192;
       nvars = context__.vals_i("nvars")[(1 - 1)];
-      current_statement__ = 180;
-      current_statement__ = 180;
+      current_statement__ = 192;
+      current_statement__ = 192;
       check_greater_or_equal(function__, "nvars", nvars, 0);
-      current_statement__ = 181;
+      current_statement__ = 193;
       context__.validate_dims("data initialization","nextern","int",
           context__.to_vec());
       nextern = std::numeric_limits<int>::min();
       
-      current_statement__ = 181;
+      current_statement__ = 193;
       nextern = context__.vals_i("nextern")[(1 - 1)];
-      current_statement__ = 181;
-      current_statement__ = 181;
+      current_statement__ = 193;
+      current_statement__ = 193;
       check_greater_or_equal(function__, "nextern", nextern, 0);
-      current_statement__ = 182;
+      current_statement__ = 194;
       context__.validate_dims("data initialization","ncovs","int",
           context__.to_vec());
       ncovs = std::numeric_limits<int>::min();
       
-      current_statement__ = 182;
+      current_statement__ = 194;
       ncovs = context__.vals_i("ncovs")[(1 - 1)];
-      current_statement__ = 182;
-      current_statement__ = 182;
+      current_statement__ = 194;
+      current_statement__ = 194;
       check_greater_or_equal(function__, "ncovs", ncovs, 0);
-      current_statement__ = 183;
+      current_statement__ = 195;
       context__.validate_dims("data initialization","ncurecovs","int",
           context__.to_vec());
       ncurecovs = std::numeric_limits<int>::min();
       
-      current_statement__ = 183;
+      current_statement__ = 195;
       ncurecovs = context__.vals_i("ncurecovs")[(1 - 1)];
-      current_statement__ = 183;
-      current_statement__ = 183;
+      current_statement__ = 195;
+      current_statement__ = 195;
       check_greater_or_equal(function__, "ncurecovs", ncurecovs, 0);
-      current_statement__ = 184;
+      current_statement__ = 196;
       context__.validate_dims("data initialization","nnphcovs","int",
           context__.to_vec());
       nnphcovs = std::numeric_limits<int>::min();
       
-      current_statement__ = 184;
+      current_statement__ = 196;
       nnphcovs = context__.vals_i("nnphcovs")[(1 - 1)];
-      current_statement__ = 184;
-      current_statement__ = 184;
+      current_statement__ = 196;
+      current_statement__ = 196;
       check_greater_or_equal(function__, "nnphcovs", nnphcovs, 0);
-      current_statement__ = 185;
+      current_statement__ = 197;
       validate_non_negative_index("basis_event", "nevent", nevent);
-      current_statement__ = 186;
+      current_statement__ = 198;
       validate_non_negative_index("basis_event", "nvars", nvars);
-      current_statement__ = 187;
+      current_statement__ = 199;
       context__.validate_dims("data initialization","basis_event","double",
           context__.to_vec(nevent, nvars));
       basis_event = Eigen::Matrix<double, -1, -1>(nevent, nvars);
@@ -1093,30 +1105,30 @@ public:
       
       {
         std::vector<local_scalar_t__> basis_event_flat__;
-        current_statement__ = 187;
+        current_statement__ = 199;
         assign(basis_event_flat__, nil_index_list(),
           context__.vals_r("basis_event"),
           "assigning variable basis_event_flat__");
-        current_statement__ = 187;
+        current_statement__ = 199;
         pos__ = 1;
-        current_statement__ = 187;
+        current_statement__ = 199;
         for (int sym1__ = 1; sym1__ <= nvars; ++sym1__) {
-          current_statement__ = 187;
+          current_statement__ = 199;
           for (int sym2__ = 1; sym2__ <= nevent; ++sym2__) {
-            current_statement__ = 187;
+            current_statement__ = 199;
             assign(basis_event,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               basis_event_flat__[(pos__ - 1)],
               "assigning variable basis_event");
-            current_statement__ = 187;
+            current_statement__ = 199;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 188;
+      current_statement__ = 200;
       validate_non_negative_index("ibasis_event", "nevent", nevent);
-      current_statement__ = 189;
+      current_statement__ = 201;
       validate_non_negative_index("ibasis_event", "nvars", nvars);
-      current_statement__ = 190;
+      current_statement__ = 202;
       context__.validate_dims("data initialization","ibasis_event","double",
           context__.to_vec(nevent, nvars));
       ibasis_event = Eigen::Matrix<double, -1, -1>(nevent, nvars);
@@ -1124,30 +1136,30 @@ public:
       
       {
         std::vector<local_scalar_t__> ibasis_event_flat__;
-        current_statement__ = 190;
+        current_statement__ = 202;
         assign(ibasis_event_flat__, nil_index_list(),
           context__.vals_r("ibasis_event"),
           "assigning variable ibasis_event_flat__");
-        current_statement__ = 190;
+        current_statement__ = 202;
         pos__ = 1;
-        current_statement__ = 190;
+        current_statement__ = 202;
         for (int sym1__ = 1; sym1__ <= nvars; ++sym1__) {
-          current_statement__ = 190;
+          current_statement__ = 202;
           for (int sym2__ = 1; sym2__ <= nevent; ++sym2__) {
-            current_statement__ = 190;
+            current_statement__ = 202;
             assign(ibasis_event,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               ibasis_event_flat__[(pos__ - 1)],
               "assigning variable ibasis_event");
-            current_statement__ = 190;
+            current_statement__ = 202;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 191;
+      current_statement__ = 203;
       validate_non_negative_index("ibasis_rcens", "nrcens", nrcens);
-      current_statement__ = 192;
+      current_statement__ = 204;
       validate_non_negative_index("ibasis_rcens", "nvars", nvars);
-      current_statement__ = 193;
+      current_statement__ = 205;
       context__.validate_dims("data initialization","ibasis_rcens","double",
           context__.to_vec(nrcens, nvars));
       ibasis_rcens = Eigen::Matrix<double, -1, -1>(nrcens, nvars);
@@ -1155,30 +1167,30 @@ public:
       
       {
         std::vector<local_scalar_t__> ibasis_rcens_flat__;
-        current_statement__ = 193;
+        current_statement__ = 205;
         assign(ibasis_rcens_flat__, nil_index_list(),
           context__.vals_r("ibasis_rcens"),
           "assigning variable ibasis_rcens_flat__");
-        current_statement__ = 193;
+        current_statement__ = 205;
         pos__ = 1;
-        current_statement__ = 193;
+        current_statement__ = 205;
         for (int sym1__ = 1; sym1__ <= nvars; ++sym1__) {
-          current_statement__ = 193;
+          current_statement__ = 205;
           for (int sym2__ = 1; sym2__ <= nrcens; ++sym2__) {
-            current_statement__ = 193;
+            current_statement__ = 205;
             assign(ibasis_rcens,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               ibasis_rcens_flat__[(pos__ - 1)],
               "assigning variable ibasis_rcens");
-            current_statement__ = 193;
+            current_statement__ = 205;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 194;
+      current_statement__ = 206;
       validate_non_negative_index("ibasis_ext_stop", "nextern", nextern);
-      current_statement__ = 195;
+      current_statement__ = 207;
       validate_non_negative_index("ibasis_ext_stop", "nvars", nvars);
-      current_statement__ = 196;
+      current_statement__ = 208;
       context__.validate_dims("data initialization","ibasis_ext_stop",
           "double",context__.to_vec(nextern, nvars));
       ibasis_ext_stop = Eigen::Matrix<double, -1, -1>(nextern, nvars);
@@ -1186,30 +1198,30 @@ public:
       
       {
         std::vector<local_scalar_t__> ibasis_ext_stop_flat__;
-        current_statement__ = 196;
+        current_statement__ = 208;
         assign(ibasis_ext_stop_flat__, nil_index_list(),
           context__.vals_r("ibasis_ext_stop"),
           "assigning variable ibasis_ext_stop_flat__");
-        current_statement__ = 196;
+        current_statement__ = 208;
         pos__ = 1;
-        current_statement__ = 196;
+        current_statement__ = 208;
         for (int sym1__ = 1; sym1__ <= nvars; ++sym1__) {
-          current_statement__ = 196;
+          current_statement__ = 208;
           for (int sym2__ = 1; sym2__ <= nextern; ++sym2__) {
-            current_statement__ = 196;
+            current_statement__ = 208;
             assign(ibasis_ext_stop,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               ibasis_ext_stop_flat__[(pos__ - 1)],
               "assigning variable ibasis_ext_stop");
-            current_statement__ = 196;
+            current_statement__ = 208;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 197;
+      current_statement__ = 209;
       validate_non_negative_index("ibasis_ext_start", "nextern", nextern);
-      current_statement__ = 198;
+      current_statement__ = 210;
       validate_non_negative_index("ibasis_ext_start", "nvars", nvars);
-      current_statement__ = 199;
+      current_statement__ = 211;
       context__.validate_dims("data initialization","ibasis_ext_start",
           "double",context__.to_vec(nextern, nvars));
       ibasis_ext_start = Eigen::Matrix<double, -1, -1>(nextern, nvars);
@@ -1217,30 +1229,30 @@ public:
       
       {
         std::vector<local_scalar_t__> ibasis_ext_start_flat__;
-        current_statement__ = 199;
+        current_statement__ = 211;
         assign(ibasis_ext_start_flat__, nil_index_list(),
           context__.vals_r("ibasis_ext_start"),
           "assigning variable ibasis_ext_start_flat__");
-        current_statement__ = 199;
+        current_statement__ = 211;
         pos__ = 1;
-        current_statement__ = 199;
+        current_statement__ = 211;
         for (int sym1__ = 1; sym1__ <= nvars; ++sym1__) {
-          current_statement__ = 199;
+          current_statement__ = 211;
           for (int sym2__ = 1; sym2__ <= nextern; ++sym2__) {
-            current_statement__ = 199;
+            current_statement__ = 211;
             assign(ibasis_ext_start,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               ibasis_ext_start_flat__[(pos__ - 1)],
               "assigning variable ibasis_ext_start");
-            current_statement__ = 199;
+            current_statement__ = 211;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 200;
+      current_statement__ = 212;
       validate_non_negative_index("x_event", "nevent", nevent);
-      current_statement__ = 201;
+      current_statement__ = 213;
       validate_non_negative_index("x_event", "ncovs", ncovs);
-      current_statement__ = 202;
+      current_statement__ = 214;
       context__.validate_dims("data initialization","x_event","double",
           context__.to_vec(nevent, ncovs));
       x_event = Eigen::Matrix<double, -1, -1>(nevent, ncovs);
@@ -1248,28 +1260,28 @@ public:
       
       {
         std::vector<local_scalar_t__> x_event_flat__;
-        current_statement__ = 202;
+        current_statement__ = 214;
         assign(x_event_flat__, nil_index_list(), context__.vals_r("x_event"),
           "assigning variable x_event_flat__");
-        current_statement__ = 202;
+        current_statement__ = 214;
         pos__ = 1;
-        current_statement__ = 202;
+        current_statement__ = 214;
         for (int sym1__ = 1; sym1__ <= ncovs; ++sym1__) {
-          current_statement__ = 202;
+          current_statement__ = 214;
           for (int sym2__ = 1; sym2__ <= nevent; ++sym2__) {
-            current_statement__ = 202;
+            current_statement__ = 214;
             assign(x_event,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               x_event_flat__[(pos__ - 1)], "assigning variable x_event");
-            current_statement__ = 202;
+            current_statement__ = 214;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 203;
+      current_statement__ = 215;
       validate_non_negative_index("x_rcens", "nrcens", nrcens);
-      current_statement__ = 204;
+      current_statement__ = 216;
       validate_non_negative_index("x_rcens", "ncovs", ncovs);
-      current_statement__ = 205;
+      current_statement__ = 217;
       context__.validate_dims("data initialization","x_rcens","double",
           context__.to_vec(nrcens, ncovs));
       x_rcens = Eigen::Matrix<double, -1, -1>(nrcens, ncovs);
@@ -1277,28 +1289,28 @@ public:
       
       {
         std::vector<local_scalar_t__> x_rcens_flat__;
-        current_statement__ = 205;
+        current_statement__ = 217;
         assign(x_rcens_flat__, nil_index_list(), context__.vals_r("x_rcens"),
           "assigning variable x_rcens_flat__");
-        current_statement__ = 205;
+        current_statement__ = 217;
         pos__ = 1;
-        current_statement__ = 205;
+        current_statement__ = 217;
         for (int sym1__ = 1; sym1__ <= ncovs; ++sym1__) {
-          current_statement__ = 205;
+          current_statement__ = 217;
           for (int sym2__ = 1; sym2__ <= nrcens; ++sym2__) {
-            current_statement__ = 205;
+            current_statement__ = 217;
             assign(x_rcens,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               x_rcens_flat__[(pos__ - 1)], "assigning variable x_rcens");
-            current_statement__ = 205;
+            current_statement__ = 217;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 206;
+      current_statement__ = 218;
       validate_non_negative_index("xcure_event", "nevent", nevent);
-      current_statement__ = 207;
+      current_statement__ = 219;
       validate_non_negative_index("xcure_event", "ncurecovs", ncurecovs);
-      current_statement__ = 208;
+      current_statement__ = 220;
       context__.validate_dims("data initialization","xcure_event","double",
           context__.to_vec(nevent, ncurecovs));
       xcure_event = Eigen::Matrix<double, -1, -1>(nevent, ncurecovs);
@@ -1306,30 +1318,30 @@ public:
       
       {
         std::vector<local_scalar_t__> xcure_event_flat__;
-        current_statement__ = 208;
+        current_statement__ = 220;
         assign(xcure_event_flat__, nil_index_list(),
           context__.vals_r("xcure_event"),
           "assigning variable xcure_event_flat__");
-        current_statement__ = 208;
+        current_statement__ = 220;
         pos__ = 1;
-        current_statement__ = 208;
+        current_statement__ = 220;
         for (int sym1__ = 1; sym1__ <= ncurecovs; ++sym1__) {
-          current_statement__ = 208;
+          current_statement__ = 220;
           for (int sym2__ = 1; sym2__ <= nevent; ++sym2__) {
-            current_statement__ = 208;
+            current_statement__ = 220;
             assign(xcure_event,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               xcure_event_flat__[(pos__ - 1)],
               "assigning variable xcure_event");
-            current_statement__ = 208;
+            current_statement__ = 220;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 209;
+      current_statement__ = 221;
       validate_non_negative_index("xcure_rcens", "nrcens", nrcens);
-      current_statement__ = 210;
+      current_statement__ = 222;
       validate_non_negative_index("xcure_rcens", "ncurecovs", ncurecovs);
-      current_statement__ = 211;
+      current_statement__ = 223;
       context__.validate_dims("data initialization","xcure_rcens","double",
           context__.to_vec(nrcens, ncurecovs));
       xcure_rcens = Eigen::Matrix<double, -1, -1>(nrcens, ncurecovs);
@@ -1337,30 +1349,30 @@ public:
       
       {
         std::vector<local_scalar_t__> xcure_rcens_flat__;
-        current_statement__ = 211;
+        current_statement__ = 223;
         assign(xcure_rcens_flat__, nil_index_list(),
           context__.vals_r("xcure_rcens"),
           "assigning variable xcure_rcens_flat__");
-        current_statement__ = 211;
+        current_statement__ = 223;
         pos__ = 1;
-        current_statement__ = 211;
+        current_statement__ = 223;
         for (int sym1__ = 1; sym1__ <= ncurecovs; ++sym1__) {
-          current_statement__ = 211;
+          current_statement__ = 223;
           for (int sym2__ = 1; sym2__ <= nrcens; ++sym2__) {
-            current_statement__ = 211;
+            current_statement__ = 223;
             assign(xcure_rcens,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               xcure_rcens_flat__[(pos__ - 1)],
               "assigning variable xcure_rcens");
-            current_statement__ = 211;
+            current_statement__ = 223;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 212;
+      current_statement__ = 224;
       validate_non_negative_index("xnph_event", "nevent", nevent);
-      current_statement__ = 213;
+      current_statement__ = 225;
       validate_non_negative_index("xnph_event", "nnphcovs", nnphcovs);
-      current_statement__ = 214;
+      current_statement__ = 226;
       context__.validate_dims("data initialization","xnph_event","double",
           context__.to_vec(nevent, nnphcovs));
       xnph_event = Eigen::Matrix<double, -1, -1>(nevent, nnphcovs);
@@ -1368,29 +1380,29 @@ public:
       
       {
         std::vector<local_scalar_t__> xnph_event_flat__;
-        current_statement__ = 214;
+        current_statement__ = 226;
         assign(xnph_event_flat__, nil_index_list(),
           context__.vals_r("xnph_event"),
           "assigning variable xnph_event_flat__");
-        current_statement__ = 214;
+        current_statement__ = 226;
         pos__ = 1;
-        current_statement__ = 214;
+        current_statement__ = 226;
         for (int sym1__ = 1; sym1__ <= nnphcovs; ++sym1__) {
-          current_statement__ = 214;
+          current_statement__ = 226;
           for (int sym2__ = 1; sym2__ <= nevent; ++sym2__) {
-            current_statement__ = 214;
+            current_statement__ = 226;
             assign(xnph_event,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               xnph_event_flat__[(pos__ - 1)], "assigning variable xnph_event");
-            current_statement__ = 214;
+            current_statement__ = 226;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 215;
+      current_statement__ = 227;
       validate_non_negative_index("xnph_rcens", "nrcens", nrcens);
-      current_statement__ = 216;
+      current_statement__ = 228;
       validate_non_negative_index("xnph_rcens", "nnphcovs", nnphcovs);
-      current_statement__ = 217;
+      current_statement__ = 229;
       context__.validate_dims("data initialization","xnph_rcens","double",
           context__.to_vec(nrcens, nnphcovs));
       xnph_rcens = Eigen::Matrix<double, -1, -1>(nrcens, nnphcovs);
@@ -1398,61 +1410,61 @@ public:
       
       {
         std::vector<local_scalar_t__> xnph_rcens_flat__;
-        current_statement__ = 217;
+        current_statement__ = 229;
         assign(xnph_rcens_flat__, nil_index_list(),
           context__.vals_r("xnph_rcens"),
           "assigning variable xnph_rcens_flat__");
-        current_statement__ = 217;
+        current_statement__ = 229;
         pos__ = 1;
-        current_statement__ = 217;
+        current_statement__ = 229;
         for (int sym1__ = 1; sym1__ <= nnphcovs; ++sym1__) {
-          current_statement__ = 217;
+          current_statement__ = 229;
           for (int sym2__ = 1; sym2__ <= nrcens; ++sym2__) {
-            current_statement__ = 217;
+            current_statement__ = 229;
             assign(xnph_rcens,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               xnph_rcens_flat__[(pos__ - 1)], "assigning variable xnph_rcens");
-            current_statement__ = 217;
+            current_statement__ = 229;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 218;
+      current_statement__ = 230;
       validate_non_negative_index("r_ext", "nextern", nextern);
-      current_statement__ = 219;
+      current_statement__ = 231;
       context__.validate_dims("data initialization","r_ext","int",
           context__.to_vec(nextern));
       r_ext = std::vector<int>(nextern, std::numeric_limits<int>::min());
       
-      current_statement__ = 219;
+      current_statement__ = 231;
       assign(r_ext, nil_index_list(), context__.vals_i("r_ext"),
         "assigning variable r_ext");
-      current_statement__ = 219;
+      current_statement__ = 231;
       for (int sym1__ = 1; sym1__ <= nextern; ++sym1__) {
-        current_statement__ = 219;
-        current_statement__ = 219;
+        current_statement__ = 231;
+        current_statement__ = 231;
         check_greater_or_equal(function__, "r_ext[sym1__]",
                                r_ext[(sym1__ - 1)], 0);}
-      current_statement__ = 220;
+      current_statement__ = 232;
       validate_non_negative_index("n_ext", "nextern", nextern);
-      current_statement__ = 221;
+      current_statement__ = 233;
       context__.validate_dims("data initialization","n_ext","int",
           context__.to_vec(nextern));
       n_ext = std::vector<int>(nextern, std::numeric_limits<int>::min());
       
-      current_statement__ = 221;
+      current_statement__ = 233;
       assign(n_ext, nil_index_list(), context__.vals_i("n_ext"),
         "assigning variable n_ext");
-      current_statement__ = 221;
+      current_statement__ = 233;
       for (int sym1__ = 1; sym1__ <= nextern; ++sym1__) {
-        current_statement__ = 221;
-        current_statement__ = 221;
+        current_statement__ = 233;
+        current_statement__ = 233;
         check_greater_or_equal(function__, "n_ext[sym1__]",
                                n_ext[(sym1__ - 1)], 0);}
-      current_statement__ = 222;
+      current_statement__ = 234;
       validate_non_negative_index("x_ext", "nextern", nextern);
-      current_statement__ = 223;
+      current_statement__ = 235;
       validate_non_negative_index("x_ext", "ncovs", ncovs);
-      current_statement__ = 224;
+      current_statement__ = 236;
       context__.validate_dims("data initialization","x_ext","double",
           context__.to_vec(nextern, ncovs));
       x_ext = Eigen::Matrix<double, -1, -1>(nextern, ncovs);
@@ -1460,28 +1472,28 @@ public:
       
       {
         std::vector<local_scalar_t__> x_ext_flat__;
-        current_statement__ = 224;
+        current_statement__ = 236;
         assign(x_ext_flat__, nil_index_list(), context__.vals_r("x_ext"),
           "assigning variable x_ext_flat__");
-        current_statement__ = 224;
+        current_statement__ = 236;
         pos__ = 1;
-        current_statement__ = 224;
+        current_statement__ = 236;
         for (int sym1__ = 1; sym1__ <= ncovs; ++sym1__) {
-          current_statement__ = 224;
+          current_statement__ = 236;
           for (int sym2__ = 1; sym2__ <= nextern; ++sym2__) {
-            current_statement__ = 224;
+            current_statement__ = 236;
             assign(x_ext,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               x_ext_flat__[(pos__ - 1)], "assigning variable x_ext");
-            current_statement__ = 224;
+            current_statement__ = 236;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 225;
+      current_statement__ = 237;
       validate_non_negative_index("xcure_ext", "nextern", nextern);
-      current_statement__ = 226;
+      current_statement__ = 238;
       validate_non_negative_index("xcure_ext", "ncurecovs", ncurecovs);
-      current_statement__ = 227;
+      current_statement__ = 239;
       context__.validate_dims("data initialization","xcure_ext","double",
           context__.to_vec(nextern, ncurecovs));
       xcure_ext = Eigen::Matrix<double, -1, -1>(nextern, ncurecovs);
@@ -1489,29 +1501,29 @@ public:
       
       {
         std::vector<local_scalar_t__> xcure_ext_flat__;
-        current_statement__ = 227;
+        current_statement__ = 239;
         assign(xcure_ext_flat__, nil_index_list(),
           context__.vals_r("xcure_ext"),
           "assigning variable xcure_ext_flat__");
-        current_statement__ = 227;
+        current_statement__ = 239;
         pos__ = 1;
-        current_statement__ = 227;
+        current_statement__ = 239;
         for (int sym1__ = 1; sym1__ <= ncurecovs; ++sym1__) {
-          current_statement__ = 227;
+          current_statement__ = 239;
           for (int sym2__ = 1; sym2__ <= nextern; ++sym2__) {
-            current_statement__ = 227;
+            current_statement__ = 239;
             assign(xcure_ext,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               xcure_ext_flat__[(pos__ - 1)], "assigning variable xcure_ext");
-            current_statement__ = 227;
+            current_statement__ = 239;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 228;
+      current_statement__ = 240;
       validate_non_negative_index("xnph_ext", "nextern", nextern);
-      current_statement__ = 229;
+      current_statement__ = 241;
       validate_non_negative_index("xnph_ext", "nnphcovs", nnphcovs);
-      current_statement__ = 230;
+      current_statement__ = 242;
       context__.validate_dims("data initialization","xnph_ext","double",
           context__.to_vec(nextern, nnphcovs));
       xnph_ext = Eigen::Matrix<double, -1, -1>(nextern, nnphcovs);
@@ -1519,26 +1531,26 @@ public:
       
       {
         std::vector<local_scalar_t__> xnph_ext_flat__;
-        current_statement__ = 230;
+        current_statement__ = 242;
         assign(xnph_ext_flat__, nil_index_list(),
           context__.vals_r("xnph_ext"), "assigning variable xnph_ext_flat__");
-        current_statement__ = 230;
+        current_statement__ = 242;
         pos__ = 1;
-        current_statement__ = 230;
+        current_statement__ = 242;
         for (int sym1__ = 1; sym1__ <= nnphcovs; ++sym1__) {
-          current_statement__ = 230;
+          current_statement__ = 242;
           for (int sym2__ = 1; sym2__ <= nextern; ++sym2__) {
-            current_statement__ = 230;
+            current_statement__ = 242;
             assign(xnph_ext,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               xnph_ext_flat__[(pos__ - 1)], "assigning variable xnph_ext");
-            current_statement__ = 230;
+            current_statement__ = 242;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 231;
+      current_statement__ = 243;
       validate_non_negative_index("b_mean", "nvars - 1", (nvars - 1));
-      current_statement__ = 232;
+      current_statement__ = 244;
       context__.validate_dims("data initialization","b_mean","double",
           context__.to_vec((nvars - 1)));
       b_mean = Eigen::Matrix<double, -1, 1>((nvars - 1));
@@ -1546,29 +1558,29 @@ public:
       
       {
         std::vector<local_scalar_t__> b_mean_flat__;
-        current_statement__ = 232;
+        current_statement__ = 244;
         assign(b_mean_flat__, nil_index_list(), context__.vals_r("b_mean"),
           "assigning variable b_mean_flat__");
-        current_statement__ = 232;
+        current_statement__ = 244;
         pos__ = 1;
-        current_statement__ = 232;
+        current_statement__ = 244;
         for (int sym1__ = 1; sym1__ <= (nvars - 1); ++sym1__) {
-          current_statement__ = 232;
+          current_statement__ = 244;
           assign(b_mean, cons_list(index_uni(sym1__), nil_index_list()),
             b_mean_flat__[(pos__ - 1)], "assigning variable b_mean");
-          current_statement__ = 232;
+          current_statement__ = 244;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 233;
+      current_statement__ = 245;
       context__.validate_dims("data initialization","est_hsd","int",
           context__.to_vec());
       est_hsd = std::numeric_limits<int>::min();
       
-      current_statement__ = 233;
+      current_statement__ = 245;
       est_hsd = context__.vals_i("est_hsd")[(1 - 1)];
-      current_statement__ = 234;
+      current_statement__ = 246;
       validate_non_negative_index("hsd_fixed", "1 - est_hsd", (1 - est_hsd));
-      current_statement__ = 235;
+      current_statement__ = 247;
       context__.validate_dims("data initialization","hsd_fixed","double",
           context__.to_vec((1 - est_hsd)));
       hsd_fixed = Eigen::Matrix<double, -1, 1>((1 - est_hsd));
@@ -1576,53 +1588,53 @@ public:
       
       {
         std::vector<local_scalar_t__> hsd_fixed_flat__;
-        current_statement__ = 235;
+        current_statement__ = 247;
         assign(hsd_fixed_flat__, nil_index_list(),
           context__.vals_r("hsd_fixed"),
           "assigning variable hsd_fixed_flat__");
-        current_statement__ = 235;
+        current_statement__ = 247;
         pos__ = 1;
-        current_statement__ = 235;
+        current_statement__ = 247;
         for (int sym1__ = 1; sym1__ <= (1 - est_hsd); ++sym1__) {
-          current_statement__ = 235;
+          current_statement__ = 247;
           assign(hsd_fixed, cons_list(index_uni(sym1__), nil_index_list()),
             hsd_fixed_flat__[(pos__ - 1)], "assigning variable hsd_fixed");
-          current_statement__ = 235;
+          current_statement__ = 247;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 235;
+      current_statement__ = 247;
       for (int sym1__ = 1; sym1__ <= (1 - est_hsd); ++sym1__) {
-        current_statement__ = 235;
-        current_statement__ = 235;
+        current_statement__ = 247;
+        current_statement__ = 247;
         check_greater_or_equal(function__, "hsd_fixed[sym1__]",
                                hsd_fixed[(sym1__ - 1)], 0);}
-      current_statement__ = 236;
+      current_statement__ = 248;
       context__.validate_dims("data initialization","smooth_model","int",
           context__.to_vec());
       smooth_model = std::numeric_limits<int>::min();
       
-      current_statement__ = 236;
+      current_statement__ = 248;
       smooth_model = context__.vals_i("smooth_model")[(1 - 1)];
-      current_statement__ = 236;
-      current_statement__ = 236;
+      current_statement__ = 248;
+      current_statement__ = 248;
       check_greater_or_equal(function__, "smooth_model", smooth_model, 1);
-      current_statement__ = 237;
+      current_statement__ = 249;
       context__.validate_dims("data initialization","cure","int",
           context__.to_vec());
       cure = std::numeric_limits<int>::min();
       
-      current_statement__ = 237;
+      current_statement__ = 249;
       cure = context__.vals_i("cure")[(1 - 1)];
-      current_statement__ = 238;
+      current_statement__ = 250;
       context__.validate_dims("data initialization","relative","int",
           context__.to_vec());
       relative = std::numeric_limits<int>::min();
       
-      current_statement__ = 238;
+      current_statement__ = 250;
       relative = context__.vals_i("relative")[(1 - 1)];
-      current_statement__ = 239;
+      current_statement__ = 251;
       validate_non_negative_index("backhaz_event", "nevent", nevent);
-      current_statement__ = 240;
+      current_statement__ = 252;
       context__.validate_dims("data initialization","backhaz_event","double",
           context__.to_vec(nevent));
       backhaz_event = Eigen::Matrix<double, -1, 1>(nevent);
@@ -1630,25 +1642,25 @@ public:
       
       {
         std::vector<local_scalar_t__> backhaz_event_flat__;
-        current_statement__ = 240;
+        current_statement__ = 252;
         assign(backhaz_event_flat__, nil_index_list(),
           context__.vals_r("backhaz_event"),
           "assigning variable backhaz_event_flat__");
-        current_statement__ = 240;
+        current_statement__ = 252;
         pos__ = 1;
-        current_statement__ = 240;
+        current_statement__ = 252;
         for (int sym1__ = 1; sym1__ <= nevent; ++sym1__) {
-          current_statement__ = 240;
+          current_statement__ = 252;
           assign(backhaz_event,
             cons_list(index_uni(sym1__), nil_index_list()),
             backhaz_event_flat__[(pos__ - 1)],
             "assigning variable backhaz_event");
-          current_statement__ = 240;
+          current_statement__ = 252;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 241;
+      current_statement__ = 253;
       validate_non_negative_index("backsurv_ext_start", "nextern", nextern);
-      current_statement__ = 242;
+      current_statement__ = 254;
       context__.validate_dims("data initialization","backsurv_ext_start",
           "double",context__.to_vec(nextern));
       backsurv_ext_start = Eigen::Matrix<double, -1, 1>(nextern);
@@ -1656,25 +1668,25 @@ public:
       
       {
         std::vector<local_scalar_t__> backsurv_ext_start_flat__;
-        current_statement__ = 242;
+        current_statement__ = 254;
         assign(backsurv_ext_start_flat__, nil_index_list(),
           context__.vals_r("backsurv_ext_start"),
           "assigning variable backsurv_ext_start_flat__");
-        current_statement__ = 242;
+        current_statement__ = 254;
         pos__ = 1;
-        current_statement__ = 242;
+        current_statement__ = 254;
         for (int sym1__ = 1; sym1__ <= nextern; ++sym1__) {
-          current_statement__ = 242;
+          current_statement__ = 254;
           assign(backsurv_ext_start,
             cons_list(index_uni(sym1__), nil_index_list()),
             backsurv_ext_start_flat__[(pos__ - 1)],
             "assigning variable backsurv_ext_start");
-          current_statement__ = 242;
+          current_statement__ = 254;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 243;
+      current_statement__ = 255;
       validate_non_negative_index("backsurv_ext_stop", "nextern", nextern);
-      current_statement__ = 244;
+      current_statement__ = 256;
       context__.validate_dims("data initialization","backsurv_ext_stop",
           "double",context__.to_vec(nextern));
       backsurv_ext_stop = Eigen::Matrix<double, -1, 1>(nextern);
@@ -1682,30 +1694,30 @@ public:
       
       {
         std::vector<local_scalar_t__> backsurv_ext_stop_flat__;
-        current_statement__ = 244;
+        current_statement__ = 256;
         assign(backsurv_ext_stop_flat__, nil_index_list(),
           context__.vals_r("backsurv_ext_stop"),
           "assigning variable backsurv_ext_stop_flat__");
-        current_statement__ = 244;
+        current_statement__ = 256;
         pos__ = 1;
-        current_statement__ = 244;
+        current_statement__ = 256;
         for (int sym1__ = 1; sym1__ <= nextern; ++sym1__) {
-          current_statement__ = 244;
+          current_statement__ = 256;
           assign(backsurv_ext_stop,
             cons_list(index_uni(sym1__), nil_index_list()),
             backsurv_ext_stop_flat__[(pos__ - 1)],
             "assigning variable backsurv_ext_stop");
-          current_statement__ = 244;
+          current_statement__ = 256;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 245;
+      current_statement__ = 257;
       context__.validate_dims("data initialization","prior_hscale_dist",
           "int",context__.to_vec());
       prior_hscale_dist = std::numeric_limits<int>::min();
       
-      current_statement__ = 245;
+      current_statement__ = 257;
       prior_hscale_dist = context__.vals_i("prior_hscale_dist")[(1 - 1)];
-      current_statement__ = 246;
+      current_statement__ = 258;
       context__.validate_dims("data initialization","prior_hscale","double",
           context__.to_vec(3));
       prior_hscale = Eigen::Matrix<double, -1, 1>(3);
@@ -1713,23 +1725,23 @@ public:
       
       {
         std::vector<local_scalar_t__> prior_hscale_flat__;
-        current_statement__ = 246;
+        current_statement__ = 258;
         assign(prior_hscale_flat__, nil_index_list(),
           context__.vals_r("prior_hscale"),
           "assigning variable prior_hscale_flat__");
-        current_statement__ = 246;
+        current_statement__ = 258;
         pos__ = 1;
-        current_statement__ = 246;
+        current_statement__ = 258;
         for (int sym1__ = 1; sym1__ <= 3; ++sym1__) {
-          current_statement__ = 246;
+          current_statement__ = 258;
           assign(prior_hscale,
             cons_list(index_uni(sym1__), nil_index_list()),
             prior_hscale_flat__[(pos__ - 1)],
             "assigning variable prior_hscale");
-          current_statement__ = 246;
+          current_statement__ = 258;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 247;
+      current_statement__ = 259;
       context__.validate_dims("data initialization","prior_cure","double",
           context__.to_vec(2));
       prior_cure = Eigen::Matrix<double, -1, 1>(2);
@@ -1737,29 +1749,29 @@ public:
       
       {
         std::vector<local_scalar_t__> prior_cure_flat__;
-        current_statement__ = 247;
+        current_statement__ = 259;
         assign(prior_cure_flat__, nil_index_list(),
           context__.vals_r("prior_cure"),
           "assigning variable prior_cure_flat__");
-        current_statement__ = 247;
+        current_statement__ = 259;
         pos__ = 1;
-        current_statement__ = 247;
+        current_statement__ = 259;
         for (int sym1__ = 1; sym1__ <= 2; ++sym1__) {
-          current_statement__ = 247;
+          current_statement__ = 259;
           assign(prior_cure, cons_list(index_uni(sym1__), nil_index_list()),
             prior_cure_flat__[(pos__ - 1)], "assigning variable prior_cure");
-          current_statement__ = 247;
+          current_statement__ = 259;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 247;
+      current_statement__ = 259;
       for (int sym1__ = 1; sym1__ <= 2; ++sym1__) {
-        current_statement__ = 247;
-        current_statement__ = 247;
+        current_statement__ = 259;
+        current_statement__ = 259;
         check_greater_or_equal(function__, "prior_cure[sym1__]",
                                prior_cure[(sym1__ - 1)], 0);}
-      current_statement__ = 248;
+      current_statement__ = 260;
       validate_non_negative_index("prior_hsd", "2 * est_hsd", (2 * est_hsd));
-      current_statement__ = 249;
+      current_statement__ = 261;
       context__.validate_dims("data initialization","prior_hsd","double",
           context__.to_vec((2 * est_hsd)));
       prior_hsd = Eigen::Matrix<double, -1, 1>((2 * est_hsd));
@@ -1767,46 +1779,46 @@ public:
       
       {
         std::vector<local_scalar_t__> prior_hsd_flat__;
-        current_statement__ = 249;
+        current_statement__ = 261;
         assign(prior_hsd_flat__, nil_index_list(),
           context__.vals_r("prior_hsd"),
           "assigning variable prior_hsd_flat__");
-        current_statement__ = 249;
+        current_statement__ = 261;
         pos__ = 1;
-        current_statement__ = 249;
+        current_statement__ = 261;
         for (int sym1__ = 1; sym1__ <= (2 * est_hsd); ++sym1__) {
-          current_statement__ = 249;
+          current_statement__ = 261;
           assign(prior_hsd, cons_list(index_uni(sym1__), nil_index_list()),
             prior_hsd_flat__[(pos__ - 1)], "assigning variable prior_hsd");
-          current_statement__ = 249;
+          current_statement__ = 261;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 249;
+      current_statement__ = 261;
       for (int sym1__ = 1; sym1__ <= (2 * est_hsd); ++sym1__) {
-        current_statement__ = 249;
-        current_statement__ = 249;
+        current_statement__ = 261;
+        current_statement__ = 261;
         check_greater_or_equal(function__, "prior_hsd[sym1__]",
                                prior_hsd[(sym1__ - 1)], 0);}
-      current_statement__ = 250;
+      current_statement__ = 262;
       validate_non_negative_index("prior_loghr_dist", "ncovs", ncovs);
-      current_statement__ = 251;
+      current_statement__ = 263;
       context__.validate_dims("data initialization","prior_loghr_dist","int",
           context__.to_vec(ncovs));
       prior_loghr_dist = std::vector<int>(ncovs, std::numeric_limits<int>::min());
       
-      current_statement__ = 251;
+      current_statement__ = 263;
       assign(prior_loghr_dist, nil_index_list(),
         context__.vals_i("prior_loghr_dist"),
         "assigning variable prior_loghr_dist");
-      current_statement__ = 251;
+      current_statement__ = 263;
       for (int sym1__ = 1; sym1__ <= ncovs; ++sym1__) {
-        current_statement__ = 251;
-        current_statement__ = 251;
+        current_statement__ = 263;
+        current_statement__ = 263;
         check_greater_or_equal(function__, "prior_loghr_dist[sym1__]",
                                prior_loghr_dist[(sym1__ - 1)], 0);}
-      current_statement__ = 252;
+      current_statement__ = 264;
       validate_non_negative_index("prior_loghr_location", "ncovs", ncovs);
-      current_statement__ = 253;
+      current_statement__ = 265;
       context__.validate_dims("data initialization","prior_loghr_location",
           "double",context__.to_vec(ncovs));
       prior_loghr_location = Eigen::Matrix<double, -1, 1>(ncovs);
@@ -1814,25 +1826,25 @@ public:
       
       {
         std::vector<local_scalar_t__> prior_loghr_location_flat__;
-        current_statement__ = 253;
+        current_statement__ = 265;
         assign(prior_loghr_location_flat__, nil_index_list(),
           context__.vals_r("prior_loghr_location"),
           "assigning variable prior_loghr_location_flat__");
-        current_statement__ = 253;
+        current_statement__ = 265;
         pos__ = 1;
-        current_statement__ = 253;
+        current_statement__ = 265;
         for (int sym1__ = 1; sym1__ <= ncovs; ++sym1__) {
-          current_statement__ = 253;
+          current_statement__ = 265;
           assign(prior_loghr_location,
             cons_list(index_uni(sym1__), nil_index_list()),
             prior_loghr_location_flat__[(pos__ - 1)],
             "assigning variable prior_loghr_location");
-          current_statement__ = 253;
+          current_statement__ = 265;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 254;
+      current_statement__ = 266;
       validate_non_negative_index("prior_loghr_scale", "ncovs", ncovs);
-      current_statement__ = 255;
+      current_statement__ = 267;
       context__.validate_dims("data initialization","prior_loghr_scale",
           "double",context__.to_vec(ncovs));
       prior_loghr_scale = Eigen::Matrix<double, -1, 1>(ncovs);
@@ -1840,25 +1852,25 @@ public:
       
       {
         std::vector<local_scalar_t__> prior_loghr_scale_flat__;
-        current_statement__ = 255;
+        current_statement__ = 267;
         assign(prior_loghr_scale_flat__, nil_index_list(),
           context__.vals_r("prior_loghr_scale"),
           "assigning variable prior_loghr_scale_flat__");
-        current_statement__ = 255;
+        current_statement__ = 267;
         pos__ = 1;
-        current_statement__ = 255;
+        current_statement__ = 267;
         for (int sym1__ = 1; sym1__ <= ncovs; ++sym1__) {
-          current_statement__ = 255;
+          current_statement__ = 267;
           assign(prior_loghr_scale,
             cons_list(index_uni(sym1__), nil_index_list()),
             prior_loghr_scale_flat__[(pos__ - 1)],
             "assigning variable prior_loghr_scale");
-          current_statement__ = 255;
+          current_statement__ = 267;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 256;
+      current_statement__ = 268;
       validate_non_negative_index("prior_loghr_df", "ncovs", ncovs);
-      current_statement__ = 257;
+      current_statement__ = 269;
       context__.validate_dims("data initialization","prior_loghr_df",
           "double",context__.to_vec(ncovs));
       prior_loghr_df = Eigen::Matrix<double, -1, 1>(ncovs);
@@ -1866,44 +1878,44 @@ public:
       
       {
         std::vector<local_scalar_t__> prior_loghr_df_flat__;
-        current_statement__ = 257;
+        current_statement__ = 269;
         assign(prior_loghr_df_flat__, nil_index_list(),
           context__.vals_r("prior_loghr_df"),
           "assigning variable prior_loghr_df_flat__");
-        current_statement__ = 257;
+        current_statement__ = 269;
         pos__ = 1;
-        current_statement__ = 257;
+        current_statement__ = 269;
         for (int sym1__ = 1; sym1__ <= ncovs; ++sym1__) {
-          current_statement__ = 257;
+          current_statement__ = 269;
           assign(prior_loghr_df,
             cons_list(index_uni(sym1__), nil_index_list()),
             prior_loghr_df_flat__[(pos__ - 1)],
             "assigning variable prior_loghr_df");
-          current_statement__ = 257;
+          current_statement__ = 269;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 258;
+      current_statement__ = 270;
       validate_non_negative_index("prior_logor_cure_dist", "ncurecovs",
                                   ncurecovs);
-      current_statement__ = 259;
+      current_statement__ = 271;
       context__.validate_dims("data initialization","prior_logor_cure_dist",
           "int",context__.to_vec(ncurecovs));
       prior_logor_cure_dist = std::vector<int>(ncurecovs, std::numeric_limits<int>::min());
       
-      current_statement__ = 259;
+      current_statement__ = 271;
       assign(prior_logor_cure_dist, nil_index_list(),
         context__.vals_i("prior_logor_cure_dist"),
         "assigning variable prior_logor_cure_dist");
-      current_statement__ = 259;
+      current_statement__ = 271;
       for (int sym1__ = 1; sym1__ <= ncurecovs; ++sym1__) {
-        current_statement__ = 259;
-        current_statement__ = 259;
+        current_statement__ = 271;
+        current_statement__ = 271;
         check_greater_or_equal(function__, "prior_logor_cure_dist[sym1__]",
                                prior_logor_cure_dist[(sym1__ - 1)], 0);}
-      current_statement__ = 260;
+      current_statement__ = 272;
       validate_non_negative_index("prior_logor_cure_location", "ncurecovs",
                                   ncurecovs);
-      current_statement__ = 261;
+      current_statement__ = 273;
       context__.validate_dims("data initialization",
           "prior_logor_cure_location","double",context__.to_vec(ncurecovs));
       prior_logor_cure_location = Eigen::Matrix<double, -1, 1>(ncurecovs);
@@ -1911,26 +1923,26 @@ public:
       
       {
         std::vector<local_scalar_t__> prior_logor_cure_location_flat__;
-        current_statement__ = 261;
+        current_statement__ = 273;
         assign(prior_logor_cure_location_flat__, nil_index_list(),
           context__.vals_r("prior_logor_cure_location"),
           "assigning variable prior_logor_cure_location_flat__");
-        current_statement__ = 261;
+        current_statement__ = 273;
         pos__ = 1;
-        current_statement__ = 261;
+        current_statement__ = 273;
         for (int sym1__ = 1; sym1__ <= ncurecovs; ++sym1__) {
-          current_statement__ = 261;
+          current_statement__ = 273;
           assign(prior_logor_cure_location,
             cons_list(index_uni(sym1__), nil_index_list()),
             prior_logor_cure_location_flat__[(pos__ - 1)],
             "assigning variable prior_logor_cure_location");
-          current_statement__ = 261;
+          current_statement__ = 273;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 262;
+      current_statement__ = 274;
       validate_non_negative_index("prior_logor_cure_scale", "ncurecovs",
                                   ncurecovs);
-      current_statement__ = 263;
+      current_statement__ = 275;
       context__.validate_dims("data initialization","prior_logor_cure_scale",
           "double",context__.to_vec(ncurecovs));
       prior_logor_cure_scale = Eigen::Matrix<double, -1, 1>(ncurecovs);
@@ -1938,26 +1950,26 @@ public:
       
       {
         std::vector<local_scalar_t__> prior_logor_cure_scale_flat__;
-        current_statement__ = 263;
+        current_statement__ = 275;
         assign(prior_logor_cure_scale_flat__, nil_index_list(),
           context__.vals_r("prior_logor_cure_scale"),
           "assigning variable prior_logor_cure_scale_flat__");
-        current_statement__ = 263;
+        current_statement__ = 275;
         pos__ = 1;
-        current_statement__ = 263;
+        current_statement__ = 275;
         for (int sym1__ = 1; sym1__ <= ncurecovs; ++sym1__) {
-          current_statement__ = 263;
+          current_statement__ = 275;
           assign(prior_logor_cure_scale,
             cons_list(index_uni(sym1__), nil_index_list()),
             prior_logor_cure_scale_flat__[(pos__ - 1)],
             "assigning variable prior_logor_cure_scale");
-          current_statement__ = 263;
+          current_statement__ = 275;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 264;
+      current_statement__ = 276;
       validate_non_negative_index("prior_logor_cure_df", "ncurecovs",
                                   ncurecovs);
-      current_statement__ = 265;
+      current_statement__ = 277;
       context__.validate_dims("data initialization","prior_logor_cure_df",
           "double",context__.to_vec(ncurecovs));
       prior_logor_cure_df = Eigen::Matrix<double, -1, 1>(ncurecovs);
@@ -1965,32 +1977,32 @@ public:
       
       {
         std::vector<local_scalar_t__> prior_logor_cure_df_flat__;
-        current_statement__ = 265;
+        current_statement__ = 277;
         assign(prior_logor_cure_df_flat__, nil_index_list(),
           context__.vals_r("prior_logor_cure_df"),
           "assigning variable prior_logor_cure_df_flat__");
-        current_statement__ = 265;
+        current_statement__ = 277;
         pos__ = 1;
-        current_statement__ = 265;
+        current_statement__ = 277;
         for (int sym1__ = 1; sym1__ <= ncurecovs; ++sym1__) {
-          current_statement__ = 265;
+          current_statement__ = 277;
           assign(prior_logor_cure_df,
             cons_list(index_uni(sym1__), nil_index_list()),
             prior_logor_cure_df_flat__[(pos__ - 1)],
             "assigning variable prior_logor_cure_df");
-          current_statement__ = 265;
+          current_statement__ = 277;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 266;
+      current_statement__ = 278;
       context__.validate_dims("data initialization","modelid","int",
           context__.to_vec());
       modelid = std::numeric_limits<int>::min();
       
-      current_statement__ = 266;
+      current_statement__ = 278;
       modelid = context__.vals_i("modelid")[(1 - 1)];
-      current_statement__ = 267;
+      current_statement__ = 279;
       validate_non_negative_index("prior_hrsd", "nnphcovs", nnphcovs);
-      current_statement__ = 268;
+      current_statement__ = 280;
       context__.validate_dims("data initialization","prior_hrsd","double",
           context__.to_vec(nnphcovs, 2));
       prior_hrsd = Eigen::Matrix<double, -1, -1>(nnphcovs, 2);
@@ -1998,92 +2010,92 @@ public:
       
       {
         std::vector<local_scalar_t__> prior_hrsd_flat__;
-        current_statement__ = 268;
+        current_statement__ = 280;
         assign(prior_hrsd_flat__, nil_index_list(),
           context__.vals_r("prior_hrsd"),
           "assigning variable prior_hrsd_flat__");
-        current_statement__ = 268;
+        current_statement__ = 280;
         pos__ = 1;
-        current_statement__ = 268;
+        current_statement__ = 280;
         for (int sym1__ = 1; sym1__ <= 2; ++sym1__) {
-          current_statement__ = 268;
+          current_statement__ = 280;
           for (int sym2__ = 1; sym2__ <= nnphcovs; ++sym2__) {
-            current_statement__ = 268;
+            current_statement__ = 280;
             assign(prior_hrsd,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               prior_hrsd_flat__[(pos__ - 1)], "assigning variable prior_hrsd");
-            current_statement__ = 268;
+            current_statement__ = 280;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 269;
+      current_statement__ = 281;
       validate_non_negative_index("gamma", "1", 1);
-      current_statement__ = 270;
+      current_statement__ = 282;
       validate_non_negative_index("loghr", "ncovs", ncovs);
-      current_statement__ = 271;
+      current_statement__ = 283;
       b_err_1dim__ = std::numeric_limits<int>::min();
       
-      current_statement__ = 271;
+      current_statement__ = 283;
       b_err_1dim__ = (nvars - 1);
-      current_statement__ = 271;
+      current_statement__ = 283;
       validate_non_negative_index("b_err", "nvars - 1", b_err_1dim__);
-      current_statement__ = 272;
+      current_statement__ = 284;
       validate_non_negative_index("hsd", "est_hsd", est_hsd);
-      current_statement__ = 273;
+      current_statement__ = 285;
       validate_non_negative_index("pcure", "cure", cure);
-      current_statement__ = 274;
+      current_statement__ = 286;
       validate_non_negative_index("logor_cure", "ncurecovs", ncurecovs);
-      current_statement__ = 275;
+      current_statement__ = 287;
       validate_non_negative_index("hrsd", "nnphcovs", nnphcovs);
-      current_statement__ = 276;
+      current_statement__ = 288;
       validate_non_negative_index("nperr", "nnphcovs", nnphcovs);
-      current_statement__ = 277;
+      current_statement__ = 289;
       nperr_2dim__ = std::numeric_limits<int>::min();
       
-      current_statement__ = 277;
-      nperr_2dim__ = (nvars - 1);
-      current_statement__ = 277;
-      validate_non_negative_index("nperr", "nvars - 1", nperr_2dim__);
-      current_statement__ = 278;
-      validate_non_negative_index("b", "nvars", nvars);
-      current_statement__ = 279;
-      validate_non_negative_index("coefs", "nvars", nvars);
-      current_statement__ = 280;
-      validate_non_negative_index("coefs_event", "nevent", nevent);
-      current_statement__ = 281;
-      validate_non_negative_index("coefs_event", "nvars", nvars);
-      current_statement__ = 282;
-      validate_non_negative_index("coefs_rcens", "nrcens", nrcens);
-      current_statement__ = 283;
-      validate_non_negative_index("coefs_rcens", "nvars", nvars);
-      current_statement__ = 284;
-      validate_non_negative_index("coefs_extern", "nextern", nextern);
-      current_statement__ = 285;
-      validate_non_negative_index("coefs_extern", "nvars", nvars);
-      current_statement__ = 286;
-      validate_non_negative_index("b_event", "nevent", nevent);
-      current_statement__ = 287;
-      validate_non_negative_index("b_event", "nvars", nvars);
-      current_statement__ = 288;
-      validate_non_negative_index("b_rcens", "nrcens", nrcens);
       current_statement__ = 289;
-      validate_non_negative_index("b_rcens", "nvars", nvars);
+      nperr_2dim__ = (nvars - 1);
+      current_statement__ = 289;
+      validate_non_negative_index("nperr", "nvars - 1", nperr_2dim__);
       current_statement__ = 290;
-      validate_non_negative_index("b_extern", "nextern", nextern);
+      validate_non_negative_index("b", "nvars", nvars);
       current_statement__ = 291;
-      validate_non_negative_index("b_extern", "nvars", nvars);
+      validate_non_negative_index("coefs", "nvars", nvars);
       current_statement__ = 292;
-      validate_non_negative_index("b_np", "nnphcovs", nnphcovs);
+      validate_non_negative_index("coefs_event", "nevent", nevent);
       current_statement__ = 293;
+      validate_non_negative_index("coefs_event", "nvars", nvars);
+      current_statement__ = 294;
+      validate_non_negative_index("coefs_rcens", "nrcens", nrcens);
+      current_statement__ = 295;
+      validate_non_negative_index("coefs_rcens", "nvars", nvars);
+      current_statement__ = 296;
+      validate_non_negative_index("coefs_extern", "nextern", nextern);
+      current_statement__ = 297;
+      validate_non_negative_index("coefs_extern", "nvars", nvars);
+      current_statement__ = 298;
+      validate_non_negative_index("b_event", "nevent", nevent);
+      current_statement__ = 299;
+      validate_non_negative_index("b_event", "nvars", nvars);
+      current_statement__ = 300;
+      validate_non_negative_index("b_rcens", "nrcens", nrcens);
+      current_statement__ = 301;
+      validate_non_negative_index("b_rcens", "nvars", nvars);
+      current_statement__ = 302;
+      validate_non_negative_index("b_extern", "nextern", nextern);
+      current_statement__ = 303;
+      validate_non_negative_index("b_extern", "nvars", nvars);
+      current_statement__ = 304;
+      validate_non_negative_index("b_np", "nnphcovs", nnphcovs);
+      current_statement__ = 305;
       b_np_2dim__ = std::numeric_limits<int>::min();
       
-      current_statement__ = 293;
+      current_statement__ = 305;
       b_np_2dim__ = (nvars - 1);
-      current_statement__ = 293;
+      current_statement__ = 305;
       validate_non_negative_index("b_np", "nvars - 1", b_np_2dim__);
-      current_statement__ = 294;
+      current_statement__ = 306;
       validate_non_negative_index("hr", "ncovs", ncovs);
-      current_statement__ = 295;
+      current_statement__ = 307;
       validate_non_negative_index("or_cure", "ncurecovs", ncurecovs);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
@@ -2697,7 +2709,7 @@ public:
           lp_accum__.add(
             gamma_lpdf<propto__>(hsd, prior_hsd[(1 - 1)], prior_hsd[(2 - 1)]));
         } 
-        current_statement__ = 177;
+        current_statement__ = 189;
         if (logical_gt(nnphcovs, 0)) {
           current_statement__ = 172;
           lp_accum__.add(
@@ -2708,15 +2720,58 @@ public:
               rvalue(prior_hrsd,
                 cons_list(index_omni(),
                   cons_list(index_uni(2), nil_index_list())), "prior_hrsd")));
-          current_statement__ = 175;
-          for (int i = 1; i <= nnphcovs; ++i) {
-            current_statement__ = 173;
-            lp_accum__.add(
-              std_normal_lpdf<propto__>(
-                rvalue(nperr,
-                  cons_list(index_uni(i),
-                    cons_list(index_min_max(1, (nvars - 1)),
-                      nil_index_list())), "nperr")));}
+          current_statement__ = 187;
+          if (logical_eq(smooth_model, 1)) {
+            current_statement__ = 185;
+            for (int i = 1; i <= nnphcovs; ++i) {
+              current_statement__ = 183;
+              lp_accum__.add(
+                std_normal_lpdf<propto__>(
+                  rvalue(nperr,
+                    cons_list(index_uni(i),
+                      cons_list(index_min_max(1, (nvars - 1)),
+                        nil_index_list())), "nperr")));}
+          } else {
+            current_statement__ = 182;
+            if (logical_eq(smooth_model, 2)) {
+              current_statement__ = 173;
+              lp_accum__.add(
+                normal_lpdf<propto__>(
+                  rvalue(nperr, cons_list(index_uni(1), nil_index_list()),
+                    "nperr"), 0, 1));
+              current_statement__ = 175;
+              if (logical_gte(nnphcovs, 2)) {
+                current_statement__ = 174;
+                lp_accum__.add(
+                  normal_lpdf<propto__>(
+                    rvalue(nperr, cons_list(index_uni(2), nil_index_list()),
+                      "nperr"),
+                    subtract(
+                      multiply(2,
+                        rvalue(nperr,
+                          cons_list(index_uni(1), nil_index_list()), "nperr")),
+                      0), 1));
+              } 
+              current_statement__ = 180;
+              if (logical_gte(nnphcovs, 3)) {
+                current_statement__ = 178;
+                for (int k = 3; k <= nnphcovs; ++k) {
+                  current_statement__ = 176;
+                  lp_accum__.add(
+                    normal_lpdf<propto__>(
+                      rvalue(nperr,
+                        cons_list(index_uni(k), nil_index_list()), "nperr"),
+                      subtract(
+                        multiply(2,
+                          rvalue(nperr,
+                            cons_list(index_uni((k - 1)), nil_index_list()),
+                            "nperr")),
+                        rvalue(nperr,
+                          cons_list(index_uni((k - 2)), nil_index_list()),
+                          "nperr")), 1));}
+              } 
+            } 
+          }
         } 
       }
     } catch (const std::exception& e) {

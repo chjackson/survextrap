@@ -107,7 +107,11 @@ The alternative, \code{"random_walk"}, specifies a second-order
 random walk for the multinomial-logit spline coefficients, based
 on logistic distributions with a common smoothing variance.  See
 the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette}
-for full details.}
+for full details.
+
+In non-proportional hazards models, setting \code{smooth_model} also
+determines whether an exchangeable or random walk model is used for the
+non-proportionality parameters (\eqn{delta}).}
 
 \item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
 \code{p_normal()} or \code{p_t()}.  A list of calls can also be provided, to give

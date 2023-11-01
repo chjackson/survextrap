@@ -236,11 +236,11 @@ An alternative _non-proportional hazards_ model is available.  This is achieved 
 
 The $s$th element of the vector $\boldsymbol{\delta}_i$ describes the departure from proportional hazards for the $s\mbox{th}$ covariate in the region of time associated with the $i$th spline basis term.   With all $\boldsymbol{\delta}_i = 0$ the model will be the proportional hazards model.  (Currently in the package, either all covariates or none have to have proportional hazards).
 
-For each covariate $s$, a hierarchical model is used for the non-proportionality effects $\delta_{ks}$.  This model "partially pools" the effects from different regions of time $i$.
+For each covariate $s$, a hierarchical model is used for the non-proportionality effects $\delta_{ks}$.  This model "partially pools" the effects from different regions of time $i$, either via an exchangeable model,
 
 \[ \delta_{is} \sim Normal(0, \tau_s^2) \] 
 
-In the non-proportional hazards model, the ratio between the hazards $h(t,\x)$ at different covariate values $\x$ is a function of time $t$.  Since the $\boldsymbol{\delta}_i$ may be arbirtarily different in each region of time $i$, the hazard ratio can be an arbitrarily-flexible function of time.  The amount and shape of non-proportionality is estimated from the data, while the hierarchical model protects against overfitting.
+or a normal second-order random walk model, like the one used for the basis coefficients.  In the non-proportional hazards model, the ratio between the hazards $h(t,\x)$ at different covariate values $\x$ is a function of time $t$.  Since the $\boldsymbol{\delta}_i$ may be arbirtarily different in each region of time $i$, the hazard ratio can be an arbitrarily-flexible function of time.  The amount and shape of non-proportionality is estimated from the data, while the hierarchical model protects against overfitting.
 
 
 # Cure models {#cure_methods}

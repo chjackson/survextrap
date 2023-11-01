@@ -350,13 +350,25 @@ model {
         hsd ~ gamma(prior_hsd[1], prior_hsd[2]);
     }
 
-    // Non-proportional haz model
-    if (nnphcovs > 0) { 
-	hrsd ~ gamma(prior_hrsd[,1], prior_hrsd[,2]);
-	for (i in 1:nnphcovs){
-	    nperr[i,1:(nvars-1)] ~ std_normal();
+  // Non-proportional hazards model
+  if (nnphcovs > 0) { 
+    hrsd ~ gamma(prior_hrsd[,1], prior_hrsd[,2]);
+    if (smooth_model==1){
+      for (i in 1:nnphcovs){
+	nperr[i,1:(nvars-1)] ~ std_normal();
+      }
+    } else if (smooth_model==2){
+      // second-order random walk [note copied code from above]
+      nperr[1] ~ normal(0, 1); 
+      if (nnphcovs >= 2)
+	nperr[2] ~ normal(2*nperr[1] - 0, 1); 
+      if (nnphcovs >= 3){ 
+	for (k in 3:nnphcovs){
+	  nperr[k] ~ normal(2*nperr[k-1] - nperr[k-2], 1);
 	}
+      }
     }
+  }
 }
 
 generated quantities {
