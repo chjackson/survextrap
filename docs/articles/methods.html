@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.7</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,7 +80,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2023-10-28</h4>
+            <h4 data-toc-skip class="date">2023-11-03</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -465,11 +465,12 @@ in the package, either all covariates or none have to have proportional
 hazards).</p>
 <p>For each covariate <span class="math inline">\(s\)</span>, a
 hierarchical model is used for the non-proportionality effects <span class="math inline">\(\delta_{ks}\)</span>. This model “partially pools”
-the effects from different regions of time <span class="math inline">\(i\)</span>.</p>
+the effects from different regions of time <span class="math inline">\(i\)</span>, either via an exchangeable model,</p>
 <p><span class="math display">\[ \delta_{is} \sim Normal(0, \tau_s^2)
 \]</span></p>
-<p>In the non-proportional hazards model, the ratio between the hazards
-<span class="math inline">\(h(t,\boldsymbol{x})\)</span> at different
+<p>or a normal second-order random walk model, like the one used for the
+basis coefficients. In the non-proportional hazards model, the ratio
+between the hazards <span class="math inline">\(h(t,\boldsymbol{x})\)</span> at different
 covariate values <span class="math inline">\(\boldsymbol{x}\)</span> is
 a function of time <span class="math inline">\(t\)</span>. Since the
 <span class="math inline">\(\boldsymbol{\delta}_i\)</span> may be
@@ -640,7 +641,7 @@ years).</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/chjackson/survextrap" class="external-link">survextrap</a></span><span class="op">)</span></span>
 <span><span class="va">colons2</span> <span class="op">&lt;-</span> <span class="va">colons</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">rx</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Obs"</span>, <span class="st">"Lev"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/droplevels.html" class="external-link">droplevels</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">rxph_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu">Surv</span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">rx</span>, data<span class="op">=</span><span class="va">colons2</span>, </span>
+<span><span class="va">rxph_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">rx</span>, data<span class="op">=</span><span class="va">colons2</span>, </span>
 <span>                       fit_method<span class="op">=</span><span class="st">"opt"</span>, mspline<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>df<span class="op">=</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rxph_mod</span>, tmax<span class="op">=</span><span class="fl">10</span>, niter<span class="op">=</span><span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 <p><img src="methods_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
@@ -696,13 +697,13 @@ distribution).</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>digits<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/rmst.html">rmst</a></span><span class="op">(</span><span class="va">rxph_mod</span>, t<span class="op">=</span><span class="fl">50</span>, niter<span class="op">=</span><span class="fl">100</span>, newdata<span class="op">=</span><span class="va">nd_full</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##    rx variable  t median 2.5% 97.5%</span></span>
-<span><span class="co">## 1 Lev     rmst 50    7.5  4.2  18.7</span></span>
-<span><span class="co">## 2 Obs     rmst 50    4.8  3.0   9.2</span></span></code></pre>
+<span><span class="co">## 1 Lev     rmst 50    8.2  4.3    21</span></span>
+<span><span class="co">## 2 Obs     rmst 50    5.0  3.1    12</span></span></code></pre>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/rmst.html">rmst</a></span><span class="op">(</span><span class="va">rxph_mod</span>, t<span class="op">=</span><span class="fl">50</span>, niter<span class="op">=</span><span class="fl">20</span>, newdata<span class="op">=</span><span class="va">nd_full</span>, newdata0<span class="op">=</span><span class="va">nd_null</span>, wane_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##    rx variable  t median 2.5% 97.5%</span></span>
-<span><span class="co">## 1 Lev     rmst 50    6.5  4.3    16</span></span>
-<span><span class="co">## 2 Obs     rmst 50    4.7  3.4    11</span></span></code></pre>
+<span><span class="co">## 1 Lev     rmst 50    7.2  4.3    22</span></span>
+<span><span class="co">## 2 Obs     rmst 50    4.9  3.5    16</span></span></code></pre>
 </div>
 <div class="section level4">
 <h4 id="waning-models-distribution-utilities">Waning models: distribution utilities<a class="anchor" aria-label="anchor" href="#waning-models-distribution-utilities"></a>

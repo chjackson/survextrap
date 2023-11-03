@@ -79,6 +79,29 @@ In many practical situations of extrapolation in time-to-event models, we do hav
 The idea of the package is to make this external information as explicit as possible - ideally in the form of data. 
 
 
+### Note on model tuning {#tuning}
+
+The `survextrap` function has various options which can be used to fine-tune the basic model explained in the Methods vignette.   These options include the number of spline
+knots, the distribution on the coefficients ($p_i$), and the prior placed on the amount of smoothness in this curve $\sigma$.  
+
+It will not usually be necessary to tune these to obtain a model that gives a survival curve that fits the observed data well, hence to estimate the restricted mean survival time well.   However they may not be optimal in every case.  See, for example, the cetuximab case study, where a tighter prior was placed on $\sigma$, and fewer knots were used.
+
+Cross-validation can be used to determine whether tuning gives an overall improvement in fit to the observed data (see "Model comparison" below).
+
+Work is ongoing to give some empirical evidence, based on simulation studies, for what the most sensible default choice should be.
+
+One particularly promising recent development in the package is the choice of a "random walk" prior to smooth the spline basis coefficients.  Here this gives a smoother, more realistic-looking hazard curve than the one above that was based on the default ("exchangeable") prior.
+
+```{r,results="hide"}
+nd_modr <- survextrap(Surv(years, status) ~ 1, data=colons, chains=1, 
+                      smooth_model = "random_walk",
+                      mspline = list(add_knots=4))
+plot(nd_modr, tmax=5)
+```
+
+
+
+
 ### Note on computation settings {#convergence}
 
 Most of the example models in this vignette have been specified using computational approximations allow the models to be fitted more quickly, but at the cost of some inaccuracy.  This has been done so that the vignettes build more quickly.   Specifically: 
@@ -322,7 +345,7 @@ These are described in [their own vignette](waning.html).
 
 
 
-## Model comparison 
+## Model comparison {#loocv}
 
 The leave-one-out cross-validation method of the [`loo`](http://mc-stan.org/loo/) package is automatically implemented for every model fitted with `survextrap`, unless `survextrap(..., loo=FALSE)` is used.
 
