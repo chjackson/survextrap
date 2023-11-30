@@ -1,0 +1,18 @@
+bibentry(bibtype = "Article",
+  title        = "survextrap: a package for flexible and transparent survival extrapolation",
+  author       = person(given = "Christopher",
+                        family = "Jackson",
+                        email = "chris.jackson@mrc-bsu.cam.ac.uk"),
+  journal      = "BMC Medical Research Methodology",
+  year         = "2023",
+  volume       = "23",
+  number       = "282",
+  doi          = "10.1186/s12874-023-02094-1",
+
+  header       = "To cite survextrap in publications use:",
+  textVersion  =
+  paste("Christopher Jackson",
+        "survextrap: a package for flexible and transparent survival extrapolation",
+        "BMC Medical Research Methodology",
+        "(2023)23:282")
+)

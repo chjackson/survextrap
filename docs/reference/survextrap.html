@@ -288,7 +288,10 @@ parameter.</p>
 random walk for the multinomial-logit spline coefficients, based
 on logistic distributions with a common smoothing variance.  See
 the <a href="https://chjackson.github.io/survextrap/articles/methods.html">methods vignette</a>
-for full details.</p></dd>
+for full details.</p>
+<p>In non-proportional hazards models, setting <code>smooth_model</code> also
+determines whether an exchangeable or random walk model is used for the
+non-proportionality parameters (\(\delta\)).</p></dd>
 
 
 <dt>hsd</dt>
@@ -369,7 +372,8 @@ simple matrix of posterior samples with all chains collapsed.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Jackson, C. (2023) <code>survextrap</code>: a package for flexible and transparent
-survival extrapolation.  arXiV preprint, <a href="https://arxiv.org/abs/2306.03957" class="external-link">https://arxiv.org/abs/2306.03957</a>.</p>
+survival extrapolation. BMC Medical Research Methodology 23:282.
+<a href="https://doi.org/10.1186/s12874-023-02094-1" class="external-link">doi:10.1186/s12874-023-02094-1</a></p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

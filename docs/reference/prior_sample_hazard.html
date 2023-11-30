@@ -185,7 +185,10 @@ parameter.</p>
 random walk for the multinomial-logit spline coefficients, based
 on logistic distributions with a common smoothing variance.  See
 the <a href="https://chjackson.github.io/survextrap/articles/methods.html">methods vignette</a>
-for full details.</p></dd>
+for full details.</p>
+<p>In non-proportional hazards models, setting <code>smooth_model</code> also
+determines whether an exchangeable or random walk model is used for the
+non-proportionality parameters (\(\delta\)).</p></dd>
 
 
 <dt>prior_loghr</dt>

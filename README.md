@@ -102,7 +102,7 @@ Many forms of external data that might be useful for survival extrapolation (suc
 
 ### Technical details of the methods
 
-The model is fully described in a [preprint paper](https://arxiv.org/abs/2306.03957).   See also `vignette("methods")`.
+The model is fully described in a paper: [Jackson, BMC Medical Research Methodology (2023)](https://doi.org/10.1186/s12874-023-02094-1).   See also `vignette("methods")`.
 
 `vignette("priors")` goes into detail on how prior distributions and judgements can be specified in `survextrap` - an important but often-neglected part of Bayesian analysis. 
 
@@ -125,7 +125,9 @@ The [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetux
 
 ## Development 
 
-The package is in "beta" status.  All major features are included, and there are no substantial changes expected, but further testing is planned before CRAN release.
+The package is in "beta" status.  All major features are included, and there are no substantial changes expected.
+
+Further testing is planned before it is put on CRAN.  In particular, work is ongoing to determine "default settings" (for things like priors and model flexibility) that work best in a wide range of examples based on simulation.   Though the current defaults are expected to be reasonable for typical use, and there are examples in the vignettes of fine-tuning them for specific cases.
 
 The current version can be installed as:
 

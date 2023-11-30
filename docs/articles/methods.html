@@ -80,7 +80,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2023-11-03</h4>
+            <h4 data-toc-skip class="date">2023-11-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -91,7 +91,7 @@ Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jac
 <p>See the <a href="../index.html">README</a> for the design principles
 of the package, and the <a href="examples.html">examples vignette</a>
 for examples of how to fit models. A more formal account of the methods
-is given in the preprint <a href="https://arxiv.org/abs/2306.03957" class="external-link">paper</a>.</p>
+is given in the preprint <a href="https://doi.org/10.1186/s12874-023-02094-1" class="external-link">paper</a>.</p>
 <div class="section level2">
 <h2 id="m-splines">M-splines<a class="anchor" aria-label="anchor" href="#m-splines"></a>
 </h2>
@@ -327,7 +327,8 @@ Logistic(0,1)\)</span>, so that the <span class="math inline">\(\gamma_i\)</span
 given <span class="math inline">\(\mu_i\)</span> and <span class="math inline">\(\sigma\)</span>. An alternative, smoother model
 can be specified to relate the basis coefficients, using a second-order
 random walk that constrains the <span class="math inline">\(\gamma_i\)</span> closer to each other in time to
-be more similar to each other. This model is generated as <span class="math inline">\(\epsilon_1=0\)</span>, <span class="math inline">\(\epsilon_2 \sim Logistic(0, 1)\)</span>, and <span class="math inline">\(\epsilon_i \sim Logistic(2\epsilon_{i-1} -
+be more similar to each other <a href="https://doi.org/10.1198/1061860043010" class="external-link">(Lang and Brezger,
+2004)</a>. This model is generated as <span class="math inline">\(\epsilon_1=0\)</span>, <span class="math inline">\(\epsilon_2 \sim Logistic(0, 1)\)</span>, and <span class="math inline">\(\epsilon_i \sim Logistic(2\epsilon_{i-1} -
 \epsilon_{i-2}, 1)\)</span> for any <span class="math inline">\(i \geq
 3\)</span>, so that the expected value of <span class="math inline">\(\epsilon_i\)</span> is the average of its two
 neighbours on either side in time.</p></li>

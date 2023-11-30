@@ -23,7 +23,7 @@ knitr::opts_chunk$set(eval=TRUE)
 ```
 
 See the [README](../index.html) for the design principles of the package, and the [examples vignette](examples.html) for examples of how to fit models.
-A more formal account of the methods is given in the preprint [paper](https://arxiv.org/abs/2306.03957).
+A more formal account of the methods is given in the preprint [paper](https://doi.org/10.1186/s12874-023-02094-1).
 
 # M-splines 
 
@@ -157,7 +157,7 @@ The prior for the basis coefficients $p_i$, that describe the mass of the hazard
     * For _very_ high values of $\sigma$, the hazard is dominated by a random one of the $n$ basis functions, which will not typically be useful in practice.
 
 (c) **A "random effect"**: $\epsilon_i$, which describes how much the $i$th basis coefficient departs from the mean, compared to the other basis coefficients.   The default is an "exchangeable" model, with $\epsilon_i \sim Logistic(0,1)$, so that the $\gamma_i$ are conditionally independent given $\mu_i$ and $\sigma$. 
-    An alternative, smoother model can be specified to relate the basis coefficients, using a second-order random walk that constrains the $\gamma_i$ closer to each other in time to be more similar to each other.  This model is generated as $\epsilon_1=0$, $\epsilon_2 \sim Logistic(0, 1)$, and $\epsilon_i \sim Logistic(2\epsilon_{i-1} - \epsilon_{i-2}, 1)$ for any $i \geq 3$, so that the expected value of $\epsilon_i$ is the average of its two neighbours on either side in time. 
+    An alternative, smoother model can be specified to relate the basis coefficients, using a second-order random walk that constrains the $\gamma_i$ closer to each other in time to be more similar to each other [(Lang and Brezger, 2004)](https://doi.org/10.1198/1061860043010).  This model is generated as $\epsilon_1=0$, $\epsilon_2 \sim Logistic(0, 1)$, and $\epsilon_i \sim Logistic(2\epsilon_{i-1} - \epsilon_{i-2}, 1)$ for any $i \geq 3$, so that the expected value of $\epsilon_i$ is the average of its two neighbours on either side in time. 
 
 > **Sidenote**. This multinomial logistic distribution is similar to a Dirichlet distribution for the $p_i$, but is slightly better behaved for how MCMC estimation is done in Stan.  The interpretation of $\sigma$ is not completely intuitive, but there is a function in the package (`prior_hsd()`) to choose the prior on $\sigma$ to match judgements about how much the hazard might vary over time.
 

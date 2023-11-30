@@ -212,7 +212,7 @@ for full details.
 
 In non-proportional hazards models, setting \code{smooth_model} also
 determines whether an exchangeable or random walk model is used for the
-non-proportionality parameters (\eqn{delta}).}
+non-proportionality parameters (\eqn{\delta}).}
 
 \item{hsd}{Smoothing variance parameter estimation.
 
@@ -293,5 +293,6 @@ versions of these models can also be used.
 }
 \references{
 Jackson, C. (2023) \code{survextrap}: a package for flexible and transparent
-survival extrapolation.  arXiV preprint, \url{https://arxiv.org/abs/2306.03957}.
+survival extrapolation. BMC Medical Research Methodology 23:282.
+\doi{10.1186/s12874-023-02094-1}
 }
