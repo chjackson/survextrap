@@ -1,4 +1,3 @@
-## TODO tests with external data
 extdat <- data.frame(start = c(5, 10, 15, 20),
                      stop =  c(10, 15, 20, 25),
                      n = c(100, 100, 100, 100),

@@ -126,7 +126,7 @@ hazard ratio and zero.</p>
 <span>  wane_nt <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  pcure1 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  pcure0 <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  offsetH <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  offseth <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  log <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
@@ -144,6 +144,7 @@ hazard ratio and zero.</p>
 <span>  wane_nt <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  pcure1 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  pcure0 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  offseth <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  offsetH <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  log <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -278,6 +279,10 @@ also have zero derivative and second derivative at the boundary.</p></dd>
 <dt>lower.tail</dt>
 <dd><p>logical; if <code>TRUE</code> (default), probabilities are \(P(X
 \le x)\), otherwise, \(P(X &gt; x)\).</p></dd>
+
+
+<dt>offseth</dt>
+<dd><p>Constant to be added to the hazard, e.g. representing a "background" risk of death from causes other than the cause of interest.</p></dd>
 
 
 <dt>p</dt>

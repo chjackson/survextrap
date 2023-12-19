@@ -135,8 +135,29 @@
 #' `"backsurv_stop"`.  This should describe the same reference population as
 #' `backhaz`, though the package does not check for consistency between these.
 #'
+#' If there are stratifying variables specified in
+#' \code{backhaz_strata}, then there should be multiple rows giving
+#' the background hazard value for each time period and stratifying
+#' variable.
+#'
 #' If `backhaz` is \code{NULL} (the default) then no background hazard
 #' component is included in the model.
+#'
+#' @param backhaz_strata A character vector of names of variables that
+#'   appear in \code{backhaz} that indicate strata, e.g.
+#'   \code{backhaz_strata = c("agegroup","sex")}.  This allows
+#'   different background hazard values to be used for different
+#'   subgroups.  These variables must also
+#'   appear in the datasets being modelled, that is, in \code{data},
+#'   \code{external} or both.  Each row of those datasets should then
+#'   have a corresponding row in \code{backhaz} which has the same
+#'   values of the stratifying variables.
+#'
+#' This is \code{NULL} by default, indicating no stratification of the
+#'   background hazard.
+#'
+#' If stratification is done, then \code{backhaz} must be supplied in
+#' form (a), as a data frame rather than a variable in the data.
 #'
 #' @param mspline A list of control parameters defining the spline model.
 #'
@@ -278,6 +299,7 @@ survextrap <- function(formula,
                        prior_logor_cure = NULL,
                        prior_hrsd = p_gamma(2,1),
                        backhaz = NULL,
+                       backhaz_strata = NULL,
                        mspline = NULL,
                        add_knots = NULL,
                        smooth_model = "exchangeable",
@@ -293,8 +315,8 @@ survextrap <- function(formula,
     x <- make_x(formula, data_x, td)
     xcure <- make_xcure(cure, data, td)
     xnph <- make_nonprop(nonprop, data, td, formula)
-    backhaz <- make_backhaz(backhaz, data, td)
-    external <- make_external(external, formula, x, xcure, xnph, backhaz)
+    backhaz <- make_backhaz(backhaz, data, external, td, backhaz_strata)
+    external <- make_external(external, formula, x, xcure, xnph, backhaz, backhaz_strata)
     mspline <- make_mspline(mspline, td, external, add_knots)
 
     basis_event  <- make_basis(td$t_event, mspline)
@@ -413,7 +435,8 @@ survextrap <- function(formula,
                        fit_method,
                        cure_formula = xcure$cure_formula,
                        nph_formula = xnph$nph_formula,
-                       backhaz=backhaz$df)
+                       backhaz=backhaz$df,
+                       backhaz_strata)
     standata_keep <- standata[c("nvars","ncovs","ncurecovs","nnphcovs","nevent","nrcens","nextern")]
     model_keep <- nlist(cure=xcure$cure, est_hsd)
     spline_keep <- nlist(mspline)
@@ -491,14 +514,15 @@ print.message <- function(x, ...){
 ##' \code{nvars} Number of basis variables (an alias for \code{df})
 ##'
 ##' @export
-mspline_spec <- function(formula, data, cure=FALSE, nonprop=NULL, backhaz=NULL, external=NULL,
+mspline_spec <- function(formula, data, cure=FALSE, nonprop=NULL,
+                         backhaz=NULL, backhaz_strata=NULL, external=NULL,
                          df=10, add_knots=NULL, degree=3, bsmooth=TRUE){
   td <- make_td(formula, data)
   x <- make_x(formula, data, td)
   xcure <- make_xcure(cure, data, td)
   xnph <- make_nonprop(nonprop, data, td)
-  backhaz <- make_backhaz(backhaz, data, td)
-  external <- make_external(external, formula, x, xcure, xnph, backhaz)
+  backhaz <- make_backhaz(backhaz, data, external, td, backhaz_strata)
+  external <- make_external(external, formula, x, xcure, xnph, backhaz, backhaz_strata)
   mspline <- list(df=df,degree=degree,bsmooth=bsmooth,add_knots=add_knots)
   mspline <- make_mspline(mspline, td, external)
   mspline
@@ -687,7 +711,8 @@ make_d <- function(model_frame) {
          stop(err))
 }
 
-make_external <- function(external, formula, x, xcure, xnph, backhaz){
+make_external <- function(external, formula, x, xcure, xnph, backhaz,
+                          backhaz_strata = NULL){
   if (is.null(external))
     extl <- list(nextern=0, stop=numeric(), start=numeric(),
                  r=integer(), n=integer(),
@@ -699,8 +724,12 @@ make_external <- function(external, formula, x, xcure, xnph, backhaz){
               tmax=max(external$stop))
     if (backhaz$relative) {
       if (is.data.frame(backhaz$df)) {
-        extl$backsurv_stop <- aa(exp(-get_cum_backhaz(external$stop, backhaz$df)))
-        extl$backsurv_start <- aa(exp(-get_cum_backhaz(external$start, backhaz$df)))
+        st <- make_backhaz_strata(backhaz_strata, backhaz$df, external)
+        backhaz$df$stratum <- factor(st$back)
+        extl$backsurv_stop <- aa(exp(-get_cum_backhaz(external$stop, backhaz$df,
+                                                      strata=st$dat)))
+        extl$backsurv_start <- aa(exp(-get_cum_backhaz(external$start, backhaz$df,
+                                                       strata=st$dat)))
       } else {
         extl$backsurv_stop <- aa(external$backsurv_stop)
         extl$backsurv_start <- aa(external$backsurv_start)

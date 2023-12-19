@@ -1,3 +1,10 @@
+# Version 0.8.8 (2023/12/19)
+
+* Background hazards in additive hazards models can now be stratified, using the new `backhaz_strata` argument to `survextrap()`.  This argument names stratifying variables (e.g. age group) that should be in both the background hazards and the individual and/or external data.
+
+* Bug fix for `hsurvmspline_wane` and `dsurvmspline_wane` where offsets were not implemented correctly.  This affected hazard predictions for models that included both background hazards and treatment effect waning.
+
+
 # Version 0.8.7 (2023/10/29)
 
 * A random walk prior can now be specified for the spline coefficients, by `smooth_model = "random_walk"`. 

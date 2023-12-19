@@ -394,9 +394,9 @@ summary(curec_mod) %>%
 In this summary,  `pcure` is the probability of cure at a value of 0 for the covariate `x.`
 
 
-## Relative survival models {#relsurv_examples}
+## Additive hazards / relative survival models {#relsurv_examples}
 
-To implement an "additive hazards" ("relative survival") model (see the [methods vignette](methods.html#relsurv_methods)), the background hazard can be supplied alongside the data.  This can be done in two ways - note the meaning of the predictions from the model depends on which of these specifications was used.  
+To implement an "additive hazards" ("relative survival") model (see the [methods vignette](methods.html#relsurv_methods)), the background hazard can be supplied alongside the data.  This can be done in two ways - note the meaning of the predictions from the model depends on which of these specifications was used.
 
 
 ### Background hazard defined at all times {#relsurv_example2}
@@ -436,6 +436,44 @@ plot_hazard(mod, tmax=15, niter=20) +
 Note that this kind of relative survival model can also be used together with a cure model. 
 If both `cure` and `backhaz` are specified, then the cure model is assumed to apply to the  cause-specific hazard.   This will define a model where the cause-specific hazard approaches zero, hence the overall hazard is increasingly dominated by the background causes of death, as time increases. 
 
+
+### Stratified background hazards
+
+Commonly, population mortality statistics are available by age and sex. 
+If the same stratifying variables are recorded in the survival data (either
+the trial or external data) then `survextrap` allows the strata to be 
+matched with the appropriate stratified background hazards.   
+
+A simple example is shown here.   Suppose the following background hazard 
+data are available, where people aged over 70 have 1.2 times the mortality
+rate of the under-70s.   The year of age is recorded in the trial data 
+`colons`, which we convert to an over/under 70 binary age group.
+
+```{r}
+bh_strata <- data.frame(time = rep(bh$time, 2),
+                        hazard = c(bh$hazard, bh$hazard*1.2),
+                        agegroup = rep(c("Under 70", "Over 70"),each=4))
+colons$agegroup <- cut(colons$age, breaks=c(0,70,Inf), 
+                       right=FALSE, labels=c("Under 70","Over 70"))
+bh_strata
+```
+
+Then to run `survextrap` with a stratified background hazard, we indicate the names of the stratifying variables in the `backhaz_strata` argument.  These variables must exist in both `data` and `backhaz` (and `external` if this is provided). Every row in `data` must have a row in `backhaz` with a matching stratum value.  (Note there can be multiple stratifying variables, in which case we would specify, for example `backhaz_strata = c("agegroup","sex")`).
+
+```{r}
+mod_bhs <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
+                      backhaz=bh_strata, backhaz_strata="agegroup")
+```
+
+To present predictions from a model with a stratified background hazard (e.g. RMST, hazard, survival), a `newdata` should be supplied to indicate which strata to present the results for, in the same manner as for models with covariates. Here the fitted hazard function reflects the increased long-term risk for over-70s.
+
+```{r}
+nd <- data.frame(agegroup = c("Over 70", "Under 70"))
+plot_hazard(mod, tmax=15, ci=FALSE) + 
+  geom_line(data = hazard(mod_bhs, newdata=nd, tmax=15, niter=300), 
+            aes(y=median, x=t, col=agegroup), lwd=1.2) + 
+  ylim(0,0.5)
+```
 
 
 

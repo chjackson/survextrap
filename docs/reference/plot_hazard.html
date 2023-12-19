@@ -169,7 +169,7 @@ drawing the intervals if the plot shows the curve for only one covariate value.<
 
 
 <dt>line_size</dt>
-<dd><p>Passed to <code>geom_line</code></p></dd>
+<dd><p>Passed to <code><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></code></p></dd>
 
 
 <dt>ci_alpha</dt>
@@ -180,6 +180,14 @@ drawing the intervals if the plot shows the curve for only one covariate value.<
 <dd><p>Show the locations of the spline knots as vertical lines</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>If the model has a single factor covariate (excluding background
+hazard strata), then curves are produced for each level of this
+factor if <code>newdata</code> requests this (or is left to its default).
+Otherwise, only a single curve is produced, illustrating the
+corresponding output from <code><a href="hazard.html">hazard</a></code>.</p>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

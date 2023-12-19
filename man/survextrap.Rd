@@ -17,6 +17,7 @@ survextrap(
   prior_logor_cure = NULL,
   prior_hrsd = p_gamma(2, 1),
   backhaz = NULL,
+  backhaz_strata = NULL,
   mspline = NULL,
   add_knots = NULL,
   smooth_model = "exchangeable",
@@ -155,8 +156,29 @@ in columns of the external data named \code{"backsurv_start"} and
 \code{"backsurv_stop"}.  This should describe the same reference population as
 \code{backhaz}, though the package does not check for consistency between these.
 
+If there are stratifying variables specified in
+\code{backhaz_strata}, then there should be multiple rows giving
+the background hazard value for each time period and stratifying
+variable.
+
 If \code{backhaz} is \code{NULL} (the default) then no background hazard
 component is included in the model.}
+
+\item{backhaz_strata}{A character vector of names of variables that
+appear in \code{backhaz} that indicate strata, e.g.
+\code{backhaz_strata = c("agegroup","sex")}.  This allows
+different background hazard values to be used for different
+subgroups.  These variables must also
+appear in the datasets being modelled, that is, in \code{data},
+\code{external} or both.  Each row of those datasets should then
+have a corresponding row in \code{backhaz} which has the same
+values of the stratifying variables.
+
+This is \code{NULL} by default, indicating no stratification of the
+background hazard.
+
+If stratification is done, then \code{backhaz} must be supplied in
+form (a), as a data frame rather than a variable in the data.}
 
 \item{mspline}{A list of control parameters defining the spline model.
 

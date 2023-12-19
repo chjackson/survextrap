@@ -43,8 +43,10 @@ test_that("Basic spline model, non-proportional hazards",{
   test_median(modnp, "alpha", -0.251)
   expect_equal(survival(modnp, newdata=nd, t=2)$median, c(0.5, 0.7), tol=1e-01)
   expect_equal(hazard(modnp, newdata=nd, t=2)$median, c(0.2, 0.1), tol=1e-01)
-  modnp <- survextrap(Surv(years, status) ~ rx + sex + obstruct, data=colons, fit_method="opt",
-                      nonprop=~sex + obstruct, mspline = list(df=4,degree=2,bsmooth=FALSE))
+  modnp <- survextrap(Surv(years, status) ~ rx + sex + obstruct,
+                      data=colons, fit_method="opt",
+                      nonprop=~sex + obstruct,
+                      mspline = list(df=4,degree=2,bsmooth=FALSE))
   expect_equal(summary(modnp) %>% filter(variable=="hrsd") %>% pull(term),
                c("sex", "obstruct"))
 })

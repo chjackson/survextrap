@@ -79,14 +79,24 @@ mean.survextrap <- function(x, newdata=NULL,
 
 default_newdata <- function(x, newdata=NULL){
   all_covs <- union(names(x$x$mfbase), names(x$xcure$mfbase))
-  has_covs <- (x$ncovs>0) || (x$ncurecovs>0)
+  all_covs_str <- union(all_covs, x$backhaz_strata)
+  has_covs <- (x$ncovs>0) || (x$ncurecovs>0) || (!is.null(x$backhaz_strata))
+
   if (is.null(newdata) && has_covs){
     newdata <- as.data.frame(c(x$x$mfbase, x$xcure$mfbase))[all_covs]
+    str_notcovs <- setdiff(x$backhaz_strata, names(x$x$mfbase)) # strata that are not also covariates
+    if (length(str_notcovs) > 0){
+      default_strata <- x$backhaz[1,str_notcovs,drop=FALSE]
+      if (nrow(newdata)==0)
+        newdata <- default_strata
+      else
+        newdata <- cbind(newdata, default_strata[rep(1,nrow(newdata)),,drop=FALSE])
+    }
   }  else {
     if (is.list(newdata)) newdata <- as.data.frame(newdata)
     if (has_covs && !(is.data.frame(newdata)))
       stop("`newdata` should be a data frame or list")
-    missing_covs <- all_covs[!(all_covs %in% names(newdata))]
+    missing_covs <- all_covs_str[!(all_covs_str %in% names(newdata))]
     if (length(missing_covs) > 0){
       plural <- if (length(missing_covs) > 1) "s" else ""
       stop(sprintf("Values of covariate%s `%s` not included in `newdata`",
@@ -146,14 +156,18 @@ rmst <- function(x, t, newdata=NULL, newdata0=NULL, wane_period=NULL, wane_nt=10
       summ_fns <- list(median=median, ~quantile(.x, probs=c(0.025, 0.975)))
 
     sample <- vector(nvals, mode="list")
+
+    nd_strata <- make_backhaz_strata(x$backhaz_strata, x$backhaz, newdata)$strata
+
     for (j in 1:nvals){
         resmat <- matrix(nrow=niter, ncol=nt)
         colnames(resmat) <- t
+        backhaz <- x$backhaz[x$backhaz$stratum == nd_strata[j],]
         for (i in 1:nt){
           if (is.null(wane_period))
             resmat[,i] <- rmst_survmspline(t[i], pars$alpha_user[,j], pars$coefs[,j,],
                                            x$mspline$knots, x$mspline$degree,
-                                           pcure = pars$cureprob_user[,j], backhaz = x$backhaz,
+                                           pcure = pars$cureprob_user[,j], backhaz = backhaz,
                                            bsmooth=x$mspline$bsmooth)
           else
             resmat[,i] <- rmst_survmspline_wane(t[i],
@@ -164,7 +178,7 @@ rmst <- function(x, t, newdata=NULL, newdata0=NULL, wane_period=NULL, wane_nt=10
                                                 knots = x$mspline$knots, degree = x$mspline$degree,
                                                 pcure1 = pars$cureprob_user[,j],
                                                 pcure0 = pars0$cureprob_user[,j],
-                                                backhaz = x$backhaz,
+                                                backhaz = backhaz,
                                                 bsmooth=x$mspline$bsmooth,
                                                 wane_period=wane_period, wane_nt=wane_nt)
         }
@@ -321,7 +335,7 @@ get_pars <- function(x, newdata=NULL, niter=NULL){
 ##'
 ##' Estimates of survival probabilities at particular times, from a
 ##' \code{\link{survextrap}} model
-##' 
+##'
 ##' @inheritParams print.survextrap
 ##' @inheritParams mean.survextrap
 ##'
@@ -364,7 +378,7 @@ hazard <- function(x, newdata=NULL, t=NULL, tmax=NULL,
 }
 
 ##' Estimates of cumulative hazard from a survextrap model
-##' 
+##'
 ##' Estimates of the cumulative hazard at particular times, from a \code{\link{survextrap}} model
 ##'
 ##' @inheritParams print.survextrap
@@ -443,6 +457,20 @@ timedep_output <- function(x, output="survival", newdata=NULL, t=NULL, tmax=NULL
     alpha_user_arr <- array(rep(pars$alpha_user, each=nt), dim=c(nt, niter, nvals))
     cureprob_arr <- if (x$cure) array(rep(pars$cureprob_user, each=nt), dim = c(nt, niter, nvals)) else NULL
 
+    ## Offsets for background hazard models
+    ## Get stratum for each row of newdata
+    nds <- make_backhaz_strata(x$backhaz_strata, x$backhaz, newdata)
+    offseth <- offsetH <- array(0, dim=c(nt, 1, nvals))
+    if (!is.null(x$backhaz)){
+      for (j in 1:nvals){
+        backhaz <- x$backhaz[x$backhaz$stratum == nds$dat[j],]
+        offseth[,1,j] <- backhaz$hazard[findInterval(t, backhaz$time)]
+        offsetH[,1,j] <- get_cum_backhaz(t, backhaz)
+      }
+    }
+    offsetH_arr <- offsetH[,rep(1,niter),]
+    offseth_arr <- offseth[,rep(1,niter),]
+
     if (!is.null(wane_period)){
       newdata0 <- default_newdata0(newdata, newdata0)
       pars0 <- get_pars(x, newdata=newdata0, niter=niter)
@@ -455,18 +483,21 @@ timedep_output <- function(x, output="survival", newdata=NULL, t=NULL, tmax=NULL
                                                         alpha_user_arr, alpha_user_arr0,
                                                         coefs1_mat, coefs0_mat,
                                                         cureprob_arr, cureprob0_arr,
+                                                        offsetH_arr,
                                                         niter, nvals, nt,
                                                         wane_period, wane_nt),
                         "hazard" = hazard_core_wane(x, times_arr,
                                                     alpha_user_arr, alpha_user_arr0,
                                                     coefs1_mat, coefs0_mat,
                                                     cureprob_arr, cureprob0_arr,
+                                                    offseth_arr,
                                                     niter, nvals, nt,
                                                     wane_period, wane_nt),
                         "cumhaz" = cumhaz_core_wane(x, times_arr,
                                                     alpha_user_arr, alpha_user_arr0,
                                                     coefs1_mat, coefs0_mat,
                                                     cureprob_arr, cureprob0_arr,
+                                                    offsetH_arr,
                                                     niter, nvals, nt,
                                                     wane_period, wane_nt)
                         )
@@ -474,11 +505,14 @@ timedep_output <- function(x, output="survival", newdata=NULL, t=NULL, tmax=NULL
     else {
       res_sam <- switch(output,
                         "survival" = survival_core(x, pars, times_arr, alpha_user_arr,
-                                                   cureprob_arr, niter, nvals, nt),
+                                                   cureprob_arr, offsetH_arr,
+                                                   niter, nvals, nt),
                         "hazard" = hazard_core(x, pars, times_arr, alpha_user_arr,
-                                               cureprob_arr, niter, nvals, nt),
+                                               cureprob_arr, offseth_arr,
+                                               niter, nvals, nt),
                         "cumhaz" = cumhaz_core(x, pars, times_arr, alpha_user_arr,
-                                               cureprob_arr, niter, nvals, nt)
+                                               cureprob_arr, offsetH_arr,
+                                               niter, nvals, nt)
                         )
     }
     dimnames(res_sam) <- list(time=1:nt, iteration=1:niter, value=1:nvals)
@@ -497,27 +531,30 @@ timedep_output <- function(x, output="survival", newdata=NULL, t=NULL, tmax=NULL
     res
 }
 
-survival_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
+survival_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, offsetH_arr, niter, nvals, nt){
   coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$mspline$nvars))
   surv_sam <- psurvmspline(times_arr, alpha_user_arr, coefs_mat,
                            x$mspline$knots, x$mspline$degree, lower.tail=FALSE,
-                           pcure=cureprob_arr, backhaz=x$backhaz, bsmooth=x$mspline$bsmooth)
+                           pcure=cureprob_arr, offsetH=offsetH_arr,
+                           bsmooth=x$mspline$bsmooth)
   surv_sam
 }
 
-hazard_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
+hazard_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, offseth_arr, niter, nvals, nt){
   coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$mspline$nvars))
   haz_sam <- hsurvmspline(times_arr, alpha_user_arr, coefs_mat,
                           x$mspline$knots, x$mspline$degree,
-                          pcure=cureprob_arr, backhaz=x$backhaz, bsmooth=x$mspline$bsmooth)
+                          pcure=cureprob_arr, offseth=offseth_arr,
+                          bsmooth=x$mspline$bsmooth)
   haz_sam
 }
 
-cumhaz_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, niter, nvals, nt){
+cumhaz_core <- function(x, pars, times_arr, alpha_user_arr, cureprob_arr, offsetH_arr, niter, nvals, nt){
   coefs_mat <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt*niter*nvals, x$mspline$nvars))
   cumhaz_sam <- Hsurvmspline(times_arr, alpha_user_arr, coefs_mat,
                              x$mspline$knots, x$mspline$degree,
-                             pcure=cureprob_arr, backhaz=x$backhaz, bsmooth=x$mspline$bsmooth)
+                             pcure=cureprob_arr, offsetH=offsetH_arr,
+                             bsmooth=x$mspline$bsmooth)
   cumhaz_sam
 }
 

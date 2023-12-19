@@ -62,7 +62,7 @@ hsurvmspline_wane(
   wane_nt = 10,
   pcure1 = 0,
   pcure0 = 0,
-  offsetH = 0,
+  offseth = 0,
   backhaz = NULL,
   log = FALSE
 )
@@ -80,6 +80,7 @@ dsurvmspline_wane(
   wane_nt = 10,
   pcure1 = 0,
   pcure0 = 0,
+  offseth = 0,
   offsetH = 0,
   backhaz = NULL,
   log = FALSE
@@ -190,6 +191,8 @@ also have zero derivative and second derivative at the boundary.}
 
 \item{lower.tail}{logical; if \code{TRUE} (default), probabilities are \eqn{P(X
 \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}
+
+\item{offseth}{Constant to be added to the hazard, e.g. representing a "background" risk of death from causes other than the cause of interest.}
 
 \item{p}{Vector of probabilities.}
 

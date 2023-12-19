@@ -14,7 +14,7 @@ based on quantiles of event times observed in the individual data."><!-- mathjax
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.8</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,6 +73,7 @@ based on quantiles of event times observed in the individual data.</p>
 <span>  cure <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nonprop <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  backhaz_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  external <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  df <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  add_knots <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -84,13 +85,13 @@ based on quantiles of event times observed in the individual data.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>formula</dt>
-<dd><p>A survival formula in standard R formula syntax, with a call to <code>Surv()</code>
+<dd><p>A survival formula in standard R formula syntax, with a call to <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv()</a></code>
 on the left hand side.</p>
 <p>Covariates included on the right hand side of the formula with be modelled with
 proportional hazards, or if <code>nonprop</code> is <code>TRUE</code> then a non-proportional
 hazards is used.</p>
 <p>If <code>data</code> is omitted, so that the model is being fitted to external aggregate data alone,
-without individual data, then the formula should not include a <code>Surv()</code> call.  The
+without individual data, then the formula should not include a <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv()</a></code> call.  The
 left-hand side of the formula will then be empty, and the right hand side specifies the covariates
 as usual.  For example, <code>formula = ~1</code> if there are no covariates.</p></dd>
 
@@ -146,8 +147,28 @@ user should also supply the background survival at the start and stop points
 in columns of the external data named <code>"backsurv_start"</code> and
 <code>"backsurv_stop"</code>.  This should describe the same reference population as
 <code>backhaz</code>, though the package does not check for consistency between these.</p>
+<p>If there are stratifying variables specified in
+<code>backhaz_strata</code>, then there should be multiple rows giving
+the background hazard value for each time period and stratifying
+variable.</p>
 <p>If <code>backhaz</code> is <code>NULL</code> (the default) then no background hazard
 component is included in the model.</p></dd>
+
+
+<dt>backhaz_strata</dt>
+<dd><p>A character vector of names of variables that
+appear in <code>backhaz</code> that indicate strata, e.g.
+<code>backhaz_strata = c("agegroup","sex")</code>.  This allows
+different background hazard values to be used for different
+subgroups.  These variables must also
+appear in the datasets being modelled, that is, in <code>data</code>,
+<code>external</code> or both.  Each row of those datasets should then
+have a corresponding row in <code>backhaz</code> which has the same
+values of the stratifying variables.</p>
+<p>This is <code>NULL</code> by default, indicating no stratification of the
+background hazard.</p>
+<p>If stratification is done, then <code>backhaz</code> must be supplied in
+form (a), as a data frame rather than a variable in the data.</p></dd>
 
 
 <dt>external</dt>

@@ -101,3 +101,10 @@ behind these plots can be extracted with \code{\link{survival}}
 into a tidy data frame to enable custom plots to be constructed
 with \pkg{ggplot2}.  See the \href{https://chjackson.github.io/survextrap/articles/cetuximab.html}{case study} vignette for some examples.
 }
+\details{
+If the model has a single factor covariate (excluding background
+hazard strata), then curves are produced for each level of this
+factor if \code{newdata} requests this (or is left to its default).
+Otherwise, only a single curve is produced, illustrating the
+corresponding output from \code{\link{hazard}}.
+}

@@ -70,7 +70,7 @@ models.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_cum_backhaz</span><span class="op">(</span><span class="va">t</span>, <span class="va">backhaz</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_cum_backhaz</span><span class="op">(</span><span class="va">t</span>, <span class="va">backhaz</span>, strata <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -83,8 +83,17 @@ hazard at.</p></dd>
 <dt>backhaz</dt>
 <dd><p>A data frame with two columns, named <code>"time"</code> and
 <code>"hazard"</code>. Each row gives the "background" hazard between the
-specified time and the next time.</p>
-<p>We assume that the background hazard is known at all times, and defined by
+specified time and the next time.</p></dd>
+
+
+<dt>strata</dt>
+<dd><p>A vector of the same length as <code>t</code> indicating strata.
+There should then be</p><ul><li><p>a column in <code>backhaz</code> named <code>stratum</code>, which should
+be a factor with the same levels as <code>strata</code> (or analogous
+character vector).</p></li>
+<li><p>a row in <code>backhaz</code> indicating the background hazard at each
+time interval for each stratum in <code>strata</code>.</p></li>
+</ul><p>We assume that the background hazard is known at all times, and defined by
 a piecewise-constant function (step function) of time. The first element of
 <code>"time"</code> should be 0, and the final row specifies the hazard at all
 times greater than the last element of <code>"time"</code>.</p>

@@ -7,7 +7,11 @@
 ##' a tidy data frame to enable custom plots to be constructed with
 ##' \pkg{ggplot2}.  See the [case study](https://chjackson.github.io/survextrap/articles/cetuximab.html) vignette for some examples.
 ##' 
-##'
+##' If the model has a single factor covariate (excluding background
+##' hazard strata), then curves are produced for each level of this
+##' factor if `newdata` requests this (or is left to its default).
+##' Otherwise, only a single curve is produced, illustrating the
+##' corresponding output from \code{\link{hazard}}.
 ##'
 ##' @inheritParams survival
 ##'
@@ -35,8 +39,8 @@ plot_hazard <- function(x, newdata=NULL, t=NULL, tmax=NULL, niter=NULL,
                   newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt)
     knots <- x$mspline$knots[x$mspline$knots <= max(haz$t)]
     aes_list <- list(x=sym("t"), y=sym("median"))
-    if (attr(haz, "nvals") > 1)
-        aes_list <- c(aes_list, list(col = sym(names(newdata)), group = sym(names(newdata))))
+    if ((attr(haz, "nvals") > 1) && (ncol(newdata) == 1))
+      aes_list <- c(aes_list, list(col = sym(names(newdata)), group = sym(names(newdata))))
     geom_ylab <- ggplot2::ylab(ylab)
     geom_xlab <- ggplot2::xlab(xlab)
     p <- ggplot(haz, mapping=aes(!!!aes_list)) + # requires ggplot2 3.4.0
@@ -62,6 +66,12 @@ plot_hazard <- function(x, newdata=NULL, t=NULL, tmax=NULL, niter=NULL,
 ##' behind these plots can be extracted with \code{\link{survival}}
 ##' into a tidy data frame to enable custom plots to be constructed
 ##' with \pkg{ggplot2}.  See the [case study](https://chjackson.github.io/survextrap/articles/cetuximab.html) vignette for some examples.
+##' 
+##' If the model has a single factor covariate (excluding background
+##' hazard strata), then curves are produced for each level of this
+##' factor if `newdata` requests this (or is left to its default).
+##' Otherwise, only a single curve is produced, illustrating the
+##' corresponding output from \code{\link{hazard}}.
 ##'
 ##' @inheritParams survival
 ##' @inheritParams plot_hazard
@@ -89,7 +99,7 @@ plot_survival <- function(x, newdata=NULL, t=NULL, tmax=NULL, km=NULL, niter=NUL
                      newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt)
     knots <- x$mspline$knots[x$mspline$knots <= max(surv$t)]
     aes_list <- list(x=sym("t"), y=sym("median"))
-    if (attr(surv,"nvals") > 1)
+    if ((attr(surv, "nvals") > 1) && (ncol(newdata) == 1))
         aes_list <- c(aes_list, list(col = sym(names(newdata)), group = sym(names(newdata))))
     geom_ylab <- ggplot2::ylab(ylab)
     geom_xlab <- ggplot2::xlab(xlab)

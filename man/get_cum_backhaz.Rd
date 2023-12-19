@@ -4,7 +4,7 @@
 \alias{get_cum_backhaz}
 \title{Cumulative background hazards}
 \usage{
-get_cum_backhaz(t, backhaz)
+get_cum_backhaz(t, backhaz, strata = NULL)
 }
 \arguments{
 \item{t}{A time point, or vector of time points, to calculate the cumulative
@@ -12,7 +12,17 @@ hazard at.}
 
 \item{backhaz}{A data frame with two columns, named \code{"time"} and
 \code{"hazard"}. Each row gives the "background" hazard between the
-specified time and the next time.
+specified time and the next time.}
+
+\item{strata}{A vector of the same length as \code{t} indicating strata.
+There should then be
+\itemize{
+\item a column in \code{backhaz} named \code{stratum}, which should
+be a factor with the same levels as \code{strata} (or analogous
+character vector).
+\item a row in \code{backhaz} indicating the background hazard at each
+time interval for each stratum in \code{strata}.
+}
 
 We assume that the background hazard is known at all times, and defined by
 a piecewise-constant function (step function) of time. The first element of
