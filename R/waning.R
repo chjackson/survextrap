@@ -255,41 +255,11 @@ rsurvmspline_wane <- function(n, alpha1, alpha0, coefs1, coefs0, knots, degree=3
                     pcure1=pcure1, pcure0=pcure0, offsetH=offsetH, backhaz=backhaz, wane_period=wane_period, wane_nt=wane_nt)
 }
 
-survival_core_wane <- function(x, times_arr, alpha_user_arr, alpha_user_arr0, coefs1_mat, coefs0_mat,
-                               cureprob1_arr, cureprob0_arr, offsetH_arr, 
-                               niter, nvals, nt, wane_period, wane_nt=10){
-  surv_sam <- psurvmspline_wane(times_arr, alpha1=alpha_user_arr, alpha0=alpha_user_arr0,
-                                coefs1=coefs1_mat, coefs0=coefs0_mat,
-                                knots=x$mspline$knots, degree=x$mspline$degree, bsmooth=x$mspline$bsmooth, lower.tail=FALSE,
-                                pcure1=cureprob1_arr, pcure0=cureprob0_arr, offsetH=offsetH_arr,
-                                wane_period=wane_period, wane_nt=wane_nt)
-}
-
-hazard_core_wane <- function(x, times_arr, alpha_user_arr, alpha_user_arr0, coefs1_mat, coefs0_mat,
-                             cureprob1_arr, cureprob0_arr, offseth_arr,
-                             niter, nvals, nt, wane_period, wane_nt=10){
-  haz_sam <- hsurvmspline_wane(times_arr, alpha1=alpha_user_arr, alpha0=alpha_user_arr0,
-                               coefs1=coefs1_mat, coefs0=coefs0_mat,
-                               knots=x$mspline$knots, degree=x$mspline$degree, bsmooth=x$mspline$bsmooth,
-                               pcure1=cureprob1_arr, pcure0=cureprob0_arr, offseth=offseth_arr,
-                               wane_period=wane_period, wane_nt=wane_nt)
-}
-
-cumhaz_core_wane <- function(x, times_arr, alpha_user_arr, alpha_user_arr0, coefs1_mat, coefs0_mat,
-                             cureprob1_arr, cureprob0_arr, offsetH_arr,
-                             niter, nvals, nt, wane_period, wane_nt=10){
-  haz_sam <- Hsurvmspline_wane(times_arr, alpha1=alpha_user_arr, alpha0=alpha_user_arr0,
-                               coefs1=coefs1_mat, coefs0=coefs0_mat,
-                               knots=x$mspline$knots, degree=x$mspline$degree, bsmooth=x$mspline$bsmooth,
-                               pcure1=cureprob1_arr, pcure0=cureprob0_arr, offsetH=offsetH_arr, 
-                               wane_period=wane_period, wane_nt=wane_nt)
-}
-
 ##' @rdname Survmspline_wane
 ##' @export
 rmst_survmspline_wane = function(t, alpha1, alpha0, coefs1, coefs0,
                                  knots, degree=3, pcure1=0, pcure0=0,
-                                 backhaz=NULL, bsmooth=TRUE,
+                                 offsetH = 0, backhaz=NULL, bsmooth=TRUE,
                                  wane_period, wane_nt=10){
   if (is.null(pcure1)) pcure1 <- 0
   if (is.null(pcure0)) pcure0 <- 0
@@ -298,7 +268,8 @@ rmst_survmspline_wane = function(t, alpha1, alpha0, coefs1, coefs0,
                unvectorised_args = c("knots","degree","backhaz","bsmooth","wane_period","wane_nt"),
                alpha1=alpha1, alpha0=alpha0, coefs1=coefs1, coefs0=coefs0, knots=knots, degree=degree,
                wane_period=wane_period, wane_nt=wane_nt,
-               pcure1=pcure1, pcure0=pcure0, backhaz=backhaz, bsmooth=bsmooth)
+               pcure1=pcure1, pcure0=pcure0,
+               offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
 }
 
 ##' @rdname Survmspline_wane

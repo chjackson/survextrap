@@ -1,3 +1,12 @@
+# Version 0.8.9 (2023/12/22)
+
+* Cleaned and simplified internal code for model outputs (`rmst`, `survival` etc.). 
+
+* `rmst` now outputs a tibble, and confidence limits in the default output are renamed to `lower` and `upper` for consistency with `survival` and `hazard`.
+
+* Arrays now allowed for `coef` argument in `dsurvspline` and related functions.
+
+
 # Version 0.8.8 (2023/12/19)
 
 * Background hazards in additive hazards models can now be stratified, using the new `backhaz_strata` argument to `survextrap()`.  This argument names stratifying variables (e.g. age group) that should be in both the background hazards and the individual and/or external data.

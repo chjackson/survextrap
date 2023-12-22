@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.9</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,6 +54,12 @@
       <small>Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.8.9" id="version-089-20231222">Version 0.8.9 (2023/12/22)<a class="anchor" aria-label="anchor" href="#version-089-20231222"></a></h2>
+<ul><li><p>Cleaned and simplified internal code for model outputs (<code>rmst</code>, <code>survival</code> etc.).</p></li>
+<li><p><code>rmst</code> now outputs a tibble, and confidence limits in the default output are renamed to <code>lower</code> and <code>upper</code> for consistency with <code>survival</code> and <code>hazard</code>.</p></li>
+<li><p>Arrays now allowed for <code>coef</code> argument in <code>dsurvspline</code> and related functions.</p></li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.8.8" id="version-088-20231219">Version 0.8.8 (2023/12/19)<a class="anchor" aria-label="anchor" href="#version-088-20231219"></a></h2>
 <ul><li><p>Background hazards in additive hazards models can now be stratified, using the new <code>backhaz_strata</code> argument to <code><a href="../reference/survextrap.html">survextrap()</a></code>. This argument names stratifying variables (e.g. age group) that should be in both the background hazards and the individual and/or external data.</p></li>

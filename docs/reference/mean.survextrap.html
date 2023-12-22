@@ -18,7 +18,7 @@ so it may be slow."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aj
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.9</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,6 +82,7 @@ so it may be slow.</p>
 <span>  wane_nt <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  niter <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  summ_fns <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sample <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -140,6 +141,11 @@ This is passed to <code><a href="https://mc-stan.org/posterior/reference/draws_s
 By default this is <code>list(median=median, ~quantile(.x, probs=c(0.025, 0.975)))</code>.
 If the list is named, then the names will be used for the columns of the
 output.</p></dd>
+
+
+<dt>sample</dt>
+<dd><p>If <code>TRUE</code> then an MCMC sample is returned from the posterior
+of the output, rather than summary statistics.</p></dd>
 
 
 <dt>...</dt>

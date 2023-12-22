@@ -132,6 +132,7 @@ rmst_survmspline_wane(
   degree = 3,
   pcure1 = 0,
   pcure0 = 0,
+  offsetH = 0,
   backhaz = NULL,
   bsmooth = TRUE,
   wane_period,

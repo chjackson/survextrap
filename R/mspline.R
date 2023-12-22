@@ -22,7 +22,12 @@
 ##' @param alpha Log hazard scale parameter.
 ##'
 ##' @param coefs Spline basis coefficients. These should sum to 1,
-##' otherwise they are normalised internally to sum to 1.
+##'   otherwise they are normalised internally to sum to 1.  Supplied
+##'   either as a vector with one element per basis term, or a matrix
+##'   with one column per basis term, and rows for alternative values
+##'   of the coefficients (in vectorised usage of this function).  If
+##'   an array is supplied, it is collapsed into a matrix with number
+##'   of columns equal to the final dimension of the array.
 ##'
 ##' @param knots Locations of knots on the axis of time, supplied in
 ##' increasing order.  These include the two boundary knots.
@@ -372,14 +377,23 @@ rsurvmspline <- function(n, alpha, coefs, knots, degree=3,
 
 survmspline_dist_setup <- function(q, alpha, coefs, knots, pcure=0, offsetH=0, offseth=0){
     validate_knots(knots)
-    if (!is.matrix(coefs)) coefs <- matrix(coefs, nrow=1)
+    if (is.vector(coefs)) coefs <- matrix(coefs, nrow=1)
+    if (is.array(coefs) && length(dim(coefs))>2){
+      nvars <- dim(coefs)[length(dim(coefs))]
+      coefs <- matrix(as.vector(coefs), ncol=nvars)
+    }
     lg <- nrow(coefs)
     nret <- max(length(q), nrow(coefs), length(alpha), length(pcure), length(offsetH), length(offseth))
     att <- attributes(q)
     q <- rep(q, length=nret)
     alpha <- rep(alpha, length=nret)
-    coefs <- matrix(rep(as.numeric(t(coefs)), length.out = ncol(coefs) * nret),
-                    ncol = ncol(coefs), byrow = TRUE)
+
+    ##
+    ## TESTME. TODO document arrays now accepted as coefs, with final var nvals
+    ##
+    coefs <- coefs[rep(seq_len(nrow(coefs)), length.out=nret),,drop=FALSE]
+    ##    coefs <- matrix(rep(as.numeric(t(coefs)), length.out = ncol(coefs) * nret),
+#                    ncol = ncol(coefs), byrow = TRUE)
     pcure <- rep(pcure, length=nret)
     offsetH <- rep(offsetH, length=nret)
     offseth <- rep(offseth, length=nret)
@@ -410,22 +424,22 @@ validate_knots <- function(knots, name="knots"){
 
 ##' @rdname Survmspline
 ##' @export
-rmst_survmspline = function(t, alpha, coefs, knots, degree=3, pcure=0, backhaz=NULL, bsmooth=TRUE){
+rmst_survmspline = function(t, alpha, coefs, knots, degree=3, pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
     if (is.null(pcure)) pcure <- 0
     rmst_generic(psurvmspline, t, start=0,
                  matargs = c("coefs"),
                  unvectorised_args = c("knots","degree","backhaz","bsmooth"),
-                 alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, backhaz=backhaz, bsmooth=bsmooth)
+                 alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
 }
 
 ##' @rdname Survmspline
 ##' @export
-mean_survmspline = function(alpha, coefs, knots, degree=3, pcure=0, backhaz=NULL, bsmooth=TRUE){
+mean_survmspline = function(alpha, coefs, knots, degree=3, pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
     nt <- if (is.matrix(coefs)) nrow(coefs) else 1
     rmst_generic(psurvmspline, rep(Inf,nt), start=0,
                  matargs = c("coefs"),
                  unvectorised_args = c("knots","degree","backhaz","bsmooth"),
-                 alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, backhaz=backhaz, bsmooth=bsmooth)
+                 alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
 }
 
 #

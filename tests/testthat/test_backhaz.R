@@ -80,6 +80,24 @@ test_that("Stratified background hazards: just IPD",{
   set.seed(1); r1std <- rmst(mod1std, newdata=nd, t=5, niter=50)
   expect_equal(r1, r1st)
   set.seed(1); s1 <- survival(mod1, newdata=nd, t=5, niter=50)
+
+  ## TODO dim of coefs.  its 4d array on exit from prepars
+  ## we at least need it to be subsetted by nvars in rmst
+  ## TODO document vectorisation of dpqr.  coefs ends up as a matrix with
+  ## nvars cols,  so nvar should be the final dimension
+  ## what was it before: a matrix with nvars cols
+  ## suspect it's going wrong in _dist_setup
+  ##    coefs <- matrix(rep(as.numeric(t(coefs)), length.out = ncol(coefs) * nret),
+ ##             ncol = ncol(coefs), byrow = TRUE)
+  ## input is nt x niter x nvars x nvals
+  ## output is niter x (niter x nvals),  weird
+  ## it doesn't handle 3+d arrays
+  ## (a) if supply vector, interpret as 1-row matrix
+  ## (b) if supply matrix, why is this line done?  It's doing the vectorisation.
+  ## Output should end up with nret rows, nvals cols
+  ## eg if coefs has 2 rows and alpha is length 8, rep 4 times
+  ## combining t() and byrow() is opaque.   Better with an index
+
   set.seed(1); s1st <- survival(mod1st, newdata=nd, t=5, niter=50)
   set.seed(1); s1std <- survival(mod1std, newdata=nd, t=5, niter=50)
   expect_equal(s1, s1st)
@@ -190,7 +208,7 @@ test_that("backhaz error handling",{
   expect_error(survextrap(Surv(years, status) ~ 1, data=colons,
                           fit_method = "opt", backhaz=bhe, backhaz_strata=c("agegroup","sex")),
                "stratifying variable \"agegroup\" has class \"factor\" in `data`, but class \"numeric\" in `backhaz`, so cannot match")
-  
+
   bhe <- bh_strata
   bhe$sex[bhe$sex=="Female"] <- "Male"
   expect_error(survextrap(Surv(years, status) ~ 1, data=colons,

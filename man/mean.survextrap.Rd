@@ -12,6 +12,7 @@
   wane_nt = 10,
   niter = NULL,
   summ_fns = NULL,
+  sample = FALSE,
   ...
 )
 }
@@ -58,6 +59,9 @@ This is passed to \code{\link[posterior:summarise_draws]{posterior::summarise_dr
 By default this is \code{list(median=median, ~quantile(.x, probs=c(0.025, 0.975)))}.
 If the list is named, then the names will be used for the columns of the
 output.}
+
+\item{sample}{If \code{TRUE} then an MCMC sample is returned from the posterior
+of the output, rather than summary statistics.}
 
 \item{...}{Other options (currently unused).}
 }

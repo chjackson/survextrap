@@ -54,3 +54,4 @@ test_that("rmst wane",{
   rd2 <- rmst(mod, t=5, wane_period=c(3,5), niter=5)
   expect_lt(rd2$median[2], rd$median[2])
 })
+

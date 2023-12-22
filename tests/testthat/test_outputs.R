@@ -34,7 +34,7 @@ test_that("Different summary functions",{
   r1 <- rmst(mod, t=5, niter=10)
   r2 <- rmst(mod, t=5, niter=10,
              summ_fns = list(mean=mean, ~quantile(.x, c(0.025, 0.975))))
-  expect_equal(r1$`2.5%`, r2$`2.5%`)
+  expect_equal(r1$lower, r2$`2.5%`)
 })
 
 

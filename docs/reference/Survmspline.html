@@ -18,7 +18,7 @@ trajectory that is a piecewise-constant function of time."><!-- mathjax --><scri
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.9</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -160,6 +160,7 @@ trajectory that is a piecewise-constant function of time.</p>
 <span>  <span class="va">knots</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  pcure <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  offsetH <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bsmooth <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
@@ -170,6 +171,7 @@ trajectory that is a piecewise-constant function of time.</p>
 <span>  <span class="va">knots</span>,</span>
 <span>  degree <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  pcure <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  offsetH <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backhaz <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bsmooth <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -183,7 +185,12 @@ trajectory that is a piecewise-constant function of time.</p>
 
 <dt>coefs</dt>
 <dd><p>Spline basis coefficients. These should sum to 1,
-otherwise they are normalised internally to sum to 1.</p></dd>
+otherwise they are normalised internally to sum to 1.  Supplied
+either as a vector with one element per basis term, or a matrix
+with one column per basis term, and rows for alternative values
+of the coefficients (in vectorised usage of this function).  If
+an array is supplied, it is collapsed into a matrix with number
+of columns equal to the final dimension of the array.</p></dd>
 
 
 <dt>knots</dt>

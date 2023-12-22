@@ -99,6 +99,7 @@ rmst_survmspline(
   knots,
   degree = 3,
   pcure = 0,
+  offsetH = 0,
   backhaz = NULL,
   bsmooth = TRUE
 )
@@ -109,6 +110,7 @@ mean_survmspline(
   knots,
   degree = 3,
   pcure = 0,
+  offsetH = 0,
   backhaz = NULL,
   bsmooth = TRUE
 )
@@ -117,7 +119,12 @@ mean_survmspline(
 \item{alpha}{Log hazard scale parameter.}
 
 \item{coefs}{Spline basis coefficients. These should sum to 1,
-otherwise they are normalised internally to sum to 1.}
+otherwise they are normalised internally to sum to 1.  Supplied
+either as a vector with one element per basis term, or a matrix
+with one column per basis term, and rows for alternative values
+of the coefficients (in vectorised usage of this function).  If
+an array is supplied, it is collapsed into a matrix with number
+of columns equal to the final dimension of the array.}
 
 \item{knots}{Locations of knots on the axis of time, supplied in
 increasing order.  These include the two boundary knots.
