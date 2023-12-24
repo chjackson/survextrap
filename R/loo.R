@@ -1,47 +1,39 @@
 ## Leave-one-out cross-validation for survextrap models
-## Implemented by mimicking the Stan code for likelihood computation in R 
+## Implemented by mimicking the Stan code for likelihood computation in R
 
 loo_survextrap <- function(x, standata, loglik_fn){
-    ll <- loglik_fn(x, standata)
-    chains <- x$stanfit@sim$chains
-    iter <- NROW(ll)
-    chain_id <- rep(1:chains, each=iter/chains)
-    r_eff <- loo::relative_eff(exp(ll), chain_id=chain_id, cores=1)
-    res <- loo::loo(ll, r_eff = r_eff)
-    res
+  ll <- loglik_fn(x, standata)
+  chains <- x$stanfit@sim$chains
+  iter <- NROW(ll)
+  chain_id <- rep(1:chains, each=iter/chains)
+  r_eff <- loo::relative_eff(exp(ll), chain_id=chain_id, cores=1)
+  res <- loo::loo(ll, r_eff = r_eff)
+  res
 }
 
 ## Log-likelihood for the individual-level data
 
 loglik_ipd <- function(x, standata){
-    pars <- get_pars(x, newdata=NULL)
-    coefs_event <- get_coefs_bycovs(x, get_draws(x), X=standata$xnph_event)
-    coefs_rcens <- get_coefs_bycovs(x, get_draws(x), X=standata$xnph_rcens)
-
-    if (standata$ncovs>0){
-        if (standata$nevent > 0) alpha_event <- pars$loghr %*% t(standata$x_event)
-        if (standata$nrcens > 0) alpha_rcens <- pars$loghr %*% t(standata$x_rcens)
-    } else alpha_event <- alpha_rcens <- 0
-    if (standata$nevent > 0) {
-        alpha_event <- alpha_event + standata$prior_hscale[1] +
-            pars$gamma[,rep(1,standata$nevent)]
-    }
-    if (standata$nrcens > 0) {
-        alpha_rcens <- alpha_rcens + standata$prior_hscale[1] +
-            pars$gamma[,rep(1,standata$nrcens)]
-    }
-    alpha_event <- unclass(alpha_event)
-    alpha_rcens <- unclass(alpha_rcens)
-    pcure <- as.numeric(pars$pcure)
+  stanmat <- get_draws(x)
+  if (standata$nevent > 0) {
+    alpha_event <- get_alpha_bycovs(x, stanmat, X=standata$x_event)
+    coefs_event <- get_coefs_bycovs(x, stanmat, X=standata$xnph_event)
+    pcure_event <- get_pcure_bycovs(x, stanmat, X=standata$x_event)
     ll_event <- log_dens(alpha_event,  standata$basis_event,
-                         coefs_event, standata$cure, pcure,
+                         coefs_event, standata$cure, pcure_event,
                          standata$ibasis_event, modelid=1,
                          standata$relative,
                          standata$backhaz_event)
+  } else ll_event <- NULL
+  if (standata$nrcens > 0) {
+    alpha_rcens <- get_alpha_bycovs(x, stanmat, X=standata$x_rcens)
+    coefs_rcens <- get_coefs_bycovs(x, stanmat, X=standata$xnph_rcens)
+    pcure_rcens <- get_pcure_bycovs(x, stanmat, X=standata$x_rcens)
     ll_rcens <- log_surv(alpha_rcens, standata$ibasis_rcens,
-                         coefs_rcens, standata$cure, pcure,
+                         coefs_rcens, standata$cure, pcure_rcens,
                          modelid=1)
-    cbind(ll_event, ll_rcens)
+  } else ll_rcens <- NULL
+  cbind(ll_event, ll_rcens)
 }
 
 ## Aggregated likelihood is r ~ Bin(n, pstop/pstart)
@@ -50,18 +42,14 @@ loglik_ipd <- function(x, standata){
 ## for each 0/1 event in the disaggregated data
 
 loglik_external <- function(x, standata){
-  pars <- get_pars(x, newdata=NULL)
-  coefs <- get_coefs_bycovs(x, get_draws(x), X=standata$xnph_ext)
-  if (standata$ncovs>0){
-    alpha <- pars$loghr %*% t(standata$x_ext)
-  } else alpha <-0
-  alpha <- alpha + standata$prior_hscale[1] + pars$gamma[,rep(1,standata$nextern)]
-  alpha <- unclass(alpha)
-  pcure <- as.numeric(pars$pcure)
+  stanmat <- get_draws(x)
+  coefs <- get_coefs_bycovs(x, stanmat, X=standata$xnph_ext)
+  alpha <- get_alpha_bycovs(x, stanmat, X=standata$x_ext)
+  pcure <- get_pcure_bycovs(x, stanmat, X=standata$x_ext)
   y <- rep(rep(c(0, 1), each=standata$nextern),
            c(standata$n_ext - standata$r_ext, standata$r_ext))
   inds <- rep(1:standata$nextern, standata$n_ext)
-  niter <- attr(pars, "niter")
+  niter <- nrow(stanmat)
   lp_stop <- log_surv(alpha,  standata$ibasis_ext_stop, coefs,
                       standata$cure, pcure, modelid=1) +
     rep(log(standata$backsurv_ext_stop), each=niter)

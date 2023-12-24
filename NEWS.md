@@ -1,3 +1,10 @@
+# Version 0.8.10 (2023/12/24)
+
+* `loo` no longer ignores covariates on the cure probability in cure models.
+
+* More internal refactoring of code to produce outputs.
+
+
 # Version 0.8.9 (2023/12/22)
 
 * Cleaned and simplified internal code for model outputs (`rmst`, `survival` etc.). 
