@@ -113,13 +113,13 @@ prepare_pars <- function(x, newdata, t, niter=NULL,
     pars <- get_pars_bycovs(x, newdata=newdata, niter=niter)
     nt <- length(t)
     niter <- pars$niter
-    nvals <- if (is.null(newdata)) 1 else nrow(newdata)
+    nvals <- pars$nvals
     nvars <- x$mspline$nvars
     times <- array(rep(t, niter*nvals), dim=c(nt, niter, nvals))
     alpha <- array(rep(pars$alpha, each=nt), dim=c(nt, niter, nvals))
     coefs <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt, niter, nvals, nvars))
     pcure <- if (x$cure) array(rep(pars$pcure, each=nt),
-                                  dim = c(nt, niter, nvals)) else NULL
+                               dim = c(nt, niter, nvals)) else NULL
 
     ## Null covariate values to wane towards in waning models
     if (!is.null(wane_period)){
@@ -128,7 +128,7 @@ prepare_pars <- function(x, newdata, t, niter=NULL,
       alpha0 <- array(rep(pars0$alpha, each=nt), dim=c(nt, niter, nvals))
       coefs0 <- array(pars0$coefs[rep(1:niter, each=nt),,], dim=c(nt, niter, nvals, x$mspline$nvars))
       pcure0 <- if (x$cure) array(rep(pars0$pcure, each=nt),
-                                     dim = c(nt, niter, nvals)) else NULL
+                                  dim = c(nt, niter, nvals)) else NULL
     } else alpha0 <- coefs0 <- pcure0 <- NULL
 
     ## Offsets for background hazard models
@@ -205,8 +205,12 @@ get_pars_bycovs <- function(x, newdata=NULL, niter=NULL){
     coefs <- get_coefs_bycovs(x, stanmat, newdata)
     pcure <- get_pcure_bycovs(x=x, stanmat=stanmat, newdata=newdata)
 
-    res <- nlist(alpha, coefs, pcure,
-                 niter) # gamma, loghr, _base versions not needed
+    res <- nlist(alpha, coefs, pcure, niter) # gamma, loghr, _base versions not needed
+
+    if (isTRUE(attr(newdata, "std")))
+      res <- marginalise_pars(res, nstd=attr(newdata,"nstd"))
+    res$nvals <- ncol(res$alpha)
+
     res
 }
 
@@ -336,7 +340,7 @@ summarise_output <- function(res_sam, summ_fns, t, newdata, summ_name=NULL,
   res <- as.data.frame(matrix(res, nrow=nt*nvals, ncol=nsumms, byrow=TRUE))
   names(res) <- attr(summ_fns, "summnames")
   res <- cbind(t = rep(t, nvals), res)
-  if (!is.null(newdata))
+  if (!is.null(newdata) && !isTRUE(attr(newdata, "std")))
     res <- cbind(newdata[rep(1:nvals,each=nt),,drop=FALSE], res)
   if (!is.null(summ_name)){
     res$variable <- summ_name

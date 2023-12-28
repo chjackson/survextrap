@@ -104,9 +104,10 @@ plot(nd_modr, tmax=5)
 
 ### Note on computation settings {#convergence}
 
-Most of the example models in this vignette have been specified using computational approximations allow the models to be fitted more quickly, but at the cost of some inaccuracy.  This has been done so that the vignettes build more quickly.   Specifically: 
+Most of the example models in this vignette have been specified using computational approximations which allow the models to be fitted more quickly, but at the cost of some inaccuracy.  This has been done so that the vignettes build more quickly.   Specifically: 
 
-* `chains=1` was set in the examples above.   This defines the number of chains used in the MCMC method to estimate the model.    This option can be left out in practice - in which case, four MCMC chains are used, which is the default setting in the `rstan` engine that the package uses, and is more reliable in practice. 
+* `chains=1` was set in the examples above.   This defines the number of chains used in the MCMC method to estimate the model.    This option can be left out in practice - in which case, four MCMC chains are used, which is the default setting in the `rstan` engine that the package uses, and is more reliable in practice.  The number of iterations per chain can also be set with the
+`iter` argument, among other settings, see `stan()`.
 
 * Likewise, some models below are fitted using `fit.method="opt"`.  This uses an [approximation to the posterior](https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html).  This is OK for producing point estimates of the parameters (the posterior mode is used - note this is likely to differ from the mean or median) but the uncertainty will be only roughly approximated.  This is very useful for quick checks and model development.
 
@@ -311,6 +312,54 @@ plot(rxphe_mod, niter=100, tmax=5)
 plot_hazard(rxphe_mod, niter=100, tmax=20)
 ```
 
+
+### Covariate-specific outputs
+
+After fitting a model that includes covariates, to present covariate-specific outputs, a `newdata` data frame is supplied to output functions such as `rmst()`, `survival()` or `hazard()`.  This contains one row for each different covariate value (or combination of covariate values) for which outputs are required, in this case, the Observation and Lev+5FU treatment groups.
+
+```{r}
+nd <- data.frame(rx = c("Obs","Lev+5FU"))
+survival(rxph_mod, t=c(5,10), newdata=nd)
+```
+
+
+### Standardised outputs
+
+In models with covariates, "standardised" outputs are defined by averaging, or marginalising, over covariate values in some reference population, rather than being conditional on a given covariate value. To compute these, we first construct a data frame with one row for each member of the reference population, and columns for the covariate values.  We then tell the output function to average the outputs over this reference population, by applying the `standardise_to` function to the population, and supplying the result as the `newdata` argument. 
+
+```{r}
+ref_pop <- data.frame(rx = c("Obs","Lev+5FU"))
+survival(rxph_mod, t = c(5,10), newdata = standardise_to(ref_pop))
+```
+
+Here a reference population is defined that consists of 1 person in the Observation
+treatment group and 1 person in the Lev+5FU group.  As expected, the marginal 5 and 10 year survival probabilities for this population are about half way between the 
+treatment-specific estimates for these survival probabilities.
+
+
+#### Notes on computation of standardised outputs 
+
+Only the _distribution_ of covariate values in the reference population matters, and not the population _size_.  For example, the same result would have been obtained here from a reference population with $n$ people in every treatment group, for any $n$.
+
+If the reference population is larger, then computation will be slower.  The default procedure involves concatenating multiple MCMC samples of $R$ parameter values into one: 
+
+\[ (\theta^{(1)} | \mathbf{x}_1,...,\theta^{(R)}|\mathbf{x}_1), ..., (\theta^{(1)} | \mathbf{x}_M,...,\theta^{(R)}|\mathbf{x}_M) \]
+
+where $R$ is the number of MCMC samples obtained in the original `survextrap` fit (4000 with the current default number of chains and iterations used by `rstan`), $M$ is the size of the reference population, and $\mathbf{x}_j$ is the vector of covariate values for the $j$th member of the reference population. The output function is then evaluated for each element of this concatenated sample, to obtain a sample of size $R \times M$ from the posterior of the standardised output.  If this sample is large, this may be computationally intensive, particularly if the output function is slow to evaluate (e.g. the RMST, which uses numerical integration). 
+
+In the example above, there was only one covariate, which was categorical, and we just wanted a 50/50 balance of two groups. Therefore a reference population of size 2 was sufficient to describe the distribution of covariates.  In more complex situations, e.g. with continuous covariates, we might want a larger reference population to characterise the distribution. 
+
+To save computation for standardised outputs with large reference populations, an alternative computational method is available.   This works by drawing a random covariate value $\mathbf{x}_r$ from the reference population for each MCMC iteration $r$, and then evaluating the output function for the corresponding parameter value $\theta^{(r)} | \mathbf{x}_r$.  The resulting sample of outputs is then a sample of size $R$ from the posterior of the standardised output:  
+
+\[ (\theta^{(1)} | \mathbf{x}_1,...,\theta^{(R)}|\mathbf{x}_R) \]
+
+This alternative method is invoked by setting the `random=TRUE` argument to `standardise_to`, e.g. 
+
+```{r}
+survival(rxph_mod, t = c(5,10), newdata = standardise_to(ref_pop, random=TRUE))
+```
+
+The results will then be dependent on the random number seed, so care should be taken that enough MCMC iterations have been run in the original `survextrap` call that the output is stable to the required number of significant figures.
 
 ### Non-proportional hazards model {#nonprop}
 

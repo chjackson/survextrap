@@ -1,3 +1,8 @@
+# Version 0.8.11 (2023/12/28)
+
+* Outputs standardised over the covariate values of a reference population can now be produced using the new `standardise_to` function.
+
+
 # Version 0.8.10 (2023/12/24)
 
 * `loo` no longer ignores covariates on the cure probability in cure models.

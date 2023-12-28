@@ -238,7 +238,7 @@ extrapolate this model over a longer period where the effect is assumed to
 diminish.
 
 This may not work if the hazard is zero or infinite at any point in the
-waning period (this the log hazard is indeterminate).  This might typically
+waning period (thus the log hazard is indeterminate).  This might typically
 happen at time 0.
 }
 \keyword{distribution}

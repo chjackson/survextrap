@@ -28,6 +28,7 @@ reference:
   - hazard
   - cumhaz
   - hazard_ratio
+  - standardise_to
   - plot_survival
   - plot_hazard
   - plot_hazard_ratio

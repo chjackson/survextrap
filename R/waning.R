@@ -32,7 +32,7 @@
 ##' diminish.
 ##'
 ##' This may not work if the hazard is zero or infinite at any point in the
-##' waning period (this the log hazard is indeterminate).  This might typically
+##' waning period (thus the log hazard is indeterminate).  This might typically
 ##' happen at time 0. 
 ##'
 ##' @aliases psurvmspline_wane Hsurvmspline_wane hsurvmspline_wane
