@@ -93,6 +93,32 @@ validate_backhaz_onestratum <- function(backhaz, stratum, nst){
     stop(sprintf("backhaz$time should be sorted in increasing order%s", str))
 }
 
+#' Parse the background hazard data supplied to survextrap, and return
+#' the essential information needed for the likelihood computation.
+#'
+#' @inheritParams survextrap
+#'
+#' @param td Output of \code{make_td} giving observed event and censoring
+#' times in the individual data
+#'
+#' @return List with components:
+#' 
+#' \code{event} Background hazard at observed event times.  This was
+#' either supplied to \code{survextrap} directly, or via a data frame
+#' of piecewise constant hazards and their change times, potentially
+#' stratified by factors in the individual data.
+#'
+#' \code{df} Data frame giving background hazard at all times (if
+#' \code{backhaz} was supplied to \code{survextrap} in this form)
+#'
+#' \code{strata} Background hazard strata, as supplied in
+#' the \code{backhaz_strata} argument to \code{survextrap}.
+#'
+#' \code{relative} Indicator for whether a relative survival (i.e. an
+#' additive hazards) model is being used, i.e. whether \code{backhaz} was
+#' supplied to \code{survextrap}
+#'
+#' @noRd 
 make_backhaz <- function(backhaz, data, external, td, backhaz_strata){
   if (is.data.frame(backhaz)) {
     if (!is.null(data)){

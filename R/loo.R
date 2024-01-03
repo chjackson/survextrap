@@ -1,6 +1,16 @@
-## Leave-one-out cross-validation for survextrap models
-## Implemented by mimicking the Stan code for likelihood computation in R
-
+#' Leave-one-out cross-validation for survextrap models Implemented by
+#' mimicking the Stan code for likelihood computation in R
+#'
+#' @param x Result of call to \code{survextrap}
+#'
+#' @param standata List of data supplied in the call to \code{rstan}'s
+#'   MCMC or other fitting function
+#'
+#' @param loglik_fn Either \code{loglik_ipd} or \code{loglik_external}
+#'
+#' @return Result of call to \code{loo::loo}
+#'
+#' @noRd 
 loo_survextrap <- function(x, standata, loglik_fn){
   ll <- loglik_fn(x, standata)
   chains <- x$stanfit@sim$chains
@@ -11,8 +21,15 @@ loo_survextrap <- function(x, standata, loglik_fn){
   res
 }
 
-## Log-likelihood for the individual-level data
-
+#' Posterior log-likelihoods for the individual-level data
+#'
+#' @inheritParams loo_survextrap
+#'
+#' @return Matrix with one column per individual-level observation
+#'   (ordered with event times before censoring times) and one row per
+#'   MCMC sample.
+#'
+#' @noRd 
 loglik_ipd <- function(x, standata){
   stanmat <- get_draws(x)
   if (standata$nevent > 0) {
@@ -36,11 +53,24 @@ loglik_ipd <- function(x, standata){
   cbind(ll_event, ll_rcens)
 }
 
-## Aggregated likelihood is r ~ Bin(n, pstop/pstart)
-## For LOO, express at the individual level as
-## ri ~ Bern((pstop/pstart)^ri (1 - pstop/pstart)^(1-ri))
-## for each 0/1 event in the disaggregated data
-
+#' Posterior log-likelihoods for the external data
+#' 
+#' @details
+#'
+#' Aggregated likelihood is \eqn{r \sim Bin(n, pstop/pstart)}.
+#'
+#' For LOO, this is expressed at the individual level, as
+#'
+#' \deqn{ri \sim Bern((pstop/pstart)^ri (1 - pstop/pstart)^(1-ri))}
+#'
+#' for each 0/1 event in the disaggregated data
+#'
+#' @inheritParams loo_survextrap
+#'
+#' @return Matrix with one column per individual in the disaggregated
+#'   external data, and one row per MCMC sample.
+#'
+#' @noRd 
 loglik_external <- function(x, standata){
   stanmat <- get_draws(x)
   coefs <- get_coefs_bycovs(x, stanmat, X=standata$xnph_ext)

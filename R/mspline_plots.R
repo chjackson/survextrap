@@ -7,6 +7,9 @@
 #'
 #' @param tmax Maximum plotting time.  Defaults to the highest knot.
 #'
+#' @return Data frame containing the basis, as returned by \code{\link{mspline_basis}}. 
+#'
+#' @export
 mspline_plotsetup <- function(knots, bknot=10,
                               tmin=NULL, tmax=NULL,
                               degree=3, df=10, bsmooth=TRUE){

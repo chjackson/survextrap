@@ -42,6 +42,9 @@ knots is then chosen to satisfy this.}
 \item{bsmooth}{If \code{TRUE} then the function is constrained to
 also have zero derivative and second derivative at the boundary.}
 }
+\value{
+Data frame containing the basis, as returned by \code{\link{mspline_basis}}.
+}
 \description{
 Get basis for an illustration of an M-spline with given knots.
 }

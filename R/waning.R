@@ -1,39 +1,41 @@
 ##' M-spline survival distribution under treatment effect waning
 ##'
-##' This defines the CDF, cumulative hazard and hazard
-##' of a survival distribution defined by combining the hazards of two different
-##' groups (e.g. "treated" and "untreated") each defined by a standard M-spline
-##' model. The log hazards of one group and the other are interpolated over a defined period of time.
-##' This may be used for models where the treatment effect wanes, over a period of time, between an estimated
-##' hazard ratio and zero.
+##' This defines the CDF, cumulative hazard and hazard of a survival
+##' distribution defined by combining the hazards of two different
+##' groups (e.g. "treated" and "untreated") each defined by a standard
+##' M-spline model. The log hazards of one group and the other are
+##' interpolated over a defined period of time.  This may be used for
+##' models where the treatment effect wanes, over a period of time,
+##' between an estimated hazard ratio and zero.
 ##'
 ##' This distribution is defined as follows.
 ##'
-##' * Between time 0 and `wane_period[1]`, the "treated" hazard is used, as
-##' defined by an M-spline with intercept `alpha1`.
+##' * Between time 0 and `wane_period[1]`, the "treated" hazard is
+##' used, as defined by an M-spline with intercept `alpha1`.
 ##'
-##' * Between `wane_period[1]` and `wane_period[2]`, the log hazard is defined
-##' by linear interpolation.  The waning period is divided into a number
-##' of discrete pieces in which the hazard is assumed to be constant, defined by the
-##' hazard at the start of the piece.  These hazard values are obtained from
-##' the spline model, using an intercept
-##' parameter `alpha` (log scale parameter) defined by linearly interpolating between `alpha1` and
-##' `alpha0` over the waning period.   The cumulative hazard at any time can
-##' then be deduced by adding up contributions on each piece.
+##' * Between `wane_period[1]` and `wane_period[2]`, the log hazard is
+##' defined by linear interpolation.  The waning period is divided
+##' into a number of discrete pieces in which the hazard is assumed to
+##' be constant, defined by the hazard at the start of the piece.
+##' These hazard values are obtained from the spline model, using an
+##' intercept parameter `alpha` (log scale parameter) defined by
+##' linearly interpolating between `alpha1` and `alpha0` over the
+##' waning period.  The cumulative hazard at any time can then be
+##' deduced by adding up contributions on each piece.
 ##'
 ##' * After `wane_period[2]`, the "untreated" hazard is used, as defined by an
 ##' M-spline with intercept `alpha0`.
 ##'
 ##' See the [methods vignette](https://chjackson.github.io/survextrap/articles/methods.html) for more details and examples.
 ##'
-##' This can be used to predict the hazard of a person treated with a treatment
-##' whose short-term effect is estimated from shorter-term data, but we wish to
-##' extrapolate this model over a longer period where the effect is assumed to
-##' diminish.
+##' This can be used to predict the hazard of a person treated with a
+##' treatment whose short-term effect is estimated from shorter-term
+##' data, but we wish to extrapolate this model over a longer period
+##' where the effect is assumed to diminish.
 ##'
-##' This may not work if the hazard is zero or infinite at any point in the
-##' waning period (thus the log hazard is indeterminate).  This might typically
-##' happen at time 0. 
+##' This may not work if the hazard is zero or infinite at any point
+##' in the waning period (thus the log hazard is indeterminate).  This
+##' might typically happen at time 0.
 ##'
 ##' @aliases psurvmspline_wane Hsurvmspline_wane hsurvmspline_wane
 ##' dsurvmspline_wane qsurvmspline_wane rsurvmspline_wane

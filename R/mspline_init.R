@@ -155,3 +155,45 @@ msplinemodel_init <- function(df = 10,
   mspline$hscale <- hscale
   mspline
 }
+
+##' Determine M-spline basis coefficients which give a constant function.
+##'
+##' This works by obtaining the coefficients of the corresponding
+##' B-spline basis, which are equal if the B-spline is a constant
+##' function.
+##'
+##' @param mspline A list with components `knots` (vector of knots),
+##' `degree` (polynomial degree) and `bsmooth` (logical for smoothness
+##' constraint at boundary), defining an M-spline configuration.
+##'
+##' @param logit If \code{TRUE} then the multinomial logit transform of the coefficients
+##' is returned.  This is a vector of length one less than the number of coefficients,
+##' with the rth element defined by \eqn{log(coefs[r+1] / coefs[1])}.
+##'
+##' @references Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425-441.
+##'
+##' @export
+mspline_constant_coefs <- function(mspline, logit=FALSE){
+  mspline <- mspline_list_init(mspline)
+  iknots <- mspline$knots[-length(mspline$knots)]
+  bknots <- c(0, max(mspline$knots))
+  degree <- mspline$degree
+
+  ## Firstly determine coefs for constant function under unsmoothed basis
+  knot_seq <- c(rep(bknots[1], degree+1), iknots, rep(bknots[2], degree+1))
+  K <- length(iknots) + degree + 1
+  p_const <- numeric(K)
+  rescale <- (degree+1)*(bknots[2] - bknots[1])
+  for(i in 1:K){
+    p_const[i] <- (knot_seq[i+degree+1] - knot_seq[i]) / rescale
+  }
+
+  ## Deduce equivalent coefs for bsmoothed basis with same knots
+  if (mspline$bsmooth)
+    p_const <- c(p_const[1:(K-3)],
+                 p_const[K]*mspline_basis_unsmooth(bknots[2], mspline$knots)[K])
+
+  p_const <- p_const/sum(p_const)
+
+  if (logit) log(p_const[-1]/p_const[1]) else p_const
+}
