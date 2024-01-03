@@ -3,7 +3,6 @@
 S3method(coef,survextrap)
 S3method(mean,survextrap)
 S3method(plot,survextrap)
-S3method(print,message)
 S3method(print,survextrap)
 S3method(summary,survextrap)
 export(Hsurvmspline)

@@ -11,20 +11,24 @@
 #' @param formula  A survival formula in standard R formula syntax, with a call to `Surv()`
 #' on the left hand side.
 #'
-#' Covariates included on the right hand side of the formula with be modelled with
-#' proportional hazards, or if \code{nonprop} is \code{TRUE} then a non-proportional
-#' hazards is used.
+#' Covariates included on the right hand side of the formula with be
+#' modelled with proportional hazards, or if \code{nonprop} is
+#' \code{TRUE} then a non-proportional hazards is used.
 #'
-#' If \code{data} is omitted, so that the model is being fitted to external aggregate data alone,
-#' without individual data, then the formula should not include a \code{Surv()} call.  The
-#' left-hand side of the formula will then be empty, and the right hand side specifies the covariates
-#' as usual.  For example, \code{formula = ~1} if there are no covariates.
+#' If \code{data} is omitted, so that the model is being fitted to
+#' external aggregate data alone, without individual data, then the
+#' formula should not include a \code{Surv()} call.  The left-hand
+#' side of the formula will then be empty, and the right hand side
+#' specifies the covariates as usual.  For example, \code{formula =
+#' ~1} if there are no covariates.
 #'
-#' @param data Data frame containing variables in `formula`.  Variables should be
-#' in a data frame, and not in the working environment.
+#' @param data Data frame containing variables in `formula`.
+#'   Variables should be in a data frame, and not in the working
+#'   environment.
 #'
-#' This may be omitted, in which case \code{external} must be supplied.  This allows a model to be
-#' fitted to external aggregate data alone, without any individual-level data.
+#' This may be omitted, in which case \code{external} must be
+#' supplied.  This allows a model to be fitted to external aggregate
+#' data alone, without any individual-level data.
 #'
 #' @param external External data as a data frame of aggregate survival counts with columns named:
 #'
@@ -36,33 +40,40 @@
 #'
 #' `r`: Number of those people who are still alive at `stop`
 #'
-#' If there are covariates in \code{formula}, then the values they take in the external data must be supplied as additional columns in \code{external}.
-#' Therefore if there are external data, the covariates in \code{formula} and \code{data} should not be named \code{start},\code{stop},\code{n} or \code{r}.
+#' If there are covariates in \code{formula}, then the values they
+#' take in the external data must be supplied as additional columns in
+#' \code{external}.  Therefore if there are external data, the
+#' covariates in \code{formula} and \code{data} should not be named
+#' \code{start},\code{stop},\code{n} or \code{r}.
 #'
-#' @param cure If `TRUE`, a mixture cure model is used, where the "uncured" survival is defined by the
-#' M-spline model, and the cure probability is estimated.
+#' @param cure If `TRUE`, a mixture cure model is used, where the
+#'   "uncured" survival is defined by the M-spline model, and the cure
+#'   probability is estimated.
 #'
 #' @param nonprop Non-proportional hazards model specification.
 #' This is achieved by modelling the spline basis coefficients in terms of the covariates.  See
 #' the [methods vignette](https://chjackson.github.io/survextrap/articles/methods.html) for more details.
 #'
-#' If \code{TRUE}, then all covariates are modelled with non-proportional hazards, using the same model formula as \code{formula}.
+#' If \code{TRUE}, then all covariates are modelled with
+#' non-proportional hazards, using the same model formula as
+#' \code{formula}.
 #'
-#' If this is a formula, then this is assumed to define a model
-#' for the dependence of the basis coefficients on the covariates.
+#' If this is a formula, then this is assumed to define a model for
+#' the dependence of the basis coefficients on the covariates.
 #'
-#' IF this is \code{NULL} or \code{FALSE} (the default) then any covariates are modelled with proportional
-#' hazards.
+#' IF this is \code{NULL} or \code{FALSE} (the default) then any
+#' covariates are modelled with proportional hazards.
 #'
-#' @param prior_hscale Prior for the baseline log hazard scale parameter (`alpha` or `log(eta)`).
-#'   This should be a call to a prior constructor function, such as
-#'   `p_normal(0,1)` or `p_t(0,2,2)`.   Supported prior distribution families
-#'   are normal (parameters mean and SD) and t distributions (parameters
-#' location, scale and degrees of freedom).  The default is a normal distribution with
-#' mean 0 and standard deviation 20.
+#' @param prior_hscale Prior for the baseline log hazard scale
+#'   parameter (`alpha` or `log(eta)`).  This should be a call to a
+#'   prior constructor function, such as `p_normal(0,1)` or
+#'   `p_t(0,2,2)`.  Supported prior distribution families are normal
+#'   (parameters mean and SD) and t distributions (parameters
+#'   location, scale and degrees of freedom).  The default is a normal
+#'   distribution with mean 0 and standard deviation 20.
 #'
-#' Note that `eta` is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
-#' full model specification).
+#' Note that `eta` is not in itself a hazard, but it is proportional
+#' to the hazard (see the vignette for the full model specification).
 #'
 #' "Baseline" is defined by the continuous covariates taking a value
 #'   of zero and factor covariates taking their reference level.  To
@@ -72,11 +83,12 @@
 #'   computation and interpretation to define the value of zero to
 #'   denote a typical value in the data, e.g. the mean.
 #'
-#' @param prior_loghr Priors for log hazard ratios.  This should be a call to
-#'   `p_normal()` or `p_t()`.  A list of calls can also be provided, to give
-#'   different priors to different coefficients, where the name
-#'   of each list component matches the name of the coefficient, e.g.
-#'   ```list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3))```
+#' @param prior_loghr Priors for log hazard ratios.  This should be a
+#'   call to `p_normal()` or `p_t()`.  A list of calls can also be
+#'   provided, to give different priors to different coefficients,
+#'   where the name of each list component matches the name of the
+#'   coefficient, e.g.  ```list("age45-59" = p_normal(0,1), "age60+" =
+#'   p_t(0,2,3))```
 #'
 #'   The default is `p_normal(0,2.5)` for all coefficients.
 #'
@@ -103,11 +115,12 @@
 #'   \code{\link{prior_hr_sd}} for a way to calibrate this to
 #'   represent a meaningful belief.
 #'
-#' @param backhaz Background hazard, that is, for causes of death other than the
-#'   cause of interest. This defines a "relative survival" model where the
-#'   overall hazard is the sum of a cause-specific hazard and a background
-#'   hazard.   The background hazard is assumed to be known, and the
-#'   cause-specific hazard is modelled with the flexible parametric model.
+#' @param backhaz Background hazard, that is, for causes of death
+#'   other than the cause of interest. This defines a
+#'   "relative survival" model where the overall hazard is the sum of
+#'   a cause-specific hazard and a background hazard.  The background
+#'   hazard is assumed to be known, and the cause-specific hazard is
+#'   modelled with the flexible parametric model.
 #'
 #' The background hazard can be supplied in two forms.  The meaning of predictions
 #' from the model depends on which of these is used.
@@ -129,11 +142,12 @@
 #' hazard cannot be predicted in general, because the background
 #' hazard is only specified over a limited range of time.
 #'
-#' If there is external data, and `backhaz` is supplied in form (b), then the
-#' user should also supply the background survival at the start and stop points
-#' in columns of the external data named `"backsurv_start"` and
-#' `"backsurv_stop"`.  This should describe the same reference population as
-#' `backhaz`, though the package does not check for consistency between these.
+#' If there is external data, and `backhaz` is supplied in form (b),
+#' then the user should also supply the background survival at the
+#' start and stop points in columns of the external data named
+#' `"backsurv_start"` and `"backsurv_stop"`.  This should describe the
+#' same reference population as `backhaz`, though the package does not
+#' check for consistency between these.
 #'
 #' If there are stratifying variables specified in
 #' \code{backhaz_strata}, then there should be multiple rows giving
@@ -309,174 +323,169 @@ survextrap <- function(formula,
                        loo = (fit_method=="mcmc"),
                        ...)
 {
-    validate_formula(formula, needs_response=FALSE)
-    td <- make_td(formula, data)
-    data_x <- if (td$indiv) data else external
-    x <- make_x(formula, data_x, td)
-    xcure <- make_xcure(cure, data, td)
-    xnph <- make_nonprop(nonprop, data, td, formula)
-    backhaz <- make_backhaz(backhaz, data, external, td, backhaz_strata)
-    external <- make_external(external, formula, x, xcure, xnph, backhaz, backhaz_strata)
-    mspline <- make_mspline(mspline, td, external, add_knots)
+  validate_formula(formula, needs_response=FALSE)
+  td <- make_td(formula, data)
+  data_x <- if (td$indiv) data else external
+  x <- make_x(formula, data_x, td)
+  xcure <- make_xcure(cure, data, td)
+  xnph <- make_nonprop(nonprop, data, td, formula)
+  backhaz <- make_backhaz(backhaz, data, external, td, backhaz_strata)
+  external <- make_external(external, formula, x, xcure, xnph, backhaz, backhaz_strata)
+  mspline <- make_mspline(mspline, td, external, add_knots)
 
-    basis_event  <- make_basis(td$t_event, mspline)
-    ibasis_event <- make_basis(td$t_event, mspline, integrate = TRUE)
-    ibasis_rcens <- make_basis(td$t_rcens, mspline, integrate = TRUE)
-    nvars <- mspline$nvars
+  basis_event  <- make_basis(td$t_event, mspline)
+  ibasis_event <- make_basis(td$t_event, mspline, integrate = TRUE)
+  ibasis_rcens <- make_basis(td$t_rcens, mspline, integrate = TRUE)
+  nvars <- mspline$nvars
 
-    if (is.null(coefs_mean)){
-        coefs_mean <- mspline_constant_coefs(mspline)
-    } else {
-      coefs_mean <- validate_coefs_mean(coefs_mean)
+  if (is.null(coefs_mean)){
+    coefs_mean <- mspline_constant_coefs(mspline)
+  } else {
+    coefs_mean <- validate_coefs_mean(coefs_mean)
+  }
+  b_mean <- aa(log(coefs_mean[-1] / coefs_mean[1]))
+
+  smooth_models <- c("exchangeable","random_walk")
+  smooth_model <- match.arg(smooth_model, smooth_models)
+  smooth_model_id <- match(smooth_model, smooth_models)
+  est_hsd <- (hsd == "bayes")
+  if (est_hsd) hsd_init <- 1
+
+  ibasis_ext_stop <- if (external$nextern>0) make_basis(external$stop, mspline, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
+  ibasis_ext_start <- if (external$nextern>0) make_basis(external$start, mspline, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
+
+  if (xnph$ncovs > 0) {
+    if (x$ncovs==0) {
+      warning("Ignoring non-proportional hazards model specification, since no covariates in model. ")
     }
-    b_mean <- aa(log(coefs_mean[-1] / coefs_mean[1]))
+  }
 
-    smooth_models <- c("exchangeable","random_walk")
-    smooth_model <- match.arg(smooth_model, smooth_models)
-    smooth_model_id <- match(smooth_model, smooth_models)
-    est_hsd <- (hsd == "bayes")
-    if (est_hsd) hsd_init <- 1
+  priors <- get_priors(prior_hscale, prior_loghr, prior_hsd, prior_cure, prior_logor_cure,
+                       x, xcure, xnph, est_hsd, prior_hrsd)
 
-    ibasis_ext_stop <- if (external$nextern>0) make_basis(external$stop, mspline, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
-    ibasis_ext_start <- if (external$nextern>0) make_basis(external$start, mspline, integrate = TRUE) else matrix(nrow=0, ncol=nvars)
+  standata <- nlist(nevent=td$nevent, nrcens=td$nrcens,
+                    nvars, nextern=external$nextern, ncovs = x$ncovs,
+                    basis_event, ibasis_event, ibasis_rcens,
+                    ibasis_ext_stop, ibasis_ext_start,
+                    x_event=x$event, x_rcens=x$rcens,
+                    r_ext = external$r,
+                    n_ext = external$n,
+                    x_ext = external$X,
+                    ncurecovs = xcure$ncovs,
+                    nnphcovs = xnph$ncovs,
+                    xcure_event = xcure$event, xcure_rcens = xcure$rcens,
+                    xcure_ext = external$Xcure,
+                    xnph_event = xnph$event, xnph_rcens = xnph$rcens,
+                    xnph_ext = external$Xnph,
+                    b_mean,
+                    est_hsd,
+                    smooth_model = smooth_model_id,
+                    cure = xcure$cure,
+                    relative=backhaz$relative,
+                    backhaz_event = backhaz$event,
+                    backsurv_ext_stop = external$backsurv_stop,
+                    backsurv_ext_start = external$backsurv_start,
+                    prior_hscale_dist = priors$hscale$distid,
+                    prior_hscale = as.numeric(unlist(priors$hscale[c("location","scale","df")])),
+                    prior_loghr_dist = aa(priors$loghr$distid),
+                    prior_loghr_location = aa(priors$loghr$location),
+                    prior_loghr_scale = aa(priors$loghr$scale),
+                    prior_loghr_df = aa(priors$loghr$df),
+                    prior_logor_cure_dist = aa(priors$logor_cure$distid),
+                    prior_logor_cure_location = aa(priors$logor_cure$location),
+                    prior_logor_cure_scale = aa(priors$logor_cure$scale),
+                    prior_logor_cure_df = aa(priors$logor_cure$df),
+                    prior_hsd = as.numeric(unlist(priors$hsd[c("shape","rate")])),
+                    prior_cure = as.numeric(unlist(priors$cure[c("shape1","shape2")])),
+                    modelid = 1,
+                    prior_hrsd = priors$hrsd
+                    )
+  pcure_init <- if (xcure$cure) 0.5 else numeric()
+  staninit <- list(gamma = aa(0),
+                   loghr = aa(rep(0, standata$ncovs)),
+                   beta_err = aa(rep(0, standata$nvars-1)),
+                   hsd = aa(if(standata$est_hsd) hsd_init else numeric()),
+                   pcure = aa(pcure_init))
+  if (identical(hsd, "eb")){
+    hsd <- eb_smoothness(standata, staninit, prior_hsd)
+  }
+  standata$hsd_fixed <- if (est_hsd) aa(numeric()) else aa(hsd)
 
-    if (xnph$ncovs > 0) {
-      if (x$ncovs==0) {
-        warning("Ignoring non-proportional hazards model specification, since no covariates in model. ")
-      }
-    }
+  stan_optimizing_ops <- function(...){
+    ops <- list(...)
+    ops <- ops[names(ops) %in% .rstan_optimizing_args]
+    if (is.null(ops$hessian)) ops$hessian <- TRUE
+    if (is.null(ops$draws)) ops$draws <- 2000
+    ops
+  }
+  stan_sampling_ops <- function(...){
+    ops <- list(...)
+    ops
+  }
+  stan_vb_ops <- function(...){
+    ops <- list(...)
+    ops <- ops[names(ops) %in% .rstan_vb_args]
+    ops
+  }
 
-    priors <- get_priors(prior_hscale, prior_loghr, prior_hsd, prior_cure, prior_logor_cure,
-                         x, xcure, xnph, est_hsd, prior_hrsd)
+  stanmod <- "survextrap"
+  if (fit_method=="opt")
+    fits <- do.call(rstan::optimizing,
+                    c(list(object=stanmodels[[stanmod]], data=standata, init=staninit),
+                      stan_optimizing_ops(...)))
+  else if (fit_method=="mcmc")
+    fits <- do.call(rstan::sampling,
+                    c(list(object=stanmodels[[stanmod]], data=standata,
+                           pars = "beta", include=FALSE), stan_sampling_ops(...)))
+  else if (fit_method=="vb")
+    fits <- do.call(rstan::vb,
+                    c(list(object=stanmodels[[stanmod]], data=standata,
+                           pars = "beta", include=FALSE), stan_vb_ops(...)))
+  else stop(sprintf("Unknown fit_method: %s",fit_method))
 
-    standata <- nlist(nevent=td$nevent, nrcens=td$nrcens,
-                      nvars, nextern=external$nextern, ncovs = x$ncovs,
-                      basis_event, ibasis_event, ibasis_rcens,
-                      ibasis_ext_stop, ibasis_ext_start,
-                      x_event=x$event, x_rcens=x$rcens,
-                      r_ext = external$r,
-                      n_ext = external$n,
-                      x_ext = external$X,
-                      ncurecovs = xcure$ncovs,
-                      nnphcovs = xnph$ncovs,
-                      xcure_event = xcure$event, xcure_rcens = xcure$rcens,
-                      xcure_ext = external$Xcure,
-                      xnph_event = xnph$event, xnph_rcens = xnph$rcens,
-                      xnph_ext = external$Xnph,
-                      b_mean,
-                      est_hsd,
-                      smooth_model = smooth_model_id,
-                      cure = xcure$cure,
-                      relative=backhaz$relative,
-                      backhaz_event = backhaz$event,
-                      backsurv_ext_stop = external$backsurv_stop,
-                      backsurv_ext_start = external$backsurv_start,
-                      prior_hscale_dist = priors$hscale$distid,  # change name in stan too?
-                      prior_hscale = as.numeric(unlist(priors$hscale[c("location","scale","df")])),
-                      prior_loghr_dist = aa(priors$loghr$distid),
-                      prior_loghr_location = aa(priors$loghr$location),
-                      prior_loghr_scale = aa(priors$loghr$scale),
-                      prior_loghr_df = aa(priors$loghr$df),
-                      prior_logor_cure_dist = aa(priors$logor_cure$distid),
-                      prior_logor_cure_location = aa(priors$logor_cure$location),
-                      prior_logor_cure_scale = aa(priors$logor_cure$scale),
-                      prior_logor_cure_df = aa(priors$logor_cure$df),
-                      prior_hsd = as.numeric(unlist(priors$hsd[c("shape","rate")])),
-                      prior_cure = as.numeric(unlist(priors$cure[c("shape1","shape2")])),
-                      modelid = 1,
-                      prior_hrsd = priors$hrsd
-                      )
-    pcure_init <- if (xcure$cure) 0.5 else numeric()
-    staninit <- list(gamma = aa(0),
-                     loghr = aa(rep(0, standata$ncovs)),
-                     beta_err = aa(rep(0, standata$nvars-1)),
-                     hsd = aa(if(standata$est_hsd) hsd_init else numeric()),
-                     pcure = aa(pcure_init))
-    if (identical(hsd, "eb")){
-        hsd <- eb_smoothness(standata, staninit, prior_hsd)
-    }
-    standata$hsd_fixed <- if (est_hsd) aa(numeric()) else aa(hsd)
+  km <- if (td$indiv) surv_summary(survfit(formula, data=data), data=data) else NULL
 
-    stan_optimizing_ops <- function(...){
-        ops <- list(...)
-        ops <- ops[names(ops) %in% .rstan_optimizing_args]
-        if (is.null(ops$hessian)) ops$hessian <- TRUE
-        if (is.null(ops$draws)) ops$draws <- 2000
-        ops
-    }
-    stan_sampling_ops <- function(...){
-        ops <- list(...)
-        ops
-    }
-    stan_vb_ops <- function(...){
-      ops <- list(...)
-      ops <- ops[names(ops) %in% .rstan_vb_args]
-      ops
-    }
+  misc_keep <- nlist(formula, indiv=td$indiv, stanfit=fits,
+                     fit_method,
+                     cure_formula = xcure$cure_formula,
+                     nph_formula = xnph$nph_formula,
+                     backhaz=backhaz$df,
+                     backhaz_strata)
+  standata_keep <- standata[c("nvars","ncovs","ncurecovs","nnphcovs","nevent","nrcens","nextern")]
+  model_keep <- nlist(cure=xcure$cure, est_hsd)
+  spline_keep <- nlist(mspline)
+  covinfo_names <- c("xnames","xlevs","xinds","mfbase")
+  x <- list(x = x[covinfo_names])
+  xcure <- list(xcure = xcure[covinfo_names])
+  xnph <- list(xnph = xnph[covinfo_names])
+  prior_keep <- list(priors=priors)
+  prioretc_keep <- nlist(coefs_mean, hsd)
+  res <- c(misc_keep, standata_keep, model_keep, spline_keep, x, xcure, xnph,
+           prior_keep, prioretc_keep, nlist(km))
+  prior_sample <- get_prior_sample(mspline=mspline,
+                                   coefs_mean=coefs_mean,
+                                   prior_hsd=prior_hsd,
+                                   prior_hscale=prior_hscale,
+                                   prior_loghr=prior_loghr,
+                                   formula = if (res$ncovs==0) NULL else as.formula(delete.response(terms(formula))),
+                                   cure_formula = if (standata$ncurecovs==0) NULL else xcure$cure_formula,
+                                   nph_formula = xnph$nph_formula,
+                                   prior_hrsd=prior_hrsd,
+                                   default_newdata = default_newdata(res),
+                                   xlevs=x$x$xlevs)
+  res <- c(res, nlist(prior_sample))
 
-    stanmod <- "survextrap"
-    if (fit_method=="opt")
-        fits <- do.call(rstan::optimizing,
-                        c(list(object=stanmodels[[stanmod]], data=standata, init=staninit),
-                          stan_optimizing_ops(...)))
-    else if (fit_method=="mcmc")
-        fits <- do.call(rstan::sampling,
-                        c(list(object=stanmodels[[stanmod]], data=standata,
-                               pars = "beta", include=FALSE), stan_sampling_ops(...)))
-    else if (fit_method=="vb")
-        fits <- do.call(rstan::vb,
-                        c(list(object=stanmodels[[stanmod]], data=standata,
-                               pars = "beta", include=FALSE), stan_vb_ops(...)))
-    else stop(sprintf("Unknown fit_method: %s",fit_method))
-
-    km <- if (td$indiv) surv_summary(survfit(formula, data=data), data=data) else NULL
-
-    misc_keep <- nlist(formula, indiv=td$indiv, stanfit=fits,
-                       fit_method,
-                       cure_formula = xcure$cure_formula,
-                       nph_formula = xnph$nph_formula,
-                       backhaz=backhaz$df,
-                       backhaz_strata)
-    standata_keep <- standata[c("nvars","ncovs","ncurecovs","nnphcovs","nevent","nrcens","nextern")]
-    model_keep <- nlist(cure=xcure$cure, est_hsd)
-    spline_keep <- nlist(mspline)
-    covinfo_names <- c("xnames","xlevs","xinds","mfbase")
-    x <- list(x = x[covinfo_names])
-    xcure <- list(xcure = xcure[covinfo_names])
-    xnph <- list(xnph = xnph[covinfo_names])
-    prior_keep <- list(priors=priors)
-    prioretc_keep <- nlist(coefs_mean, hsd)
-    res <- c(misc_keep, standata_keep, model_keep, spline_keep, x, xcure, xnph,
-             prior_keep, prioretc_keep, nlist(km))
-    prior_sample <- get_prior_sample(mspline=mspline,
-                                     coefs_mean=coefs_mean,
-                                     prior_hsd=prior_hsd,
-                                     prior_hscale=prior_hscale,
-                                     prior_loghr=prior_loghr,
-                                     formula = if (res$ncovs==0) NULL else as.formula(delete.response(terms(formula))),
-                                     cure_formula = if (standata$ncurecovs==0) NULL else xcure$cure_formula,
-                                     nph_formula = xnph$nph_formula,
-                                     prior_hrsd=prior_hrsd,
-                                     default_newdata = default_newdata(res),
-                                     xlevs=x$x$xlevs)
-    res <- c(res, nlist(prior_sample))
-
-    class(res) <- "survextrap"
-    if (loo && (fit_method=="mcmc")) {
-      res$loo <- loo_survextrap(res, standata, loglik_ipd)
-      if (external$nextern > 0)
-        res$loo_external <- loo_survextrap(res, standata, loglik_external)
-    }
-    else {
-      res$loo <- sprintf("Cross-validation statistics not available with `fit_method=\"%s\"`", fit_method)
-      class(res$loo) <- "message"
-    }
-    res
-}
-
-##' @export
-print.message <- function(x, ...){
-  message(x)
+  class(res) <- "survextrap"
+  if (loo && (fit_method=="mcmc")) {
+    res$loo <- loo_survextrap(res, standata, loglik_ipd)
+    if (external$nextern > 0)
+      res$loo_external <- loo_survextrap(res, standata, loglik_external)
+  }
+  else {
+    res$loo <- sprintf("Cross-validation statistics not available with `fit_method=\"%s\"`", fit_method)
+    class(res$loo) <- "message"
+  }
+  res
 }
 
 ##' Make default M-spline knot specification given a survival dataset.
@@ -677,7 +686,7 @@ make_td <- function(formula, data){
     if (attr(terms(formula),"response"))
       warning("`formula` has a left-hand side, but `data` not supplied")
     return(nlist(indiv=FALSE,
-                 t_end=numeric(), status=numeric(), t_event=numeric(), t_rcens=numeric(),
+                 t_event=numeric(), t_rcens=numeric(),
                  nevent=0, nrcens=0, ind_event=numeric(), ind_rcens=numeric()))
   }
   mf <- stats::model.frame(terms(formula), data)
@@ -694,7 +703,6 @@ make_td <- function(formula, data){
   ind_event <- which(status==1)
   ind_rcens <- which(status==0)
   nlist(indiv=TRUE, # is there any individual-level data
-        t_end, status,
         t_event, t_rcens, nevent, nrcens,
         ind_event, ind_rcens)
 }
@@ -819,10 +827,10 @@ validate_df <- function(df, degree, bsmooth){
 make_mspline <- function(mspline, td, external, add_knots=NULL){
 
   ## observed times to choose default knots to span
-  tmax <- max(c(td$t_end,external$tmax), na.rm = TRUE)
-  tt <- td$t_end[td$status == 1] # uncensored event times
+  tmax <- max(c(td$t_event, td$t_rcens, external$tmax), na.rm = TRUE)
+  tt <- td$t_event # uncensored event times
   if (is.null(mspline$knots) && !length(tt)) {
-    tt <- td$t_end
+    tt <- td$t_rcens
     if (length(tt)>0)
       warning("No observed events found in the data. Censoring times will ",
               "be used to evaluate default knot locations for splines.")

@@ -133,61 +133,61 @@ psurvmspline <- function(q, alpha, coefs, knots, degree=3, lower.tail=TRUE, log.
 ##' @export
 Hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
                          pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
-    if (!is.null(backhaz)) offsetH <- get_cum_backhaz(x, backhaz)
-    if (is.null(pcure)) pcure <- 0
-    ind <- att <- NULL
-    d <- survmspline_dist_setup(q=x, alpha=alpha, coefs=coefs, knots=knots, pcure=pcure, offsetH=offsetH)
-    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
-    if (any(ind)){
-        knots <- sort(knots)
-        ibasis <- mspline_basis(q, knots=knots, degree=degree, integrate=TRUE, bsmooth=bsmooth)
-        log_cumhaz <- mspline_sum_basis(ibasis, coefs, as.vector(alpha), log=TRUE)
-        pp <- pcure>0
-        log_cumhaz[pp] = - (pcure[pp] + (1 - pcure[pp])*(-log_cumhaz[pp])) # since surv = -log_cumhaz
-        if (log){
-          ret[ind] <- log_cumhaz
-          ret[ind][offsetH>0] <- log(exp(ret[ind][offsetH>0]) + offsetH[offsetH>0])
-        }
-        else {
-          ret[ind] <- exp(log_cumhaz)
-          ret[ind][offsetH>0] <- ret[ind][offsetH>0] + offsetH[offsetH>0]
-        }
+  if (!is.null(backhaz)) offsetH <- get_cum_backhaz(x, backhaz)
+  if (is.null(pcure)) pcure <- 0
+  ind <- att <- NULL
+  d <- survmspline_dist_setup(q=x, alpha=alpha, coefs=coefs, knots=knots, pcure=pcure, offsetH=offsetH)
+  for (i in seq_along(d)) assign(names(d)[i], d[[i]])
+  if (any(ind)){
+    knots <- sort(knots)
+    ibasis <- mspline_basis(q, knots=knots, degree=degree, integrate=TRUE, bsmooth=bsmooth)
+    log_cumhaz <- mspline_sum_basis(ibasis, coefs, as.vector(alpha), log=TRUE)
+    pp <- pcure>0
+    log_cumhaz[pp] = - (pcure[pp] + (1 - pcure[pp])*(-log_cumhaz[pp])) # since surv = -log_cumhaz
+    if (log){
+      ret[ind] <- log_cumhaz
+      ret[ind][offsetH>0] <- log(exp(ret[ind][offsetH>0]) + offsetH[offsetH>0])
     }
-    attributes(ret) <- att
-    ret
+    else {
+      ret[ind] <- exp(log_cumhaz)
+      ret[ind][offsetH>0] <- ret[ind][offsetH>0] + offsetH[offsetH>0]
+    }
+  }
+  attributes(ret) <- att
+  ret
 }
 
 ##' @rdname Survmspline
 ##' @export
 hsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
                          pcure=0, offseth=0, backhaz=NULL, bsmooth=TRUE){
-    if (!is.null(backhaz)) offseth <- backhaz$hazard[findInterval(x, backhaz$time)]
-    if (is.null(pcure)) pcure <- 0
-    ind <- att <- NULL
-    d <- survmspline_dist_setup(q=x, alpha=alpha, coefs=coefs, knots=knots, pcure=pcure, offseth=offseth)
-    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
-    if (any(ind)){
-        knots <- sort(knots)
-        basis <- mspline_basis(q, knots=knots, degree=degree, bsmooth=bsmooth)
-        loghaz <- mspline_sum_basis(basis, coefs, as.vector(alpha), log=TRUE)
-        pp <- pcure>0
-        logdens <- dsurvmspline(x=x[pp], alpha=alpha[pp], coefs=coefs[pp,,drop=FALSE],
-                               knots=knots, degree=degree, pcure=0, log=TRUE, bsmooth=bsmooth)
-        logsurv <- psurvmspline(q=q[pp], alpha=alpha[pp], coefs=coefs[pp,,drop=FALSE],
-                               knots=knots, degree=degree, pcure=pcure[pp], log.p=TRUE, lower.tail=FALSE, bsmooth=bsmooth)
-        loghaz[pp] <- log(1 - pcure[pp]) + logdens - logsurv
+  if (!is.null(backhaz)) offseth <- backhaz$hazard[findInterval(x, backhaz$time)]
+  if (is.null(pcure)) pcure <- 0
+  ind <- att <- NULL
+  d <- survmspline_dist_setup(q=x, alpha=alpha, coefs=coefs, knots=knots, pcure=pcure, offseth=offseth)
+  for (i in seq_along(d)) assign(names(d)[i], d[[i]])
+  if (any(ind)){
+    knots <- sort(knots)
+    basis <- mspline_basis(q, knots=knots, degree=degree, bsmooth=bsmooth)
+    loghaz <- mspline_sum_basis(basis, coefs, as.vector(alpha), log=TRUE)
+    pp <- pcure>0
+    logdens <- dsurvmspline(x=x[pp], alpha=alpha[pp], coefs=coefs[pp,,drop=FALSE],
+                            knots=knots, degree=degree, pcure=0, log=TRUE, bsmooth=bsmooth)
+    logsurv <- psurvmspline(q=q[pp], alpha=alpha[pp], coefs=coefs[pp,,drop=FALSE],
+                            knots=knots, degree=degree, pcure=pcure[pp], log.p=TRUE, lower.tail=FALSE, bsmooth=bsmooth)
+    loghaz[pp] <- log(1 - pcure[pp]) + logdens - logsurv
 
-        if (log){
-          ret[ind] <- loghaz
-          ret[ind][offseth>0] <- log(exp(ret[ind][offseth>0]) + offseth[offseth>0])
-        }
-        else {
-          ret[ind] <- exp(loghaz)
-          ret[ind][offseth>0] <- ret[ind][offseth>0] + offseth[offseth>0]
-        }
+    if (log){
+      ret[ind] <- loghaz
+      ret[ind][offseth>0] <- log(exp(ret[ind][offseth>0]) + offseth[offseth>0])
     }
-    attributes(ret) <- att
-    ret
+    else {
+      ret[ind] <- exp(loghaz)
+      ret[ind][offseth>0] <- ret[ind][offseth>0] + offseth[offseth>0]
+    }
+  }
+  attributes(ret) <- att
+  ret
 }
 
 ##' @rdname Survmspline
@@ -202,7 +202,7 @@ dsurvmspline <- function(x, alpha, coefs, knots, degree=3, log=FALSE,
   if (is.null(pcure)) pcure <- 0
   ind <- att <- NULL
   d <- survmspline_dist_setup(q=x, alpha=alpha, coefs=coefs, knots=knots,
-                             pcure=pcure, offseth=offseth, offsetH=offsetH)
+                              pcure=pcure, offseth=offseth, offsetH=offsetH)
   for (i in seq_along(d)) assign(names(d)[i], d[[i]])
   if (any(ind)){
     loghaz <- hsurvmspline(q, alpha, coefs, knots, degree,
@@ -242,34 +242,34 @@ rsurvmspline <- function(n, alpha, coefs, knots, degree=3,
 }
 
 survmspline_dist_setup <- function(q, alpha, coefs, knots, pcure=0, offsetH=0, offseth=0){
-    validate_knots(knots)
-    if (is.vector(coefs)) coefs <- matrix(coefs, nrow=1)
-    if (is.array(coefs) && length(dim(coefs))>2){
-      nvars <- dim(coefs)[length(dim(coefs))]
-      coefs <- matrix(as.vector(coefs), ncol=nvars)
-    }
-    lg <- nrow(coefs)
-    nret <- max(length(q), nrow(coefs), length(alpha), length(pcure), length(offsetH), length(offseth))
-    att <- attributes(q)
-    q <- rep(q, length=nret)
-    alpha <- rep(alpha, length=nret)
-    coefs <- coefs[rep(seq_len(nrow(coefs)), length.out=nret),,drop=FALSE]
-    pcure <- rep(pcure, length=nret)
-    offsetH <- rep(offsetH, length=nret)
-    offseth <- rep(offseth, length=nret)
-    ret <- numeric(nret)
-    nas <- is.na(q) | is.na(alpha) | is.na(rowSums(coefs)) | is.na(pcure) | is.na(offsetH) | is.na(offseth)
-    ret[nas] <- NA
-    nans <- is.nan(q) | is.nan(alpha) | is.nan(rowSums(coefs)) | is.nan(pcure) | is.nan(offsetH) | is.nan(offseth)
-    ret[nans] <- NaN
-    ind <- !(nas | nans)
-    q <- q[ind]
-    alpha <- alpha[ind]
-    coefs <- coefs[ind,,drop=FALSE]
-    pcure <- pcure[ind]
-    offsetH <- offsetH[ind]
-    offseth <- offseth[ind]
-    nlist(ret, q, alpha, coefs, ind, pcure, offsetH, offseth, att)
+  validate_knots(knots)
+  if (is.vector(coefs)) coefs <- matrix(coefs, nrow=1)
+  if (is.array(coefs) && length(dim(coefs))>2){
+    nvars <- dim(coefs)[length(dim(coefs))]
+    coefs <- matrix(as.vector(coefs), ncol=nvars)
+  }
+  lg <- nrow(coefs)
+  nret <- max(length(q), nrow(coefs), length(alpha), length(pcure), length(offsetH), length(offseth))
+  att <- attributes(q)
+  q <- rep(q, length=nret)
+  alpha <- rep(alpha, length=nret)
+  coefs <- coefs[rep(seq_len(nrow(coefs)), length.out=nret),,drop=FALSE]
+  pcure <- rep(pcure, length=nret)
+  offsetH <- rep(offsetH, length=nret)
+  offseth <- rep(offseth, length=nret)
+  ret <- numeric(nret)
+  nas <- is.na(q) | is.na(alpha) | is.na(rowSums(coefs)) | is.na(pcure) | is.na(offsetH) | is.na(offseth)
+  ret[nas] <- NA
+  nans <- is.nan(q) | is.nan(alpha) | is.nan(rowSums(coefs)) | is.nan(pcure) | is.nan(offsetH) | is.nan(offseth)
+  ret[nans] <- NaN
+  ind <- !(nas | nans)
+  q <- q[ind]
+  alpha <- alpha[ind]
+  coefs <- coefs[ind,,drop=FALSE]
+  pcure <- pcure[ind]
+  offsetH <- offsetH[ind]
+  offseth <- offseth[ind]
+  nlist(ret, q, alpha, coefs, ind, pcure, offsetH, offseth, att)
 }
 
 validate_knots <- function(knots, name="knots"){
@@ -285,21 +285,21 @@ validate_knots <- function(knots, name="knots"){
 ##' @rdname Survmspline
 ##' @export
 rmst_survmspline = function(t, alpha, coefs, knots, degree=3, pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
-    if (is.null(pcure)) pcure <- 0
-    rmst_generic(psurvmspline, t, start=0,
-                 matargs = c("coefs"),
-                 unvectorised_args = c("knots","degree","backhaz","bsmooth"),
-                 alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
+  if (is.null(pcure)) pcure <- 0
+  rmst_generic(psurvmspline, t, start=0,
+               matargs = c("coefs"),
+               unvectorised_args = c("knots","degree","backhaz","bsmooth"),
+               alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
 }
 
 ##' @rdname Survmspline
 ##' @export
 mean_survmspline = function(alpha, coefs, knots, degree=3, pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
-    nt <- if (is.matrix(coefs)) nrow(coefs) else 1
-    rmst_generic(psurvmspline, rep(Inf,nt), start=0,
-                 matargs = c("coefs"),
-                 unvectorised_args = c("knots","degree","backhaz","bsmooth"),
-                 alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
+  nt <- if (is.matrix(coefs)) nrow(coefs) else 1
+  rmst_generic(psurvmspline, rep(Inf,nt), start=0,
+               matargs = c("coefs"),
+               unvectorised_args = c("knots","degree","backhaz","bsmooth"),
+               alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
 }
 
 #

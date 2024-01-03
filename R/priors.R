@@ -54,25 +54,25 @@ p_t <- function(location = 0, scale = 2.5, df = 1) {
 #' @rdname priors
 #' @export
 p_beta <- function(shape1 = 1, shape2 = 1){
-    validate_positive_parameter(shape1)
-    validate_positive_parameter(shape2)
-    res <- nlist(dist = "beta", shape1, shape2)
-    res$r <- function(n)rbeta(n, shape1=shape1, shape2=shape2)
-    res$q <- function(p)qbeta(p, shape1=shape1, shape2=shape2)
-    class(res) <- "prior"
-    res
+  validate_positive_parameter(shape1)
+  validate_positive_parameter(shape2)
+  res <- nlist(dist = "beta", shape1, shape2)
+  res$r <- function(n)rbeta(n, shape1=shape1, shape2=shape2)
+  res$q <- function(p)qbeta(p, shape1=shape1, shape2=shape2)
+  class(res) <- "prior"
+  res
 }
 
 #' @rdname priors
 #' @export
 p_gamma <- function(shape = 2, rate = 1){
-    validate_positive_parameter(shape)
-    validate_positive_parameter(rate)
-    res <- nlist(dist = "gamma", shape, rate)
-    res$r <- function(n)rgamma(n, shape=shape, rate=rate)
-    res$q <- function(p)qgamma(p, shape=shape, rate=rate)
-    class(res) <- "prior"
-    res
+  validate_positive_parameter(shape)
+  validate_positive_parameter(rate)
+  res <- nlist(dist = "gamma", shape, rate)
+  res$r <- function(n)rgamma(n, shape=shape, rate=rate)
+  res$q <- function(p)qgamma(p, shape=shape, rate=rate)
+  class(res) <- "prior"
+  res
 }
 
 #' Derive a normal prior for the log hazard scale parameter based on a guess at survival times
@@ -166,33 +166,33 @@ get_priors <- function(hscale, loghr, hsd, cure, logor_cure, x, xcure, xnph, est
 }
 
 validate_prior <- function(prior, priorname=NULL, element=NULL){
-    if (is.null(priorname)) priorname <- deparse(substitute(prior))
-    priorfullname <- sprintf("prior_%s", priorname)
+  if (is.null(priorname)) priorname <- deparse(substitute(prior))
+  priorfullname <- sprintf("prior_%s", priorname)
 
-    valid_priors <- list(hscale = c("normal","t"),
-                         loghr = c("normal","t"),
-                         cure = "beta",
-                         hsd = "gamma",
-                         logor_cure = c("normal","t"),
-                         hrsd = "gamma")
+  valid_priors <- list(hscale = c("normal","t"),
+                       loghr = c("normal","t"),
+                       cure = "beta",
+                       hsd = "gamma",
+                       logor_cure = c("normal","t"),
+                       hrsd = "gamma")
 
-    element <- if (is.null(element)) "" else sprintf("[[%s]]",element)
-    if (!inherits(prior, "prior")){
-        stop(sprintf("`%s%s` should be a call to a prior constructor function such as %s(), see help(survextrap)",
-                     priorfullname, element, valid_priors[[priorname]][1]))
-    } else {
-        if (!(prior$dist %in% valid_priors[[priorname]])){
-            vp <- paste0("p_",valid_priors[[priorname]])
-            vpstr <- if (length(vp)==1) vp else paste("one of", paste(vp,collapse=","))
-            stop(sprintf("`%s%s` should be %s. p_%s was supplied", priorfullname, element, vpstr, prior$dist))
-        }
+  element <- if (is.null(element)) "" else sprintf("[[%s]]",element)
+  if (!inherits(prior, "prior")){
+    stop(sprintf("`%s%s` should be a call to a prior constructor function such as %s(), see help(survextrap)",
+                 priorfullname, element, valid_priors[[priorname]][1]))
+  } else {
+    if (!(prior$dist %in% valid_priors[[priorname]])){
+      vp <- paste0("p_",valid_priors[[priorname]])
+      vpstr <- if (length(vp)==1) vp else paste("one of", paste(vp,collapse=","))
+      stop(sprintf("`%s%s` should be %s. p_%s was supplied", priorfullname, element, vpstr, prior$dist))
     }
+  }
 }
 
 get_prior_hsd <- function(prior, est_hsd){
-    validate_prior(prior, "hsd")
-    if (!est_hsd) return(list(shape=aa(numeric()), rate=aa(numeric())))
-    prior
+  validate_prior(prior, "hsd")
+  if (!est_hsd) return(list(shape=aa(numeric()), rate=aa(numeric())))
+  prior
 }
 
 ## @param prior_list User-supplied prior specification
@@ -426,54 +426,54 @@ prior_sample_basehaz <- function(mspline,
 }
 
 prior_sample_hscale <- function(sam, nsim, x, prior_loghr, X, X0){
-    loghr_prior <- get_prior_coveffs(prior_loghr, x, "loghr")
-    loghr <- lapply(attr(loghr_prior, "r"), function(x)x$r(nsim))
-    loghr <- do.call(cbind, loghr[x$xnames])
-    if (!is.null(X0)){
-      linpred0 <- loghr %*% t(X0)
-      sam$alpha0 <- sam$alpha + linpred0
-      sam$hscale0 <- exp(sam$alpha0)
-    }
-    linpred <- loghr %*% t(X)
-    sam$alpha <- sam$alpha + linpred
-    sam$hscale <- exp(sam$alpha)
-    sam
+  loghr_prior <- get_prior_coveffs(prior_loghr, x, "loghr")
+  loghr <- lapply(attr(loghr_prior, "r"), function(x)x$r(nsim))
+  loghr <- do.call(cbind, loghr[x$xnames])
+  if (!is.null(X0)){
+    linpred0 <- loghr %*% t(X0)
+    sam$alpha0 <- sam$alpha + linpred0
+    sam$hscale0 <- exp(sam$alpha0)
+  }
+  linpred <- loghr %*% t(X)
+  sam$alpha <- sam$alpha + linpred
+  sam$hscale <- exp(sam$alpha)
+  sam
 }
 
 prior_sample_nonprop <- function(sam, nsim, x, xnph, prior_hrsd, Xnph, Xnph0){
-    hrsd_prior <- get_prior_hrsd(prior_hrsd, xnph)
-    hrsd <- vector(x$ncovs, mode="list")
-    nvars <- ncol(sam$coefs) # number of spline basis terms
-    np_linpred <- matrix(0, nrow=nsim, ncol=nvars-1)
-    for (i in seq_len(x$ncovs)){
-      hrsd[[i]] <- rgamma(nsim, shape=hrsd_prior[i,1], rate=hrsd_prior[i,2])
-      b_np <- matrix(rnorm(nsim *(nvars - 1), 0, hrsd[[i]]),
-                     nrow=nsim, ncol=nvars-1)
-      if (!is.null(Xnph0))
-        np_linpred0 <- np_linpred + b_np * Xnph0[i]
-      np_linpred <- np_linpred + b_np * Xnph[i]
-    }
-    if (!is.null(Xnph0)){
-      np_linpred0 <- cbind(0, np_linpred0)
-      sam$beta0 <- sam$beta + np_linpred0
-      sam$coefs0 <- exp(sam$beta0) / rowSums(exp(sam$beta0))
-    }
-    np_linpred <- cbind(0, np_linpred)
-    sam$beta <- sam$beta + np_linpred
-    sam$coefs <- exp(sam$beta) / rowSums(exp(sam$beta))
-    sam
+  hrsd_prior <- get_prior_hrsd(prior_hrsd, xnph)
+  hrsd <- vector(x$ncovs, mode="list")
+  nvars <- ncol(sam$coefs) # number of spline basis terms
+  np_linpred <- matrix(0, nrow=nsim, ncol=nvars-1)
+  for (i in seq_len(x$ncovs)){
+    hrsd[[i]] <- rgamma(nsim, shape=hrsd_prior[i,1], rate=hrsd_prior[i,2])
+    b_np <- matrix(rnorm(nsim *(nvars - 1), 0, hrsd[[i]]),
+                   nrow=nsim, ncol=nvars-1)
+    if (!is.null(Xnph0))
+      np_linpred0 <- np_linpred + b_np * Xnph0[i]
+    np_linpred <- np_linpred + b_np * Xnph[i]
+  }
+  if (!is.null(Xnph0)){
+    np_linpred0 <- cbind(0, np_linpred0)
+    sam$beta0 <- sam$beta + np_linpred0
+    sam$coefs0 <- exp(sam$beta0) / rowSums(exp(sam$beta0))
+  }
+  np_linpred <- cbind(0, np_linpred)
+  sam$beta <- sam$beta + np_linpred
+  sam$coefs <- exp(sam$beta) / rowSums(exp(sam$beta))
+  sam
 }
 
 prior_sample_cure <- function(sam, nsim, xcure, prior_cure, prior_logor_cure, Xcure){
-    sam$pcure <- prior_cure$r(nsim)
-    if (xcure$ncovs > 0) { 
-      logor_cure_prior <- get_prior_coveffs(prior_logor_cure, xcure, "logor_cure")
-      logor_cure <- lapply(attr(logor_cure_prior, "r"), function(x)x$r(nsim))
-      logor_cure <- do.call(cbind, logor_cure[xcure$xnames])
-      linpred <- logor_cure %*% t(Xcure)
-      sam$pcure <- plogis(qlogis(sam$pcure) + linpred)
-    }
-    sam
+  sam$pcure <- prior_cure$r(nsim)
+  if (xcure$ncovs > 0) { 
+    logor_cure_prior <- get_prior_coveffs(prior_logor_cure, xcure, "logor_cure")
+    logor_cure <- lapply(attr(logor_cure_prior, "r"), function(x)x$r(nsim))
+    logor_cure <- do.call(cbind, logor_cure[xcure$xnames])
+    linpred <- logor_cure %*% t(Xcure)
+    sam$pcure <- plogis(qlogis(sam$pcure) + linpred)
+  }
+  sam
 }
 
 ##' Generate and/or plot a sample from the prior distribution of M-spline hazard curves
@@ -630,18 +630,18 @@ prior_hr <- function(prior_loghr = p_normal(0, 2.5),
 
 ## Copied from internal function in stats package, under GPL.  Copyright (c) R Core.
 format_perc <- function (x, digits = max(2L, getOption("digits")), probability = TRUE,
-    use.fC = length(x) < 100, ...)
+                         use.fC = length(x) < 100, ...)
 {
-    if (length(x)) {
-        if (probability)
-            x <- 100 * x
-        ans <- paste0(if (use.fC)
-            formatC(x, format = "fg", width = 1, digits = digits)
-        else format(x, trim = TRUE, digits = digits, ...), "%")
-        ans[is.na(x)] <- ""
-        ans
-    }
-    else character(0)
+  if (length(x)) {
+    if (probability)
+      x <- 100 * x
+    ans <- paste0(if (use.fC)
+                    formatC(x, format = "fg", width = 1, digits = digits)
+                  else format(x, trim = TRUE, digits = digits, ...), "%")
+    ans[is.na(x)] <- ""
+    ans
+  }
+  else character(0)
 }
 
 
