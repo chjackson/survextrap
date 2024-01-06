@@ -76,15 +76,16 @@ that define a constant hazard function (see
 \code{\link{mspline_constant_coefs}}).  They are normalised to
 sum to 1 internally (if they do not already).}
 
-\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{alpha} or \code{log(eta)}).
-This should be a call to a prior constructor function, such as
-\code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
-are normal (parameters mean and SD) and t distributions (parameters
-location, scale and degrees of freedom).  The default is a normal distribution with
-mean 0 and standard deviation 20.
+\item{prior_hscale}{Prior for the baseline log hazard scale
+parameter (\code{alpha} or \code{log(eta)}).  This should be a call to a
+prior constructor function, such as \code{p_normal(0,1)} or
+\code{p_t(0,2,2)}.  Supported prior distribution families are normal
+(parameters mean and SD) and t distributions (parameters
+location, scale and degrees of freedom).  The default is a normal
+distribution with mean 0 and standard deviation 20.
 
-Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
-full model specification).
+Note that \code{eta} is not in itself a hazard, but it is proportional
+to the hazard (see the vignette for the full model specification).
 
 "Baseline" is defined by the continuous covariates taking a value
 of zero and factor covariates taking their reference level.  To
@@ -108,11 +109,11 @@ values given here.}
 \item{formula}{A model formula with no response, defining the
 covariates on the hazard scale.}
 
-\item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
-\code{p_normal()} or \code{p_t()}.  A list of calls can also be provided, to give
-different priors to different coefficients, where the name
-of each list component matches the name of the coefficient, e.g.
-\code{list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3))}
+\item{prior_loghr}{Priors for log hazard ratios.  This should be a
+call to \code{p_normal()} or \code{p_t()}.  A list of calls can also be
+provided, to give different priors to different coefficients,
+where the name of each list component matches the name of the
+coefficient, e.g.  \code{list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3))}
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 

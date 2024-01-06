@@ -48,6 +48,15 @@ output.}
 \item{sample}{If \code{TRUE} then the MCMC samples are returned instead
 of being summarised as a median and 95\% credible intervals.}
 }
+\value{
+A data frame (tibble) with each row containing posterior summary statistics
+for different times.
+
+Or if \code{sample=TRUE}, an array with dimensions
+\code{length(t)}, \code{niter}, and 1, giving the
+incremental RMST evaluated at different times and MCMC iterations
+respectively.
+}
 \description{
 Compute the hazard ratio at a series of time points, estimated from
 a \code{\link{survextrap}} model.  Intended for use with

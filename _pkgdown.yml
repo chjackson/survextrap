@@ -52,6 +52,7 @@ reference:
   - mspline_basis
   - mspline_constant_coefs
   - mspline_plotdata
+  - mspline_plotsetup
   - plot_mspline
   - mspline_init
   - mspline_list_init

@@ -65,3 +65,15 @@ test_that("hrtime", {
                  summ_fns = list(mean=mean))
   expect_equal(hrt3$mean, hrt2$mean[1])
 })
+
+test_that("irmst",{
+  expect_error(irmst(mod), "`newdata` should be supplied explicitly")
+  nd <- data.frame(rx = c("Lev+5FU","Lev"))
+  set.seed(1)
+  r2 <- rmst(mod, newdata=nd[2,,drop=FALSE], t=5, niter=50)
+  r1 <- rmst(mod, newdata=nd[1,,drop=FALSE], t=5, niter=50)
+  expect_equal(irmst(mod, newdata=nd, t=5, niter=50)$median,
+               r2$median - r1$median, tol=1e-01)
+  isam <- irmst(mod, newdata=nd, t=5, niter=5, sample=TRUE)
+  expect_true(is.numeric(mean(isam)))
+})

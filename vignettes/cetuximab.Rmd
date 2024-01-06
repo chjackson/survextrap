@@ -234,7 +234,7 @@ names(rescomp) <- names(rescompi)
 rescomp %>% 
   mutate(looic = round(looic, 1), 
          rmf = sprintf("%s (%s, %s)", round(median,2), 
-                       round(`2.5%`, 2), round(`97.5%`, 2))) %>%
+                       round(`lower`, 2), round(`upper`, 2))) %>%
   select(df, looic, rmf) %>%
   knitr::kable(col.names = c("df", "LOOIC", "Restricted mean survival (5 years)"))
 ```
@@ -304,24 +304,27 @@ Note that when using functions like `rmst()` or `survival()` which extract outpu
 ```{r table_trt, class.source = 'fold-hide'}
 comp_fn <- function(mod){
     rm <- rmst(mod, niter=1000, newdata=data.frame(treat="Control"), t=c(5,20)) %>% 
-        rename(rm_med="median",rm_lower="2.5%", rm_upper="97.5%") %>% 
+        rename(rm_med="median", rm_lower="lower", rm_upper="upper") %>% 
         select(t, rm_med, rm_lower, rm_upper)
     irm <- irmst(mod, niter=1000, t=c(5,20)) %>%
-        rename(ir_med="median",ir_lower="2.5%", ir_upper="97.5%") %>%
+        rename(ir_med="median", ir_lower="lower", ir_upper="upper") %>%
         select(ir_med, ir_lower, ir_upper)
     cbind(name=deparse(substitute(mod)), rm, irm, 
           list(looic = mod$loo$estimates["looic","Estimate"]))
 }
 
-rmst_cet <- rmst(mod_cet, t=c(5,20))
 rmst_con <- rmst(mod_con, t=c(5,20)) %>%
-  rename(rm_med="median",rm_lower="2.5%", rm_upper="97.5%") %>% 
+  rename(rm_med="median", rm_lower="lower", rm_upper="upper") %>% 
   select(t, rm_med, rm_lower, rm_upper)
-irmst_sep <- attr(rmst_cet,"sample")[[1]] - attr(rmst_con,"sample")[[1]]
-irmst_sep <- posterior::summarise_draws(irmst_sep, median,
-                                        ~quantile(.x, probs=c(0.025, 0.975))) %>%
+
+irmst_sep <- rmst(mod_cet, t=c(5,20), sample=TRUE) - rmst(mod_con, t=c(5,20), sample=TRUE) 
+
+irmst_sep <- irmst_sep %>%
+  posterior::summarise_draws(median,
+                             ~quantile(.x, probs=c(0.025, 0.975))) %>%
   rename(t=variable, ir_med="median",ir_lower="2.5%", ir_upper="97.5%") %>% 
   select(ir_med, ir_lower, ir_upper)
+
 loo_sep <- mod_con$loo$estimates["looic","Estimate"] +
   mod_cet$loo$estimates["looic","Estimate"]
 comp_sep <- cbind(list(name="mod_sep"), rmst_con, irmst_sep, list(looic=loo_sep))
@@ -421,7 +424,7 @@ knot_list <- list(c(10,20),
 
 comp_fn <- function(mod){
   rm <- rmst(mod, niter=1000, newdata=data.frame(treat="Control"), t=c(20)) %>% 
-    rename(rm_med="median",rm_lower="2.5%", rm_upper="97.5%") %>% 
+    rename(rm_med="median",rm_lower="lower", rm_upper="upper") %>% 
     mutate(rmf = sprintf("%s (%s, %s)", round(rm_med,2), 
                          round(rm_lower,2), round(rm_upper,2))) %>%
     select(t, rmf)
@@ -678,10 +681,10 @@ relic40 <- rmst(mod_cure_elic, t=40, niter=ni) %>%
 modlabs <- c("(1a)", "(1a)", "(1b)", "(1c)", "(1d)","(1e)", "(1f)", "(1g)")
 
 rs <- list(rcon, rcon20, rcon520, rreg20, rreg40, rpop40, rcure40, relic40) %>%
-  purrr::reduce(full_join, by = join_by(variable, t, median, `2.5%`, `97.5%`, data, extrap)) %>%
+  purrr::reduce(full_join, by = join_by(variable, t, median, `lower`, `upper`, data, extrap)) %>%
   mutate(modlabs=modlabs,
          rmst = sprintf("%s (%s, %s)", round(median,2), 
-                        round(`2.5%`,2), round(`97.5%`,2))) %>%
+                        round(`lower`,2), round(`upper`,2))) %>%
   select(modlabs, data, extrap, t, rmst)
 knitr::kable(rs, col.names=c("Model", "Observed data","Extrapolation assumptions",
                              "Time horizon","Restricted mean survival"))
@@ -742,13 +745,13 @@ irmw20 <- irmst(mod_full_pop, t=20, niter=ni, newdata = ind, newdata0 = ind0,
 
 rmd <- rbind(rmnwr, rmnw, rmw6, rmw20) %>% 
     filter(treat=="Control") %>%
-    rename(rm="median",rmlower="2.5%",rmupper="97.5%") %>%
+    rename(rm="median",rmlower="lower",rmupper="upper") %>%
     mutate(data=c("reg","pop"),
            rmf = sprintf("%s (%s, %s)", round(rm,2), 
                          round(rmlower,2), round(rmupper,2))) %>%
     select(data, wane, rmf) 
 irmd <- rbind(irmnwr, irmnw, irmw6, irmw20) %>% 
-    rename(irm="median",irmlower="2.5%",irmupper="97.5%") %>%
+    rename(irm="median",irmlower="lower",irmupper="upper") %>%
     mutate(data=c("reg","pop","pop","pop"),
            irmf = sprintf("%s (%s, %s)", round(irm,2), 
                           round(irmlower,2), round(irmupper,2))) %>%

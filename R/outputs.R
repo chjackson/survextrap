@@ -59,7 +59,7 @@
 ##' output.
 ##'
 ##' @param sample If \code{TRUE} then an MCMC sample is returned from the posterior
-##' of the output, rather than summary statistics. 
+##' of the output, rather than summary statistics.
 ##'
 ##' @param ... Other options (currently unused).
 ##'
@@ -99,14 +99,13 @@ mean.survextrap <- function(x, newdata=NULL,
 ##' rmst(mod, t=3, niter=100)
 ##' rmst(mod, t=3, summ_fns=list(mean=mean), niter=100)
 ##'
-##' @return A data frame with each row containing posterior summary statistics
-##' for a particular covariate value.
+##' @return A data frame (tibble) with each row containing posterior summary statistics
+##' for a particular time and covariate value.
 ##'
-##' An attribute \code{"sample"} is also returned, containing a list of matrices
-##' containing samples from the posterior distribution of the RMST.  The list has
-##' one component for each row of \code{newdata}, defined as a matrix where the
-##' number of rows is the number of MCMC samples, and the number of columns is the
-##' number of times in \code{t}.
+##' Or if \code{sample=TRUE}, an array with dimensions
+##' \code{length(t)}, \code{niter}, \code{nrow(newdata)}, giving the
+##' RMST evaluated at different times, MCMC iterations and covariate
+##' values respectively.
 ##'
 ##' @export
 rmst <- function(x,t,newdata=NULL,
@@ -115,10 +114,10 @@ rmst <- function(x,t,newdata=NULL,
   newdata <- default_newdata(x, newdata)
   p <- prepare_pars(x=x, newdata=newdata, t=t, niter=niter, newdata0=newdata0, wane_period=wane_period)
 
-  nd_strata <- make_backhaz_strata(x$backhaz_strata, x$backhaz, newdata)$strata
+  nd_strata <- make_backhaz_strata(x$backhaz_strata, x$backhaz, newdata)$dat
   res_sam <- array(dim=c(p$nt, p$niter, p$nvals))
   for (j in 1:p$nvals){
-    ## for rmst_generic, this should be matrix rather than array 
+    ## for rmst_generic, this should be matrix rather than array
     coefs1 <- matrix(p$coefs[,,j,], ncol=p$nvars)
     backhaz <- x$backhaz[x$backhaz$stratum == nd_strata[j],] # awkward to vectorise this over nvals
     ## note the offset depends on t so we can't supply a fixed offset
@@ -166,24 +165,27 @@ rmst <- function(x,t,newdata=NULL,
 ##' levels, then this is taken from these levels.  Otherwise \code{newdata}
 ##' must be supplied explicitly.
 ##'
+##' @return A data frame (tibble) with each row containing posterior summary statistics
+##' for a particular time and covariate value.
+##'
+##' Or if \code{sample=TRUE}, an array with dimensions
+##' \code{length(t)}, \code{niter}, \code{nrow(newdata)}, giving the
+##' incremental RMST evaluated at different times, MCMC iterations and covariate
+##' values respectively.
+##'
 ##' @inheritParams rmst
 ##'
 ##' @export
 irmst <- function(x, t, newdata=NULL, newdata0=NULL, wane_period=NULL, wane_nt=10,
-                  niter=NULL, summ_fns=NULL){
+                  niter=NULL, summ_fns=NULL, sample=FALSE){
     newdata <- default_newdata_comparison(x, newdata)
     rmst1 <- rmst(x, t=t, newdata=newdata[1,,drop=FALSE], newdata0=newdata0[1,,drop=FALSE],
-                  wane_period = wane_period, wane_nt=wane_nt, niter=niter)
+                  wane_period = wane_period, wane_nt=wane_nt, niter=niter, sample=TRUE)
     rmst2 <- rmst(x, t=t, newdata=newdata[2,,drop=FALSE], newdata0=newdata0[2,,drop=FALSE],
-                  wane_period = wane_period, wane_nt=wane_nt, niter=niter)
-    irmst_sam <- attr(rmst2, "sample")[[1]] - attr(rmst1, "sample")[[1]]
-    irmst_sam <- posterior::as_draws(irmst_sam)
-    if (is.null(summ_fns))
-      summ_fns <- list(median=median, ~quantile(.x, probs=c(0.025, 0.975)))
-    res <- do.call(summary, c(list(irmst_sam), summ_fns))
-    res <- cbind(t=as.numeric(res$variable), res)
-    res$variable <- "irmst"
-    attr(res, "sample") <- irmst_sam
+                  wane_period = wane_period, wane_nt=wane_nt, niter=niter, sample=TRUE)
+    irmst_sam <- rmst2 - rmst1
+    res <- summarise_output(irmst_sam, summ_fns, t, newdata=NULL,
+                            summ_name="irmst", sample=sample)
     res
 }
 
@@ -206,6 +208,10 @@ irmst <- function(x, t, newdata=NULL, newdata0=NULL, wane_period=NULL, wane_nt=1
 ##'
 ##' @param sample If \code{TRUE} then the MCMC samples are returned instead
 ##' of being summarised as a median and 95% credible intervals.
+##'
+##' @return A data frame (tibble) giving posterior summary statistics,
+##'   or (if \code{sample=TRUE}) an array giving samples from the
+##'   posterior.
 ##'
 ##' @export
 survival <- function(x, newdata=NULL, t=NULL, tmax=NULL,
@@ -239,6 +245,10 @@ survival <- function(x, newdata=NULL, t=NULL, tmax=NULL,
 ##' @inheritParams print.survextrap
 ##' @inheritParams survival
 ##'
+##' @return A data frame (tibble) giving posterior summary statistics,
+##'   or (if \code{sample=TRUE}) an array giving samples from the
+##'   posterior.
+##'
 ##' @export
 hazard <- function(x, newdata=NULL, t=NULL, tmax=NULL,
                     niter=NULL, summ_fns=NULL, sample=FALSE,
@@ -268,6 +278,10 @@ hazard <- function(x, newdata=NULL, t=NULL, tmax=NULL,
 ##'
 ##' @inheritParams print.survextrap
 ##' @inheritParams survival
+##'
+##' @return A data frame (tibble) giving posterior summary statistics,
+##'   or (if \code{sample=TRUE}) an array giving samples from the
+##'   posterior.
 ##'
 ##' @export
 cumhaz <- function(x, newdata=NULL, t=NULL, tmax=NULL,
@@ -313,22 +327,22 @@ cumhaz <- function(x, newdata=NULL, t=NULL, tmax=NULL,
 #'
 #' @inheritParams hazard
 #'
+#' @return A data frame (tibble) with each row containing posterior summary statistics
+#' for different times.
+#'
+#' Or if \code{sample=TRUE}, an array with dimensions
+#' \code{length(t)}, \code{niter}, and 1, giving the
+#' incremental RMST evaluated at different times and MCMC iterations
+#' respectively. 
+#'
 #' @export
 hazard_ratio <- function(x, newdata=NULL, t=NULL, tmax=NULL, niter=NULL, summ_fns=NULL, sample=FALSE) {
   newdata <- default_newdata_comparison(x, newdata)
   if (is.null(t)) t <- default_plottimes(x, tmax)
-  haz1 <- hazard(x, newdata=newdata[1,,drop=FALSE], t=t, tmax=tmax, niter=niter, sample=TRUE)[,,1]
-  haz2 <- hazard(x, newdata=newdata[2,,drop=FALSE], t=t, tmax=tmax, niter=niter, sample=TRUE)[,,1]
+  haz1 <- hazard(x, newdata=newdata[1,,drop=FALSE], t=t, tmax=tmax, niter=niter, sample=TRUE)[,,1,drop=FALSE]
+  haz2 <- hazard(x, newdata=newdata[2,,drop=FALSE], t=t, tmax=tmax, niter=niter, sample=TRUE)[,,1,drop=FALSE]
   hr_sam <- haz2 / haz1
-  summ_fns <- default_summfns(summ_fns)
-  if (!sample){
-    res <- apply(hr_sam, 1, do_summfns, summ_fns)
-    nsumms <- length(do_summfns(1, summ_fns))
-    res <- as.data.frame(t(matrix(res, nrow=nsumms, ncol=length(t))))
-    names(res) <- attr(summ_fns, "summnames")
-    res <- cbind(t = t, res)
-  } else res <- hr_sam
-  res
+  summarise_output(hr_sam, summ_fns, t, newdata=NULL, sample=sample)
 }
 
 ##' Hazard ratio between high and low values of the hazard over time
@@ -348,24 +362,21 @@ hazard_ratio <- function(x, newdata=NULL, t=NULL, tmax=NULL, niter=NULL, summ_fn
 ##'   covariate value requested in `newdata`, and one column for each
 ##'   posterior summary statistic.
 ##'
+##' Or if \code{sample=TRUE}, an array with dimensions
+##' \code{1}, \code{niter}, and \code{nrow(newdata)}, giving the
+##' incremental RMST evaluated at different MCMC iterations
+##' and covariate values respectively. 
+##'
 ##' @export
-hrtime <- function(x, newdata=NULL, niter=NULL, summ_fns=NULL, hq=c(0.1, 0.9)){
+hrtime <- function(x, newdata=NULL, niter=NULL, summ_fns=NULL, hq=c(0.1, 0.9), sample=FALSE){
   newdata <- default_newdata(x, newdata)
   t <- seq(0, max(x$mspline$knots), length.out=100)
   haz <- hazard(x, newdata=newdata, niter=niter, t=t, sample=TRUE)
   if (!is.numeric(hq) || (length(hq) !=2))
     stop("`hq` should be a numeric vector of length 2")
   haz_hilo <- apply(haz, c(2,3), quantile, hq)
-  hr <- haz_hilo[2,,] / haz_hilo[1,,]
-  hr <- haz_hilo[2,,] / haz_hilo[1,,]
-  dim(hr) <- dim(haz_hilo)[c(2,3)]
-  summ_fns <- default_summfns(summ_fns)
-  res <- t(apply(hr, 2, do_summfns, summ_fns))
-  res <- as.data.frame(res)
-  names(res) <- attr(summ_fns, "summnames")
-  if (!is.null(newdata))
-    res <- cbind(newdata, res)
-  res
+  hr_sam <- haz_hilo[2,,,drop=FALSE] / haz_hilo[1,,,drop=FALSE]
+  summarise_output(hr_sam, summ_fns, t=NULL, newdata=newdata, sample=sample)
 }
 
 

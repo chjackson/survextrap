@@ -67,14 +67,13 @@ output.}
 of the output, rather than summary statistics.}
 }
 \value{
-A data frame with each row containing posterior summary statistics
-for a particular covariate value.
+A data frame (tibble) with each row containing posterior summary statistics
+for a particular time and covariate value.
 
-An attribute \code{"sample"} is also returned, containing a list of matrices
-containing samples from the posterior distribution of the RMST.  The list has
-one component for each row of \code{newdata}, defined as a matrix where the
-number of rows is the number of MCMC samples, and the number of columns is the
-number of times in \code{t}.
+Or if \code{sample=TRUE}, an array with dimensions
+\code{length(t)}, \code{niter}, \code{nrow(newdata)}, giving the
+RMST evaluated at different times, MCMC iterations and covariate
+values respectively.
 }
 \description{
 Compute the restricted mean survival time from a model fitted with

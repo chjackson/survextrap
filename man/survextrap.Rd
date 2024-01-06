@@ -32,20 +32,24 @@ survextrap(
 \item{formula}{A survival formula in standard R formula syntax, with a call to \code{Surv()}
 on the left hand side.
 
-Covariates included on the right hand side of the formula with be modelled with
-proportional hazards, or if \code{nonprop} is \code{TRUE} then a non-proportional
-hazards is used.
+Covariates included on the right hand side of the formula with be
+modelled with proportional hazards, or if \code{nonprop} is
+\code{TRUE} then a non-proportional hazards is used.
 
-If \code{data} is omitted, so that the model is being fitted to external aggregate data alone,
-without individual data, then the formula should not include a \code{Surv()} call.  The
-left-hand side of the formula will then be empty, and the right hand side specifies the covariates
-as usual.  For example, \code{formula = ~1} if there are no covariates.}
+If \code{data} is omitted, so that the model is being fitted to
+external aggregate data alone, without individual data, then the
+formula should not include a \code{Surv()} call.  The left-hand
+side of the formula will then be empty, and the right hand side
+specifies the covariates as usual.  For example, \code{formula =
+~1} if there are no covariates.}
 
-\item{data}{Data frame containing variables in \code{formula}.  Variables should be
-in a data frame, and not in the working environment.
+\item{data}{Data frame containing variables in \code{formula}.
+Variables should be in a data frame, and not in the working
+environment.
 
-This may be omitted, in which case \code{external} must be supplied.  This allows a model to be
-fitted to external aggregate data alone, without any individual-level data.}
+This may be omitted, in which case \code{external} must be
+supplied.  This allows a model to be fitted to external aggregate
+data alone, without any individual-level data.}
 
 \item{external}{External data as a data frame of aggregate survival counts with columns named:
 
@@ -57,33 +61,40 @@ fitted to external aggregate data alone, without any individual-level data.}
 
 \code{r}: Number of those people who are still alive at \code{stop}
 
-If there are covariates in \code{formula}, then the values they take in the external data must be supplied as additional columns in \code{external}.
-Therefore if there are external data, the covariates in \code{formula} and \code{data} should not be named \code{start},\code{stop},\code{n} or \code{r}.}
+If there are covariates in \code{formula}, then the values they
+take in the external data must be supplied as additional columns in
+\code{external}.  Therefore if there are external data, the
+covariates in \code{formula} and \code{data} should not be named
+\code{start},\code{stop},\code{n} or \code{r}.}
 
-\item{cure}{If \code{TRUE}, a mixture cure model is used, where the "uncured" survival is defined by the
-M-spline model, and the cure probability is estimated.}
+\item{cure}{If \code{TRUE}, a mixture cure model is used, where the
+"uncured" survival is defined by the M-spline model, and the cure
+probability is estimated.}
 
 \item{nonprop}{Non-proportional hazards model specification.
 This is achieved by modelling the spline basis coefficients in terms of the covariates.  See
 the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette} for more details.
 
-If \code{TRUE}, then all covariates are modelled with non-proportional hazards, using the same model formula as \code{formula}.
+If \code{TRUE}, then all covariates are modelled with
+non-proportional hazards, using the same model formula as
+\code{formula}.
 
-If this is a formula, then this is assumed to define a model
-for the dependence of the basis coefficients on the covariates.
+If this is a formula, then this is assumed to define a model for
+the dependence of the basis coefficients on the covariates.
 
-IF this is \code{NULL} or \code{FALSE} (the default) then any covariates are modelled with proportional
-hazards.}
+IF this is \code{NULL} or \code{FALSE} (the default) then any
+covariates are modelled with proportional hazards.}
 
-\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{alpha} or \code{log(eta)}).
-This should be a call to a prior constructor function, such as
-\code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
-are normal (parameters mean and SD) and t distributions (parameters
-location, scale and degrees of freedom).  The default is a normal distribution with
-mean 0 and standard deviation 20.
+\item{prior_hscale}{Prior for the baseline log hazard scale
+parameter (\code{alpha} or \code{log(eta)}).  This should be a call to a
+prior constructor function, such as \code{p_normal(0,1)} or
+\code{p_t(0,2,2)}.  Supported prior distribution families are normal
+(parameters mean and SD) and t distributions (parameters
+location, scale and degrees of freedom).  The default is a normal
+distribution with mean 0 and standard deviation 20.
 
-Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
-full model specification).
+Note that \code{eta} is not in itself a hazard, but it is proportional
+to the hazard (see the vignette for the full model specification).
 
 "Baseline" is defined by the continuous covariates taking a value
 of zero and factor covariates taking their reference level.  To
@@ -93,11 +104,11 @@ meaning.  For continuous covariates, it helps for both
 computation and interpretation to define the value of zero to
 denote a typical value in the data, e.g. the mean.}
 
-\item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
-\code{p_normal()} or \code{p_t()}.  A list of calls can also be provided, to give
-different priors to different coefficients, where the name
-of each list component matches the name of the coefficient, e.g.
-\code{list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3))}
+\item{prior_loghr}{Priors for log hazard ratios.  This should be a
+call to \code{p_normal()} or \code{p_t()}.  A list of calls can also be
+provided, to give different priors to different coefficients,
+where the name of each list component matches the name of the
+coefficient, e.g.  \code{list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3))}
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
@@ -124,11 +135,12 @@ per covariate, as in \code{prior_loghr}.  See
 \code{\link{prior_hr_sd}} for a way to calibrate this to
 represent a meaningful belief.}
 
-\item{backhaz}{Background hazard, that is, for causes of death other than the
-cause of interest. This defines a "relative survival" model where the
-overall hazard is the sum of a cause-specific hazard and a background
-hazard.   The background hazard is assumed to be known, and the
-cause-specific hazard is modelled with the flexible parametric model.
+\item{backhaz}{Background hazard, that is, for causes of death
+other than the cause of interest. This defines a
+"relative survival" model where the overall hazard is the sum of
+a cause-specific hazard and a background hazard.  The background
+hazard is assumed to be known, and the cause-specific hazard is
+modelled with the flexible parametric model.
 
 The background hazard can be supplied in two forms.  The meaning of predictions
 from the model depends on which of these is used.
@@ -150,11 +162,12 @@ excess hazard or survival on top of this background.  The overall
 hazard cannot be predicted in general, because the background
 hazard is only specified over a limited range of time.
 
-If there is external data, and \code{backhaz} is supplied in form (b), then the
-user should also supply the background survival at the start and stop points
-in columns of the external data named \code{"backsurv_start"} and
-\code{"backsurv_stop"}.  This should describe the same reference population as
-\code{backhaz}, though the package does not check for consistency between these.
+If there is external data, and \code{backhaz} is supplied in form (b),
+then the user should also supply the background survival at the
+start and stop points in columns of the external data named
+\code{"backsurv_start"} and \code{"backsurv_stop"}.  This should describe the
+same reference population as \code{backhaz}, though the package does not
+check for consistency between these.
 
 If there are stratifying variables specified in
 \code{backhaz_strata}, then there should be multiple rows giving

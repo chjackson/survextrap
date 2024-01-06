@@ -330,7 +330,7 @@ newdata_to_X <- function(newdata, x, formula=NULL, xlevs=NULL){
 #' median or mode and 95\% credible limits).
 #'
 #' @noRd
-summarise_output <- function(res_sam, summ_fns, t, newdata, summ_name=NULL,
+summarise_output <- function(res_sam, summ_fns, t=NULL, newdata, summ_name=NULL,
                              sample=FALSE){
   if (sample) return(res_sam)
   nt <- dim(res_sam)[1]; niter <- dim(res_sam)[2]; nvals <- dim(res_sam)[3]
@@ -339,7 +339,7 @@ summarise_output <- function(res_sam, summ_fns, t, newdata, summ_name=NULL,
   nsumms <- length(do_summfns(1, summ_fns))
   res <- as.data.frame(matrix(res, nrow=nt*nvals, ncol=nsumms, byrow=TRUE))
   names(res) <- attr(summ_fns, "summnames")
-  res <- cbind(t = rep(t, nvals), res)
+  if (!is.null(t)) res <- cbind(t = rep(t, nvals), res)
   if (!is.null(newdata) && !isTRUE(attr(newdata, "std")))
     res <- cbind(newdata[rep(1:nvals,each=nt),,drop=FALSE], res)
   if (!is.null(summ_name)){

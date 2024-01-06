@@ -4,7 +4,14 @@
 \alias{hrtime}
 \title{Hazard ratio between high and low values of the hazard over time}
 \usage{
-hrtime(x, newdata = NULL, niter = NULL, summ_fns = NULL, hq = c(0.1, 0.9))
+hrtime(
+  x,
+  newdata = NULL,
+  niter = NULL,
+  summ_fns = NULL,
+  hq = c(0.1, 0.9),
+  sample = FALSE
+)
 }
 \arguments{
 \item{x}{A fitted model object as returned by \code{\link{survextrap}}}
@@ -45,12 +52,20 @@ ratio in \code{prior_hr_sd}).  The ratio between the high and low
 values will be summarised, as a measure of time-dependence.  By
 default, this is \code{c(0.1, 0.9)}, so that the 10\% and 90\%
 quantiles are used respectively.}
+
+\item{sample}{If \code{TRUE} then the MCMC samples are returned instead
+of being summarised as a median and 95\% credible intervals.}
 }
 \value{
 A summary of the posterior distribution of this hazard
 ratio from the fitted model, as a data frame with one row per
 covariate value requested in \code{newdata}, and one column for each
 posterior summary statistic.
+
+Or if \code{sample=TRUE}, an array with dimensions
+\code{1}, \code{niter}, and \code{nrow(newdata)}, giving the
+incremental RMST evaluated at different MCMC iterations
+and covariate values respectively.
 }
 \description{
 This is intended as an intuitive single-number measure of how much

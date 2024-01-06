@@ -1,3 +1,8 @@
+# Version 0.8.12 (2024/01/06)
+
+* `irmst`, `hazard_ratio` and `hrtime` tidied.   Fix of bug in `irmst` introduced in v0.8.9, and all now have a `sample` argument.
+
+
 # Version 0.8.11 (2023/12/28)
 
 * Outputs standardised over the covariate values of a reference population can now be produced using the new `standardise_to` function.

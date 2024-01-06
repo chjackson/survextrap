@@ -48,15 +48,16 @@ if \code{bsmooth} is \code{FALSE}.
 at the highest knot, by defining the derivative and second derivative
 at this point to be zero.}
 
-\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{alpha} or \code{log(eta)}).
-This should be a call to a prior constructor function, such as
-\code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
-are normal (parameters mean and SD) and t distributions (parameters
-location, scale and degrees of freedom).  The default is a normal distribution with
-mean 0 and standard deviation 20.
+\item{prior_hscale}{Prior for the baseline log hazard scale
+parameter (\code{alpha} or \code{log(eta)}).  This should be a call to a
+prior constructor function, such as \code{p_normal(0,1)} or
+\code{p_t(0,2,2)}.  Supported prior distribution families are normal
+(parameters mean and SD) and t distributions (parameters
+location, scale and degrees of freedom).  The default is a normal
+distribution with mean 0 and standard deviation 20.
 
-Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
-full model specification).
+Note that \code{eta} is not in itself a hazard, but it is proportional
+to the hazard (see the vignette for the full model specification).
 
 "Baseline" is defined by the continuous covariates taking a value
 of zero and factor covariates taking their reference level.  To

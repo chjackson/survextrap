@@ -73,6 +73,11 @@ this is not supplied, then no waning is assumed.}
 \item{wane_nt}{Number of intervals defining the piecewise constant approximation
 to the hazard during the waning period.}
 }
+\value{
+A data frame (tibble) giving posterior summary statistics,
+or (if \code{sample=TRUE}) an array giving samples from the
+posterior.
+}
 \description{
 Estimates of the cumulative hazard at particular times, from a \code{\link{survextrap}} model
 }

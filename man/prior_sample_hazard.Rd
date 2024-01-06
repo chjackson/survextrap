@@ -80,15 +80,16 @@ function.  This should be a call to \code{p_gamma()}.  The default is
 \code{p_gamma(2,1)}.  See \code{\link{prior_haz_sd}} for a way to
 calibrate this to represent a meaningful belief.}
 
-\item{prior_hscale}{Prior for the baseline log hazard scale parameter (\code{alpha} or \code{log(eta)}).
-This should be a call to a prior constructor function, such as
-\code{p_normal(0,1)} or \code{p_t(0,2,2)}.   Supported prior distribution families
-are normal (parameters mean and SD) and t distributions (parameters
-location, scale and degrees of freedom).  The default is a normal distribution with
-mean 0 and standard deviation 20.
+\item{prior_hscale}{Prior for the baseline log hazard scale
+parameter (\code{alpha} or \code{log(eta)}).  This should be a call to a
+prior constructor function, such as \code{p_normal(0,1)} or
+\code{p_t(0,2,2)}.  Supported prior distribution families are normal
+(parameters mean and SD) and t distributions (parameters
+location, scale and degrees of freedom).  The default is a normal
+distribution with mean 0 and standard deviation 20.
 
-Note that \code{eta} is not in itself a hazard, but it is proportional to the hazard (see the vignette for the
-full model specification).
+Note that \code{eta} is not in itself a hazard, but it is proportional
+to the hazard (see the vignette for the full model specification).
 
 "Baseline" is defined by the continuous covariates taking a value
 of zero and factor covariates taking their reference level.  To
@@ -113,40 +114,45 @@ In non-proportional hazards models, setting \code{smooth_model} also
 determines whether an exchangeable or random walk model is used for the
 non-proportionality parameters (\eqn{\delta}).}
 
-\item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
-\code{p_normal()} or \code{p_t()}.  A list of calls can also be provided, to give
-different priors to different coefficients, where the name
-of each list component matches the name of the coefficient, e.g.
-\code{list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3))}
+\item{prior_loghr}{Priors for log hazard ratios.  This should be a
+call to \code{p_normal()} or \code{p_t()}.  A list of calls can also be
+provided, to give different priors to different coefficients,
+where the name of each list component matches the name of the
+coefficient, e.g.  \code{list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3))}
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
 \item{formula}{A survival formula in standard R formula syntax, with a call to \code{Surv()}
 on the left hand side.
 
-Covariates included on the right hand side of the formula with be modelled with
-proportional hazards, or if \code{nonprop} is \code{TRUE} then a non-proportional
-hazards is used.
+Covariates included on the right hand side of the formula with be
+modelled with proportional hazards, or if \code{nonprop} is
+\code{TRUE} then a non-proportional hazards is used.
 
-If \code{data} is omitted, so that the model is being fitted to external aggregate data alone,
-without individual data, then the formula should not include a \code{Surv()} call.  The
-left-hand side of the formula will then be empty, and the right hand side specifies the covariates
-as usual.  For example, \code{formula = ~1} if there are no covariates.}
+If \code{data} is omitted, so that the model is being fitted to
+external aggregate data alone, without individual data, then the
+formula should not include a \code{Surv()} call.  The left-hand
+side of the formula will then be empty, and the right hand side
+specifies the covariates as usual.  For example, \code{formula =
+~1} if there are no covariates.}
 
-\item{cure}{If \code{TRUE}, a mixture cure model is used, where the "uncured" survival is defined by the
-M-spline model, and the cure probability is estimated.}
+\item{cure}{If \code{TRUE}, a mixture cure model is used, where the
+"uncured" survival is defined by the M-spline model, and the cure
+probability is estimated.}
 
 \item{nonprop}{Non-proportional hazards model specification.
 This is achieved by modelling the spline basis coefficients in terms of the covariates.  See
 the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette} for more details.
 
-If \code{TRUE}, then all covariates are modelled with non-proportional hazards, using the same model formula as \code{formula}.
+If \code{TRUE}, then all covariates are modelled with
+non-proportional hazards, using the same model formula as
+\code{formula}.
 
-If this is a formula, then this is assumed to define a model
-for the dependence of the basis coefficients on the covariates.
+If this is a formula, then this is assumed to define a model for
+the dependence of the basis coefficients on the covariates.
 
-IF this is \code{NULL} or \code{FALSE} (the default) then any covariates are modelled with proportional
-hazards.}
+IF this is \code{NULL} or \code{FALSE} (the default) then any
+covariates are modelled with proportional hazards.}
 
 \item{newdata}{A data frame with one row, containing variables in
 the model formulae.  Samples will then be drawn, for any

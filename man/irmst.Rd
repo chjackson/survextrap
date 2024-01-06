@@ -12,7 +12,8 @@ irmst(
   wane_period = NULL,
   wane_nt = 10,
   niter = NULL,
-  summ_fns = NULL
+  summ_fns = NULL,
+  sample = FALSE
 )
 }
 \arguments{
@@ -49,6 +50,18 @@ This is passed to \code{\link[posterior:summarise_draws]{posterior::summarise_dr
 By default this is \code{list(median=median, ~quantile(.x, probs=c(0.025, 0.975)))}.
 If the list is named, then the names will be used for the columns of the
 output.}
+
+\item{sample}{If \code{TRUE} then an MCMC sample is returned from the posterior
+of the output, rather than summary statistics.}
+}
+\value{
+A data frame (tibble) with each row containing posterior summary statistics
+for a particular time and covariate value.
+
+Or if \code{sample=TRUE}, an array with dimensions
+\code{length(t)}, \code{niter}, \code{nrow(newdata)}, giving the
+incremental RMST evaluated at different times, MCMC iterations and covariate
+values respectively.
 }
 \description{
 Compute the difference in the restricted mean survival times

@@ -8,11 +8,11 @@ prior on the log hazard ratio}
 prior_hr(prior_loghr = p_normal(0, 2.5), quantiles = c(0.025, 0.5, 0.975))
 }
 \arguments{
-\item{prior_loghr}{Priors for log hazard ratios.  This should be a call to
-\code{p_normal()} or \code{p_t()}.  A list of calls can also be provided, to give
-different priors to different coefficients, where the name
-of each list component matches the name of the coefficient, e.g.
-\code{list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3))}
+\item{prior_loghr}{Priors for log hazard ratios.  This should be a
+call to \code{p_normal()} or \code{p_t()}.  A list of calls can also be
+provided, to give different priors to different coefficients,
+where the name of each list component matches the name of the
+coefficient, e.g.  \code{list("age45-59" = p_normal(0,1), "age60+" = p_t(0,2,3))}
 
 The default is \code{p_normal(0,2.5)} for all coefficients.}
 
