@@ -1,0 +1,9 @@
+library(survextrap)
+library(DT)
+
+mspline_defaults <- list(
+  df = 8,
+  degree = 3,
+  bsmooth = TRUE,
+  bknot = 10
+)

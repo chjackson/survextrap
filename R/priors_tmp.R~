@@ -1,0 +1,14 @@
+prior_sample_covs <- function(x, prior_loghr, X, X0, sam){
+    loghr_prior <- get_prior_coveffs(prior_loghr, x, "loghr")
+    loghr <- lapply(attr(loghr_prior, "r"), function(x)x$r(nsim))
+    loghr <- do.call(cbind, loghr[x$xnames])
+    if (!is.null(X0)){
+      linpred0 <- loghr %*% t(X0)
+      sam$alpha0 <- sam$alpha + linpred0
+      sam$hscale0 <- exp(sam$alpha0)
+    }
+    linpred <- loghr %*% t(X)
+    sam$alpha <- sam$alpha + linpred
+    sam$hscale <- exp(sam$alpha)
+    sam
+}

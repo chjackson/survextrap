@@ -1,0 +1,39 @@
+bootstrapPage(
+
+  selectInput(inputId = "df",
+      label = "Knots df",
+      choices = c(2,4,6,8),
+      selected = 6),
+
+  selectInput(inputId = "degree",
+      label = "Polynomial degree",
+      choices = c(2,3,4),
+      selected = 3),
+
+  checkboxInput(inputId = "bsmooth",
+      label = "Boundary smoothness",
+      value = TRUE),
+
+  uiOutput(outputId = "coefs", height = "300px"),
+
+  plotOutput(outputId = "main_plot", height = "300px"),
+
+)
+    
+    #initialize a blank dataframe
+
+    #output the datatable based on the dataframe (and make it editable)
+#    output$my_datatable <- renderDT({
+#        DT::datatable(v$data, editable = TRUE)
+#    })
+
+## TODO
+
+## coefficients 
+
+## knot positions 
+
+## why no x axis? 
+## y axis scaling
+## line colors, widths
+## ggplot code to paste
