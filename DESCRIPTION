@@ -11,7 +11,7 @@ Description: Survival analysis using a flexible Bayesian model for individual-le
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.0
 Biarch: true
 Depends: 
     R (>= 3.5.0),

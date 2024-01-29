@@ -9,7 +9,6 @@
 #' @references Jackson, C. (2023) \code{survextrap}: a package for flexible and transparent
 #' survival extrapolation.  arXiV preprint, \url{https://arxiv.org/abs/2306.03957}.
 #' 
-#' @docType package
 #' @name survextrap-package
 #' @useDynLib survextrap, .registration = TRUE
 #' @import methods
@@ -24,4 +23,4 @@
 #' 
 #' @importFrom stats as.formula delete.response dweibull integrate median model.matrix model.response optim predict pweibull quantile qbeta qgamma qnorm qt rlogis rnorm runif rbeta rgamma rt sd terms time var formula model.frame na.pass plogis qlogis get_all_vars reshape .getXlevels setNames
 #'
-NULL
+"_PACKAGE"

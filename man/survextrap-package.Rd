@@ -15,3 +15,21 @@ For details of the methods, see the paper by Jackson (2023).
 Jackson, C. (2023) \code{survextrap}: a package for flexible and transparent
 survival extrapolation.  arXiV preprint, \url{https://arxiv.org/abs/2306.03957}.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/chjackson/survextrap}
+  \item \url{https://chjackson.github.io/survextrap/}
+  \item Report bugs at \url{https://github.com/chjackson/survextrap/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk} (\href{https://orcid.org/0000-0002-6656-8913}{ORCID}) [copyright holder]
+
+Other contributors:
+\itemize{
+  \item Iain Timmins (\href{https://orcid.org/0000-0002-8761-582X}{ORCID}) [contributor]
+}
+
+}
