@@ -15,3 +15,4 @@ vignettes/*_files*
 /Meta/
 man/figures
 docs/reference/figures
+inst/stan/survextrap.exe

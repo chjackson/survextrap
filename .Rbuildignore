@@ -15,3 +15,5 @@ vignettes/cetuximab*
 ^doc$
 ^Meta$
 vignettes/sbc*
+cmdstanr
+inst/stan/survextrap.exe

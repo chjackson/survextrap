@@ -411,18 +411,18 @@ survextrap <- function(formula,
   }
   standata$hsd_fixed <- if (est_hsd) aa(numeric()) else aa(hsd)
 
-  stan_optimizing_ops <- function(...){
+  rstan_optimizing_ops <- function(...){
     ops <- list(...)
     ops <- ops[names(ops) %in% .rstan_optimizing_args]
     if (is.null(ops$hessian)) ops$hessian <- TRUE
     if (is.null(ops$draws)) ops$draws <- 2000
     ops
   }
-  stan_sampling_ops <- function(...){
+  rstan_sampling_ops <- function(...){
     ops <- list(...)
     ops
   }
-  stan_vb_ops <- function(...){
+  rstan_vb_ops <- function(...){
     ops <- list(...)
     ops <- ops[names(ops) %in% .rstan_vb_args]
     ops
@@ -432,15 +432,15 @@ survextrap <- function(formula,
   if (fit_method=="opt")
     fits <- do.call(rstan::optimizing,
                     c(list(object=stanmodels[[stanmod]], data=standata, init=staninit),
-                      stan_optimizing_ops(...)))
+                      rstan_optimizing_ops(...)))
   else if (fit_method=="mcmc")
     fits <- do.call(rstan::sampling,
                     c(list(object=stanmodels[[stanmod]], data=standata,
-                           pars = "beta", include=FALSE), stan_sampling_ops(...)))
+                           pars = "beta", include=FALSE), rstan_sampling_ops(...)))
   else if (fit_method=="vb")
     fits <- do.call(rstan::vb,
                     c(list(object=stanmodels[[stanmod]], data=standata,
-                           pars = "beta", include=FALSE), stan_vb_ops(...)))
+                           pars = "beta", include=FALSE), rstan_vb_ops(...)))
   else stop(sprintf("Unknown fit_method: %s",fit_method))
 
   km <- if (td$indiv) surv_summary(survfit(formula, data=data), data=data) else NULL
