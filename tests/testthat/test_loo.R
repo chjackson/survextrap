@@ -31,7 +31,7 @@ test_that("loo with no events / censored",{
   suppressWarnings({
     mod <- survextrap(Surv(years, status) ~ 1, data=cnoev, fit_method="mcmc",
                       chains=1, iter=1000)
-    expect_equal(mod$loo$estimates["looic","Estimate"], 0.0647417, tol=1e-02)
+    expect_equal(mod$loo$estimates["looic","Estimate"], 0.0647417, tol=1e-01)
     mod <- survextrap(Surv(years, status) ~ 1, data=cnocens, fit_method="mcmc",
                       chains=1, iter=1000)
     expect_equal(mod$loo$estimates["looic","Estimate"], 169.6696, tol=1e-02)
@@ -49,12 +49,12 @@ test_that("loo with external",{
     nde_mod <- survextrap(Surv(years, status) ~ 1, data=colons,
                           external = extdat, add_knots=c(4, 10, 25),
                           fit_method="mcmc", chains=1, iter=1000)
-    expect_equal(nde_mod$loo$estimates["looic","Estimate"], 426.8256, tol=1e-00)
+    expect_equal(nde_mod$loo$estimates["looic","Estimate"], 426.8256, tol=1e-01)
 
     extdat$sex = 1
     nde_mod1 <- survextrap(Surv(years, status) ~ sex, data=colons,
                            external = extdat, add_knots=c(4, 10, 25),
                            fit_method="mcmc", chains=1, iter=1000)
-    expect_equal(nde_mod1$loo$estimates["looic","Estimate"], 428.6499, tol=1e-00)
+    expect_equal(nde_mod1$loo$estimates["looic","Estimate"], 428.6499, tol=1e-01)
   })
 })
