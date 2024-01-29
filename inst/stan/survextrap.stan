@@ -93,7 +93,7 @@ functions {
         return target();
     }
 
-    real loghr_lp(vector loghr, int[] dist, vector location, vector scale, vector df) {
+    real loghr_lp(vector loghr, array[] int dist, vector location, vector scale, vector df) {
 	for (i in 1:rows(loghr)){
 	    if (dist[i] == 1)  // normal
 		target += normal_lpdf(loghr[i] | location[i], scale[i]);
