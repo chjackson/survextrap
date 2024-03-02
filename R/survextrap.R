@@ -420,6 +420,7 @@ survextrap <- function(formula,
   }
   rstan_sampling_ops <- function(...){
     ops <- list(...)
+    ops <- ops[names(ops) %in% .rstan_sampling_args]
     ops
   }
   rstan_vb_ops <- function(...){
@@ -922,6 +923,11 @@ drop_intercept <- function(x) {
 ## formals(), but they are hidden deeply inside methods.  Instead they
 ## are taken from help(rstan::optimizing) - should ensure it is up to
 ## date
+
+.rstan_sampling_args <- c("object","data","pars","chains","iter","warmup","thin",
+                          "seed","init","check_data","sample_file","diagnostic_file","verbose",
+                          "algorithm","control","cores","open_progress","show_messages",
+                          "chain_id","init_r","test_grad","append_samples","refresh","enable_random_init")
 
 .rstan_optimizing_args <- c("object","data","seed","init","check_data","sample_file","algorithm",
                             "verbose","hessian","as_vector","draws","constrained","importance_resampling",

@@ -60,7 +60,7 @@
 
 # Version 0.8.2 (2023/06/14)
 
-* Individual data can now be excluded, and model fitted to external data alone.
+* Individual data can now be excluded, so that the model is fitted to external data alone.
 
 
 # Version 0.8.1 (2023/05/25)
