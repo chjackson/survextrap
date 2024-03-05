@@ -1,3 +1,8 @@
+# Version 0.8.13 (2024/03/05)
+
+* Bug fix for models with external data and either nonproportional hazards or covariates on cure probability. 
+
+
 # Version 0.8.12 (2024/01/06)
 
 * `irmst`, `hazard_ratio` and `hrtime` tidied.   Fix of bug in `irmst` introduced in v0.8.9, and all now have a `sample` argument.
