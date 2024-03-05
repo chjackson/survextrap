@@ -753,12 +753,12 @@ make_external <- function(external, formula, x, xcure, xnph, backhaz,
     }
     if (xcure$ncovs>0){
       form <- delete.response(terms(xcure$cure_formula))
-      mf <- model.frame(formula, external, xlev = xcure$xlevs)
+      mf <- model.frame(form, external, xlev = xcure$xlevs)
       Xcure <- drop_intercept(model.matrix(form, mf))
     }
     if (xnph$ncovs>0){
       form <- delete.response(terms(xnph$nph_formula))
-      mf <- model.frame(formula, external, xlev = xnph$xlevs)
+      mf <- model.frame(form, external, xlev = xnph$xlevs)
       Xnph <- drop_intercept(model.matrix(form, mf))
     }
   }
