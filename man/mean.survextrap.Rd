@@ -13,6 +13,7 @@
   niter = NULL,
   summ_fns = NULL,
   sample = FALSE,
+  disc_rate = 0,
   ...
 )
 }
@@ -62,6 +63,9 @@ output.}
 
 \item{sample}{If \code{TRUE} then an MCMC sample is returned from the posterior
 of the output, rather than summary statistics.}
+
+\item{disc_rate}{Discounting rate used to calculate the discounted RMST,
+using an exponential discounting function}
 
 \item{...}{Other options (currently unused).}
 }
