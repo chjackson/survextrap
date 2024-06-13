@@ -234,7 +234,7 @@ An alternative _non-proportional hazards_ model is available.  This is achieved 
 
 \[ \gamma_i(\boldsymbol{x)} \sim Logistic(\mu_i + \boldsymbol{\delta}^T_i \x, \sigma) \quad (i=2,...,n), \quad \delta_1 = 0 \]
 
-The $s$th element of the vector $\boldsymbol{\delta}_i$ describes the departure from proportional hazards for the $s\mbox{th}$ covariate in the region of time associated with the $i$th spline basis term.   With all $\boldsymbol{\delta}_i = 0$ the model will be the proportional hazards model.  (Currently in the package, either all covariates or none have to have proportional hazards).
+The $s$th element of the vector $\boldsymbol{\delta}_i$ describes the departure from proportional hazards for the $s\mbox{th}$ covariate in the region of time associated with the $i$th spline basis term.   With all $\boldsymbol{\delta}_i = 0$ the model will be the proportional hazards model.  Non-proportional hazards can be applied to any subset of the covariates if needed, or all covariates.
 
 For each covariate $s$, a hierarchical model is used for the non-proportionality effects $\delta_{ks}$.  This model "partially pools" the effects from different regions of time $i$, either via an exchangeable model,
 
