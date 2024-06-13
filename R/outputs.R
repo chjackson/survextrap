@@ -47,6 +47,9 @@
 ##' @param wane_nt Number of intervals defining the piecewise constant approximation
 ##' to the hazard during the waning period.
 ##'
+##' @param disc_rate Discounting rate used to calculate the discounted mean
+##' or restricted mean survival time, using an exponential discounting function.
+##'
 ##' @param niter Number of MCMC iterations to use to compute credible
 ##' intervals.  Set to a low value to make this function quicker, at the cost of
 ##' some approximation error (which may not be important for plotting or model
@@ -60,8 +63,6 @@
 ##'
 ##' @param sample If \code{TRUE} then an MCMC sample is returned from the posterior
 ##' of the output, rather than summary statistics.
-##' @param disc_rate Discounting rate used to calculate the discounted RMST,
-##' using an exponential discounting function
 ##'
 ##' @param ... Other options (currently unused).
 ##'
@@ -73,8 +74,8 @@
 ##'
 ##' @export
 mean.survextrap <- function(x, newdata=NULL,
-                            newdata0=NULL, wane_period=NULL, wane_nt=10,
-                            niter=NULL, summ_fns=NULL, sample=FALSE, disc_rate = 0, ...){
+                            newdata0=NULL, wane_period=NULL, wane_nt=10, disc_rate = 0, 
+                            niter=NULL, summ_fns=NULL, sample=FALSE, ...){
   res <- rmst(x, t=Inf, newdata=newdata, niter=niter, summ_fns=summ_fns,
               newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt,
               sample=sample, disc_rate=disc_rate)
@@ -111,8 +112,8 @@ mean.survextrap <- function(x, newdata=NULL,
 ##'
 ##' @export
 rmst <- function(x,t,newdata=NULL,
-                  newdata0=NULL, wane_period=NULL, wane_nt=10,
-                  niter=NULL,summ_fns=NULL,sample=FALSE, disc_rate=0){
+                  newdata0=NULL, wane_period=NULL, wane_nt=10, disc_rate=0,
+                  niter=NULL,summ_fns=NULL,sample=FALSE){
   newdata <- default_newdata(x, newdata)
   p <- prepare_pars(x=x, newdata=newdata, t=t, niter=niter, newdata0=newdata0, wane_period=wane_period)
 

@@ -98,3 +98,16 @@ test_that("dists with constant hazard",{
     prob <- psurvmspline(3, alpha, cf2, knots, lower.tail = FALSE)
     expect_equal(prob, exp(-cumhaz))
 })
+
+test_that("mean and RMST",{
+  expect_lt(rmst_survmspline(alpha, coefs, knots, t=10),
+            mean_survmspline(alpha, coefs, knots))
+  expect_lt(rmst_survmspline(alpha, coefs, knots, t=10, disc_rate=0.1),
+            rmst_survmspline(alpha, coefs, knots, t=10))
+  expect_equal(rmst_survmspline(alpha, coefs, knots, t=10, disc_rate=0),
+               rmst_survmspline(alpha, coefs, knots, t=10))
+  expect_error(rmst_survmspline(alpha, coefs, knots, t=10, disc_rate="rubbish"),
+               "`disc_rate` must be numeric")
+  expect_error(rmst_survmspline(alpha, coefs, knots, t=10, disc_rate=c(0.1, 0.01)),
+               "`disc_rate` must be a scalar")
+})

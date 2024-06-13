@@ -52,8 +52,8 @@
 ##'  \code{"time"} should be 0, and the final row specifies the hazard at all
 ##'  times greater than the last element of \code{"time"}.
 ##'
-##' @param disc_rate Discounting rate used to calculate the discounted RMST,
-##' using an exponential discounting function
+##' @param disc_rate Discounting rate used to calculate the discounted mean or
+##' restricted mean survival time, using an exponential discounting function.
 ##'
 ##' @return \code{dsurvmspline} gives the density, \code{psurvmspline} gives the
 ##' distribution function, \code{hsurvmspline} gives the hazard and
@@ -297,12 +297,12 @@ rmst_survmspline = function(t, alpha, coefs, knots, degree=3, pcure=0, offsetH=0
 
 ##' @rdname Survmspline
 ##' @export
-mean_survmspline = function(alpha, coefs, knots, degree=3, pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
+mean_survmspline = function(alpha, coefs, knots, degree=3, pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE, disc_rate=0){
   nt <- if (is.matrix(coefs)) nrow(coefs) else 1
   rmst_generic(psurvmspline, rep(Inf,nt), start=0,
                matargs = c("coefs"),
                unvectorised_args = c("knots","degree","backhaz","bsmooth"),
-               alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
+               alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth, disc_rate=disc_rate)
 }
 
 #
@@ -325,7 +325,9 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL
       na_inds <- na_inds | is.na(args[[i]])
   }
   # exponential discounting function
-  disc_fn <- function(t, disc_rate){ exp(-t*disc_rate)}
+  if (!is.numeric(disc_rate)) stop("`disc_rate` must be numeric")
+  if (length(disc_rate) > 1) stop(sprintf("`disc_rate` must be a scalar. found `length(disc_rate)=`%s",length(disc_rate)))
+  disc_fn <- function(t, disc_rate){ exp(-t*disc_rate) }
 
   t <- rep(t, length.out=maxlen)
   for (i in seq(along=args_mat)){

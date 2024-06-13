@@ -11,10 +11,10 @@ rmst(
   newdata0 = NULL,
   wane_period = NULL,
   wane_nt = 10,
+  disc_rate = 0,
   niter = NULL,
   summ_fns = NULL,
-  sample = FALSE,
-  disc_rate = 0
+  sample = FALSE
 )
 }
 \arguments{
@@ -53,6 +53,9 @@ this is not supplied, then no waning is assumed.}
 \item{wane_nt}{Number of intervals defining the piecewise constant approximation
 to the hazard during the waning period.}
 
+\item{disc_rate}{Discounting rate used to calculate the discounted mean
+or restricted mean survival time, using an exponential discounting function.}
+
 \item{niter}{Number of MCMC iterations to use to compute credible
 intervals.  Set to a low value to make this function quicker, at the cost of
 some approximation error (which may not be important for plotting or model
@@ -66,9 +69,6 @@ output.}
 
 \item{sample}{If \code{TRUE} then an MCMC sample is returned from the posterior
 of the output, rather than summary statistics.}
-
-\item{disc_rate}{Discounting rate used to calculate the discounted RMST,
-using an exponential discounting function}
 }
 \value{
 A data frame (tibble) with each row containing posterior summary statistics

@@ -28,18 +28,22 @@ test_that("External data with covariates",{
 
 test_that("External data with nonproportional hazards",{
   extdat$sex = 1
-  nde_mod1 <- survextrap(Surv(years, status) ~ sex, nonprop=TRUE, data=colons,
-                         chains=1, external = extdat,
-                         add_knots=c(4, 10, 25), fit_method="opt")
-  nde_mod1
+  expect_no_error({
+    nde_mod1 <- survextrap(Surv(years, status) ~ sex, nonprop=TRUE, data=colons,
+                           chains=1, external = extdat,
+                           add_knots=c(4, 10, 25), fit_method="opt")
+    nde_mod1
+  })
 })
 
 test_that("External data with cure and covariates",{
   extdat$sex = 1
-  nde_mod1 <- survextrap(Surv(years, status) ~ 1, cure=~sex, data=colons,
-                         chains=1, external = extdat,
-                         add_knots=c(4, 10, 25), fit_method="opt")
-  nde_mod1
+  expect_no_error({
+    nde_mod1 <- survextrap(Surv(years, status) ~ 1, cure=~sex, data=colons,
+                           chains=1, external = extdat,
+                           add_knots=c(4, 10, 25), fit_method="opt")
+    nde_mod1
+  })
 })
 
 test_that("external data MCMC fit",{

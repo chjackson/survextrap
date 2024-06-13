@@ -55,8 +55,8 @@ output.}
 \item{sample}{If \code{TRUE} then an MCMC sample is returned from the posterior
 of the output, rather than summary statistics.}
 
-\item{disc_rate}{Discounting rate used to calculate the discounted RMST,
-using an exponential discounting function}
+\item{disc_rate}{Discounting rate used to calculate the discounted mean
+or restricted mean survival time, using an exponential discounting function.}
 }
 \value{
 A data frame (tibble) with each row containing posterior summary statistics
