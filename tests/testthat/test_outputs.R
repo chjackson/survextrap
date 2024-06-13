@@ -77,3 +77,16 @@ test_that("irmst",{
   isam <- irmst(mod, newdata=nd, t=5, niter=5, sample=TRUE)
   expect_true(is.numeric(mean(isam)))
 })
+
+test_that("discounting",{
+  skip_on_cran()
+  expect_lt(rmst(mod, t=5, disc_rate=0.1, niter=50)$median[1],
+            rmst(mod, t=5, niter=50)$median[1])
+  expect_lt(mean(mod, t=5, disc_rate=0.01, niter=10)$median[1],
+            mean(mod, t=5, niter=10)$median[1])
+  nd <- data.frame(rx = c("Lev+5FU","Lev"))
+  expect_lt(
+    abs(irmst(mod, newdata=nd, t=5, disc_rate=0.1, niter=20)$median),
+    abs(irmst(mod, newdata=nd, t=5, niter=20)$median)
+  )
+})

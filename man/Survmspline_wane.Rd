@@ -136,7 +136,8 @@ rmst_survmspline_wane(
   backhaz = NULL,
   bsmooth = TRUE,
   wane_period,
-  wane_nt = 10
+  wane_nt = 10,
+  disc_rate = 0
 )
 
 mean_survmspline_wane(
@@ -151,7 +152,8 @@ mean_survmspline_wane(
   backhaz = NULL,
   bsmooth = TRUE,
   wane_period,
-  wane_nt = 10
+  wane_nt = 10,
+  disc_rate = 0
 )
 }
 \arguments{
@@ -198,6 +200,9 @@ also have zero derivative and second derivative at the boundary.}
 \item{p}{Vector of probabilities.}
 
 \item{n}{Number of random numbers to simulate.}
+
+\item{disc_rate}{Discounting rate used to calculate the discounted mean or
+restricted mean survival time, using an exponential discounting function.}
 }
 \value{
 \code{psurvmspline_wane} gives the CDF, \code{Hsurvmspline_wane} gives the cumulative

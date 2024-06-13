@@ -47,6 +47,9 @@
 ##' @param wane_nt Number of intervals defining the piecewise constant approximation
 ##' to the hazard during the waning period.
 ##'
+##' @param disc_rate Discounting rate used to calculate the discounted mean
+##' or restricted mean survival time, using an exponential discounting function.
+##'
 ##' @param niter Number of MCMC iterations to use to compute credible
 ##' intervals.  Set to a low value to make this function quicker, at the cost of
 ##' some approximation error (which may not be important for plotting or model
@@ -71,11 +74,11 @@
 ##'
 ##' @export
 mean.survextrap <- function(x, newdata=NULL,
-                            newdata0=NULL, wane_period=NULL, wane_nt=10,
+                            newdata0=NULL, wane_period=NULL, wane_nt=10, disc_rate = 0, 
                             niter=NULL, summ_fns=NULL, sample=FALSE, ...){
   res <- rmst(x, t=Inf, newdata=newdata, niter=niter, summ_fns=summ_fns,
               newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt,
-              sample=sample)
+              sample=sample, disc_rate=disc_rate)
   res$variable <- "mean"
   res$t <- NULL
   res
@@ -109,7 +112,7 @@ mean.survextrap <- function(x, newdata=NULL,
 ##'
 ##' @export
 rmst <- function(x,t,newdata=NULL,
-                  newdata0=NULL, wane_period=NULL, wane_nt=10,
+                  newdata0=NULL, wane_period=NULL, wane_nt=10, disc_rate=0,
                   niter=NULL,summ_fns=NULL,sample=FALSE){
   newdata <- default_newdata(x, newdata)
   p <- prepare_pars(x=x, newdata=newdata, t=t, niter=niter, newdata0=newdata0, wane_period=wane_period)
@@ -128,7 +131,8 @@ rmst <- function(x,t,newdata=NULL,
                                        x$mspline$knots, x$mspline$degree,
                                        pcure = p$pcure[,,j],
                                        backhaz = backhaz,
-                                       bsmooth=x$mspline$bsmooth)
+                                       bsmooth=x$mspline$bsmooth,
+                                       disc_rate = disc_rate)
     else {
       coefs0 <- matrix(p$coefs0[,,j,], ncol=p$nvars)
       res_sam[,,j] <- rmst_survmspline_wane(t, alpha1 = p$alpha[,,j], alpha0 = p$alpha0[,,j],
@@ -139,7 +143,8 @@ rmst <- function(x,t,newdata=NULL,
                                             pcure0 = p$pcure0[,,j],
                                             backhaz = backhaz,
                                             bsmooth=x$mspline$bsmooth,
-                                            wane_period=wane_period, wane_nt=wane_nt
+                                            wane_period=wane_period, wane_nt=wane_nt,
+                                            disc_rate = disc_rate
                                             )
     }
   }
@@ -177,12 +182,12 @@ rmst <- function(x,t,newdata=NULL,
 ##'
 ##' @export
 irmst <- function(x, t, newdata=NULL, newdata0=NULL, wane_period=NULL, wane_nt=10,
-                  niter=NULL, summ_fns=NULL, sample=FALSE){
+                  niter=NULL, summ_fns=NULL, sample=FALSE, disc_rate = 0){
     newdata <- default_newdata_comparison(x, newdata)
     rmst1 <- rmst(x, t=t, newdata=newdata[1,,drop=FALSE], newdata0=newdata0[1,,drop=FALSE],
-                  wane_period = wane_period, wane_nt=wane_nt, niter=niter, sample=TRUE)
+                  wane_period = wane_period, wane_nt=wane_nt, niter=niter, sample=TRUE, disc_rate = disc_rate)
     rmst2 <- rmst(x, t=t, newdata=newdata[2,,drop=FALSE], newdata0=newdata0[2,,drop=FALSE],
-                  wane_period = wane_period, wane_nt=wane_nt, niter=niter, sample=TRUE)
+                  wane_period = wane_period, wane_nt=wane_nt, niter=niter, sample=TRUE, disc_rate = disc_rate)
     irmst_sam <- rmst2 - rmst1
     res <- summarise_output(irmst_sam, summ_fns, t, newdata=NULL,
                             summ_name="irmst", sample=sample)
@@ -333,7 +338,7 @@ cumhaz <- function(x, newdata=NULL, t=NULL, tmax=NULL,
 #' Or if \code{sample=TRUE}, an array with dimensions
 #' \code{length(t)}, \code{niter}, and 1, giving the
 #' incremental RMST evaluated at different times and MCMC iterations
-#' respectively. 
+#' respectively.
 #'
 #' @export
 hazard_ratio <- function(x, newdata=NULL, t=NULL, tmax=NULL, niter=NULL, summ_fns=NULL, sample=FALSE) {
@@ -365,7 +370,7 @@ hazard_ratio <- function(x, newdata=NULL, t=NULL, tmax=NULL, niter=NULL, summ_fn
 ##' Or if \code{sample=TRUE}, an array with dimensions
 ##' \code{1}, \code{niter}, and \code{nrow(newdata)}, giving the
 ##' incremental RMST evaluated at different MCMC iterations
-##' and covariate values respectively. 
+##' and covariate values respectively.
 ##'
 ##' @export
 hrtime <- function(x, newdata=NULL, niter=NULL, summ_fns=NULL, hq=c(0.1, 0.9), sample=FALSE){

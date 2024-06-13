@@ -52,6 +52,9 @@
 ##'  \code{"time"} should be 0, and the final row specifies the hazard at all
 ##'  times greater than the last element of \code{"time"}.
 ##'
+##' @param disc_rate Discounting rate used to calculate the discounted mean or
+##' restricted mean survival time, using an exponential discounting function.
+##'
 ##' @return \code{dsurvmspline} gives the density, \code{psurvmspline} gives the
 ##' distribution function, \code{hsurvmspline} gives the hazard and
 ##' \code{Hsurvmspline} gives the cumulative hazard.
@@ -284,28 +287,28 @@ validate_knots <- function(knots, name="knots"){
 
 ##' @rdname Survmspline
 ##' @export
-rmst_survmspline = function(t, alpha, coefs, knots, degree=3, pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
+rmst_survmspline = function(t, alpha, coefs, knots, degree=3, pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE, disc_rate = 0){
   if (is.null(pcure)) pcure <- 0
   rmst_generic(psurvmspline, t, start=0,
                matargs = c("coefs"),
                unvectorised_args = c("knots","degree","backhaz","bsmooth"),
-               alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
+               alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth, disc_rate=disc_rate)
 }
 
 ##' @rdname Survmspline
 ##' @export
-mean_survmspline = function(alpha, coefs, knots, degree=3, pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
+mean_survmspline = function(alpha, coefs, knots, degree=3, pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE, disc_rate=0){
   nt <- if (is.matrix(coefs)) nrow(coefs) else 1
   rmst_generic(psurvmspline, rep(Inf,nt), start=0,
                matargs = c("coefs"),
                unvectorised_args = c("knots","degree","backhaz","bsmooth"),
-               alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
+               alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth, disc_rate=disc_rate)
 }
 
 #
 # copied from flexsurv
 #
-rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL, ...)
+rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL, disc_rate = 0, ...)
 {
   args <- list(...)
   args_mat <- args[matargs]
@@ -321,6 +324,11 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL
       args[[i]] <- rep(args[[i]], length.out=maxlen)
       na_inds <- na_inds | is.na(args[[i]])
   }
+  # exponential discounting function
+  if (!is.numeric(disc_rate)) stop("`disc_rate` must be numeric")
+  if (length(disc_rate) > 1) stop(sprintf("`disc_rate` must be a scalar. found `length(disc_rate)=`%s",length(disc_rate)))
+  disc_fn <- function(t, disc_rate){ exp(-t*disc_rate) }
+
   t <- rep(t, length.out=maxlen)
   for (i in seq(along=args_mat)){
       if (is.matrix(args_mat[[i]])){
@@ -341,9 +349,9 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL
       pdargs <- c(list(start[i]), fargs_vec, fargs_mat, args_unvectorised)
       start_p <- 1 - do.call(pdist, pdargs)
       fn <- function(end){
-          pdargs <- c(list(end), fargs_vec, fargs_mat, args_unvectorised)
-          pd <- do.call(pdist, pdargs)
-          (1 - pd) / start_p
+        pdargs <- c(list(end), fargs_vec, fargs_mat, args_unvectorised)
+        pd <- do.call(pdist, pdargs)
+        (1 - pd)*disc_fn(end, disc_rate = disc_rate) / start_p
       }
       res <- try(integrate(fn, start[i], t[i]))
       if (!inherits(res, "try-error"))

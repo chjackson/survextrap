@@ -101,7 +101,8 @@ rmst_survmspline(
   pcure = 0,
   offsetH = 0,
   backhaz = NULL,
-  bsmooth = TRUE
+  bsmooth = TRUE,
+  disc_rate = 0
 )
 
 mean_survmspline(
@@ -112,7 +113,8 @@ mean_survmspline(
   pcure = 0,
   offsetH = 0,
   backhaz = NULL,
-  bsmooth = TRUE
+  bsmooth = TRUE,
+  disc_rate = 0
 )
 }
 \arguments{
@@ -161,6 +163,9 @@ also have zero derivative and second derivative at the boundary.}
 \item{p}{Vector of probabilities.}
 
 \item{n}{Number of random numbers to simulate.}
+
+\item{disc_rate}{Discounting rate used to calculate the discounted mean or
+restricted mean survival time, using an exponential discounting function.}
 }
 \value{
 \code{dsurvmspline} gives the density, \code{psurvmspline} gives the
