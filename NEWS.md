@@ -1,3 +1,8 @@
+# Version 0.8.15 (2024/06/29)
+
+* Random walk prior for the coefficients changed to a first-order weighted model, following [Phillippo et al.](https://arxiv.org/abs/2401.12640), so that the expected smoothness accounts for the knot spacing.
+
+
 # Version 0.8.14 (2024/06/13)
 
 * Added discount rate argument `disc_rate` to `mean` and `rmst()` functions (PR #12)

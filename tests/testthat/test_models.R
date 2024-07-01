@@ -25,7 +25,6 @@ test_that("Basic spline model, no covariates",{
     expect_equal(coef(mod)["alpha"], coef(modm)["alpha"], tol=1e-01)
     expect_true(is.numeric(mod$prior_sample$sample(nsim=4)$alpha))
     expect_true(is.numeric(mod$prior_sample$haz_const()["50%","haz"]))
-    modr <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt", smooth_model = "random_walk")
 })
 
 test_that("Basic spline model, with covariates",{
@@ -77,6 +76,17 @@ test_that("Changing the spline specification",{
 
   mspline <- mspline_spec(Surv(years, d) ~ 1, data=cetux, df=6, add_knots=20)
   expect_equal(mspline$knots[[2]], 1.04)
+
+})
+
+test_that("Random walk priors",{
+  expect_no_error({
+    modr <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt",
+                       smooth_model = "random_walk")
+    rxnphr_mod <- survextrap(Surv(years, status) ~ rx, data=colons,
+                            nonprop=TRUE, fit_method = "opt",
+                            smooth_model="random_walk")
+  })
 })
 
 test_that("Spline prior mean",{

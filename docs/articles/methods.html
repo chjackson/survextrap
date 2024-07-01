@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.13</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.15</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,7 +80,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2024-06-13</h4>
+            <h4 data-toc-skip class="date">2024-06-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -319,19 +319,25 @@ random one of the <span class="math inline">\(n\)</span> basis
 functions, which will not typically be useful in practice.</p></li>
 </ul>
 </li>
-<li><p><strong>A “random effect”</strong>: <span class="math inline">\(\epsilon_i\)</span>, which describes how much the
+<li>
+<p><strong>A “random effect”</strong>: <span class="math inline">\(\epsilon_i\)</span>, which describes how much the
 <span class="math inline">\(i\)</span>th basis coefficient departs from
 the mean, compared to the other basis coefficients. The default is an
 “exchangeable” model, with <span class="math inline">\(\epsilon_i \sim
 Logistic(0,1)\)</span>, so that the <span class="math inline">\(\gamma_i\)</span> are conditionally independent
-given <span class="math inline">\(\mu_i\)</span> and <span class="math inline">\(\sigma\)</span>. An alternative, smoother model
-can be specified to relate the basis coefficients, using a second-order
-random walk that constrains the <span class="math inline">\(\gamma_i\)</span> closer to each other in time to
-be more similar to each other <a href="https://doi.org/10.1198/1061860043010" class="external-link">(Lang and Brezger,
-2004)</a>. This model is generated as <span class="math inline">\(\epsilon_1=0\)</span>, <span class="math inline">\(\epsilon_2 \sim Logistic(0, 1)\)</span>, and <span class="math inline">\(\epsilon_i \sim Logistic(2\epsilon_{i-1} -
-\epsilon_{i-2}, 1)\)</span> for any <span class="math inline">\(i \geq
-3\)</span>, so that the expected value of <span class="math inline">\(\epsilon_i\)</span> is the average of its two
-neighbours on either side in time.</p></li>
+given <span class="math inline">\(\mu_i\)</span> and <span class="math inline">\(\sigma\)</span>.</p>
+<p>An alternative, smoother model can be specified to relate the basis
+coefficients, using a random walk that constrains the <span class="math inline">\(\gamma_i\)</span> closer to each other in time to
+be more similar to each other. This model is generated as <span class="math inline">\(\epsilon_1=0\)</span>, and <span class="math inline">\(\epsilon_i \sim Logistic(\epsilon_{i-1},
+w_i)\)</span> for any <span class="math inline">\(i \geq 2\)</span>. The
+weight <span class="math inline">\(w_i\)</span> accounts for the
+difference in the time periods described by coefficients <span class="math inline">\(i\)</span> and <span class="math inline">\(i-1\)</span>. This ensures that we are less
+inclined to allow hazard variations in regions of time where the knots
+are more closely-spaced, leading to a more realistically smooth function
+than if these weights were excluded. The exact definition of <span class="math inline">\(w_i\)</span> is given in <a href="https://arxiv.org/abs/2401.12640" class="external-link">Phillippo et al. 2024</a>,
+following principles from <a href="https://arxiv.org/pdf/2201.06808" class="external-link">Li
+and Cao 2022</a>.</p>
+</li>
 </ol>
 <blockquote>
 <p><strong>Sidenote</strong>. This multinomial logistic distribution is

@@ -239,10 +239,9 @@ independent logistic priors on the multinomial-logit spline
 coefficients, conditionally on a common smoothing variance
 parameter.
 
-The alternative, \code{"random_walk"}, specifies a second-order
-random walk for the multinomial-logit spline coefficients, based
-on logistic distributions with a common smoothing variance.  See
-the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette}
+The alternative, \code{"random_walk"}, specifies a random walk
+prior for the multinomial-logit spline coefficients, based on
+logistic distributions.  See the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette}
 for full details.
 
 In non-proportional hazards models, setting \code{smooth_model} also

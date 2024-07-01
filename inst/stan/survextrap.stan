@@ -84,16 +84,15 @@ functions {
     * @param df Real, df for the prior distribution
     * @return Nothing
     */
-    real loghaz_lp(real gamma, int dist, real location, real scale, real df) {
+    void loghaz_lp(real gamma, int dist, real location, real scale, real df) {
         if (dist == 1)  // normal
         target += normal_lpdf(gamma | location, scale);
         else if (dist == 2)  // student_t
         target += student_t_lpdf(gamma | df, location, scale);
         /* else dist is 0 and nothing is added */
-        return target();
     }
 
-    real loghr_lp(vector loghr, array[] int dist, vector location, vector scale, vector df) {
+    void loghr_lp(vector loghr, array[] int dist, vector location, vector scale, vector df) {
 	for (i in 1:rows(loghr)){
 	    if (dist[i] == 1)  // normal
 		target += normal_lpdf(loghr[i] | location[i], scale[i]);
@@ -101,7 +100,6 @@ functions {
 		target += student_t_lpdf(loghr[i] | df[i], location[i], scale[i]);
 	}
         /* else dist is 0 and nothing is added */
-        return target();
     }
 
 }
@@ -140,7 +138,7 @@ data {
     int est_hsd;
     vector<lower=0>[1-est_hsd] hsd_fixed;
     int<lower=1> smooth_model;
-
+    vector[nvars-1] sqrt_wt; // weights used for random walk prior
     int cure;
 
     int relative; 
@@ -268,7 +266,6 @@ model {
     vector[nevent] alpha_event; // for events
     vector[nrcens] alpha_rcens; // for right censored
     vector[nextern] alpha_extern; // for external data
-    real dummy;
     real cp;
     vector[nextern] p_ext_stop; // unconditional survival prob at external time points
     vector[nextern] p_ext_start; //
@@ -312,60 +309,56 @@ model {
     }
 
     // log prior for baseline log hazard
-    dummy = loghaz_lp(gamma[1], prior_hscale_dist, 0, 
-		      prior_hscale[2], prior_hscale[3]);
+    loghaz_lp(gamma[1], prior_hscale_dist, 0, 
+	      prior_hscale[2], prior_hscale[3]);
 
     // log prior for covariates on the log hazard
-    dummy = loghr_lp(loghr, prior_loghr_dist, prior_loghr_location,
-        		     prior_loghr_scale, prior_loghr_df);
-
+    loghr_lp(loghr, prior_loghr_dist, prior_loghr_location,
+	     prior_loghr_scale, prior_loghr_df);
+  
   // smoothing prior for spline coefficients
   if (smooth_model==1){
-    // exchangeable
+    // exchangeable (as in the BMC Med Res survextrap paper)
     b_err ~ logistic(0, 1);
   }
-  else if (smooth_model==2) {
-    // second-order random walk
-    b_err[1] ~ logistic(0, 1); 
-    if (nvars-1 >= 2)
-      b_err[2] ~ logistic(2*b_err[1] - 0, 1); 
-    if (nvars-1 >= 3){ 
-      for (k in 3:(nvars-1)){
-	b_err[k] ~ logistic(2*b_err[k-1] - b_err[k-2], 1);
+  else if (smooth_model==2){
+    // first-order random walk 
+    b_err[1] ~ logistic(0, sqrt_wt[1]); 
+    if (nvars-1 >= 2){
+      for (k in 2:(nvars-1)){
+	b_err[k] ~ logistic(b_err[k-1], sqrt_wt[k]);
       }
     }
   }
 
-    // prior for cure fraction
-    if (cure) {
-        pcure ~ beta(prior_cure[1], prior_cure[2]);
-    }
-    if (ncurecovs > 0){
-	// log prior for covariates on the log odds of cure
-	dummy = loghr_lp(logor_cure, prior_logor_cure_dist, prior_logor_cure_location,
-			 prior_logor_cure_scale, prior_logor_cure_df);
-    }
+  // prior for cure fraction
+  if (cure) {
+    pcure ~ beta(prior_cure[1], prior_cure[2]);
+  }
+  if (ncurecovs > 0){
+    // log prior for covariates on the log odds of cure
+    loghr_lp(logor_cure, prior_logor_cure_dist, prior_logor_cure_location,
+	     prior_logor_cure_scale, prior_logor_cure_df);
+  }
     
-    if (est_hsd){
-        hsd ~ gamma(prior_hsd[1], prior_hsd[2]);
-    }
+  if (est_hsd){
+    hsd ~ gamma(prior_hsd[1], prior_hsd[2]);
+  }
 
   // Non-proportional hazards model
   if (nnphcovs > 0) { 
     hrsd ~ gamma(prior_hrsd[,1], prior_hrsd[,2]);
-    if (smooth_model==1){
-      for (i in 1:nnphcovs){
+    for (i in 1:nnphcovs){
+      if (smooth_model==1){
 	nperr[i,1:(nvars-1)] ~ std_normal();
       }
-    } else if (smooth_model==2){
-      // second-order random walk [note copied code from above]
-      nperr[1] ~ normal(0, 1); 
-      if (nnphcovs >= 2)
-	nperr[2] ~ normal(2*nperr[1] - 0, 1); 
-      if (nnphcovs >= 3){ 
-	for (k in 3:nnphcovs){
-	  nperr[k] ~ normal(2*nperr[k-1] - nperr[k-2], 1);
-	}
+      else if (smooth_model==2){
+	// first-order random walk
+	nperr[i,1] ~ normal(0, sqrt_wt[1]); 
+	if (nvars-1 >= 2)
+	  for (k in 2:(nvars-1)){
+	    nperr[i,k] ~ normal(nperr[i,k-1], sqrt_wt[k]);
+	  }
       }
     }
   }

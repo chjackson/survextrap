@@ -33,6 +33,7 @@ plot_hazard <- function(x, newdata=NULL, t=NULL, tmax=NULL, niter=NULL,
                         newdata0=NULL, wane_period=NULL, wane_nt=10,                        
                         ci=NULL, xlab="Time", ylab="Hazard",
                         line_size=1.5, ci_alpha=0.2, show_knots=FALSE){
+    validate_survextrap(x)
     lower <- upper <- NULL
     newdata <- default_newdata(x, newdata)
     haz <- hazard(x, newdata=newdata, t=t, tmax=tmax, niter=niter,
@@ -92,6 +93,7 @@ plot_survival <- function(x, newdata=NULL, t=NULL, tmax=NULL, km=NULL, niter=NUL
                           newdata0=NULL, wane_period=NULL, wane_nt=10,                        
                           ci=NULL, xlab="Time", ylab="Survival",
                           line_size=1.5, ci_alpha=0.2, show_knots=FALSE){
+    validate_survextrap(x)
     lower <- upper <- NULL
     if (is.null(km)) km <- one_factor_cov(x)
     newdata <- default_newdata(x, newdata)
@@ -196,6 +198,7 @@ plot_hazard_ratio <- function(x, newdata=NULL, t=NULL, tmax=NULL,
                               niter=NULL,
                               ci=TRUE, xlab="Time", ylab="Hazard ratio",
                               line_size=1.5, ci_alpha=0.2){
+    validate_survextrap(x)
     lower <- upper <- NULL
     hr <- hazard_ratio(x, newdata=newdata, t=t, tmax=tmax, niter=niter)
     knots <- x$mspline$knots[x$mspline$knots <= max(hr$t)]

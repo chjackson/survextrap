@@ -219,10 +219,10 @@
 #'   coefficients, conditionally on a common smoothing variance
 #'   parameter.
 #'
-#'   The alternative, \code{"random_walk"}, specifies a second-order
-#'   random walk for the multinomial-logit spline coefficients, based
-#'   on logistic distributions with a common smoothing variance.  See
-#'   the [methods vignette](https://chjackson.github.io/survextrap/articles/methods.html)
+#'   The alternative, \code{"random_walk"}, specifies a random walk
+#'   prior for the multinomial-logit spline coefficients, based on
+#'   logistic distributions.  See the [methods
+#'   vignette](https://chjackson.github.io/survextrap/articles/methods.html)
 #'   for full details.
 #'
 #'   In non-proportional hazards models, setting \code{smooth_model} also
@@ -380,6 +380,7 @@ survextrap <- function(formula,
                     b_mean,
                     est_hsd,
                     smooth_model = smooth_model_id,
+                    sqrt_wt = aa(mspline$sqrt_wt),
                     cure = xcure$cure,
                     relative=backhaz$relative,
                     backhaz_event = backhaz$event,
@@ -846,10 +847,12 @@ make_mspline <- function(mspline, td, external, add_knots=NULL){
   if (is.numeric(add_knots)) {
     add_knots <- setdiff(unique(add_knots), mspline$knots)
     mspline$knots <- sort(c(mspline$knots, add_knots))
-    mspline$df <- mspline$df + length(add_knots)
+    mspline <- mspline_update(mspline)
   }
-  mspline$nvars  <- mspline$df
-  mspline[c("nvars","knots","degree","bsmooth","df")]
+  mspline$nvars  <- mspline$df # do we need both?
+  mspline <- mspline[c("nvars","knots","degree","bsmooth","df","basis_means","basis_spans")]
+  mspline$sqrt_wt <- sqrt(mspline$basis_spans / sum(mspline$basis_spans))
+  mspline
 }
 
 validate_coefs_mean <- function(coefs){
@@ -938,3 +941,7 @@ drop_intercept <- function(x) {
                     "importance_resampling","keep_every",
                     "iter","grad_samples","elbo_samples","eta","adapt_engaged",
                     "tol_rel_obj","eval_elbo","output_samples","adapt_iter")
+
+validate_survextrap <- function(x){
+  if (!inherits(x, "survextrap")) stop("`x` should be a survextrap model")
+}

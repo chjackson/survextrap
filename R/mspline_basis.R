@@ -40,6 +40,7 @@ mspline_basis <- function(times, knots, degree=3, integrate = FALSE,
   attr(res, "times") <- times
   attr(res, "bsmooth") <- bsmooth
   attr(res, "knots") <- knots
+  attr(res, "degree") <- degree
   attr(res, "Boundary.knots") <- NULL
   ## note that this overwrites the knots attributes created by splines2
   ## which are the internal knots
@@ -97,6 +98,8 @@ mspline_basis_unsmooth <- function(times, knots, degree=3, integrate = FALSE) {
 ##' the upper boundary, so that the derivative and second derivative
 ##' are zero.
 ##'
+##' Only supports cubic M-splines, i.e. degree 3
+##'
 ##' @author Derivation by Iain Timmins (https://github.com/irtimmins)
 ##'
 ##' Lower boundary constraints not supported, on the assumption that
@@ -105,28 +108,33 @@ mspline_basis_unsmooth <- function(times, knots, degree=3, integrate = FALSE) {
 ##'
 ##' @noRd
 mspline_basis_bsmooth <- function(times, knots, integrate = FALSE) {
-  degree <- 3
-  basis0 <- mspline_basis_unsmooth(times, knots, degree=degree, integrate)
-  knots <- sort(knots) # just in case
-  iknots <- knots[-length(knots)]
-  bknots <- c(0, max(knots))
+  basis0 <- mspline_basis_unsmooth(times, knots, degree=3, integrate)
   n <- ncol(basis0)
   res <- matrix(nrow=length(times), ncol=n-2)
   for (i in 1:(n-3))
     res[,i] <- basis0[,i]
+##  res[,n-2] <- n2coef*basis0[,n-2] + n1coef*basis0[,n-1] + ncoef*basis0[,n]
+  res[,n-2] <- basis0[,c(n-2,n-1,n)] %*% bsmooth_coefs(knots)
+  res
+}
+
+bsmooth_coefs <- function(knots){
+  knots <- sort(knots) # just in case
+  iknots <- knots[-length(knots)]
+  bknots <- c(0, max(knots))
   b <- splines2::mSpline(iknots, knots = iknots, Boundary.knots = bknots,
-                         degree = degree, intercept = TRUE)
+                         degree = 3, intercept = TRUE)
   b_deriv <- splines2::mSpline(iknots, knots = iknots, Boundary.knots = bknots,
-                               degree = degree, intercept = TRUE, derivs=1)
+                               degree = 3, intercept = TRUE, derivs=1)
   b_2deriv <- splines2::mSpline(iknots, knots = iknots, Boundary.knots = bknots,
-                               degree = degree, intercept = TRUE, derivs=2)
+                               degree = 3, intercept = TRUE, derivs=2)
   U <- bknots[2]
   bU <- predict(b, U)
   bdU <- predict(b_deriv, U)
   b2dU <- predict(b_2deriv, U)
+  n <- length(bU)
   ncoef <- 1 / bU[n]
   n1coef <- - ncoef * bdU[n] / bdU[n-1]
   n2coef <- ( - n1coef * b2dU[n-1]  -  ncoef * b2dU[n] ) /  b2dU[n-2]
-  res[,n-2] <- n2coef*basis0[,n-2] + n1coef*basis0[,n-1] + ncoef*basis0[,n]
-  res
+  c(n2coef, n1coef, ncoef)
 }

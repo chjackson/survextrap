@@ -49,8 +49,8 @@ plot_prior_hazard(
 \arguments{
 \item{knots}{Vector of knot locations. If not supplied, \code{df}
 has to be specified.  One of two rules is then used to choose the
-knot locations.  If \code{bknots} is specified, a set of equally
-spaced knots between zero and \code{bknots} is used.  Otherwise
+knot locations.  If \code{bknot} is specified, a set of equally
+spaced knots between zero and \code{bknot} is used.  Otherwise
 if \code{obstimes} is supplied, the knots are chosen as equally
 spaced quantiles of \code{obstimes}.
 
@@ -104,10 +104,9 @@ independent logistic priors on the multinomial-logit spline
 coefficients, conditionally on a common smoothing variance
 parameter.
 
-The alternative, \code{"random_walk"}, specifies a second-order
-random walk for the multinomial-logit spline coefficients, based
-on logistic distributions with a common smoothing variance.  See
-the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette}
+The alternative, \code{"random_walk"}, specifies a random walk
+prior for the multinomial-logit spline coefficients, based on
+logistic distributions.  See the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette}
 for full details.
 
 In non-proportional hazards models, setting \code{smooth_model} also

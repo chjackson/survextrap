@@ -1,7 +1,7 @@
 ---
 title: "Case study of using survextrap: cetuximab for head and neck cancer"
 author: "Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>"
-date: "2024-01-06"
+date: "2024-06-29"
 output: 
   rmarkdown::html_document:
     toc: true
@@ -37,7 +37,7 @@ The data are from an analysis of survival in head and neck cancer, previously co
 We first load the required packages, plot a Kaplan-Meier curve of the individual trial data, and create subsets of the data by treatment group, for use in some of the later analyses.
 
 
-```r
+``` r
 library(survextrap)
 library(ggplot2)
 library(dplyr)
@@ -47,7 +47,7 @@ survminer::ggsurvplot(survfit(Surv(years, d) ~ treat, data=cetux)) + xlab("Years
 
 <img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/packages_data.png" style="display: block; margin: auto;" />
 
-```r
+``` r
 control <- cetux[cetux$treat=="Control",]
 cetuximab <- cetux[cetux$treat=="Cetuximab",]
 ```
@@ -57,7 +57,7 @@ cetuximab <- cetux[cetux$treat=="Cetuximab",]
 First we set up an M-spline, specifying only that we expect a maximum of 6 spline coefficients to be sufficient to describe hazard variations, and we want to allow hazards to change up to 20 years.  The resulting default spline knots are saved in the `mspline` object here.  The default knots are based on quantiles of the event times in the data (which is why we supply the data in this command).
 
 
-```r
+``` r
 mspline <- mspline_spec(Surv(years, d) ~ 1, data=cetux, df=6, add_knots=20)
 ```
 
@@ -72,7 +72,7 @@ Since patients in the trial have a median age of 57 (range 34 to 83), the prior 
 Conversely, the `prior_haz_const()` function translates a normal prior for $\eta$ to the corresponding beliefs about survival.  We use this to check that the lower limit of the distribution derived by `p_meansurv()` is sensible. 
 
 
-```r
+``` r
 prior_hscale <- p_meansurv(median=25, upper=100, mspline=mspline)
 prior_haz_const(mspline, prior_hscale = prior_hscale)
 ```
@@ -91,7 +91,7 @@ The prior for $\sigma$ is chosen so that the highest hazard values over the 20 y
 The choice of Gamma(2,5) here was arrived at through trial-and-error, until the distribution for $\rho$ (the quantity `hr` returned by `prior_haz_sd()`) matched our prior judgement.  Note that repeated simulations will give slightly different results unless the seed is set.
 
 
-```r
+``` r
 set.seed(1)
 prior_hsd <- p_gamma(2, 5)
 prior_haz_sd(mspline = mspline,
@@ -112,7 +112,7 @@ prior_haz_sd(mspline = mspline,
 The prior for the treatment effect is weak, and designed only to rule out extremely implausible values, with a prior median of 1 and upper 95\% credible limit of 50 for the hazard ratio.  The function `p_hr()` translates this information to a normal prior for the log hazard ratio.  The function `prior_hr()` goes in the other direction, and summarises the prior for the hazard ratio implied by a particular normal distribution on the log scale (in the special format returned by `p_hr()`, or alternatively by the function `p_normal()`).
 
 
-```r
+``` r
 prior_loghr <- p_hr(median=1, upper=50)
 prior_hr(prior_loghr)
 ```
@@ -130,7 +130,7 @@ In a similar way, we can calibrate the Gamma prior for the parameter $\tau$, whi
 Here a Gamma(2,3) prior is used, which represents a judgement that the hazard ratio could vary about 10-fold (to an order of magnitude) at different points over 20 years.
 
 
-```r
+``` r
 set.seed(1)
 prior_hrsd <- p_gamma(2, 3)
 prior_hr_sd(mspline = mspline,                              
@@ -161,7 +161,7 @@ An approximation to full MCMC sampling can also be specified by calling `survext
 When we are ready to produce the "final" results, we can switch back to MCMC with the default number of chains and iterations. 
 
 
-```r
+``` r
 options(mc.cores = 2) # CRAN check limits to 2 cores
 # options(mc.cores = parallel::detectCores())
 chains <- 4; iter <- 2000
@@ -179,19 +179,10 @@ Occasionally the fitting may report "divergent transitions".  This is a limitati
 First we fit two models for the control group trial data: one (`mod_con`) allowing hazard variations up to 20 years, and another (`mod_con5`) assuming a constant hazard after 5 years.   `mod_con5` is implemented by leaving out the `mspline` argument to `survextrap`, in which case the final spline knot is set to the end of the data.  All models in `survextrap` assume a constant hazard after the final spline knot.
 
 
-```r
+``` r
 mod_con <- survextrap(Surv(years, d) ~ 1, data=control, mspline=mspline,
                       chains=chains, iter=iter,
                       prior_hscale=prior_hscale, prior_hsd = prior_hsd)
-```
-
-```
-## Warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
-## Running the chains for more iterations may help. See
-## https://mc-stan.org/misc/warnings.html#tail-ess
-```
-
-```r
 mod_con5 <- survextrap(Surv(years, d) ~ 1, data=control, 
                        chains=chains, iter=iter, 
                        prior_hscale=prior_hscale, prior_hsd = prior_hsd)
@@ -200,7 +191,7 @@ mod_con5 <- survextrap(Surv(years, d) ~ 1, data=control,
 A plot comparing the survival and hazard curves from these models is then built.  We use the `survival()` and `hazard()` functions to extract survival and hazard estimates, and combine these to give a dataset that can be plotted with `ggplot()`. 
 
 
-```r
+``` r
 surv_const <- survival(mod_con5, tmax=20) %>% mutate(model="Constant hazard")
 surv_ipd <- survival(mod_con, tmax=20) %>% mutate(model="Varying hazard")
 surv_single <- rbind(surv_const, surv_ipd)
@@ -224,7 +215,18 @@ ps <- ggplot(surv_single, aes(x=t, y=median,
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
     geom_vline(xintercept = max(control$years)) +
     geom_vline(xintercept = mod_con5$mspline$iknots, col="gray80", lty=2)
+```
 
+```
+## Warning: [1m[22mA numeric `legend.position` argument in `theme()` was deprecated in ggplot2
+## 3.5.0.
+## [36mℹ[39m Please use the `legend.position.inside` argument of `theme()` instead.
+## [90mThis warning is displayed once every 8 hours.[39m
+## [90mCall `lifecycle::last_lifecycle_warnings()` to see where this warning was[39m
+## [90mgenerated.[39m
+```
+
+``` r
 ph <- ggplot(haz_single, aes(x=t, y=median, 
                         group=model, col=model, fill=model)) + 
     geom_ribbon(aes(ymin=lower, ymax=upper), alpha=0.2, colour=NA) +
@@ -266,19 +268,6 @@ for (i in seq_along(dfs)){
                   rmst(mod,t=5))
     rescomp[i,] <- rescompi
 }
-```
-
-```
-## Warning: There were 1 divergent transitions after warmup. See
-## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
-## to find out why this is a problem and how to eliminate them.
-```
-
-```
-## Warning: Examine the pairs() plot to diagnose sampling problems
-```
-
-```{.r .fold-hide}
 names(rescomp) <- names(rescompi)
 rescomp %>% 
   mutate(looic = round(looic, 1), 
@@ -292,14 +281,14 @@ rescomp %>%
 
 | df| LOOIC|Restricted mean survival (5 years) |
 |--:|-----:|:----------------------------------|
-|  5| 596.5|2.88 (2.62, 3.14)                  |
+|  5| 596.5|2.88 (2.62, 3.13)                  |
 |  6| 597.4|2.88 (2.62, 3.14)                  |
-|  7| 590.8|2.87 (2.62, 3.14)                  |
-|  8| 591.8|2.88 (2.62, 3.14)                  |
-|  9| 593.8|2.89 (2.62, 3.13)                  |
-| 10| 594.1|2.88 (2.61, 3.13)                  |
-| 11| 592.2|2.89 (2.63, 3.13)                  |
-| 12| 592.8|2.88 (2.62, 3.15)                  |
+|  7| 590.8|2.87 (2.6, 3.14)                   |
+|  8| 591.7|2.88 (2.62, 3.13)                  |
+|  9| 593.8|2.88 (2.62, 3.13)                  |
+| 10| 594.1|2.88 (2.62, 3.13)                  |
+| 11| 592.6|2.89 (2.62, 3.15)                  |
+| 12| 592.6|2.89 (2.61, 3.15)                  |
 </details>
 The estimates of RMST within 5 years do not change within 0.1.   Note this is only one of many ad-hoc checks we could do - note we did not change the prior for the smoothness `prior_hsd`, which also governs the amount of smoothness of the hazard function.  LOOCV is also lower for `df=7`.  In practice we might want to switch the `df` according to what data are included, but for simplicity of illustration in this article, we stick with `df=6` for all models, which in general gives slightly stabler computation without affecting the results.
 
@@ -310,17 +299,38 @@ Using LOOIC for model choice may result in fitted hazard functions that wiggle a
 
 We now fit a joint model for both arms of the trial data, describing the treatment effect either through proportional hazards (`mod_ph`) or with `survextrap`'s novel flexible non-proportional hazards model (`mod_nph`).
 
-```r
+``` r
 mod_ph <- survextrap(Surv(years, d) ~ treat, data=cetux, 
                      mspline=mspline, 
                      chains=chains, iter=iter,
                      prior_hscale=prior_hscale, prior_hsd = prior_hsd,
                      prior_loghr=prior_loghr)
+```
+
+```
+## Warning: There were 3 divergent transitions after warmup. See
+## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+## to find out why this is a problem and how to eliminate them.
+```
+
+```
+## Warning: Examine the pairs() plot to diagnose sampling problems
+```
+
+``` r
 mod_nph <- survextrap(Surv(years, d) ~ treat, data=cetux, mspline=mspline, 
                       chains=chains, iter=iter,
                       nonprop = TRUE,
                       prior_hscale=prior_hscale, prior_hsd = prior_hsd,
                       prior_loghr=prior_loghr, prior_hrsd=prior_hrsd)
+```
+
+We also fit a model for the cetuximab treatment arm alone, to couple with the model `mod_con` for the control arm that we fitted earlier. 
+
+``` r
+mod_cet <- survextrap(Surv(years, d) ~ 1, data=cetuximab, mspline=mspline, 
+                      chains=chains, iter=iter,
+                      prior_hscale=prior_hscale, prior_hsd = prior_hsd)
 ```
 
 ```
@@ -331,14 +341,6 @@ mod_nph <- survextrap(Surv(years, d) ~ treat, data=cetux, mspline=mspline,
 
 ```
 ## Warning: Examine the pairs() plot to diagnose sampling problems
-```
-
-We also fit a model for the cetuximab treatment arm alone, to couple with the model `mod_con` for the control arm that we fitted earlier. 
-
-```r
-mod_cet <- survextrap(Surv(years, d) ~ 1, data=cetuximab, mspline=mspline, 
-                      chains=chains, iter=iter,
-                      prior_hscale=prior_hscale, prior_hsd = prior_hsd)
 ```
 
 The survival curves for these three models are now compared.
@@ -432,30 +434,30 @@ knitr::kable(trtcompf, col.names=c("Model","Time horizon",
 
 |Model                         | Time horizon|Restricted mean survival |Increase in restricted mean survival | LOOIC|
 |:-----------------------------|------------:|:------------------------|:------------------------------------|-----:|
-|(2a) Proportional hazards     |            5|2.88 (2.64,3.13)         |0.33 (-0.02,0.68)                    |  1156|
-|(2b) Non-proportional hazards |            5|2.88 (2.62,3.12)         |0.3 (-0.07,0.65)                     |  1157|
-|(2c) Separate arms            |            5|2.88 (2.62,3.14)         |0.49 (-0.95,3.7)                     |  1161|
-|(2a) Proportional hazards     |           20|4.97 (3.76,6.68)         |1.19 (-0.08,2.71)                    |  1156|
-|(2b) Non-proportional hazards |           20|4.92 (3.7,6.81)          |1.04 (-0.57,2.95)                    |  1157|
-|(2c) Separate arms            |           20|5.1 (3.76,7.19)          |0.49 (-0.95,3.7)                     |  1161|
+|(2a) Proportional hazards     |            5|2.89 (2.64,3.12)         |0.31 (-0.03,0.62)                    |  1156|
+|(2b) Non-proportional hazards |            5|2.88 (2.62,3.15)         |0.31 (-0.05,0.67)                    |  1158|
+|(2c) Separate arms            |            5|2.88 (2.63,3.14)         |0.49 (-0.84,3.64)                    |  1161|
+|(2a) Proportional hazards     |           20|4.89 (3.79,6.79)         |1.1 (-0.13,2.47)                     |  1156|
+|(2b) Non-proportional hazards |           20|4.97 (3.8,7.03)          |1.13 (-0.47,3.04)                    |  1158|
+|(2c) Separate arms            |           20|5.11 (3.83,7.28)         |0.49 (-0.84,3.64)                    |  1161|
 </details>
 
 There is very little difference between the fit of the three models. 
 
 The following code formats the table in LaTeX format (for the paper).
 
-```r
+``` r
 write.table(trtcompf, sep="  &  ", eol="\\\\\n", quote=FALSE, row.names = FALSE)
 ```
 
 ```
 ## model  &  t  &  rm  &  ir  &  looic\\
-## (2a) Proportional hazards  &  5  &  2.88 (2.64,3.13)  &  0.33 (-0.02,0.68)  &  1156\\
-## (2b) Non-proportional hazards  &  5  &  2.88 (2.62,3.12)  &  0.3 (-0.07,0.65)  &  1157\\
-## (2c) Separate arms  &  5  &  2.88 (2.62,3.14)  &  0.49 (-0.95,3.7)  &  1161\\
-## (2a) Proportional hazards  &  20  &  4.97 (3.76,6.68)  &  1.19 (-0.08,2.71)  &  1156\\
-## (2b) Non-proportional hazards  &  20  &  4.92 (3.7,6.81)  &  1.04 (-0.57,2.95)  &  1157\\
-## (2c) Separate arms  &  20  &  5.1 (3.76,7.19)  &  0.49 (-0.95,3.7)  &  1161\\
+## (2a) Proportional hazards  &  5  &  2.89 (2.64,3.12)  &  0.31 (-0.03,0.62)  &  1156\\
+## (2b) Non-proportional hazards  &  5  &  2.88 (2.62,3.15)  &  0.31 (-0.05,0.67)  &  1158\\
+## (2c) Separate arms  &  5  &  2.88 (2.63,3.14)  &  0.49 (-0.84,3.64)  &  1161\\
+## (2a) Proportional hazards  &  20  &  4.89 (3.79,6.79)  &  1.1 (-0.13,2.47)  &  1156\\
+## (2b) Non-proportional hazards  &  20  &  4.97 (3.8,7.03)  &  1.13 (-0.47,3.04)  &  1158\\
+## (2c) Separate arms  &  20  &  5.11 (3.83,7.28)  &  0.49 (-0.84,3.64)  &  1161\\
 ```
 
 
@@ -463,7 +465,7 @@ write.table(trtcompf, sep="  &  ", eol="\\\\\n", quote=FALSE, row.names = FALSE)
 
 In this example, there are registry data giving counts of $r_j$ survivors to the next year out of $n_j$ alive at year $j$, from from $j=5$ years onwards.  This is supplied in the `survextrap` package as `cetux_seer`. 
 
-```r
+``` r
 head(cetux_seer)
 ```
 
@@ -483,7 +485,7 @@ We fit a model which assumes that people in the registry data have the same surv
 > **Note**: if instead there had been only one row in the external data, giving survivors to 25 years from those alive at 6 years, it would be impossible to identify variations in the hazard _within_ the period from 6 to 25 years, so using multiple knots inside this period would be futile.
 
 
-```r
+``` r
 mspline_seer <- mspline_spec(Surv(years, d) ~ 1, data=cetux, df=6, 
                              add_knots=c(10,15,20))
 mod_seer <- survextrap(Surv(years, d) ~ 1, data=control, 
@@ -543,7 +545,7 @@ Placing knots at 10,15 and 20 years gives the lowest (best) LOOIC from these alt
 
 <details>
 
-```r
+``` r
 knot_list <- list(c(10,20), 
                   c(20),
                   seq(8,20,by=2))
@@ -571,7 +573,7 @@ for (i in 1:3){
 ```
 
 ```
-## Warning: There were 7 divergent transitions after warmup. See
+## Warning: There were 6 divergent transitions after warmup. See
 ## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
 ## to find out why this is a problem and how to eliminate them.
 ```
@@ -580,7 +582,7 @@ for (i in 1:3){
 ## Warning: Examine the pairs() plot to diagnose sampling problems
 ```
 
-```r
+``` r
 do.call("rbind", c(list(comp_fn(mod_seer)), res)) %>%
   mutate(knots = c("10,15,20",
                    unlist(lapply(knot_list, paste, collapse=",")))) %>%
@@ -593,10 +595,10 @@ do.call("rbind", c(list(comp_fn(mod_seer)), res)) %>%
 
 |Additional knots    |Restricted mean survival over 20 years | LOOIC|
 |:-------------------|:--------------------------------------|-----:|
-|10,15,20            |5.82 (5.07, 6.62)                      |  1484|
-|10,20               |5.7 (4.97, 6.49)                       |  1504|
-|20                  |5.77 (5.07, 6.53)                      |  1514|
-|8,10,12,14,16,18,20 |5.81 (5.07, 6.66)                      |  1508|
+|10,15,20            |5.8 (5.03, 6.63)                       |  1485|
+|10,20               |5.74 (4.95, 6.55)                      |  1507|
+|20                  |5.76 (5.05, 6.56)                      |  1514|
+|8,10,12,14,16,18,20 |5.79 (5.06, 6.6)                       |  1508|
 </details>
 
 
@@ -607,7 +609,7 @@ do.call("rbind", c(list(comp_fn(mod_seer)), res)) %>%
 An alternative way of including external data is through additive hazards (or relative survival), using the `backhaz` argument to supply a data frame that describes the background hazard at all times.  This describes the population of the USA but matched to the trial patients by age, sex and calendar year, and is supplied in the `survextrap` package as `cetux_bh`.
 
 
-```r
+``` r
 head(cetux_bh)
 ```
 
@@ -623,7 +625,7 @@ head(cetux_bh)
 The remaining data (trial and registry) are used to infer the excess hazard for head and neck cancer patients.  A model is fitted which assumes the overall hazard for the trial and registry patients is the sum of the background hazard (fixed from the data in `backhaz`) and an unknown excess hazard to be estimated.
 
 
-```r
+``` r
 mod_seer_pop <- survextrap(Surv(years, d) ~ 1, data=control, mspline = mspline_seer,
                            external=cetux_seer, backhaz=cetux_bh, 
                            chains=chains,iter=iter,
@@ -669,7 +671,7 @@ The benefit of the population data in this example is to inform extrapolations o
 Two models are then fitted, to show the impact of the population data. The first includes the trial and registry data.
 
 
-```r
+``` r
 mspline40 <- mspline_spec(Surv(years, d) ~ treat, data=cetux, df=6, 
                           add_knots=c(10, 15, 20, 30, 40))
 mod_seer40 <- survextrap(Surv(years, d) ~ 1, data=control, mspline = mspline40,
@@ -678,20 +680,10 @@ mod_seer40 <- survextrap(Surv(years, d) ~ 1, data=control, mspline = mspline40,
                          prior_hscale=prior_hscale, prior_hsd = prior_hsd)
 ```
 
-```
-## Warning: There were 1 divergent transitions after warmup. See
-## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
-## to find out why this is a problem and how to eliminate them.
-```
-
-```
-## Warning: Examine the pairs() plot to diagnose sampling problems
-```
-
 The second includes the trial, registry and population data.
 <a id="popplot"></a>
 
-```r
+``` r
 mod_seer_pop40 <- survextrap(Surv(years, d) ~ 1, data=control, mspline = mspline40,
                            external=cetux_seer, backhaz=cetux_bh,
                            chains=chains, iter=iter, 
@@ -743,7 +735,7 @@ In many clinical applications, it is thought that the excess hazard for a popula
 One way of modelling a decreasing hazard is through a _mixture cure_ model.   This can also be used to model a decreasing _excess_ hazard in an additive hazards model.  This is simply specified by setting `cure=TRUE` in the call to `survextrap`.
 
 
-```r
+``` r
 mod_cure <- survextrap(Surv(years, d) ~ 1, data=control, mspline = mspline40,
                        external=cetux_seer, backhaz=cetux_bh, 
                        cure=TRUE, 
@@ -763,7 +755,7 @@ An alternative way to build in judgements about longer-term survival is through 
 Here, suppose we are confident that by 40 years, the survival of head and neck cancer patients will be similar to that of the general population.  Instead of using a parametric cure model, we can create an artificial external dataset that contains the same information as our judgement.  Here the annual population survival probability is computed from the hazard stored in `cetux_bh`, and stored in `pops`.  
 
 
-```r
+``` r
 cetux_bh <- cetux_bh %>% 
   mutate(surv1 = exp(-hazard*1))
 pops <- cetux_bh$surv1[39]
@@ -772,7 +764,7 @@ pops <- cetux_bh$surv1[39]
 A `Beta(n*pops, n(1-pops))` distribution for any `n` will have a mean of `pops`, here 0.72.  We then set `n` to control the amount of uncertainty around this prior guess.
 
 
-```r
+``` r
 qbeta(c(0.025, 0.5, 0.975), 1000*pops, 1000*(1-pops))
 ```
 
@@ -783,7 +775,7 @@ qbeta(c(0.025, 0.5, 0.975), 1000*pops, 1000*(1-pops))
 The information in this Beta prior is equivalent to having observed `1000*pops` survivors out of 1000 people.  This gives a numerator and denominator `n` and `r` for survival between `start=39` and `stop=40` years.  We use these to construct a dataset in the format needed by the `external` argument to `survextrap`.
 
 
-```r
+``` r
 data_elic <- data.frame(
   start=39, stop=40,
   n = 1000, 
@@ -795,7 +787,7 @@ data_elic <- data.frame(
 This can then be joined to the registry data `cetux_seer`, to give an external dataset to supply to `survextrap`. 
 
 
-```r
+``` r
 pop_cured <- 
   cetux_seer %>% full_join(data_elic, by = join_by(start, stop, r, n, treat))
 mod_cure_elic <- survextrap(Surv(years, d) ~ 1, data=control, mspline=mspline40, 
@@ -884,32 +876,32 @@ knitr::kable(rs, col.names=c("Model", "Observed data","Extrapolation assumptions
 
 |Model |Observed data             |Extrapolation assumptions | Time horizon|Restricted mean survival |
 |:-----|:-------------------------|:-------------------------|------------:|:------------------------|
-|(1a)  |Trial                     |No extrapolation          |            5|2.88 (2.62, 3.14)        |
-|(1a)  |Trial                     |Uncertain hazard          |           20|5.1 (3.76, 7.19)         |
-|(1b)  |Trial                     |Constant hazard           |           20|5.12 (3.99, 6.68)        |
-|(1c)  |Trial,registry            |No extrapolation          |           20|5.78 (5.04, 6.58)        |
-|(1d)  |Trial,registry            |Uncertain hazard          |           40|6.2 (5.35, 7.13)         |
-|(1e)  |Trial,registry,population |Uncertain excess hazard   |           40|6.2 (5.36, 7.14)         |
-|(1f)  |Trial,registry,population |Mixture cure              |           40|6.27 (5.41, 7.18)        |
-|(1g)  |Trial,registry,population |Elicited survival         |           40|6.25 (5.42, 7.23)        |
+|(1a)  |Trial                     |No extrapolation          |            5|2.88 (2.63, 3.14)        |
+|(1a)  |Trial                     |Uncertain hazard          |           20|5.11 (3.83, 7.28)        |
+|(1b)  |Trial                     |Constant hazard           |           20|5.12 (4, 6.68)           |
+|(1c)  |Trial,registry            |No extrapolation          |           20|5.77 (5.03, 6.6)         |
+|(1d)  |Trial,registry            |Uncertain hazard          |           40|6.19 (5.33, 7.17)        |
+|(1e)  |Trial,registry,population |Uncertain excess hazard   |           40|6.21 (5.38, 7.14)        |
+|(1f)  |Trial,registry,population |Mixture cure              |           40|6.28 (5.39, 7.19)        |
+|(1g)  |Trial,registry,population |Elicited survival         |           40|6.25 (5.36, 7.2)         |
 </details>
 
 The following code formats the table in LaTeX format (for the paper).
 
-```r
+``` r
 write.table(rs, sep="  &  ", eol="\\\\\n", quote=FALSE, row.names = FALSE)
 ```
 
 ```
 ## modlabs  &  data  &  extrap  &  t  &  rmst\\
-## (1a)  &  Trial  &  No extrapolation  &  5  &  2.88 (2.62, 3.14)\\
-## (1a)  &  Trial  &  Uncertain hazard  &  20  &  5.1 (3.76, 7.19)\\
-## (1b)  &  Trial  &  Constant hazard  &  20  &  5.12 (3.99, 6.68)\\
-## (1c)  &  Trial,registry  &  No extrapolation  &  20  &  5.78 (5.04, 6.58)\\
-## (1d)  &  Trial,registry  &  Uncertain hazard  &  40  &  6.2 (5.35, 7.13)\\
-## (1e)  &  Trial,registry,population  &  Uncertain excess hazard  &  40  &  6.2 (5.36, 7.14)\\
-## (1f)  &  Trial,registry,population  &  Mixture cure  &  40  &  6.27 (5.41, 7.18)\\
-## (1g)  &  Trial,registry,population  &  Elicited survival  &  40  &  6.25 (5.42, 7.23)\\
+## (1a)  &  Trial  &  No extrapolation  &  5  &  2.88 (2.63, 3.14)\\
+## (1a)  &  Trial  &  Uncertain hazard  &  20  &  5.11 (3.83, 7.28)\\
+## (1b)  &  Trial  &  Constant hazard  &  20  &  5.12 (4, 6.68)\\
+## (1c)  &  Trial,registry  &  No extrapolation  &  20  &  5.77 (5.03, 6.6)\\
+## (1d)  &  Trial,registry  &  Uncertain hazard  &  40  &  6.19 (5.33, 7.17)\\
+## (1e)  &  Trial,registry,population  &  Uncertain excess hazard  &  40  &  6.21 (5.38, 7.14)\\
+## (1f)  &  Trial,registry,population  &  Mixture cure  &  40  &  6.28 (5.39, 7.19)\\
+## (1g)  &  Trial,registry,population  &  Elicited survival  &  40  &  6.25 (5.36, 7.2)\\
 ```
 
 
@@ -918,7 +910,7 @@ write.table(rs, sep="  &  ", eol="\\\\\n", quote=FALSE, row.names = FALSE)
 Finally, we estimate the effect of treatment with cetuximab on long-term survival.  We extend two of the models with external data (fitted earlier to just the control group) to include a treatment effect and fit them to the full trial data `cetux`.  Firstly, the model with trial and registry data, and secondly, the model with all three data sources (trial, registry and population, but no "cure" assumption).  The proportional hazards model is assumed, which was adequate to describe the short-term data.
 
 
-```r
+``` r
 mod_full_reg <- survextrap(Surv(years, d) ~ treat, data=cetux, mspline = mspline40,
                            external=cetux_seer, 
                            chains=chains, iter=iter, 
@@ -936,7 +928,7 @@ The restricted mean survival for the control group, and the increase in the rest
 The calls to `rmst` and `irmst` are modified to include a `wane_period` (vector defining the start and end of the waning period).  We also supply `newdata` and `newdata0`, which indicate respectively what covariate values in the model correspond to "treated" and "control" groups.
 
 
-```r
+``` r
 nd <- data.frame(treat=c("Cetuximab"))
 nd0 <- data.frame(treat=c("Control"))
 ind <- data.frame(treat=c("Control","Cetuximab"))
@@ -994,23 +986,23 @@ knitr::kable(res_wane %>%
 
 |Data                      |Model              |Restricted mean survival |Increase in restricted mean survival |
 |:-------------------------|:------------------|:------------------------|:------------------------------------|
-|Trial,registry            |(2d) No waning     |5.82 (5.07, 6.65)        |1.2 (-0.4, 2.75)                     |
-|Trial,registry,population |(2e) No waning     |5.88 (5.14, 6.67)        |1.11 (-0.3, 2.57)                    |
-|Trial,registry,population |(2e) 5 to 6 years  |5.88 (5.14, 6.67)        |0.83 (-0.23, 1.9)                    |
-|Trial,registry,population |(2e) 5 to 20 years |5.88 (5.14, 6.67)        |1.05 (-0.29, 2.44)                   |
+|Trial,registry            |(2d) No waning     |5.83 (5.06, 6.58)        |1.22 (-0.31, 2.91)                   |
+|Trial,registry,population |(2e) No waning     |5.88 (5.15, 6.72)        |1.04 (-0.32, 2.52)                   |
+|Trial,registry,population |(2e) 5 to 6 years  |5.88 (5.15, 6.72)        |0.79 (-0.24, 1.86)                   |
+|Trial,registry,population |(2e) 5 to 20 years |5.88 (5.15, 6.72)        |0.99 (-0.3, 2.39)                    |
 Table in LaTeX format (for the paper).
 
-```r
+``` r
 write.table(res_wane, eol="\\\\\n", sep="  &  ", row.names = FALSE, quote=FALSE)
 ```
 
 ```
 ## model  &  rmf  &  irmf  &  looic\\
-## (2d) No waning  &  5.82 (5.07, 6.65)  &  1.2 (-0.4, 2.75)  &  \\
-## (2e) No waning  &  5.88 (5.14, 6.67)  &  1.11 (-0.3, 2.57)  &  \\
-## (2e) 5 to 6 years  &  5.88 (5.14, 6.67)  &  0.83 (-0.23, 1.9)  &  \\
-## (2e) 5 to 20 years  &  5.88 (5.14, 6.67)  &  1.05 (-0.29, 2.44)  &  \\
+## (2d) No waning  &  5.83 (5.06, 6.58)  &  1.22 (-0.31, 2.91)  &  \\
+## (2e) No waning  &  5.88 (5.15, 6.72)  &  1.04 (-0.32, 2.52)  &  \\
+## (2e) 5 to 6 years  &  5.88 (5.15, 6.72)  &  0.79 (-0.24, 1.86)  &  \\
+## (2e) 5 to 20 years  &  5.88 (5.15, 6.72)  &  0.99 (-0.3, 2.39)  &  \\
 ```
 
 
-Using all three data sources, with no waning, the incremental restricted mean survival over 20 years is estimated as 1.11 (-0.3, 2.57).  This reduces to 1.05 (-0.29, 2.44) when waning is applied gradually from 6 to 20 years, and even further to 0.83 (-0.23, 1.9) when the effect is assumed to wane rapidly from 5 to 6 years.
+Using all three data sources, with no waning, the incremental restricted mean survival over 20 years is estimated as 1.04 (-0.32, 2.52).  This reduces to 0.99 (-0.3, 2.39) when waning is applied gradually from 6 to 20 years, and even further to 0.79 (-0.24, 1.86) when the effect is assumed to wane rapidly from 5 to 6 years.

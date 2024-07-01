@@ -26,8 +26,8 @@ also have zero derivative and second derivative at the boundary.}
 
 \item{knots}{Vector of knot locations. If not supplied, \code{df}
 has to be specified.  One of two rules is then used to choose the
-knot locations.  If \code{bknots} is specified, a set of equally
-spaced knots between zero and \code{bknots} is used.  Otherwise
+knot locations.  If \code{bknot} is specified, a set of equally
+spaced knots between zero and \code{bknot} is used.  Otherwise
 if \code{obstimes} is supplied, the knots are chosen as equally
 spaced quantiles of \code{obstimes}.
 

@@ -13,14 +13,16 @@ plot_mspline(
   coefs = NULL,
   scale = 1,
   tmin = 0,
-  tmax = 10
+  tmax = 10,
+  show_knots = FALSE,
+  show_means = FALSE
 )
 }
 \arguments{
 \item{knots}{Vector of knot locations. If not supplied, \code{df}
 has to be specified.  One of two rules is then used to choose the
-knot locations.  If \code{bknots} is specified, a set of equally
-spaced knots between zero and \code{bknots} is used.  Otherwise
+knot locations.  If \code{bknot} is specified, a set of equally
+spaced knots between zero and \code{bknot} is used.  Otherwise
 if \code{obstimes} is supplied, the knots are chosen as equally
 spaced quantiles of \code{obstimes}.
 
@@ -50,7 +52,13 @@ terms, the function is multiplied by \code{scale}.   The log of the scale is the
 \item{tmin}{Minimum plotting time.  Defaults to zero.}
 
 \item{tmax}{Maximum plotting time.  Defaults to the highest knot.}
+
+\item{show_knots}{Show the positions of the knots, including the upper boundary}
+
+\item{show_means}{Show the "mean" around which each basis term is
+centred (defined as the mean of a random variable whose PDF is
+defined by the basis term).}
 }
 \description{
-Plot a M-spline function, showing how it is built up from its basis
+See \code{\link{mspline_plotdata}} for the data behind the plot
 }
