@@ -84,14 +84,16 @@ mspline_df <- function(knots, degree, bsmooth){
   length(knots) + degree - 2*bsmooth
 }
 
-#' Obtain characteristics of an M-spline that are defined deterministically
+#' Deduce characteristics of an M-spline that are defined deterministically
 #' given the knots and degree (and whether we want to smooth the upper boundary)
 #'
 #' @noRd
 mspline_update <- function(mspline){
+  if (is.null(mspline$bsmooth)) mspline$bsmooth <- TRUE
   mspline$df <- mspline_df(mspline$knots, mspline$degree, mspline$bsmooth)
   mspline$basis_means <- make_basis_means(mspline$knots, mspline$degree, mspline$bsmooth)
   mspline$basis_spans <- make_basis_spans(mspline$knots, mspline$degree, mspline$bsmooth)
+  mspline$sqrt_wt <- sqrt(mspline$basis_spans / sum(mspline$basis_spans))
   mspline
 }
 

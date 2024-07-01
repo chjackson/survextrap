@@ -174,6 +174,13 @@ test_that("prior hazard function samples", {
                                tmin=0, tmax=10, nsim=10)
     ggplot(pdf, aes(x=time, y=haz, group=rep)) + geom_line() + ylim(0,2)
 
+    pdf <- prior_sample_hazard(knots = c(1,2,3,5), degree=3,
+                               prior_hscale = p_normal(0,1),
+                               prior_hsd = p_gamma(10, 10),
+                               smooth_model = "random_walk",
+                               tmin=0, tmax=10, nsim=10)
+    ggplot(pdf, aes(x=time, y=haz, group=rep)) + geom_line() + ylim(0,2)
+
     ## prop haz model
     pdf <- prior_sample_hazard(knots = c(1,2,3,5), degree=3,
                                prior_hscale = p_normal(0,1),

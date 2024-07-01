@@ -412,10 +412,9 @@ prior_sample_basehaz <- function(mspline,
       }
     }
   } else if (smooth_model=="random_walk"){
-    b_err[,2] <- rlogis(nsim, 0, 1)
-    if (np >= 3){
-      for (j in 3:np){
-        b_err[,j] <- rlogis(nsim, 2*b_err[,j-1] - b_err[,j-2], 1)
+    if (np >= 2){
+      for (j in 2:np){
+        b_err[,j] <- rlogis(nsim, b_err[,j-1], mspline$sqrt_wt[j-1])
       }
     }
     lcmat <- matrix(rep(c(0,lcoefs_mean), nsim), nrow=nsim, ncol=np, byrow=TRUE)
@@ -509,7 +508,8 @@ prior_sample_hazard <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
                              bsmooth=bsmooth)
   time <- attr(basis, "times")
   knots <- attr(basis, "knots")
-  sam <- prior_sample(mspline = list(knots=knots, degree=degree, bsmooth=bsmooth),
+  mspline <- mspline_update(list(knots=knots, degree=degree, bsmooth=bsmooth))
+  sam <- prior_sample(mspline = mspline,
                       coefs_mean=coefs_mean, prior_hsd=prior_hsd,
                       prior_hscale=prior_hscale,
                       smooth_model = smooth_model,

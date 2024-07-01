@@ -850,8 +850,6 @@ make_mspline <- function(mspline, td, external, add_knots=NULL){
     mspline <- mspline_update(mspline)
   }
   mspline$nvars  <- mspline$df # do we need both?
-  mspline <- mspline[c("nvars","knots","degree","bsmooth","df","basis_means","basis_spans")]
-  mspline$sqrt_wt <- sqrt(mspline$basis_spans / sum(mspline$basis_spans))
   mspline
 }
 
