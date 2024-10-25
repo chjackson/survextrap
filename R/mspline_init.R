@@ -33,6 +33,15 @@
 ##' The component \code{df} is also included, and derived as a consequence
 ##' of the fundamental components.
 ##'
+##' \code{basis_means} gives the "mean" of each basis term (i.e. the
+##' mean of a random variable whose probability density function is
+##' given by the basis function)
+##'
+##' \code{basis_spans} and \code{sqrt_wt} are quantities used in the
+##' construction of random walk prior distributions for the basis
+##' coefficients (following \url{https://arxiv.org/abs/2401.12640} and
+##' \url{https://arxiv.org/abs/2201.06808}).
+##'
 ##' @export
 mspline_init <- function(df = 10,
                          degree = 3,

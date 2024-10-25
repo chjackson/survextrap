@@ -89,7 +89,9 @@ hazard is only specified over a limited range of time.
 If there is external data, and \code{backhaz} is supplied in form (b),
 then the user should also supply the background survival at the
 start and stop points in columns of the external data named
-\code{"backsurv_start"} and \code{"backsurv_stop"}.  This should describe the
+\code{"backsurv_start"} and \code{"backsurv_stop"}.  That is, the probability
+of survival up to each of these times for someone alive at time 0.
+This should describe the
 same reference population as \code{backhaz}, though the package does not
 check for consistency between these.
 

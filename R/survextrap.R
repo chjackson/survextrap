@@ -145,7 +145,9 @@
 #' If there is external data, and `backhaz` is supplied in form (b),
 #' then the user should also supply the background survival at the
 #' start and stop points in columns of the external data named
-#' `"backsurv_start"` and `"backsurv_stop"`.  This should describe the
+#' `"backsurv_start"` and `"backsurv_stop"`.  That is, the probability
+#' of survival up to each of these times for someone alive at time 0.
+#' This should describe the
 #' same reference population as `backhaz`, though the package does not
 #' check for consistency between these.
 #'

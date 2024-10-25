@@ -1,4 +1,4 @@
-# Version 0.8.15 (2024/06/29)
+# Version 0.8.15 (2024/07/01)
 
 * Random walk prior for the coefficients changed to a first-order weighted model, following [Phillippo et al.](https://arxiv.org/abs/2401.12640), so that the expected smoothness accounts for the knot spacing.
 
