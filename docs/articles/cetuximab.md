@@ -1,7 +1,7 @@
 ---
 title: "Case study of using survextrap: cetuximab for head and neck cancer"
 author: "Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>"
-date: "2024-06-29"
+date: "2025-02-24"
 output: 
   rmarkdown::html_document:
     toc: true
@@ -45,7 +45,7 @@ library(viridis) # for colour palettes
 survminer::ggsurvplot(survfit(Surv(years, d) ~ treat, data=cetux)) + xlab("Years")
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/packages_data.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/packages_data.png" style="display: block; margin: auto;" />
 
 ``` r
 control <- cetux[cetux$treat=="Control",]
@@ -244,7 +244,7 @@ grid::grid.draw(cbind(ggplotGrob(ps),
                       ggplotGrob(ph)))
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_control.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_control.png" style="display: block; margin: auto;" />
 
 The plots show the posterior median and 95\% credible intervals. There are no data between 5 and 20 years, so the extrapolation of the trial data over this period depends on the model assumption - either that the hazard is constant, or that the hazard will change smoothly, but with an unknown direction and extent of change.   If we allow it to change, the uncertainty is appropriately greater. 
 
@@ -371,7 +371,7 @@ ggplot(surv_trt, aes(x=t, y=median, col=Model, lty=treat)) +
     geom_vline(xintercept = mod_con5$mspline$iknots, col="gray80", lty=2)
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_trt.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_trt.png" style="display: block; margin: auto;" />
 </details>
 
 
@@ -533,7 +533,7 @@ ggplot(haz_plot_reg, aes(x=t, y=median, col=Model, fill=Model)) +
     labs(col=NULL, fill=NULL)
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_registry.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_registry.png" style="display: block; margin: auto;" />
 </details>
 
 
@@ -661,7 +661,7 @@ ggplot(haz_plot_reg_pop20, aes(x=t, y=median, col=Model, fill=Model)) +
     labs(col=NULL, fill=NULL)
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_registry_pop20.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_registry_pop20.png" style="display: block; margin: auto;" />
 </details>
 
 Including the population data does not make much difference to the estimated hazards over 20 years after diagnosis. 
@@ -722,7 +722,7 @@ ggplot(haz_plot_reg_pop, aes(x=t, y=median, col=Model, fill=Model)) +
     geom_vline(xintercept = max(control$years)) 
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_registry_pop40.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_registry_pop40.png" style="display: block; margin: auto;" />
 </details>
 
 
@@ -827,7 +827,7 @@ ggplot(haz_plot_cure, aes(x=t, y=median, col=Model, fill=Model)) +
     labs(col=NULL, fill=NULL) 
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_cure.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_cure.png" style="display: block; margin: auto;" />
 </details>
 
 # Table of mean survival times

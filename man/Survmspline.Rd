@@ -102,7 +102,9 @@ rmst_survmspline(
   offsetH = 0,
   backhaz = NULL,
   bsmooth = TRUE,
-  disc_rate = 0
+  disc_rate = 0,
+  method = "gl",
+  gl_nodes = 100
 )
 
 mean_survmspline(
@@ -164,8 +166,20 @@ also have zero derivative and second derivative at the boundary.}
 
 \item{n}{Number of random numbers to simulate.}
 
-\item{disc_rate}{Discounting rate used to calculate the discounted mean or
-restricted mean survival time, using an exponential discounting function.}
+\item{disc_rate}{Discounting rate used to calculate the discounted mean
+or restricted mean survival time, using an exponential discounting function.}
+
+\item{method}{Method of numerical integration to obtain the
+restricted mean survival time from the survival function.
+
+The default is \code{method="gl"}, a Gauss-Legendre method with 100
+nodes between zero and the maximum of \code{t}.
+
+\code{method="adaptive"} uses the base R \code{integrate} function, which is
+much slower, but potentially more robust for badly-behaved
+survival functions.}
+
+\item{gl_nodes}{Number of nodes for the Gauss-Legendre method.}
 }
 \value{
 \code{dsurvmspline} gives the density, \code{psurvmspline} gives the

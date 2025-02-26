@@ -14,7 +14,9 @@ irmst(
   niter = NULL,
   summ_fns = NULL,
   sample = FALSE,
-  disc_rate = 0
+  disc_rate = 0,
+  method = "gl",
+  gl_nodes = 100
 )
 }
 \arguments{
@@ -57,6 +59,18 @@ of the output, rather than summary statistics.}
 
 \item{disc_rate}{Discounting rate used to calculate the discounted mean
 or restricted mean survival time, using an exponential discounting function.}
+
+\item{method}{Method of numerical integration to obtain the
+restricted mean survival time from the survival function.
+
+The default is \code{method="gl"}, a Gauss-Legendre method with 100
+nodes between zero and the maximum of \code{t}.
+
+\code{method="adaptive"} uses the base R \code{integrate} function, which is
+much slower, but potentially more robust for badly-behaved
+survival functions.}
+
+\item{gl_nodes}{Number of nodes for the Gauss-Legendre method.}
 }
 \value{
 A data frame (tibble) with each row containing posterior summary statistics

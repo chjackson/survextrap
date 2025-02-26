@@ -5,68 +5,52 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="survextrap">
 <title>Details of methods behind survextrap • survextrap</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Details of methods behind survextrap">
-<meta property="og:description" content="survextrap">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Details of methods behind survextrap">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.16</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/cetuximab.html">Case study of using survextrap: cetuximab for head and neck cancer</a>
-    <a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a>
-    <a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a>
-    <a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a>
-    <a class="dropdown-item" href="../articles/sbc.html">Simulation-based calibration of survextrap</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/cetuximab.html">Case study of using survextrap: cetuximab for head and neck cancer</a></li>
+    <li><a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a></li>
+    <li><a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a></li>
+    <li><a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a></li>
+    <li><a class="dropdown-item" href="../articles/sbc.html">Simulation-based calibration of survextrap</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/chjackson/survextrap/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/chjackson/survextrap/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -75,12 +59,13 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Details of methods behind survextrap</h1>
+
+      <h1>Details of methods behind survextrap</h1>
                         <h4 data-toc-skip class="author">Christopher
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2024-06-29</h4>
+            <h4 data-toc-skip class="date">2025-02-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -99,19 +84,25 @@ is given in the preprint <a href="https://doi.org/10.1186/s12874-023-02094-1" cl
 <em>knots</em>. In the example below, the knots are located at the
 integers from 1 to 10, as shown by the grid lines.</p>
 <p>Each region is associated with a <em>cubic polynomial function</em>
-<span class="math inline">\(b_i(t)\)</span>, known as a <em>basis</em>
-function. M-spline basis functions are defined to be positive.</p>
-<p>The hazard <span class="math inline">\(h(t)\)</span> at time <span class="math inline">\(t\)</span> is defined by a <em>weighted sum</em>
-of the basis functions:</p>
-<p><span class="math display">\[h(t) = \eta \sum_i p_i
-b_i(t)\]</span></p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">b_i(t)</annotation></semantics></math>,
+known as a <em>basis</em> function. M-spline basis functions are defined
+to be positive.</p>
+<p>The hazard
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t)</annotation></semantics></math>
+at time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+is defined by a <em>weighted sum</em> of the basis functions:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>η</mi><munder><mo>∑</mo><mi>i</mi></munder><msub><mi>p</mi><mi>i</mi></msub><msub><mi>b</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t) = \eta \sum_i p_i b_i(t)</annotation></semantics></math></p>
 <p>with</p>
 <ul>
-<li><p>weights <span class="math inline">\(p_1,\ldots,p_n\)</span> that
-sum to 1, <span class="math inline">\(\sum_i p_i = 1\)</span>, known as
-the <em>basis coefficients</em>.</p></li>
-<li><p>a <em>scale</em> parameter <span class="math inline">\(\eta\)</span> that describes the average level of
-the hazard.</p></li>
+<li><p>weights
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mn>1</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>p</mi><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">p_1,\ldots,p_n</annotation></semantics></math>
+that sum to 1,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>i</mi></msub><msub><mi>p</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\sum_i p_i = 1</annotation></semantics></math>,
+known as the <em>basis coefficients</em>.</p></li>
+<li><p>a <em>scale</em> parameter
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>
+that describes the average level of the hazard.</p></li>
 </ul>
 <div class="section level3">
 <h3 id="standard-m-spline-basis">Standard M-spline basis<a class="anchor" aria-label="anchor" href="#standard-m-spline-basis"></a>
@@ -120,7 +111,8 @@ the hazard.</p></li>
 Two of the basis functions have peaks at 0 and the upper knot, and the
 others have peaks around the knot, diminishing to zero on either side.
 See <a href="https://www.jstor.org/stable/2245395" class="external-link">Ramsay</a> for the
-exact definitions of <span class="math inline">\(b_i(t)\)</span>.</p>
+exact definitions of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">b_i(t)</annotation></semantics></math>.</p>
 <p>The package provides a few functions
 (e.g. <code><a href="../reference/mspline_plotdata.html">mspline_plotdata()</a></code>, <code><a href="../reference/plot_mspline.html">plot_mspline()</a></code>) to
 illustrate M-spline bases. The actual computation of the basis is done
@@ -167,30 +159,42 @@ package functions for defining M-splines.</p>
 <div class="section level2">
 <h2 id="using-m-splines-to-represent-particular-hazard-shapes">Using M-splines to represent particular hazard shapes<a class="anchor" aria-label="anchor" href="#using-m-splines-to-represent-particular-hazard-shapes"></a>
 </h2>
-<p>The coefficients <span class="math inline">\(p_i\)</span> define how
-the hazard changes through time. If knots are equally spaced, then <span class="math inline">\(p_i\)</span> are nearly proportional to the hazard
-in the <span class="math inline">\(i\)</span>th region, so that if all
-<span class="math inline">\(p_i\)</span> are equal, then the hazard is
-nearly constant (red line <code>p_equal</code> in the figure). It is not
-exactly constant because of the influence of the regions at either end
-of the space, whose polynomial functions have a skewed shape.</p>
+<p>The coefficients
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>i</mi></msub><annotation encoding="application/x-tex">p_i</annotation></semantics></math>
+define how the hazard changes through time. If knots are equally spaced,
+then
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>i</mi></msub><annotation encoding="application/x-tex">p_i</annotation></semantics></math>
+are nearly proportional to the hazard in the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>th
+region, so that if all
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>i</mi></msub><annotation encoding="application/x-tex">p_i</annotation></semantics></math>
+are equal, then the hazard is nearly constant (red line
+<code>p_equal</code> in the figure). It is not exactly constant because
+of the influence of the regions at either end of the space, whose
+polynomial functions have a skewed shape.</p>
 <p>To produce a practically constant hazard, we can search numerically
-for the <span class="math inline">\(p_i\)</span> which minimise the
-variance of a selection of points <span class="math inline">\(t\)</span>
+for the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>i</mi></msub><annotation encoding="application/x-tex">p_i</annotation></semantics></math>
+which minimise the variance of a selection of points
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
 that span the area that we want to model. This search can be done
 automatically in the package (red line <code>p_const</code> in the
 figure).</p>
 <p><strong>Extrapolation?</strong> To fully specify a parametric
 time-to-event model, we have to define the hazard for times greater than
-the time <span class="math inline">\(t_{n}\)</span> of the highest knot,
-which is 10 in the example.</p>
+the time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mi>n</mi></msub><annotation encoding="application/x-tex">t_{n}</annotation></semantics></math>
+of the highest knot, which is 10 in the example.</p>
 <p>The model in <code>survextrap</code> simply assumes that the hazard
-for <span class="math inline">\(t &gt; t_{n}\)</span> is constant, the
-same as the hazard at <span class="math inline">\(t_{n}\)</span>.</p>
+for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>&gt;</mo><msub><mi>t</mi><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">t &gt; t_{n}</annotation></semantics></math>
+is constant, the same as the hazard at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mi>n</mi></msub><annotation encoding="application/x-tex">t_{n}</annotation></semantics></math>.</p>
 <p>Therefore, if you want to estimate survival over a period where you
 think the hazard might not be constant, then you should make sure that
-the highest spline knot <span class="math inline">\(t_n\)</span> is
-after the end of this period.</p>
+the highest spline knot
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mi>n</mi></msub><annotation encoding="application/x-tex">t_n</annotation></semantics></math>
+is after the end of this period.</p>
 <blockquote>
 <p><strong>Sidenote</strong>. Another way to define the hazard beyond
 the last knot would be to extrapolate the final basis polynomials. This
@@ -254,21 +258,28 @@ e.g. Gaussian or Dirichlet processes.</p></li>
 <div class="section level2">
 <h2 id="bayesspec">Bayesian model specification<a class="anchor" aria-label="anchor" href="#bayesspec"></a>
 </h2>
-<p>The <em>parameters</em> of the model, <span class="math inline">\(p_i\)</span> and <span class="math inline">\(\eta\)</span>, are estimated from data using
-Bayesian inference.</p>
+<p>The <em>parameters</em> of the model,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>i</mi></msub><annotation encoding="application/x-tex">p_i</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>,
+are estimated from data using Bayesian inference.</p>
 <p>The <em>flexibility</em> of the fitted model is determined by two
 things.</p>
 <ol style="list-style-type: lower-alpha">
-<li><p>The number <span class="math inline">\(n\)</span> and choice of
-knots. This determines the <em>maximum potential flexibility</em> of the
-hazard function.</p></li>
-<li><p>The <em>prior distribution</em> on the basis coefficients <span class="math inline">\(p_i\)</span>. This plays the role of
-<em>smoothing</em> the fitted hazard function.</p></li>
+<li><p>The number
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+and choice of knots. This determines the <em>maximum potential
+flexibility</em> of the hazard function.</p></li>
+<li><p>The <em>prior distribution</em> on the basis coefficients
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>i</mi></msub><annotation encoding="application/x-tex">p_i</annotation></semantics></math>.
+This plays the role of <em>smoothing</em> the fitted hazard
+function.</p></li>
 </ol>
 <p>The default approach taken by <code>survextrap</code> is to choose a
-large number of knots and basis functions (the default is <span class="math inline">\(n=10\)</span>), intended to accommodate all
-reasonable situations, and then <em>estimate</em> the extent of
-smoothing needed from the data.</p>
+large number of knots and basis functions (the default is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">n=10</annotation></semantics></math>),
+intended to accommodate all reasonable situations, and then
+<em>estimate</em> the extent of smoothing needed from the data.</p>
 <ul>
 <li><p>With <em>more data</em>, the fitted curve is as flexible as
 necessary to represent the data.</p></li>
@@ -276,10 +287,11 @@ necessary to represent the data.</p></li>
 prior.</p></li>
 </ul>
 <p>This is a smoother, Bayesian analogue of the common approach to
-spline model selection based on choosing <span class="math inline">\(n\)</span> to give the model with the lowest AIC.
-It also similar in principle to the “penalised likelihood” methods
-implemented in e.g. the <code>mgcv</code> and <code>rstpm2</code>
-packages.</p>
+spline model selection based on choosing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+to give the model with the lowest AIC. It also similar in principle to
+the “penalised likelihood” methods implemented in e.g. the
+<code>mgcv</code> and <code>rstpm2</code> packages.</p>
 <p>All priors in the package can be chosen by the user (within given
 distribution families). See the <a href="priors.html">priors
 vignette</a> for examples and advice for doing this. The defaults in the
@@ -291,71 +303,128 @@ explicitly.</p>
 <div class="section level2">
 <h2 id="priorhaz">Prior distribution for the hazard curve<a class="anchor" aria-label="anchor" href="#priorhaz"></a>
 </h2>
-<p>A log-normal prior is used for the scale <span class="math inline">\(\eta\)</span>. The default in the package is
-normal(0, 20) for <span class="math inline">\(\log(\eta)\)</span>.</p>
-<p>The prior for the basis coefficients <span class="math inline">\(p_i\)</span>, that describe the mass of the hazard
-in each region, is specified on the multinomial logistic scale, since
-<span class="math inline">\(\sum_i p_i = 1\)</span>. Define <span class="math inline">\(log(p_i / p_1) = \gamma_i\)</span>, with <span class="math inline">\(\gamma_1=0\)</span>, and <span class="math inline">\(\gamma_i = \mu_i + \sigma\epsilon_i\)</span>, for
-<span class="math inline">\(i = 2, \ldots, n\)</span>. The prior has the
-following parameters:</p>
+<p>A log-normal prior is used for the scale
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>.
+The default in the package is normal(0, 20) for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>η</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\log(\eta)</annotation></semantics></math>.</p>
+<p>The prior for the basis coefficients
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>i</mi></msub><annotation encoding="application/x-tex">p_i</annotation></semantics></math>,
+that describe the mass of the hazard in each region, is specified on the
+multinomial logistic scale, since
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>i</mi></msub><msub><mi>p</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\sum_i p_i = 1</annotation></semantics></math>.
+Define
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>o</mi><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>p</mi><mi>i</mi></msub><mi>/</mi><msub><mi>p</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>γ</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">log(p_i / p_1) = \gamma_i</annotation></semantics></math>,
+with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mn>1</mn></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\gamma_1=0</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>i</mi></msub><mo>=</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>+</mo><mi>σ</mi><msub><mi>ϵ</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\gamma_i = \mu_i + \sigma\epsilon_i</annotation></semantics></math>,
+for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>=</mo><mn>2</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">i = 2, \ldots, n</annotation></semantics></math>.
+The prior has the following parameters:</p>
 <ol style="list-style-type: lower-alpha">
-<li><p><strong>Prior mean</strong>: <span class="math inline">\(\boldsymbol{\mu} = (\mu_2,\ldots,\mu_n)\)</span>.
-By default, this is determined from the special set of <span class="math inline">\(p_i\)</span> that result in a <em>constant
-hazard</em> <span class="math inline">\(h(t)\)</span>. See the
-<code><a href="../reference/mspline_constant_coefs.html">mspline_constant_coefs()</a></code> function in the package to compute
-this.</p></li>
+<li><p><strong>Prior mean</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝛍</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>μ</mi><mn>2</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>μ</mi><mi>n</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\boldsymbol{\mu} = (\mu_2,\ldots,\mu_n)</annotation></semantics></math>.
+By default, this is determined from the special set of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>i</mi></msub><annotation encoding="application/x-tex">p_i</annotation></semantics></math>
+that result in a <em>constant hazard</em>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t)</annotation></semantics></math>.
+See the <code><a href="../reference/mspline_constant_coefs.html">mspline_constant_coefs()</a></code> function in the package to
+compute this.</p></li>
 <li>
-<p><strong>Prior variability</strong>: <span class="math inline">\(\sigma\)</span> controls the smoothness of the
-fitted hazard curve.</p>
+<p><strong>Prior variability</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+controls the smoothness of the fitted hazard curve.</p>
 <ul>
-<li><p>If <span class="math inline">\(\sigma=0\)</span>, then we are
-certain that the hazard function (before being scaled by <span class="math inline">\(\eta\)</span>) is the one defined by <span class="math inline">\(\boldsymbol{\mu}\)</span>. By default this is a
-constant hazard.</p></li>
-<li><p>Values of <span class="math inline">\(\sigma\)</span> around 1
-favour wiggly curves, such that the fitted hazard curve is driven mainly
-by the the observed data.</p></li>
-<li><p>For <em>very</em> high values of <span class="math inline">\(\sigma\)</span>, the hazard is dominated by a
-random one of the <span class="math inline">\(n\)</span> basis
-functions, which will not typically be useful in practice.</p></li>
+<li><p>If
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\sigma=0</annotation></semantics></math>,
+then we are certain that the hazard function (before being scaled by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>)
+is the one defined by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math>.
+By default this is a constant hazard.</p></li>
+<li><p>Values of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+around 1 favour wiggly curves, such that the fitted hazard curve is
+driven mainly by the the observed data.</p></li>
+<li><p>For <em>very</em> high values of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>,
+the hazard is dominated by a random one of the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+basis functions, which will not typically be useful in
+practice.</p></li>
 </ul>
 </li>
 <li>
-<p><strong>A “random effect”</strong>: <span class="math inline">\(\epsilon_i\)</span>, which describes how much the
-<span class="math inline">\(i\)</span>th basis coefficient departs from
-the mean, compared to the other basis coefficients. The default is an
-“exchangeable” model, with <span class="math inline">\(\epsilon_i \sim
-Logistic(0,1)\)</span>, so that the <span class="math inline">\(\gamma_i\)</span> are conditionally independent
-given <span class="math inline">\(\mu_i\)</span> and <span class="math inline">\(\sigma\)</span>.</p>
+<p><strong>A “random effect”</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϵ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\epsilon_i</annotation></semantics></math>,
+which describes how much the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>th
+basis coefficient departs from the mean, compared to the other basis
+coefficients. The default is an “exchangeable” model, with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϵ</mi><mi>i</mi></msub><mo>∼</mo><mi>L</mi><mi>o</mi><mi>g</mi><mi>i</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\epsilon_i \sim Logistic(0,1)</annotation></semantics></math>,
+so that the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\gamma_i</annotation></semantics></math>
+are conditionally independent given
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>.</p>
 <p>An alternative, smoother model can be specified to relate the basis
-coefficients, using a random walk that constrains the <span class="math inline">\(\gamma_i\)</span> closer to each other in time to
-be more similar to each other. This model is generated as <span class="math inline">\(\epsilon_1=0\)</span>, and <span class="math inline">\(\epsilon_i \sim Logistic(\epsilon_{i-1},
-w_i)\)</span> for any <span class="math inline">\(i \geq 2\)</span>. The
-weight <span class="math inline">\(w_i\)</span> accounts for the
-difference in the time periods described by coefficients <span class="math inline">\(i\)</span> and <span class="math inline">\(i-1\)</span>. This ensures that we are less
-inclined to allow hazard variations in regions of time where the knots
-are more closely-spaced, leading to a more realistically smooth function
-than if these weights were excluded. The exact definition of <span class="math inline">\(w_i\)</span> is given in <a href="https://arxiv.org/abs/2401.12640" class="external-link">Phillippo et al. 2024</a>,
-following principles from <a href="https://arxiv.org/pdf/2201.06808" class="external-link">Li
-and Cao 2022</a>.</p>
+coefficients, using a random walk that constrains the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\gamma_i</annotation></semantics></math>
+closer to each other in time to be more similar to each other. This
+model is generated as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϵ</mi><mn>1</mn></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\epsilon_1=0</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϵ</mi><mi>i</mi></msub><mo>∼</mo><mi>L</mi><mi>o</mi><mi>g</mi><mi>i</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>ϵ</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>w</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\epsilon_i \sim Logistic(\epsilon_{i-1}, w_i)</annotation></semantics></math>
+for any
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>≥</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">i \geq 2</annotation></semantics></math>.
+The weight
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mi>i</mi></msub><annotation encoding="application/x-tex">w_i</annotation></semantics></math>
+accounts for the difference in the time periods described by
+coefficients
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i-1</annotation></semantics></math>.
+This ensures that we are less inclined to allow hazard variations in
+regions of time where the knots are more closely-spaced, leading to a
+more realistically smooth function than if these weights were excluded.
+The exact definition of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mi>i</mi></msub><annotation encoding="application/x-tex">w_i</annotation></semantics></math>
+is given in <a href="https://arxiv.org/abs/2401.12640" class="external-link">Phillippo et
+al. 2024</a>, following principles from <a href="https://arxiv.org/pdf/2201.06808" class="external-link">Li and Cao 2022</a>.</p>
 </li>
 </ol>
 <blockquote>
 <p><strong>Sidenote</strong>. This multinomial logistic distribution is
-similar to a Dirichlet distribution for the <span class="math inline">\(p_i\)</span>, but is slightly better behaved for
-how MCMC estimation is done in Stan. The interpretation of <span class="math inline">\(\sigma\)</span> is not completely intuitive, but
-there is a function in the package (<code>prior_hsd()</code>) to choose
-the prior on <span class="math inline">\(\sigma\)</span> to match
-judgements about how much the hazard might vary over time.</p>
+similar to a Dirichlet distribution for the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>i</mi></msub><annotation encoding="application/x-tex">p_i</annotation></semantics></math>,
+but is slightly better behaved for how MCMC estimation is done in Stan.
+The interpretation of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+is not completely intuitive, but there is a function in the package
+(<code>prior_hsd()</code>) to choose the prior on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+to match judgements about how much the hazard might vary over time.</p>
 </blockquote>
 <p>The plots below show samples from the prior distribution for the
 hazard functions implied by two choices of the joint prior distribution
-for <span class="math inline">\(\eta\)</span> and <span class="math inline">\(p\)</span>. In both, <span class="math inline">\(\eta\)</span> is log normal(0,1), which supports
-hazard rates between about 0.1 and 7, and the prior mean for <span class="math inline">\(p\)</span> is the special set that is centred
-around a constant hazard. The two samples differ by the choice of prior
-variability. <span class="math inline">\(\sigma \sim
-Gamma(2,40)\)</span> strongly favours low values of <span class="math inline">\(\sigma\)</span>, which forces the hazard to be
-nearly uniform, while <span class="math inline">\(\sigma \sim
-Gamma(2,1)\)</span> allows a wide range of wiggly shapes.</p>
+for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>.
+In both,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>
+is log normal(0,1), which supports hazard rates between about 0.1 and 7,
+and the prior mean for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
+is the special set that is centred around a constant hazard. The two
+samples differ by the choice of prior variability.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>∼</mo><mi>G</mi><mi>a</mi><mi>m</mi><mi>m</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mn>40</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\sigma \sim Gamma(2,40)</annotation></semantics></math>
+strongly favours low values of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>,
+which forces the hazard to be nearly uniform, while
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>∼</mo><mi>G</mi><mi>a</mi><mi>m</mi><mi>m</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\sigma \sim Gamma(2,1)</annotation></semantics></math>
+allows a wide range of wiggly shapes.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">knots</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span></span>
 <span><span class="va">mspline</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>knots<span class="op">=</span><span class="va">knots</span><span class="op">)</span></span>
@@ -375,18 +444,26 @@ Gamma(2,1)\)</span> allows a wide range of wiggly shapes.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/bquote.html" class="external-link">bquote</a></span><span class="op">(</span><span class="va">sigma</span> <span class="op">~</span> <span class="st">"~ Gamma(2,1)"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">gridExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html" class="external-link">grid.arrange</a></span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="methods_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
-<p>By default, the package estimates <span class="math inline">\(\sigma\)</span> as part of the full Bayesian model
-(with a gamma(2,1) prior), so that uncertainty about the level of
-smoothness is accounted for.</p>
+<p>By default, the package estimates
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+as part of the full Bayesian model (with a gamma(2,1) prior), so that
+uncertainty about the level of smoothness is accounted for.</p>
 <p>If sampling is poor, then this alternative procedure might work - fit
 the model in two steps (“empirical Bayes”):</p>
 <ol style="list-style-type: decimal">
 <li><p>A “training” model fit is perfomed, where a prior is placed on
-<span class="math inline">\(\sigma\)</span>, and the maximum a
-posteriori estimate <span class="math inline">\(\hat\sigma\)</span> of
-<span class="math inline">\(\sigma\)</span> is determined.</p></li>
-<li><p>A “final” model is then fitted, in which <span class="math inline">\(\sigma\)</span> is fixed to <span class="math inline">\(\hat\sigma\)</span>, giving the “optimal” amount
-of smoothness for the hazard <span class="math inline">\(h(t)\)</span>.</p></li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>,
+and the maximum a posteriori estimate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>σ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\sigma</annotation></semantics></math>
+of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+is determined.</p></li>
+<li><p>A “final” model is then fitted, in which
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+is fixed to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>σ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\sigma</annotation></semantics></math>,
+giving the “optimal” amount of smoothness for the hazard
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t)</annotation></semantics></math>.</p></li>
 </ol>
 <p>The default choices in the package seems to under-smooth in some
 cases. Though it may not matter if the hazard function is
@@ -434,57 +511,78 @@ function, prior to observing the data.</p>
 <h2 id="effect-of-covariates-on-the-hazard">Effect of covariates on the hazard<a class="anchor" aria-label="anchor" href="#effect-of-covariates-on-the-hazard"></a>
 </h2>
 <p>In <code>survextrap</code>, the hazard may also depend on a vector of
-covariates <span class="math inline">\(\boldsymbol{x}\)</span> as well
-as time <span class="math inline">\(t\)</span>, and we write the hazard
-as <span class="math inline">\(h(t,\boldsymbol{x})\)</span>.</p>
+covariates
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\boldsymbol{x}</annotation></semantics></math>
+as well as time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>,
+and we write the hazard as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo>,</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t,\boldsymbol{x})</annotation></semantics></math>.</p>
 <div class="section level3">
 <h3 id="proportional-hazards-model">Proportional hazards model<a class="anchor" aria-label="anchor" href="#proportional-hazards-model"></a>
 </h3>
 <p>The default model fitted is a <em>proportional hazards model</em>,
-where the scale parameter <span class="math inline">\(\eta(\boldsymbol{x})\)</span> is defined as a
-log-linear function of a vector of covariates <span class="math inline">\(\boldsymbol{x}\)</span>.</p>
-<p><span class="math display">\[ \eta(\boldsymbol{x}) =
-\exp(\boldsymbol{\beta}^T \boldsymbol{x}) \]</span></p>
-<p>In this model, the ratio between the hazards <span class="math inline">\(h(t,\boldsymbol{x})\)</span> at two different
-values of <span class="math inline">\(\boldsymbol{x}\)</span> is
-constant with respect to time <span class="math inline">\(t\)</span>.
+where the scale parameter
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\eta(\boldsymbol{x})</annotation></semantics></math>
+is defined as a log-linear function of a vector of covariates
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\boldsymbol{x}</annotation></semantics></math>.</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>𝛃</mi><mi>T</mi></msup><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex"> \eta(\boldsymbol{x}) = \exp(\boldsymbol{\beta}^T \boldsymbol{x}) </annotation></semantics></math></p>
+<p>In this model, the ratio between the hazards
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo>,</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t,\boldsymbol{x})</annotation></semantics></math>
+at two different values of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\boldsymbol{x}</annotation></semantics></math>
+is constant with respect to time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>.
 The <em>hazard ratios</em> (i.e. between a value of 1 and 0 for each
-<span class="math inline">\(\boldsymbol{x}\)</span>) are <span class="math inline">\(exp(\boldsymbol{\beta})\)</span>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\boldsymbol{x}</annotation></semantics></math>)
+are
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>e</mi><mi>x</mi><mi>p</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝛃</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">exp(\boldsymbol{\beta})</annotation></semantics></math>.</p>
 </div>
 <div class="section level3">
 <h3 id="nonprop">Flexible, non-proportional hazards model<a class="anchor" aria-label="anchor" href="#nonprop"></a>
 </h3>
 <p>An alternative <em>non-proportional hazards</em> model is available.
-This is achieved by also modelling the spline coefficients <span class="math inline">\(p_i\)</span> as functions of covariates, in
-addition to the log-linear model on <span class="math inline">\(\eta\)</span>.</p>
-<p><span class="math display">\[log(p_i(\boldsymbol{x}) /
-p_1(\boldsymbol{x})) = \gamma_i(\boldsymbol{x)} \]</span></p>
-<p><span class="math display">\[ \gamma_i(\boldsymbol{x)} \sim
-Logistic(\mu_i + \boldsymbol{\delta}^T_i \boldsymbol{x}, \sigma) \quad
-(i=2,...,n), \quad \delta_1 = 0 \]</span></p>
-<p>The <span class="math inline">\(s\)</span>th element of the vector
-<span class="math inline">\(\boldsymbol{\delta}_i\)</span> describes the
-departure from proportional hazards for the <span class="math inline">\(s\mbox{th}\)</span> covariate in the region of
-time associated with the <span class="math inline">\(i\)</span>th spline
-basis term. With all <span class="math inline">\(\boldsymbol{\delta}_i =
-0\)</span> the model will be the proportional hazards model.
-Non-proportional hazards can be applied to any subset of the covariates
-if needed, or all covariates.</p>
-<p>For each covariate <span class="math inline">\(s\)</span>, a
-hierarchical model is used for the non-proportionality effects <span class="math inline">\(\delta_{ks}\)</span>. This model “partially pools”
-the effects from different regions of time <span class="math inline">\(i\)</span>, either via an exchangeable model,</p>
-<p><span class="math display">\[ \delta_{is} \sim Normal(0, \tau_s^2)
-\]</span></p>
+This is achieved by also modelling the spline coefficients
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>i</mi></msub><annotation encoding="application/x-tex">p_i</annotation></semantics></math>
+as functions of covariates, in addition to the log-linear model on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>.</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>o</mi><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>p</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><msub><mi>p</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>γ</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mrow><mi>𝐱</mi><mo stretchy="false" form="postfix" mathvariant="bold">)</mo></mrow></mrow><annotation encoding="application/x-tex">log(p_i(\boldsymbol{x}) / p_1(\boldsymbol{x})) = \gamma_i(\boldsymbol{x)} </annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mrow><mi>𝐱</mi><mo stretchy="false" form="postfix" mathvariant="bold">)</mo></mrow><mo>∼</mo><mi>L</mi><mi>o</mi><mi>g</mi><mi>i</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>+</mo><msubsup><mi>𝛅</mi><mi>i</mi><mi>T</mi></msubsup><mi>𝐱</mi><mo>,</mo><mi>σ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="1.0em"></mspace><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo>=</mo><mn>2</mn><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mspace width="1.0em"></mspace><msub><mi>δ</mi><mn>1</mn></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex"> \gamma_i(\boldsymbol{x)} \sim Logistic(\mu_i + \boldsymbol{\delta}^T_i \boldsymbol{x}, \sigma) \quad (i=2,...,n), \quad \delta_1 = 0 </annotation></semantics></math></p>
+<p>The
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>th
+element of the vector
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛅</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\delta}_i</annotation></semantics></math>
+describes the departure from proportional hazards for the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mtext mathvariant="normal">th</mtext></mrow><annotation encoding="application/x-tex">s\mbox{th}</annotation></semantics></math>
+covariate in the region of time associated with the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>th
+spline basis term. With all
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝛅</mi><mi>i</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\boldsymbol{\delta}_i = 0</annotation></semantics></math>
+the model will be the proportional hazards model. Non-proportional
+hazards can be applied to any subset of the covariates if needed, or all
+covariates.</p>
+<p>For each covariate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>,
+a hierarchical model is used for the non-proportionality effects
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mrow><mi>k</mi><mi>s</mi></mrow></msub><annotation encoding="application/x-tex">\delta_{ks}</annotation></semantics></math>.
+This model “partially pools” the effects from different regions of time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
+either via an exchangeable model,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mrow><mi>i</mi><mi>s</mi></mrow></msub><mo>∼</mo><mi>N</mi><mi>o</mi><mi>r</mi><mi>m</mi><mi>a</mi><mi>l</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>τ</mi><mi>s</mi><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex"> \delta_{is} \sim Normal(0, \tau_s^2) </annotation></semantics></math></p>
 <p>or a normal second-order random walk model, like the one used for the
 basis coefficients. In the non-proportional hazards model, the ratio
-between the hazards <span class="math inline">\(h(t,\boldsymbol{x})\)</span> at different
-covariate values <span class="math inline">\(\boldsymbol{x}\)</span> is
-a function of time <span class="math inline">\(t\)</span>. Since the
-<span class="math inline">\(\boldsymbol{\delta}_i\)</span> may be
-arbirtarily different in each region of time <span class="math inline">\(i\)</span>, the hazard ratio can be an
-arbitrarily-flexible function of time. The amount and shape of
-non-proportionality is estimated from the data, while the hierarchical
-model protects against overfitting.</p>
+between the hazards
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo>,</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t,\boldsymbol{x})</annotation></semantics></math>
+at different covariate values
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\boldsymbol{x}</annotation></semantics></math>
+is a function of time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>.
+Since the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛅</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\delta}_i</annotation></semantics></math>
+may be arbirtarily different in each region of time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
+the hazard ratio can be an arbitrarily-flexible function of time. The
+amount and shape of non-proportionality is estimated from the data,
+while the hierarchical model protects against overfitting.</p>
 </div>
 </div>
 <div class="section level2">
@@ -492,19 +590,41 @@ model protects against overfitting.</p>
 </h2>
 <p>The <code>survextrap</code> package implements a mixture cure version
 of the M-spline model.</p>
-<p>In a mixture cure model, the survival is defined by <span class="math inline">\(S(t | p, \boldsymbol{\theta}) = p +
-(1-p)S_0(t|\boldsymbol{\theta})\)</span>, where <span class="math inline">\(p\)</span> is sometimes termed the “cure
-probability”, and <span class="math inline">\(S_0(t|\boldsymbol{\theta})\)</span> is a
-parametric model with parameters <span class="math inline">\(\boldsymbol{\theta}\)</span>, termed the “uncured
-survival”. In <code>survextrap</code>, <span class="math inline">\(S_0\)</span> is the M-spline model.</p>
+<p>In a mixture cure model, the survival is defined by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>p</mi><mo>,</mo><mi>𝛉</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>p</mi><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="true" form="postfix">)</mo></mrow><msub><mi>S</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>𝛉</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">S(t | p, \boldsymbol{\theta}) = p + (1-p)S_0(t|\boldsymbol{\theta})</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
+is sometimes termed the “cure probability”, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>𝛉</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">S_0(t|\boldsymbol{\theta})</annotation></semantics></math>
+is a parametric model with parameters
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛉</mi><annotation encoding="application/x-tex">\boldsymbol{\theta}</annotation></semantics></math>,
+termed the “uncured survival”. In <code>survextrap</code>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>S</mi><mn>0</mn></msub><annotation encoding="application/x-tex">S_0</annotation></semantics></math>
+is the M-spline model.</p>
 <p>This model can be interpreted in two different ways:</p>
 <ul>
-<li><p>as a mixture model, where a person has hazard <span class="math inline">\(h_1(t)=0\)</span> at all times <span class="math inline">\(t\)</span> with probability <span class="math inline">\(p\)</span>, or hazard <span class="math inline">\(h_0(t)\)</span> at all times with probability
-<span class="math inline">\(1-p\)</span>.</p></li>
-<li><p>as a model where everyone follows the same hazard function <span class="math inline">\(h(t) = f(t)/S(t)\)</span>, where the PDF is <span class="math inline">\(f(t) = (1-p)f_0(t)\)</span>, and <span class="math inline">\(f_0(t)\)</span> is the PDF of the “uncured”
-parametric model. Hence <span class="math inline">\(h(t) = f_0(t) /
-(p/(1-p) + S_0(t))\)</span>, which asymptotically decreases towards zero
-with increasing <span class="math inline">\(t\)</span> (as long as <span class="math inline">\(p&gt;0\)</span>).</p></li>
+<li><p>as a mixture model, where a person has hazard
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">h_1(t)=0</annotation></semantics></math>
+at all times
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+with probability
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>,
+or hazard
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h_0(t)</annotation></semantics></math>
+at all times with probability
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">1-p</annotation></semantics></math>.</p></li>
+<li><p>as a model where everyone follows the same hazard function
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t) = f(t)/S(t)</annotation></semantics></math>,
+where the PDF is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="true" form="postfix">)</mo></mrow><msub><mi>f</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(t) = (1-p)f_0(t)</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f_0(t)</annotation></semantics></math>
+is the PDF of the “uncured” parametric model. Hence
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>f</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msub><mi>S</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t) = f_0(t) / (p/(1-p) + S_0(t))</annotation></semantics></math>,
+which asymptotically decreases towards zero with increasing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+(as long as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">p&gt;0</annotation></semantics></math>).</p></li>
 </ul>
 <p>Since we cannot observe whether censored observations are part of the
 “cured” subgroup, these interpretations are indistinguishable in
@@ -516,23 +636,29 @@ practice.</p>
 <p><code>survextrap</code> also implements a model where the overall
 hazard is assumed to be the sum of two components corresponding to
 different causes of death. These are usually termed the “background”
-hazard <span class="math inline">\(h_b(t)\)</span> and the
-“cause-specific” or “excess” hazard <span class="math inline">\(h_c(t)\)</span>, so that <span class="math inline">\(h(t) = h_b(t) + h_c(t)\)</span>, where:</p>
+hazard
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>b</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h_b(t)</annotation></semantics></math>
+and the “cause-specific” or “excess” hazard
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>c</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h_c(t)</annotation></semantics></math>,
+so that
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>h</mi><mi>b</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msub><mi>h</mi><mi>c</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t) = h_b(t) + h_c(t)</annotation></semantics></math>,
+where:</p>
 <ul>
-<li><p><span class="math inline">\(h_b(t)\)</span> is assumed to be a
-known, piecewise-constant (step) function, and is provided by the user
-in a data frame that gives the background hazard in each of a series of
-time periods. See <a href="examples.html#relsurv_examples">the
-examples</a>.</p></li>
-<li><p><span class="math inline">\(h_c(t)\)</span> follows the standard
-flexible parametric (M-spline) model used in
+<li><p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>b</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h_b(t)</annotation></semantics></math>
+is assumed to be a known, piecewise-constant (step) function, and is
+provided by the user in a data frame that gives the background hazard in
+each of a series of time periods. See <a href="examples.html#relsurv_examples">the examples</a>.</p></li>
+<li><p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>c</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h_c(t)</annotation></semantics></math>
+follows the standard flexible parametric (M-spline) model used in
 <code>survextrap</code>.</p></li>
 </ul>
 <p>This is known as a “relative survival” model, since the additive
-model for the hazards implies a multiplicative model for survival: <span class="math inline">\(S(t) = S_b(t)S_c(t)\)</span>. This kind of model
-is often used when the background hazard is confidently known (from
-national statistics on general mortality) and the cause-specific hazard
-can be inferred from the individual-level data.</p>
+model for the hazards implies a multiplicative model for survival:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>S</mi><mi>b</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><msub><mi>S</mi><mi>c</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">S(t) = S_b(t)S_c(t)</annotation></semantics></math>.
+This kind of model is often used when the background hazard is
+confidently known (from national statistics on general mortality) and
+the cause-specific hazard can be inferred from the individual-level
+data.</p>
 <p>The model used in <code>survextrap</code> is a variant of the model
 by <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.3064" class="external-link">Nelson
 et al</a> and should give similar results. The only difference is that
@@ -541,12 +667,16 @@ of spline is used.</p>
 <div class="section level4">
 <h4 id="combining-relative-survival-and-cure-models">Combining relative survival and cure models<a class="anchor" aria-label="anchor" href="#combining-relative-survival-and-cure-models"></a>
 </h4>
-<p>To use a cure model and a relative survival model together, <span class="math inline">\(h_c(t)\)</span> is defined by a mixture cure
-version of the M-spline model, and a background hazard data set is
-supplied to define <span class="math inline">\(h_b(t)\)</span>. This
-allows the overall hazard <span class="math inline">\(h(t)\)</span> to
-decrease asymptotically towards a background hazard <span class="math inline">\(h_b(t)\)</span>, instead of decreasing towards
-zero.</p>
+<p>To use a cure model and a relative survival model together,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>c</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h_c(t)</annotation></semantics></math>
+is defined by a mixture cure version of the M-spline model, and a
+background hazard data set is supplied to define
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>b</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h_b(t)</annotation></semantics></math>.
+This allows the overall hazard
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t)</annotation></semantics></math>
+to decrease asymptotically towards a background hazard
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>b</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h_b(t)</annotation></semantics></math>,
+instead of decreasing towards zero.</p>
 <p>This model is appropriate if we are sure that people with the disease
 are eventually “cured”, or alternatively, their risk from the disease
 becomes negligible compared to their risk of death from other causes,
@@ -581,36 +711,60 @@ long-term survival in the treatment group, because it relies on the
 assumption that the hazard ratio in the short term continues in the
 longer term. Instead, to predict long-term survival in the <em>treatment
 group</em> we assume that the treatment effect <em>wanes</em> over some
-time interval from <span class="math inline">\(t_{min}\)</span> to <span class="math inline">\(t_{max}\)</span>, where <span class="math inline">\(t_{min}\)</span> is after the follow-up period of
-the trial.</p></li>
+time interval from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><annotation encoding="application/x-tex">t_{min}</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub><annotation encoding="application/x-tex">t_{max}</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><annotation encoding="application/x-tex">t_{min}</annotation></semantics></math>
+is after the follow-up period of the trial.</p></li>
 </ul>
 </div>
 <div class="section level4">
 <h4 id="waning-model-details">Waning model: details<a class="anchor" aria-label="anchor" href="#waning-model-details"></a>
 </h4>
-<p>Specifically, to predict the long-term hazard <span class="math inline">\(h(t | x=1)\)</span> in the treated group, we
-assume:</p>
+<p>Specifically, to predict the long-term hazard
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo>=</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t | x=1)</annotation></semantics></math>
+in the treated group, we assume:</p>
 <ul>
-<li><p>Between time <span class="math inline">\(t=0\)</span> and <span class="math inline">\(t=t_{min}\)</span>, <span class="math inline">\(h(t | x=1)\)</span> is equal to the hazard in the
-treated group <span class="math inline">\(x=1\)</span>, estimated from
-the model.</p></li>
-<li><p>After time <span class="math inline">\(t=t_{max}\)</span>, <span class="math inline">\(h(t | x=1)\)</span> is equal to the hazard in the
-control group <span class="math inline">\(h(t | x=0)\)</span>, estimated
-from the model.</p></li>
+<li><p>Between time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">t=0</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub></mrow><annotation encoding="application/x-tex">t=t_{min}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo>=</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t | x=1)</annotation></semantics></math>
+is equal to the hazard in the treated group
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">x=1</annotation></semantics></math>,
+estimated from the model.</p></li>
+<li><p>After time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><msub><mi>t</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub></mrow><annotation encoding="application/x-tex">t=t_{max}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo>=</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t | x=1)</annotation></semantics></math>
+is equal to the hazard in the control group
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo>=</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t | x=0)</annotation></semantics></math>,
+estimated from the model.</p></li>
 <li>
-<p>During the interval between <span class="math inline">\(t =
-t_{min}\)</span> and <span class="math inline">\(t = t_{max}\)</span>,
-the log hazard ratio <span class="math inline">\(\log(hr(t)) =
-\log(h(t|x=1) | h(t|x=0))\)</span> diminishes linearly between the log
-hazard ratio <span class="math inline">\(\log(hr(t_{min}))\)</span> at
-<span class="math inline">\(t_{min}\)</span>, estimated from the model,
-and zero at <span class="math inline">\(t_{max}\)</span>. That is, <span class="math inline">\(\log(hr(t)) = w \log(hr(t_{min}))\)</span>, where
-<span class="math inline">\(w = (t - t_{min}) / (t_{max} -
-t_{min})\)</span>.</p>
-<p>Hence the predicted hazard for the treated group at <span class="math inline">\(t\)</span> is defined from the M-spline model as
-<span class="math inline">\(h(t|x=1) = h(t | x=0) hr(t)\)</span>, where
-<span class="math inline">\(h(t|x=0)\)</span> comes from the fitted
-M-spline model.</p>
+<p>During the interval between
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub></mrow><annotation encoding="application/x-tex">t = t_{min}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><msub><mi>t</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub></mrow><annotation encoding="application/x-tex">t = t_{max}</annotation></semantics></math>,
+the log hazard ratio
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>h</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>log</mo><mo stretchy="false" form="prefix">(</mo><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mrow><mo stretchy="true" form="prefix">|</mo><mi>x</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">|</mo></mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo>=</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\log(hr(t)) = \log(h(t|x=1) | h(t|x=0))</annotation></semantics></math>
+diminishes linearly between the log hazard ratio
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>h</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\log(hr(t_{min}))</annotation></semantics></math>
+at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><annotation encoding="application/x-tex">t_{min}</annotation></semantics></math>,
+estimated from the model, and zero at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub><annotation encoding="application/x-tex">t_{max}</annotation></semantics></math>.
+That is,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>h</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>w</mi><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>h</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\log(hr(t)) = w \log(hr(t_{min}))</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo>−</mo><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub><mo>−</mo><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">w = (t - t_{min}) / (t_{max} - t_{min})</annotation></semantics></math>.</p>
+<p>Hence the predicted hazard for the treated group at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+is defined from the M-spline model as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo>=</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo>=</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mi>h</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t|x=1) = h(t | x=0) hr(t)</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo>=</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t|x=0)</annotation></semantics></math>
+comes from the fitted M-spline model.</p>
 </li>
 <li><p>A piecewise-constant approximation, on a fine grid, is then
 imposed on the hazard within the waning period to allow easy calculation
@@ -619,19 +773,24 @@ of the cumulative hazard, survival and related quantities.</p></li>
 <p>Note that the waning assumption is implemented during
 <em>prediction</em> from the fitted model, rather than as a “prior” or
 structural assumption used during model fitting. The baseline log hazard
-ratio at <span class="math inline">\(t_{min}\)</span> is inferred from
-the M-spline model, short-term data and any long-term data provided.
-Then when requesting predictions of, e.g., survival curves, hazard
-curves or mean survival times from this fitted model, we can optionally
-request that over some interval <span class="math inline">\(t_{min},t_{max}\)</span> the log hazard ratio for
-some covariate changes linearly between the value estimated from the
-model and some “null” value.</p>
+ratio at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><annotation encoding="application/x-tex">t_{min}</annotation></semantics></math>
+is inferred from the M-spline model, short-term data and any long-term
+data provided. Then when requesting predictions of, e.g., survival
+curves, hazard curves or mean survival times from this fitted model, we
+can optionally request that over some interval
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>,</mo><msub><mi>t</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub></mrow><annotation encoding="application/x-tex">t_{min},t_{max}</annotation></semantics></math>
+the log hazard ratio for some covariate changes linearly between the
+value estimated from the model and some “null” value.</p>
 <p>The fitted M-spline model does not necessarily need to be a
 proportional hazards model to use treatment waning. If the fitted model
 is non-proportional hazards, the hazard ratio will be non-constant
-between time 0 and <span class="math inline">\(t_{min}\)</span>, then
-wane between the value at <span class="math inline">\(t_{min}\)</span>
-and zero at <span class="math inline">\(t_{max}\)</span>.</p>
+between time 0 and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><annotation encoding="application/x-tex">t_{min}</annotation></semantics></math>,
+then wane between the value at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><annotation encoding="application/x-tex">t_{min}</annotation></semantics></math>
+and zero at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub><annotation encoding="application/x-tex">t_{max}</annotation></semantics></math>.</p>
 </div>
 <div class="section level4">
 <h4 id="waning-models-example">Waning models: example<a class="anchor" aria-label="anchor" href="#waning-models-example"></a>
@@ -727,7 +886,7 @@ effect” model are available as <code><a href="../reference/Survmspline_wane.ht
 summaries or predictions from this model.</p>
 </div>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
@@ -738,15 +897,15 @@ summaries or predictions from this model.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>
