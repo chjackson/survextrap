@@ -108,14 +108,14 @@ default_newdata_comparison <- function(x, newdata){
 #' for waning models.
 #'
 #' @noRd
-prepare_pars <- function(x, newdata, t, niter=NULL,
-                         newdata0=NULL, wane_period=NULL){
+prepare_pars <- function(x, newdata, t=NULL, niter=NULL,
+                         newdata0=NULL, wane_period=NULL, offsets=TRUE){
     pars <- get_pars_bycovs(x, newdata=newdata, niter=niter)
-    nt <- length(t)
+    nt <- if (is.null(t)) 1 else length(t)
     niter <- pars$niter
     nvals <- pars$nvals
     nvars <- x$mspline$nvars
-    times <- array(rep(t, niter*nvals), dim=c(nt, niter, nvals))
+    times <- if (!is.null(t)) array(rep(t, niter*nvals), dim=c(nt, niter, nvals)) else NULL
     alpha <- array(rep(pars$alpha, each=nt), dim=c(nt, niter, nvals))
     coefs <- array(pars$coefs[rep(1:niter, each=nt),,], dim=c(nt, niter, nvals, nvars))
     pcure <- if (x$cure) array(rep(pars$pcure, each=nt),
@@ -134,12 +134,15 @@ prepare_pars <- function(x, newdata, t, niter=NULL,
     ## Offsets for background hazard models
     ## Get stratum for each row of newdata.
     nds <- make_backhaz_strata(x$backhaz_strata, x$backhaz, newdata)
+    backhaz <- vector(nvals, mode="list")
     offseth <- offsetH <- array(0, dim=c(nt, 1, nvals))
     if (!is.null(x$backhaz)){
       for (j in 1:nvals){
-        backhaz <- x$backhaz[x$backhaz$stratum == nds$dat[j],]
-        offseth[,1,j] <- backhaz$hazard[findInterval(t, backhaz$time)]
-        offsetH[,1,j] <- get_cum_backhaz(t, backhaz)
+        backhaz[[j]] <- x$backhaz[x$backhaz$stratum == nds$dat[j],,drop=FALSE]
+        if (!is.null(t)){
+          offseth[,1,j] <- backhaz[[j]]$hazard[findInterval(t, backhaz[[j]]$time)]
+          offsetH[,1,j] <- get_cum_backhaz(t, backhaz[[j]])
+        } else offseth <- offsetH <- NULL
       }
     }
     offsetH <- offsetH[,rep(1,niter),]
@@ -148,9 +151,11 @@ prepare_pars <- function(x, newdata, t, niter=NULL,
     nlist(times,
           alpha, coefs, pcure,
           alpha0, coefs0, pcure0,
-          offseth, offsetH,
+          backhaz, offseth, offsetH, 
           nt, niter, nvals, nvars)
 }
+
+
 
 
 ##' Extract samples of parameters from Stan output and combine with

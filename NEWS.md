@@ -1,3 +1,8 @@
+# Version 0.8.16 (2025/??)
+
+* rmst() and related functions are now faster, with the new Gauss-Legendre integration method.  Thanks to Iain Timmins.
+
+
 # Version 0.8.15 (2024/07/01)
 
 * Random walk prior for the coefficients changed to a first-order weighted model, following [Phillippo et al.](https://arxiv.org/abs/2401.12640), so that the expected smoothness accounts for the knot spacing.

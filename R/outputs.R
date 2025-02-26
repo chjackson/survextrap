@@ -74,11 +74,11 @@
 ##'
 ##' @export
 mean.survextrap <- function(x, newdata=NULL,
-                            newdata0=NULL, wane_period=NULL, wane_nt=10, disc_rate = 0, 
+                            newdata0=NULL, wane_period=NULL, wane_nt=10, disc_rate = 0,
                             niter=NULL, summ_fns=NULL, sample=FALSE, ...){
   res <- rmst(x, t=Inf, newdata=newdata, niter=niter, summ_fns=summ_fns,
               newdata0=newdata0, wane_period=wane_period, wane_nt=wane_nt,
-              sample=sample, disc_rate=disc_rate)
+              sample=sample, disc_rate=disc_rate, method="adaptive")
   res$variable <- "mean"
   res$t <- NULL
   res
@@ -88,14 +88,24 @@ mean.survextrap <- function(x, newdata=NULL,
 ##'
 ##' Compute the restricted mean survival time from a model fitted with
 ##' \code{\link{survextrap}}.  Defined as the integral of the fitted
-##' survival curve up to a specified time.  This relies on numerical
-##' integration, which is done for every parameter in the MCMC sample,
-##' so it may be slow.
+##' survival curve up to a specified time.
 ##'
 ##' @inheritParams mean.survextrap
 ##'
 ##' @param t Vector of times.  The restricted mean survival time up to each one of these times
 ##' will be computed.
+##'
+##' @param method Method of numerical integration to obtain the
+##'   restricted mean survival time from the survival function.
+##'
+##' The default is `method="gl"`, a Gauss-Legendre method with 100
+##' nodes between zero and the maximum of `t`.
+##'
+##' `method="adaptive"` uses the base R `integrate` function, which is
+##' much slower, but potentially more robust for badly-behaved
+##' survival functions.
+##'
+##' @param gl_nodes Number of nodes for the Gauss-Legendre method.
 ##'
 ##' @examples
 ##' mod <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt")
@@ -112,27 +122,26 @@ mean.survextrap <- function(x, newdata=NULL,
 ##'
 ##' @export
 rmst <- function(x,t,newdata=NULL,
-                  newdata0=NULL, wane_period=NULL, wane_nt=10, disc_rate=0,
+                  newdata0=NULL, wane_period=NULL, wane_nt=10, disc_rate=0, method="gl", gl_nodes=100,
                   niter=NULL,summ_fns=NULL,sample=FALSE){
+  if (any(t==Inf)) method <- "adaptive"
   newdata <- default_newdata(x, newdata)
-  p <- prepare_pars(x=x, newdata=newdata, t=t, niter=niter, newdata0=newdata0, wane_period=wane_period)
 
-  nd_strata <- make_backhaz_strata(x$backhaz_strata, x$backhaz, newdata)$dat
-  res_sam <- array(dim=c(p$nt, p$niter, p$nvals))
+  p <- prepare_pars(x=x, newdata=newdata, niter=niter, newdata0=newdata0, wane_period=wane_period,
+                    t = NULL) # result is crossed times x pars inside rmst_generic
+
+  res_sam <- array(dim=c(length(t), p$niter, p$nvals))
   for (j in 1:p$nvals){
     ## for rmst_generic, this should be matrix rather than array
     coefs1 <- matrix(p$coefs[,,j,], ncol=p$nvars)
-    backhaz <- x$backhaz[x$backhaz$stratum == nd_strata[j],] # awkward to vectorise this over nvals
-    ## note the offset depends on t so we can't supply a fixed offset
-    ## instead have to supply backhaz to enable integration of
-    ## psurvmspline over t to get rmst
     if (is.null(wane_period))
       res_sam[,,j] <- rmst_survmspline(t, p$alpha[,,j], coefs1,
                                        x$mspline$knots, x$mspline$degree,
                                        pcure = p$pcure[,,j],
-                                       backhaz = backhaz,
+                                       backhaz = p$backhaz[[j]],
                                        bsmooth=x$mspline$bsmooth,
-                                       disc_rate = disc_rate)
+                                       disc_rate = disc_rate,
+                                       method = method, gl_nodes=gl_nodes)
     else {
       coefs0 <- matrix(p$coefs0[,,j,], ncol=p$nvars)
       res_sam[,,j] <- rmst_survmspline_wane(t, alpha1 = p$alpha[,,j], alpha0 = p$alpha0[,,j],
@@ -141,10 +150,11 @@ rmst <- function(x,t,newdata=NULL,
                                             degree = x$mspline$degree,
                                             pcure1 = p$pcure[,,j],
                                             pcure0 = p$pcure0[,,j],
-                                            backhaz = backhaz,
+                                            backhaz = p$backhaz[[j]],
                                             bsmooth=x$mspline$bsmooth,
                                             wane_period=wane_period, wane_nt=wane_nt,
-                                            disc_rate = disc_rate
+                                            disc_rate = disc_rate,
+                                            method = method, gl_nodes=gl_nodes
                                             )
     }
   }
@@ -182,12 +192,12 @@ rmst <- function(x,t,newdata=NULL,
 ##'
 ##' @export
 irmst <- function(x, t, newdata=NULL, newdata0=NULL, wane_period=NULL, wane_nt=10,
-                  niter=NULL, summ_fns=NULL, sample=FALSE, disc_rate = 0){
+                  niter=NULL, summ_fns=NULL, sample=FALSE, disc_rate = 0, method="gl", gl_nodes=100){
     newdata <- default_newdata_comparison(x, newdata)
     rmst1 <- rmst(x, t=t, newdata=newdata[1,,drop=FALSE], newdata0=newdata0[1,,drop=FALSE],
-                  wane_period = wane_period, wane_nt=wane_nt, niter=niter, sample=TRUE, disc_rate = disc_rate)
+                  wane_period = wane_period, wane_nt=wane_nt, niter=niter, sample=TRUE, disc_rate = disc_rate, method=method, gl_nodes=gl_nodes)
     rmst2 <- rmst(x, t=t, newdata=newdata[2,,drop=FALSE], newdata0=newdata0[2,,drop=FALSE],
-                  wane_period = wane_period, wane_nt=wane_nt, niter=niter, sample=TRUE, disc_rate = disc_rate)
+                  wane_period = wane_period, wane_nt=wane_nt, niter=niter, sample=TRUE, disc_rate = disc_rate, method=method, gl_nodes=gl_nodes)
     irmst_sam <- rmst2 - rmst1
     res <- summarise_output(irmst_sam, summ_fns, t, newdata=NULL,
                             summ_name="irmst", sample=sample)
