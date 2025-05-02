@@ -29,7 +29,7 @@ level versus the first level is computed.  For any other models,
 \code{newdata} must be supplied explicitly.
 
 Standardisation (with \code{\link{standardise_to}}) is not supported.
-This might be done by hand by using \code{\link{hazard(...,sample=TRUE)}}
+This might be done by hand by using \code{hazard(...,sample=TRUE)}
 to obtain posterior samples for the two standardised hazards separately,
 then summarising by hand.}
 

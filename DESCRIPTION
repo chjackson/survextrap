@@ -9,7 +9,7 @@ Authors@R:
              comment = c(ORCID = "0000-0002-8761-582X")),
       person("Michael", "Sweeting", , "", role = c("ctb"),
              comment = c(ORCID = "0000-0003-0980-8965")))
-Description: Survival analysis using a flexible Bayesian model for individual-level right-censored data, optionally combined with aggregate data on counts of survivors in different periods of time.   An M-spline is used to describe the hazard function, with a hierarchical prior on the coefficients to control overfitting.  Proportional hazards or flexible non-proportional hazards models can be used to relate survival to predictors.  Additive hazards (relative survival) models, waning treatment effects, and mixture cure models are also supported.  Priors can be customised and calibrated to substantive beliefs.  Posterior distributions are estimated using Stan, and outputs are arranged in a tidy format. See Jackson (2023) <doi:10.1186/s12874-023-02094-1>.
+Description: Survival analysis using a flexible Bayesian model for individual-level right-censored data, optionally combined with aggregate data on counts of survivors in different periods of time.   An M-spline is used to describe the hazard function, with a prior on the coefficients that controls over-fitting.  Proportional hazards or flexible non-proportional hazards models can be used to relate survival to predictors.  Additive hazards (relative survival) models, waning treatment effects, and mixture cure models are also supported.  Priors can be customised and calibrated to substantive beliefs.  Posterior distributions are estimated using Stan, and outputs are arranged in a tidy format. See Jackson (2023) <doi:10.1186/s12874-023-02094-1>.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -42,6 +42,7 @@ Suggests:
     rmarkdown,
     testthat,
     SHELF,
+    flexsurv,
     flexsurvcure,
     splines,
     dplyr,

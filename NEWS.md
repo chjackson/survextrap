@@ -1,6 +1,6 @@
 # Version 0.9 (2025/05/02)
 
-* `smooth_model = "random_walk"` made the default in `survextrap()`, following [Timmins et al.](10.48550/arXiv.2503.21388).
+* `smooth_model = "random_walk"` made the default in `survextrap()`, following [Timmins et al.](https://doi.org/10.48550/arXiv.2503.21388).
 
 
 # Version 0.8.16 (2025/02/26)

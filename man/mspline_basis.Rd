@@ -33,5 +33,5 @@ assumed to be zero at times less than zero, since these models are
 used for hazard functions in survival data.
 }
 \references{
-The \href{https://cran.r-project.org/web/packages/splines2/index.html}{splines2} package is used.
+The \href{https://CRAN.R-project.org/package=splines2}{splines2} package is used.
 }

@@ -45,7 +45,7 @@ with
 
 In the standard basis, 10 knots implies there are 13 basis functions.  Two of the basis functions have peaks at 0 and the upper knot, and the others have peaks around the knot, diminishing to zero on either side.  See [Ramsay](https://www.jstor.org/stable/2245395) for the exact definitions of $b_i(t)$.  
 
-The package provides a few functions (e.g. `mspline_plotdata()`, `plot_mspline()`) to illustrate M-spline bases.  The actual computation of the basis is done with the [splines2](https://cran.r-project.org/web/packages/splines2/index.html) package. 
+The package provides a few functions (e.g. `mspline_plotdata()`, `plot_mspline()`) to illustrate M-spline bases.  The actual computation of the basis is done with the [splines2](https://CRAN.R-project.org/package=splines2) package. 
 
 ```{r,message=FALSE,warning=FALSE,class.source = 'fold-hide'}
 library(survextrap)
@@ -194,7 +194,7 @@ If sampling is poor, then this alternative procedure might work - fit the model 
 
 The default choices in the package seems to under-smooth in some cases. Though it may not matter if the hazard function is under-smoothed, if the purpose of the model is to estimate a quantity that is an average over time (e.g. mean survival).
 
-A sensible route to resolving these uncertainties might be use cross-validation to assess and choose between model specifications.  The package provides an interface to the [LOO-CV](https://mc-stan.org/loo) method for Bayesian cross-validation - though note that this only assesses fit to the individual-level data, using the same principle as AIC.
+A sensible route to resolving these uncertainties might be use cross-validation to assess and choose between model specifications.  The package provides an interface to the [LOO-CV](https://mc-stan.org/loo/) method for Bayesian cross-validation - though note that this only assesses fit to the individual-level data, using the same principle as AIC.
 
 
 

@@ -390,7 +390,7 @@ In this example, the credible interval for the Lev+5FU / Lev hazard ratio is wid
 
 ### Treatment effect waning models 
 
-These are described in [their own vignette](waning.html).
+These are described in [the methods vignette](https://chjackson.github.io/survextrap/articles/methods.html#waning).
 
 
 
