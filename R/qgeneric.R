@@ -7,10 +7,11 @@
 ## This function is used by default for custom distributions for which a
 ## quantile function is not provided.
 ##
-## It works by finding the root of the equation \eqn{h(q) = pdist(q) - p = 0}.
-## Starting from the interval \eqn{(-1, 1)}, the interval width is expanded by
-## 50\% until \eqn{h()} is of opposite sign at either end.  The root is then
-## found using \code{\link{uniroot}}.
+## It works by finding the root of the equation \eqn{h(q) = pdist(q) -
+## p = 0}.  Starting from the interval \eqn{(-1, 1)}, the interval
+## width is expanded by 50\% until \eqn{h()} is of opposite sign at
+## either end.  The root is then found using numerical methods
+## (\code{vuniroot} from the `rstpm2` package by Mark Clements).
 ##
 ## This assumes a suitably smooth, continuous distribution.
 ##
@@ -100,7 +101,7 @@ qgeneric <- function(pdist, p, matargs=NULL, scalarargs=NULL, ...)
             args <- c(args, args.mat, args.scalar)
             (do.call(pdist, args) - p)
         }
-        ptmp <- rstpm2::vuniroot(h, interval, tol=.Machine$double.eps, extendInt="yes", maxiter=10000)$root
+        ptmp <- vuniroot(h, interval, tol=.Machine$double.eps, extendInt="yes", maxiter=10000)$root
         ret[ind] <- ptmp
     }
     if (any(is.nan(ret))) warning("NaNs produced")

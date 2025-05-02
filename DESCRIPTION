@@ -26,7 +26,6 @@ Imports:
     posterior,
     Rcpp (>= 0.12.0),
     rstan (>= 2.26.0),
-    rstpm2,
     splines2,
     tibble
 LinkingTo: 
