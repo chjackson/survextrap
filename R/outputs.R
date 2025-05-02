@@ -340,6 +340,11 @@ cumhaz <- function(x, newdata=NULL, t=NULL, tmax=NULL,
 #'   level versus the first level is computed.  For any other models,
 #'   \code{newdata} must be supplied explicitly.
 #'
+#' Standardisation (with \code{\link{standardise_to}}) is not supported.
+#' This might be done by hand by using \code{\link{hazard(...,sample=TRUE)}}
+#' to obtain posterior samples for the two standardised hazards separately,
+#' then summarising by hand.
+#'
 #' @inheritParams hazard
 #'
 #' @return A data frame (tibble) with each row containing posterior summary statistics
@@ -354,6 +359,8 @@ cumhaz <- function(x, newdata=NULL, t=NULL, tmax=NULL,
 hazard_ratio <- function(x, newdata=NULL, t=NULL, tmax=NULL, niter=NULL, summ_fns=NULL, sample=FALSE) {
   newdata <- default_newdata_comparison(x, newdata)
   if (is.null(t)) t <- default_plottimes(x, tmax)
+  if (isTRUE(attr(newdata, "std")))
+    stop("Standardisation not currently supported in `hazard_ratio`")
   haz1 <- hazard(x, newdata=newdata[1,,drop=FALSE], t=t, tmax=tmax, niter=niter, sample=TRUE)[,,1,drop=FALSE]
   haz2 <- hazard(x, newdata=newdata[2,,drop=FALSE], t=t, tmax=tmax, niter=niter, sample=TRUE)[,,1,drop=FALSE]
   hr_sam <- haz2 / haz1
