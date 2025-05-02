@@ -28,10 +28,10 @@
 ##' is computed at the mean of each numeric covariate in the original data, and at the
 ##' baseline level of each factor covariate.
 ##'
-##' Note caution is required about how treatment groups (for example)
+##' Note: caution is required about how treatment groups (for example)
 ##' are stored in your data.  If these are coded as numeric (0/1),
-##' then if `newdata` is not specified only one output will be shown,
-##' which relates to the average value of this numeric variable over
+##' then if `newdata` is not specified, only one output will be shown.
+##' This relates to the average value of this numeric variable over
 ##' the data, which doesn't correspond to either of the treatment
 ##' groups.  To avoid this, a treatment group should be stored as a
 ##' factor.

@@ -2,7 +2,7 @@
 
 
 ##' Determine default values for covariates used in survextrap output
-##' functions.  Rationale is documented in \code{\link{mean.survextrap}}.
+##' functions.  The rationale is documented in \code{\link{mean.survextrap}}.
 ##'
 ##' @inheritParams mean.survextrap
 ##'
@@ -41,9 +41,9 @@ default_newdata <- function(x, newdata=NULL){
 ##' Determine default values for covariates used for the untreated
 ##' group in waning models.
 ##'
-##' This is taken from the first row of default is the set to the
-##' first row of \code{newdata}.  Typically this would be a "null"
-##' value, such as the control group in a trial.
+##' This is taken from the first row of \code{newdata}.  Typically
+##' this would be a "null" value, such as the control group in a
+##' trial.
 ##'
 ##' @inheritParams mean.survextrap
 ##'
@@ -364,7 +364,7 @@ summarise_output <- function(res_sam, summ_fns, t=NULL, newdata, summ_name=NULL,
 ##'   to use for the output displayed to the user.
 ##'
 ##' @noRd
-default_summfns <- function(summ_fns){
+default_summfns <- function(summ_fns=NULL){
   if (is.null(summ_fns)){
     summ_fns <- list(~quantile(.x, probs=c(0.5, 0.025, 0.975), na.rm=TRUE))
     attr(summ_fns, "summnames") <- c("median","lower","upper")

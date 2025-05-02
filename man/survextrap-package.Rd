@@ -13,7 +13,12 @@ For details of the methods, see the paper by Jackson (2023).
 }
 \references{
 Jackson, C. (2023) \code{survextrap}: a package for flexible and transparent
-survival extrapolation.  arXiV preprint, \url{https://arxiv.org/abs/2306.03957}.
+survival extrapolation. BMC Medical Research Methodology 23:282.
+\doi{10.1186/s12874-023-02094-1}
+
+Timmins I, Torabi F, Jackson C, Lambert P, Sweeting M J. (2025)
+Simulation-based assessment of a Bayesian survival model with flexible baseline hazard and time-dependent effects.
+\doi{10.48550/arXiv.2503.21388}.
 }
 \seealso{
 Useful links:
@@ -30,6 +35,7 @@ Useful links:
 Other contributors:
 \itemize{
   \item Iain Timmins (\href{https://orcid.org/0000-0002-8761-582X}{ORCID}) [contributor]
+  \item Michael Sweeting (\href{https://orcid.org/0000-0003-0980-8965}{ORCID}) [contributor]
 }
 
 }

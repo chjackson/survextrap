@@ -17,7 +17,7 @@ mspline_basis(times, knots, degree = 3, integrate = FALSE, bsmooth = TRUE)
 
 \item{bsmooth}{If \code{TRUE} then the function is constrained to
 also have zero derivative and second derivative at the boundary,
-which improves smoothness at the boundary (experimental feature).}
+which improves smoothness at the boundary.}
 }
 \value{
 A two-dimensional array.  Rows are the times, and columns are the basis terms.

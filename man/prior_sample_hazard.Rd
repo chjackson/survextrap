@@ -99,15 +99,17 @@ meaning.  For continuous covariates, it helps for both
 computation and interpretation to define the value of zero to
 denote a typical value in the data, e.g. the mean.}
 
-\item{smooth_model}{The default \code{"exchangeable"} uses
-independent logistic priors on the multinomial-logit spline
-coefficients, conditionally on a common smoothing variance
-parameter.
-
-The alternative, \code{"random_walk"}, specifies a random walk
+\item{smooth_model}{The default \code{"random_walk"}, specifies a random walk
 prior for the multinomial-logit spline coefficients, based on
 logistic distributions.  See the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette}
 for full details.
+
+The alternative \code{"exchangeable"} uses
+independent logistic priors on the multinomial-logit spline
+coefficients, conditionally on a common smoothing variance
+parameter.  Note this is the method explained in the original
+survextrap paper (Jackson, BMC Med Res 2023).  The random
+walk model is shown to perform better in Timmins et al (2025).
 
 In non-proportional hazards models, setting \code{smooth_model} also
 determines whether an exchangeable or random walk model is used for the
@@ -176,6 +178,10 @@ represent a meaningful belief.}
 \item{tmax}{Maximum plotting time.  Defaults to the highest knot.}
 
 \item{nsim}{Number of simulations to draw}
+}
+\value{
+A tidy data frame containing values of the hazard at a
+sequence of times, for different draws from the prior distribution.
 }
 \description{
 Generates and/or plots the hazard curves (as functions of time)

@@ -1,6 +1,7 @@
 url: https://chjackson.github.io/survextrap/
 template:
   bootstrap: 5
+  math-rendering: mathjax
   assets: web_assets
 reference:
 - title: Fitting models

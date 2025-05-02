@@ -23,7 +23,7 @@ knitr::opts_chunk$set(eval=TRUE)
 ```
 
 See the [README](../index.html) for the design principles of the package, and the [examples vignette](examples.html) for examples of how to fit models.
-A more formal account of the methods is given in the preprint [paper](https://doi.org/10.1186/s12874-023-02094-1).
+A more formal account of the methods is given in the `survextrap` [paper](https://doi.org/10.1186/s12874-023-02094-1).
 
 # M-splines 
 
@@ -194,7 +194,7 @@ If sampling is poor, then this alternative procedure might work - fit the model 
 
 The default choices in the package seems to under-smooth in some cases. Though it may not matter if the hazard function is under-smoothed, if the purpose of the model is to estimate a quantity that is an average over time (e.g. mean survival).
 
-A sensible route to resolving these uncertainties might be use cross-validation to assess and choose between model specifications.  The package provides an interface to the [LOO-CV](https://mc-stan.org/users/interfaces/loo) method for Bayesian cross-validation - though note that this only assesses fit to the individual-level data, using the same principle as AIC.
+A sensible route to resolving these uncertainties might be use cross-validation to assess and choose between model specifications.  The package provides an interface to the [LOO-CV](https://mc-stan.org/loo) method for Bayesian cross-validation - though note that this only assesses fit to the individual-level data, using the same principle as AIC.
 
 
 

@@ -49,9 +49,12 @@ drawing the intervals if the plot shows the curve for only one covariate value.}
 
 \item{ylab}{Y-axis label}
 
-\item{line_size}{Passed to \code{\link{geom_line}}}
+\item{line_size}{Passed to \code{\link[ggplot2]{geom_line}}}
 
 \item{ci_alpha}{Transparency for the credible interval ribbons}
+}
+\value{
+A \code{ggplot2} plot object.
 }
 \description{
 For use with non-proportional hazards models (\code{survextrap(...,nonprop=TRUE)}).   Intended as a quick check of a model fit, so there are

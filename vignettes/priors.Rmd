@@ -42,7 +42,7 @@ This article describes these two kinds of "prior" judgements that can be used in
 
 We suppose there is some expert judgement about survival over the time period from $t$ to $u$, and we can "elicit" this as the probability $p$ that a person who is alive at $t$ will have died before $u$. 
 
-This elicitation might be done in many ways (e.g. through consensus methods, or consulting multiple experts and aggregating their beliefs).  `survextrap` does not include tools or guidance for doing elicitation, but further info is available, e.g. from [Bojke et al.](https://journals.sagepub.com/doi/pdf/10.1177/0272989X211028236), or [SHELF](https://shelf.sites.sheffield.ac.uk/). 
+This elicitation might be done in many ways (e.g. through consensus methods, or consulting multiple experts and aggregating their beliefs).  `survextrap` does not include tools or guidance for doing elicitation, but further info is available, e.g. from [Bojke et al.](https://journals.sagepub.com/doi/pdf/10.1177/0272989X211028236), or [SHELF](https://shelf.sites.sheffield.ac.uk). 
 
 One simple way is to elicit:
 
@@ -86,7 +86,7 @@ For example, the Beta(9,6) distribution above is equivalent to pseudo-data of 9 
 
 * We could elicit survival probabilities over different time intervals, and use these as multiple `external` datasets in `survextrap`.
 
-* It would probably not be appropriate to include beliefs about the same quantity, elicited from multiple experts, as multiple external datasets in `survextrap`.   This is because the experts may have shared beliefs based on their common knowledge of the field.   If multiple experts are consulted about the same quantity, their beliefs should be aggregated into a single distribution before using `survextrap`, e.g. by using mathematical aggregation or a consensus method.  Again, see, e.g. [Bojke et al.](https://journals.sagepub.com/doi/pdf/10.1177/0272989X211028236) or [SHELF](https://shelf.sites.sheffield.ac.uk/), for more information about elicitation. 
+* It would probably not be appropriate to include beliefs about the same quantity, elicited from multiple experts, as multiple external datasets in `survextrap`.   This is because the experts may have shared beliefs based on their common knowledge of the field.   If multiple experts are consulted about the same quantity, their beliefs should be aggregated into a single distribution before using `survextrap`, e.g. by using mathematical aggregation or a consensus method.  Again, see, e.g. [Bojke et al.](https://journals.sagepub.com/doi/pdf/10.1177/0272989X211028236) or [SHELF](https://shelf.sites.sheffield.ac.uk), for more information about elicitation. 
 
 
 <!-- [Do we want an illustration of a survextrap model here?] -->

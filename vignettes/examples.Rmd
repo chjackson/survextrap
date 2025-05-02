@@ -117,7 +117,7 @@ head(summary(nd_mod))
 ```
 
 #### Divergent transitions {#divergences}
-* If using MCMC, there may be a warning produced by Stan about `divergent transitions after warmup`.  This is a limitation of the sampling algorithm, and can happen when the posterior distribution is awkward to sample from.  See the [Stan documentation](https://mc-stan.org/misc/warnings.html) for technical details.  If there are only one or two divergent transitions, the message is probably safe to ignore, but in any case the results should be examined to ensure they make sense.  With lots of divergent transitions, it is safer to simplify the model, e.g. by using stronger priors or fewer spline knots.
+* If using MCMC, there may be a warning produced by Stan about `divergent transitions after warmup`.  This is a limitation of the sampling algorithm, and can happen when the posterior distribution is awkward to sample from.  See the [Stan documentation](https://mc-stan.org/learn-stan/diagnostics-warnings.html) for technical details.  If there are only one or two divergent transitions, the message is probably safe to ignore, but in any case the results should be examined to ensure they make sense.  With lots of divergent transitions, it is safer to simplify the model, e.g. by using stronger priors or fewer spline knots.
 
 
 ## Restricted mean survival 
@@ -229,7 +229,7 @@ Information about long term survival could be elicited from experts.  To use thi
 
 For example, we ask the expert to consider a set of people who have survived for 10 years.  How many of them would they expect to survive a further 5 years?  Through some kind of formal elicitation process, they supply a best guess (median) of 30%, and a 95\% credible interval of 10\% to 50\%.  
 
-Using standard techniques from elicitation ([SHELF](https://shelf.sites.sheffield.ac.uk/)) we can interpret that as a $Beta(6.6, 15.0)$ prior distribution for the survival probability.  
+Using standard techniques from elicitation ([SHELF](https://shelf.sites.sheffield.ac.uk)) we can interpret that as a $Beta(6.6, 15.0)$ prior distribution for the survival probability.  
 
 ```{r}
 SHELF::fitdist(vals=c(0.1, 0.3, 0.5), probs=c(0.025, 0.5, 0.975),
@@ -396,7 +396,7 @@ These are described in [their own vignette](waning.html).
 
 ## Model comparison {#loocv}
 
-The leave-one-out cross-validation method of the [`loo`](http://mc-stan.org/loo/) package is automatically implemented for every model fitted with `survextrap`, unless `survextrap(..., loo=FALSE)` is used.
+The leave-one-out cross-validation method of the [`loo`](https://mc-stan.org/loo/) package is automatically implemented for every model fitted with `survextrap`, unless `survextrap(..., loo=FALSE)` is used.
 
 The cross-validation results are returned in the `loo` and `loo_external` component of the fitted model object, describing the fit of the model to the individual and external data respectively.  For the external data, "leave one out" refers to leaving out a single individual's outcome from the aggregate totals.
 

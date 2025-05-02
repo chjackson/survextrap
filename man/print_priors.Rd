@@ -9,6 +9,9 @@ print_priors(x)
 \arguments{
 \item{x}{A fitted model object as returned by \code{\link{survextrap}}}
 }
+\value{
+No explicit value is returned.
+}
 \description{
 Print the priors used in a fitted survextrap model
 }

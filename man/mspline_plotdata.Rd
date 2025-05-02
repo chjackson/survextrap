@@ -51,6 +51,10 @@ terms, the function is multiplied by \code{scale}.   The log of the scale is the
 
 \item{tmax}{Maximum plotting time.  Defaults to the highest knot.}
 }
+\value{
+A data frame with values of the hazard at different times for different
+basis functions.
+}
 \description{
 Data for plotting an M-spline function, showing how it is built up from its basis
 }

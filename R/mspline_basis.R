@@ -19,7 +19,7 @@
 ##'
 ##' @param bsmooth If \code{TRUE} then the function is constrained to
 ##'   also have zero derivative and second derivative at the boundary,
-##'   which improves smoothness at the boundary (experimental feature).
+##'   which improves smoothness at the boundary.
 ##'
 ##' @references The [splines2](https://cran.r-project.org/web/packages/splines2/index.html) package is used.
 ##'

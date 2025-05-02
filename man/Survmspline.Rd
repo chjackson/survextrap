@@ -225,7 +225,7 @@ Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science
 
 Brilleman, S. L., Elci, E. M., Novik, J. B., & Wolfe, R. (2020). Bayesian survival analysis using the rstanarm R package. arXiv preprint arXiv:2002.09633.
 
-Wang, W., Yan, J. (2021). Shape-restricted regression splines with R package splines2. Journal of Data Science_, \emph{19}(3), 498-517.
+Wang, W., Yan, J. (2021). Shape-restricted regression splines with R package splines2. Journal of Data Science, \emph{19}(3), 498-517.
 }
 \author{
 Christopher Jackson \href{mailto:chris.jackson@mrc-bsu.cam.ac.uk}{chris.jackson@mrc-bsu.cam.ac.uk}

@@ -44,6 +44,8 @@ form_prior_str <- function(prior){
 ##'
 ##' @inheritParams print.survextrap
 ##'
+##' @return No explicit value is returned.
+##'
 ##' @export
 print_priors <- function(x){
     cat("Priors:\n")

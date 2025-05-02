@@ -22,11 +22,13 @@
 ##'
 ##' @param ylab Y-axis label
 ##'
-##' @param line_size Passed to \code{\link{geom_line}}
+##' @param line_size Passed to \code{\link[ggplot2]{geom_line}}
 ##'
 ##' @param ci_alpha Transparency for the credible interval ribbons
 ##'
 ##' @param show_knots Show the locations of the spline knots as vertical lines
+##'
+##' @return A `ggplot2` plot object.
 ##'
 ##' @export
 plot_hazard <- function(x, newdata=NULL, t=NULL, tmax=NULL, niter=NULL,
@@ -87,6 +89,8 @@ plot_hazard <- function(x, newdata=NULL, t=NULL, tmax=NULL, niter=NULL,
 ##' The Kaplan-Meier estimates are returned in the \code{km} component
 ##' of the fitted model object returned by \code{\link{survextrap}},
 ##' for use in hand-crafted plots like these.
+##'
+##' @return A `ggplot2` plot object.
 ##'
 ##' @export
 plot_survival <- function(x, newdata=NULL, t=NULL, tmax=NULL, km=NULL, niter=NULL,
@@ -163,6 +167,8 @@ default_plottimes <- function(x, tmax=NULL, nplot=100){
 #'
 #' @import ggplot2
 #'
+#' @return A `ggplot2` plot object.
+#'
 #' @export
 plot.survextrap <- function(x, type="hazsurv", newdata=NULL, ...){
     switch(type,
@@ -192,6 +198,8 @@ plot_hazsurv <- function(x, newdata=NULL, ...){
 ##'
 ##' @inheritParams hazard_ratio
 ##' @inheritParams plot_hazard
+##' 
+##' @return A `ggplot2` plot object.
 ##'
 ##' @export
 plot_hazard_ratio <- function(x, newdata=NULL, t=NULL, tmax=NULL,

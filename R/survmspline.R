@@ -92,7 +92,7 @@
 ##'
 ##' Brilleman, S. L., Elci, E. M., Novik, J. B., & Wolfe, R. (2020). Bayesian survival analysis using the rstanarm R package. arXiv preprint arXiv:2002.09633.
 ##'
-##' Wang, W., Yan, J. (2021). Shape-restricted regression splines with R package splines2. Journal of Data Science_, *19*(3), 498-517.
+##' Wang, W., Yan, J. (2021). Shape-restricted regression splines with R package splines2. Journal of Data Science, *19*(3), 498-517.
 ##'
 ##' @keywords distribution
 ##'
