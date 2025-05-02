@@ -5,14 +5,20 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Survival Extrapolation with a Flexible Parametric Model and External Data • survextrap</title>
-<script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Survival Extrapolation with a Flexible Bayesian Parametric Model and External Data • survextrap</title>
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Survival Extrapolation with a Flexible Parametric Model and External Data">
-<meta name="description" content="Survival analysis using a flexible Bayesian model for individual-level right-censored data, optionally combined with aggregate data on counts of survivors in different periods of time. An M-spline is used to describe the hazard function, with a hierarchical prior on the coefficients to control overfitting. Proportional hazards or flexible non-proportional hazards models can be used to relate survival to predictors. Mixture cure models, additive hazards (relative survival) models and waning treatment effects models are also supported. Priors can be customised and calibrated to substantive beliefs. Posterior distributions are estimated using Stan, and outputs are arranged in a tidy format. See See Jackson (2023) &lt;doi:10.48550/arXiv.2306.03957&gt;.">
-<meta property="og:description" content="Survival analysis using a flexible Bayesian model for individual-level right-censored data, optionally combined with aggregate data on counts of survivors in different periods of time. An M-spline is used to describe the hazard function, with a hierarchical prior on the coefficients to control overfitting. Proportional hazards or flexible non-proportional hazards models can be used to relate survival to predictors. Mixture cure models, additive hazards (relative survival) models and waning treatment effects models are also supported. Priors can be customised and calibrated to substantive beliefs. Posterior distributions are estimated using Stan, and outputs are arranged in a tidy format. See See Jackson (2023) &lt;doi:10.48550/arXiv.2306.03957&gt;.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Survival Extrapolation with a Flexible Bayesian Parametric Model and External Data">
+<meta name="description" content="Survival analysis using a flexible Bayesian model for individual-level right-censored data, optionally combined with aggregate data on counts of survivors in different periods of time. An M-spline is used to describe the hazard function, with a hierarchical prior on the coefficients to control overfitting. Proportional hazards or flexible non-proportional hazards models can be used to relate survival to predictors. Additive hazards (relative survival) models, waning treatment effects, and mixture cure models are also supported. Priors can be customised and calibrated to substantive beliefs. Posterior distributions are estimated using Stan, and outputs are arranged in a tidy format. See Jackson (2023) &lt;doi:10.1186/s12874-023-02094-1&gt;.">
+<meta property="og:description" content="Survival analysis using a flexible Bayesian model for individual-level right-censored data, optionally combined with aggregate data on counts of survivors in different periods of time. An M-spline is used to describe the hazard function, with a hierarchical prior on the coefficients to control overfitting. Proportional hazards or flexible non-proportional hazards models can be used to relate survival to predictors. Additive hazards (relative survival) models, waning treatment effects, and mixture cure models are also supported. Priors can be customised and calibrated to substantive beliefs. Posterior distributions are estimated using Stan, and outputs are arranged in a tidy format. See Jackson (2023) &lt;doi:10.1186/s12874-023-02094-1&gt;.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +65,7 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="survextrap">survextrap<a class="anchor" aria-label="anchor" href="#survextrap"></a>
 </h1></div>
-<p><code>survextrap</code> is an R package to model survival from a combination of</p>
+<p><code>survextrap</code> is an R package for parametric survival modelling with either or both of:</p>
 <ol style="list-style-type: decimal">
 <li>A standard individual-level, right-censored survival dataset, e.g.</li>
 </ol>
@@ -104,7 +110,7 @@ etc…
 </tr>
 </table>
 <ol start="2" style="list-style-type: decimal">
-<li>“External” data sources in the following aggregate “count” form:</li>
+<li>(optionally) “External” data sources in the following aggregate “count” form:</li>
 </ol>
 <table class="table">
 <tr>
@@ -120,48 +126,48 @@ Predictors…
 </tr>
 <tr>
 <th>
-Start time <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+Start time <span class="math inline">\(t\)</span>
 </th>
 <th>
-End time <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+End time <span class="math inline">\(u\)</span>
 </th>
 <th>
-Alive at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+Alive at <span class="math inline">\(t\)</span>
 </th>
 <th>
-Still alive at <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+Still alive at <span class="math inline">\(u\)</span>
 </th>
 <th>
 </th>
 </tr>
 <tr>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mn>1</mn></msub><annotation encoding="application/x-tex">t_{1}</annotation></semantics></math>
+<span class="math inline">\(t_{1}\)</span>
 </td>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mn>1</mn></msub><annotation encoding="application/x-tex">u_{1}</annotation></semantics></math>
+<span class="math inline">\(u_{1}\)</span>
 </td>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>n</mi><mn>1</mn></msub><annotation encoding="application/x-tex">n_{1}</annotation></semantics></math>
+<span class="math inline">\(n_{1}\)</span>
 </td>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mn>1</mn></msub><annotation encoding="application/x-tex">r_{1}</annotation></semantics></math>
+<span class="math inline">\(r_{1}\)</span>
 </td>
 <td>
 </td>
 </tr>
 <tr>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mn>2</mn></msub><annotation encoding="application/x-tex">t_{2}</annotation></semantics></math>
+<span class="math inline">\(t_{2}\)</span>
 </td>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mn>2</mn></msub><annotation encoding="application/x-tex">u_{2}</annotation></semantics></math>
+<span class="math inline">\(u_{2}\)</span>
 </td>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>n</mi><mn>2</mn></msub><annotation encoding="application/x-tex">n_{2}</annotation></semantics></math>
+<span class="math inline">\(n_{2}\)</span>
 </td>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mn>2</mn></msub><annotation encoding="application/x-tex">r_{2}</annotation></semantics></math>
+<span class="math inline">\(r_{2}\)</span>
 </td>
 <td>
 </td>
@@ -227,14 +233,13 @@ etc…
 </ul>
 </div>
 <div class="section level2">
-<h2 id="development">Development<a class="anchor" aria-label="anchor" href="#development"></a>
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>The package is in “beta” status. All major features are included, and there are no substantial changes expected.</p>
-<p>Further testing is planned before it is put on CRAN. In particular, work is ongoing to determine “default settings” (for things like priors and model flexibility) that work best in a wide range of examples based on simulation. Though the current defaults are expected to be reasonable for typical use, and there are examples in the vignettes of fine-tuning them for specific cases.</p>
 <p>The current version can be installed as:</p>
 <pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"survextrap"</span>, repos<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'https://chjackson.r-universe.dev'</span>,</span>
 <span>                                       <span class="st">'https://cloud.r-project.org'</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<p>Please give feedback and suggestions if you do. These can be posted on <a href="https://github.com/chjackson/survextrap/issues" class="external-link">github issues</a>, or <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk">email</a>.</p>
+<p>and will soon be on CRAN as well.</p>
+<p>Please give feedback and suggestions if you use it. These can be posted on <a href="https://github.com/chjackson/survextrap/issues" class="external-link">github issues</a>, or <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk">email</a>.</p>
 <!-- badges: start -->
 
 </div>
@@ -267,7 +272,7 @@ etc…
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Christopher Jackson <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0002-6656-8913" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Christopher Jackson <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0002-6656-8913" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
@@ -290,7 +295,7 @@ etc…
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>

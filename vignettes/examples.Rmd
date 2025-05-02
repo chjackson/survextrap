@@ -378,7 +378,7 @@ The non-proportional hazards model is experimental. In theory, it can be "tuned"
 
 If a plot of the posterior hazard ratio against time is desired, this might be constructed by extracting samples from the posterior of the hazard for different covariate values by using `hazard(..., sample=TRUE)`, converting to samples from the hazard ratio, and then summarising and plotting.
 
-The functions `hazard_ratio()` and `plot_hazard_ratio()` can be used to calculate or plot the ratio of hazards between two covariate values, as a function of time.  The covariate values are supplied in a data frame with two rows - all covariates in the model should be included here (there is currently no facility for standardised effect estimation).
+The functions `hazard_ratio()` and `plot_hazard_ratio()` can be used to calculate or plot the ratio of hazards between two covariate values, as a function of time.  The covariate values are supplied in a data frame with two rows - all covariates in the model should be included here (there is currently no facility for standardised effect estimation in these functions).
 
 ```{r}
 nd <- data.frame(rx = c("Lev+5FU","Lev"))

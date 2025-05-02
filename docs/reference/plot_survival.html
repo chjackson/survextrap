@@ -23,7 +23,7 @@ with ggplot2.  See the case study vignette for some examples."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,10 +104,10 @@ for each level of this factor.</p>
 <p>(b) if there are multiple covariates, or any numeric covariates, then the output
 is computed at the mean of each numeric covariate in the original data, and at the
 baseline level of each factor covariate.</p>
-<p>Note caution is required about how treatment groups (for example)
+<p>Note: caution is required about how treatment groups (for example)
 are stored in your data.  If these are coded as numeric (0/1),
-then if <code>newdata</code> is not specified only one output will be shown,
-which relates to the average value of this numeric variable over
+then if <code>newdata</code> is not specified, only one output will be shown.
+This relates to the average value of this numeric variable over
 the data, which doesn't correspond to either of the treatment
 groups.  To avoid this, a treatment group should be stored as a
 factor.</p></dd>
@@ -176,7 +176,7 @@ drawing the intervals if the plot shows the curve for only one covariate value.<
 
 
 <dt id="arg-line-size">line_size<a class="anchor" aria-label="anchor" href="#arg-line-size"></a></dt>
-<dd><p>Passed to <code>geom_line</code></p></dd>
+<dd><p>Passed to <code><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></code></p></dd>
 
 
 <dt id="arg-ci-alpha">ci_alpha<a class="anchor" aria-label="anchor" href="#arg-ci-alpha"></a></dt>
@@ -187,6 +187,10 @@ drawing the intervals if the plot shows the curve for only one covariate value.<
 <dd><p>Show the locations of the spline knots as vertical lines</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A <code>ggplot2</code> plot object.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>If the model has a single factor covariate (excluding background

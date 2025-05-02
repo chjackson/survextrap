@@ -25,7 +25,7 @@ versions of these models can also be used."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -353,7 +353,8 @@ calculated using optimisation, via <span class="pkg">rstan</span>'s
 <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html" class="external-link">rstan::optimizing()</a></code>
 function.  A sample from a normal approximation to the
 (real-line-transformed) posterior distribution is drawn in order
-to obtain credible intervals.</p>
+to obtain credible intervals.  This is useful for model development,
+while using MCMC for the "final answer".</p>
 <p>If <code>fit_method="vb"</code>, then variational Bayes methods are
 used, via <span class="pkg">rstan</span>'s
 <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-vb.html" class="external-link">rstan::vb()</a></code> function.

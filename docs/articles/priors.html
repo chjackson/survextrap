@@ -6,7 +6,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Priors in survextrap models • survextrap</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -20,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,7 +71,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2025-02-24</h4>
+            <h4 data-toc-skip class="date">2025-05-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/priors.Rmd" class="external-link"><code>vignettes/priors.Rmd</code></a></small>
       <div class="d-none name"><code>priors.Rmd</code></div>
@@ -76,20 +82,14 @@ Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jac
 <p>The flexible survival models in <code>survextrap</code> are
 <strong>Bayesian</strong>.</p>
 <p>This means that they analyse data under a <strong>parametric</strong>
-model, which assumes that each data point
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
-comes from a sampling distribution with probability density function
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(x|\theta)</annotation></semantics></math>.
-The parameters
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
-are estimated by combining a <strong>prior</strong> distribution
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">p(\theta)</annotation></semantics></math>,
-representing beliefs about model parameters external to the data, with a
+model, which assumes that each data point <span class="math inline">\(x\)</span> comes from a sampling distribution with
+probability density function <span class="math inline">\(f(x|\theta)\)</span>. The parameters <span class="math inline">\(\theta\)</span> are estimated by combining a
+<strong>prior</strong> distribution <span class="math inline">\(p(\theta)\)</span>, representing beliefs about
+model parameters external to the data, with a
 <strong>“likelihood”</strong> that represents the information from a set
-of data
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\boldsymbol{x}</annotation></semantics></math>,
-producing a posterior distribution
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">p(\theta | \boldsymbol{x})</annotation></semantics></math>.</p>
+of data <span class="math inline">\(\boldsymbol{x}\)</span>, producing a
+posterior distribution <span class="math inline">\(p(\theta |
+\boldsymbol{x})\)</span>.</p>
 <p>The principle behind the package is that any information that is
 relevant to extrapolation should be represented transparently. This is
 arguably clearest if expressed through <strong>data</strong> or
@@ -100,71 +100,56 @@ survival data, and aggregate counts of survivors, as described on the
 front page. Expert judgements about survival can be converted to
 pseudo-data in the form of aggregate counts.</p></li>
 <li>
-<p><strong>Parametric mechanisms</strong> denote the form of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f()</annotation></semantics></math>.
-These might include the notion that some people are cured (mixture cure
-models), or that disease-specific and background hazards can be modelled
-additively (relative survival models). Conventional parametric survival
-models (like the Weibull and log-logistic) are generally used out of
-familiarity, not because they are thought to represent meaningful
-mechanisms for survival.</p>
+<p><strong>Parametric mechanisms</strong> denote the form of <span class="math inline">\(f()\)</span>. These might include the notion that
+some people are cured (mixture cure models), or that disease-specific
+and background hazards can be modelled additively (relative survival
+models). Conventional parametric survival models (like the Weibull and
+log-logistic) are generally used out of familiarity, not because they
+are thought to represent meaningful mechanisms for survival.</p>
 <p>The default parametric model in <code>survextrap</code> is a flexible
 spline-based model. This is designed as a “black box”, which aims to fit
 the data as well as possible. It is not designed to be treated as a
 mechanism for extrapolation.</p>
 </li>
 </ul>
-<p>However, this spline model has parameters
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>,
-which still need prior distributions, because the model is Bayesian!</p>
+<p>However, this spline model has parameters <span class="math inline">\(\theta\)</span>, which still need prior
+distributions, because the model is Bayesian!</p>
 <p>This article describes these two kinds of “prior” judgements that can
 be used in <code>survextrap</code> models.</p>
 <ol style="list-style-type: decimal">
 <li><p>Judgements about survival probabilities, that can be converted to
-pseudo-data, and treated as part of the model likelihood for data
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\boldsymbol{x}</annotation></semantics></math>.</p></li>
-<li><p>Priors on parameters
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+pseudo-data, and treated as part of the model likelihood for data <span class="math inline">\(\boldsymbol{x}\)</span>.</p></li>
+<li><p>Priors on parameters <span class="math inline">\(\theta\)</span>
 in spline models.</p></li>
 </ol>
 <div class="section level2">
 <h2 id="converting-prior-judgements-about-survival-to-external-data">Converting prior judgements about survival to external data<a class="anchor" aria-label="anchor" href="#converting-prior-judgements-about-survival-to-external-data"></a>
 </h2>
 <p>We suppose there is some expert judgement about survival over the
-time period from
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
-to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>,
-and we can “elicit” this as the probability
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
-that a person who is alive at
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
-will have died before
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>.</p>
+time period from <span class="math inline">\(t\)</span> to <span class="math inline">\(u\)</span>, and we can “elicit” this as the
+probability <span class="math inline">\(p\)</span> that a person who is
+alive at <span class="math inline">\(t\)</span> will have died before
+<span class="math inline">\(u\)</span>.</p>
 <p>This elicitation might be done in many ways (e.g. through consensus
 methods, or consulting multiple experts and aggregating their beliefs).
 <code>survextrap</code> does not include tools or guidance for doing
 elicitation, but further info is available, e.g. from <a href="https://journals.sagepub.com/doi/pdf/10.1177/0272989X211028236" class="external-link">Bojke
-et al.</a>, or <a href="https://shelf.sites.sheffield.ac.uk/" class="external-link">SHELF</a>.</p>
+et al.</a>, or <a href="https://shelf.sites.sheffield.ac.uk" class="external-link">SHELF</a>.</p>
 <p>One simple way is to elicit:</p>
 <ul>
-<li><p>a best guess for what
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
-is. We could interpret this as the <em>median</em> of the prior
+<li><p>a best guess for what <span class="math inline">\(p\)</span> is.
+We could interpret this as the <em>median</em> of the prior
 distribution.</p></li>
 <li><p>upper and lower prior credible limits, such that we are (for
-example) 90% sure that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
-is within this range. We can interpret these as the 5% and 95%
-quantiles.</p></li>
+example) 90% sure that <span class="math inline">\(p\)</span> is within
+this range. We can interpret these as the 5% and 95% quantiles.</p></li>
 </ul>
 <p>As an example, suppose we elicited a best guess of 0.6, and a 90%
 credible interval of 0.4 to 0.8. These can be fitted to a
-<em>probability distribution</em> representing beliefs about
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>.
-The SHELF R package provides a useful function, <code>fitdist</code>, to
-do this. We use this to fit a <em>Beta</em> distribution, a
-typically-used distribution for probabilities.</p>
+<em>probability distribution</em> representing beliefs about <span class="math inline">\(p\)</span>. The SHELF R package provides a useful
+function, <code>fitdist</code>, to do this. We use this to fit a
+<em>Beta</em> distribution, a typically-used distribution for
+probabilities.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/OakleyJ/SHELF" class="external-link">SHELF</a></span><span class="op">)</span></span>
 <span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.6</span>, <span class="fl">0.8</span><span class="op">)</span></span>
@@ -174,9 +159,8 @@ typically-used distribution for probabilities.</p>
 <span><span class="co">## 1 9.190895 6.19854</span></span></code></pre>
 <p>This gives a Beta(9.2, 6.2) distribution. We can plot its probability
 density function, to check that the distribution represents the beliefs
-about
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
-that we intended to use:</p>
+about <span class="math inline">\(p\)</span> that we intended to
+use:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">p</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -185,69 +169,34 @@ that we intended to use:</p>
 <p><img src="priors_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
 <p>We now convert the elicited Beta distribution to pseudo-data.</p>
 <p>The trick for doing this comes from a basic result about Bayesian
-estimation of an event probability
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>.
-Suppose we start with a
-Beta<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(a,b)</annotation></semantics></math>
-prior for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>,
-and observe
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
-events out of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
-individual observations, where each observation may or may not have
-resulted in an event, so that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
-comes from a Binomial distribution with probability
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>.
-The posterior for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
-is then
-Beta<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo>+</mo><mi>y</mi><mo>,</mo><mi>b</mi><mo>+</mo><mi>n</mi><mo>−</mo><mi>y</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(a+y, b+n-y)</annotation></semantics></math>.</p>
-<p>We can then equate our elicited belief (call it
-Beta<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>e</mi><mn>1</mn></msub><mo>,</mo><msub><mi>e</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(e_1, e_2)</annotation></semantics></math>,
-say) with a posterior distribution under a vague prior (say a
-Beta<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo>=</mo><mn>0</mn><mo>,</mo><mi>b</mi><mo>=</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(a=0,b=0)</annotation></semantics></math>).
-Therefore
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>e</mi><mn>1</mn></msub><mo>=</mo><mi>a</mi><mo>+</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">e_1=a+y</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>e</mi><mn>2</mn></msub><mo>=</mo><mi>b</mi><mo>+</mo><mi>n</mi><mo>−</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">e_2 = b+n-y</annotation></semantics></math>,
-hence
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><msub><mi>e</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">y=e_1</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><msub><mi>e</mi><mn>1</mn></msub><mo>+</mo><msub><mi>e</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">n = e_1 + e_2</annotation></semantics></math>.</p>
-<p>In other words, our elicited
-Beta<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>e</mi><mn>1</mn></msub><mo>,</mo><msub><mi>e</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(e_1,e_2)</annotation></semantics></math>
-distribution is equivalent to the knowledge from an aggregate count of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>e</mi><mn>1</mn></msub><annotation encoding="application/x-tex">e_1</annotation></semantics></math>
-events out of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>e</mi><mn>1</mn></msub><mo>+</mo><msub><mi>e</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">e_1 + e_2</annotation></semantics></math>
-observations. This aggregate “pseudo-data” can be used as an
-<code>external</code> data source in <code>survextrap</code>.</p>
+estimation of an event probability <span class="math inline">\(p\)</span>. Suppose we start with a Beta<span class="math inline">\((a,b)\)</span> prior for <span class="math inline">\(p\)</span>, and observe <span class="math inline">\(y\)</span> events out of <span class="math inline">\(n\)</span> individual observations, where each
+observation may or may not have resulted in an event, so that <span class="math inline">\(y\)</span> comes from a Binomial distribution with
+probability <span class="math inline">\(p\)</span>. The posterior for
+<span class="math inline">\(p\)</span> is then Beta<span class="math inline">\((a+y, b+n-y)\)</span>.</p>
+<p>We can then equate our elicited belief (call it Beta<span class="math inline">\((e_1, e_2)\)</span>, say) with a posterior
+distribution under a vague prior (say a Beta<span class="math inline">\((a=0,b=0)\)</span>). Therefore <span class="math inline">\(e_1=a+y\)</span> and <span class="math inline">\(e_2 = b+n-y\)</span>, hence <span class="math inline">\(y=e_1\)</span>, <span class="math inline">\(n =
+e_1 + e_2\)</span>.</p>
+<p>In other words, our elicited Beta<span class="math inline">\((e_1,e_2)\)</span> distribution is equivalent to
+the knowledge from an aggregate count of <span class="math inline">\(e_1\)</span> events out of <span class="math inline">\(e_1 + e_2\)</span> observations. This aggregate
+“pseudo-data” can be used as an <code>external</code> data source in
+<code>survextrap</code>.</p>
 <p>For example, the Beta(9,6) distribution above is equivalent to
 pseudo-data of 9 events out of 15 trials. The point estimate of the
 event probability from this data would be 9/15 = 0.6 (our original
 guess). A pseudo-dataset of 90 events out of 150 trials would have the
 same median, but a narrower credible interval, since the dataset is
-larger, implying greater confidence that the true
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
-is near to the point estimate.</p>
+larger, implying greater confidence that the true <span class="math inline">\(p\)</span> is near to the point estimate.</p>
 <div class="section level4">
 <h4 id="further-notes-on-elicitation">Further notes on elicitation<a class="anchor" aria-label="anchor" href="#further-notes-on-elicitation"></a>
 </h4>
 <ul>
 <li><p>Academic note: there are different ways of defining a vague Beta
-prior for a probability.
-Beta<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(0,0)</annotation></semantics></math>
-is a uniform distribution for the log odds
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\log(p/(1-p))</annotation></semantics></math>,
-and
-Beta<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(1,1)</annotation></semantics></math>
-is uniform on the scale of the probability
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>.
-The “Jeffreys” prior
-Beta<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.5</mn><mo>,</mo><mn>0.5</mn><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(0.5, 0.5)</annotation></semantics></math>
-is sometimes used as a compromise between these. The difference between
-these choices is unlikely to matter in practice.</p></li>
+prior for a probability. Beta<span class="math inline">\((0,0)\)</span>
+is a uniform distribution for the log odds <span class="math inline">\(\log(p/(1-p))\)</span>, and Beta<span class="math inline">\((1,1)\)</span> is uniform on the scale of the
+probability <span class="math inline">\(p\)</span>. The “Jeffreys” prior
+Beta<span class="math inline">\((0.5, 0.5)\)</span> is sometimes used as
+a compromise between these. The difference between these choices is
+unlikely to matter in practice.</p></li>
 <li><p>We could elicit survival probabilities over different time
 intervals, and use these as multiple <code>external</code> datasets in
 <code>survextrap</code>.</p></li>
@@ -259,7 +208,7 @@ multiple experts are consulted about the same quantity, their beliefs
 should be aggregated into a single distribution before using
 <code>survextrap</code>, e.g. by using mathematical aggregation or a
 consensus method. Again, see, e.g. <a href="https://journals.sagepub.com/doi/pdf/10.1177/0272989X211028236" class="external-link">Bojke
-et al.</a> or <a href="https://shelf.sites.sheffield.ac.uk/" class="external-link">SHELF</a>,
+et al.</a> or <a href="https://shelf.sites.sheffield.ac.uk" class="external-link">SHELF</a>,
 for more information about elicitation.</p></li>
 </ul>
 <!-- [Do we want an illustration of a survextrap model here?] -->
@@ -296,34 +245,18 @@ used.</p>
 <pre><code><span><span class="co">## Priors:</span></span>
 <span><span class="co">##   Baseline log hazard scale: normal(location=0,scale=20)</span></span>
 <span><span class="co">##   Smoothness SD: gamma(shape=2,rate=1)</span></span></code></pre>
-<p>The “baseline log hazard scale” parameter is the parameter
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>η</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\log(\eta)</annotation></semantics></math>
-in the definition of the M-spline function for the hazard:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>η</mi><msub><mo>∑</mo><mi>k</mi></msub><msub><mi>p</mi><mi>k</mi></msub><msub><mi>b</mi><mi>k</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t) = \eta \sum_k p_k b_k(t)</annotation></semantics></math>.
-By itself,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>
-does not define a hazard. It only defines a hazard after being combined
-with the basis coefficients
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>k</mi></msub><annotation encoding="application/x-tex">p_k</annotation></semantics></math>
-and basis terms
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mi>k</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">b_k()</annotation></semantics></math>.</p>
-<p>The “smoothness SD” is the parameter
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
-. This is even harder to interpret than
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>.
-Values of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\sigma=0</annotation></semantics></math>
-represent certainty that the hazard is the one defined by the prior mean
-for the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>k</mi></msub><annotation encoding="application/x-tex">p_k</annotation></semantics></math>.
-Values of 1 or more favour wiggly hazard curves, while very high values
-are <a href="methods.html#priorhaz">not meaningful</a>.</p>
-<p>The prior mean for the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>k</mi></msub><annotation encoding="application/x-tex">p_k</annotation></semantics></math>
-can be examined in <code>coefs_mean</code> - by default, this defines a
-hazard function
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t)</annotation></semantics></math>
-that is constant over time. The number and location of knots can also be
+<p>The “baseline log hazard scale” parameter is the parameter <span class="math inline">\(\log(\eta)\)</span> in the definition of the
+M-spline function for the hazard: <span class="math inline">\(h(t) =
+\eta \sum_k p_k b_k(t)\)</span>. By itself, <span class="math inline">\(\eta\)</span> does not define a hazard. It only
+defines a hazard after being combined with the basis coefficients <span class="math inline">\(p_k\)</span> and basis terms <span class="math inline">\(b_k()\)</span>.</p>
+<p>The “smoothness SD” is the parameter <span class="math inline">\(\sigma\)</span> . This is even harder to interpret
+than <span class="math inline">\(\eta\)</span>. Values of <span class="math inline">\(\sigma=0\)</span> represent certainty that the
+hazard is the one defined by the prior mean for the <span class="math inline">\(p_k\)</span>. Values of 1 or more favour wiggly
+hazard curves, while very high values are <a href="methods.html#priorhaz">not meaningful</a>.</p>
+<p>The prior mean for the <span class="math inline">\(p_k\)</span> can
+be examined in <code>coefs_mean</code> - by default, this defines a
+hazard function <span class="math inline">\(h(t)\)</span> that is
+constant over time. The number and location of knots can also be
 examined in the <code>mspline</code> component of the model.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">nd_mod</span><span class="op">$</span><span class="va">coefs_mean</span>,<span class="fl">2</span><span class="op">)</span></span>
@@ -344,23 +277,15 @@ specification.</p>
 <h5 id="constant-hazard-level">Constant hazard level<a class="anchor" aria-label="anchor" href="#constant-hazard-level"></a>
 </h5>
 <p>The first thing to verify is the typical level of the hazard. If no
-prior for the hazard scale parameter
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>
-is supplied in <code>survextrap</code>, then a default
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>20</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">N(0,20)</annotation></semantics></math>
-is used, which is very vague. We can illustrate the implications of this
-choice by deriving the prior for the constant hazard
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>η</mi><msub><mo>∑</mo><mi>k</mi></msub><msub><mi>p</mi><mi>k</mi></msub><msub><mi>b</mi><mi>k</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t) = \eta \sum_k p_k b_k(t)</annotation></semantics></math>
-which is implied by the prior for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>
-and the special values of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>k</mi></msub><annotation encoding="application/x-tex">p_k</annotation></semantics></math>
-that imply a constant hazard (found using
-<code><a href="../reference/mspline_constant_coefs.html">mspline_constant_coefs()</a></code>).</p>
+prior for the hazard scale parameter <span class="math inline">\(\eta\)</span> is supplied in
+<code>survextrap</code>, then a default <span class="math inline">\(N(0,20)\)</span> is used, which is very vague. We
+can illustrate the implications of this choice by deriving the prior for
+the constant hazard <span class="math inline">\(h(t) = \eta \sum_k p_k
+b_k(t)\)</span> which is implied by the prior for <span class="math inline">\(\eta\)</span> and the special values of <span class="math inline">\(p_k\)</span> that imply a constant hazard (found
+using <code><a href="../reference/mspline_constant_coefs.html">mspline_constant_coefs()</a></code>).</p>
 <p>The <code>haz_const</code> function returns a summary of the implied
 prior for this constant hazard, and the implied prior for the mean
-survival time
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">1/h(t)</annotation></semantics></math>.</p>
+survival time <span class="math inline">\(1/h(t)\)</span>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nd_mod</span><span class="op">$</span><span class="va">prior_sample</span><span class="op">$</span><span class="fu">haz_const</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##                haz         mean</span></span>
@@ -382,34 +307,23 @@ that this represents uncertainty about the mean survival in a
 population, rather than the variability between individuals in the
 population, so perhaps the credible interval should be narrower than you
 think.</p></li>
-<li><p>hence giving a median and lower credible limit for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(t)</annotation></semantics></math>,
-hence (after dividing by the constant
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>k</mi></msub><msub><mi>p</mi><mi>k</mi></msub><msub><mi>b</mi><mi>k</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\sum_k p_k b_k(t)</annotation></semantics></math>
-for an arbitrary
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
-and logging), giving a median
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>
-and lower credible limit
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>
-for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>η</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\log(\eta)</annotation></semantics></math>.
-Hence a normal prior for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>η</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\log(\eta)</annotation></semantics></math>
-can be defined with median
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>,
-and standard deviation
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>L</mi><mo>−</mo><mi>m</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">(L-m)/2</annotation></semantics></math>.</p></li>
+<li><p>hence giving a median and lower credible limit for <span class="math inline">\(h(t)\)</span>, hence (after dividing by the
+constant <span class="math inline">\(\sum_k p_k b_k(t)\)</span> for an
+arbitrary <span class="math inline">\(t\)</span> and logging), giving a
+median <span class="math inline">\(m\)</span> and lower credible limit
+<span class="math inline">\(L\)</span> for <span class="math inline">\(\log(\eta)\)</span>. Hence a normal prior for
+<span class="math inline">\(\log(\eta)\)</span> can be defined with
+median <span class="math inline">\(m\)</span>, and standard deviation
+<span class="math inline">\((L-m)/2\)</span>.</p></li>
 </ul>
 <p>This is implemented in the function <code>p_meansurv</code>. Note
 that a spline knot specification is required to obtain the constant
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>k</mi></msub><msub><mi>p</mi><mi>k</mi></msub><msub><mi>b</mi><mi>k</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\sum_k p_k b_k(t)</annotation></semantics></math>.</p>
+<span class="math inline">\(\sum_k p_k b_k(t)\)</span>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span></span></code></pre></div>
-<p>For a given prior on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>
-and spline specification, the function <code>prior_haz_const</code> can
-be used to summarise the implied prior on the constant hazard and mean
+<p>For a given prior on <span class="math inline">\(\eta\)</span> and
+spline specification, the function <code>prior_haz_const</code> can be
+used to summarise the implied prior on the constant hazard and mean
 survival time. We use this now to check that the prior that we defined
 with <code>p_meansurv</code> is the one that we intended to define.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -426,9 +340,8 @@ prior revised if necessary.</p>
 <p>Finally, an updated <code>survextrap</code> model can be fitted that
 includes the weakly informative prior that we defined and checked. For
 reporting purposes, we can use <code>print_priors</code> to view the
-normal prior for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>η</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\log(\eta)</annotation></semantics></math>
-that was automatically derived.</p>
+normal prior for <span class="math inline">\(\log(\eta)\)</span> that
+was automatically derived.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ndi_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colons</span>, fit_method<span class="op">=</span><span class="st">"opt"</span>,</span>
 <span>                      prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span><span class="op">)</span></span>
@@ -467,15 +380,12 @@ to be supplied explicitly.</p>
 <span>                               prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span>,</span>
 <span>                               tmax<span class="op">=</span><span class="fl">3</span>, nsim<span class="op">=</span><span class="fl">30</span><span class="op">)</span></span></code></pre></div>
 <p>These plots can give some idea of how much risks might be expected to
-vary over time. The parameter driving these variations is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>,
-whose prior can be defined with the <code>prior_hsd</code> argument to
-<code>survextrap</code>. In the standard <code>survextrap</code> model,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\sigma=0</annotation></semantics></math>
-means that we are sure that the hazard will be constant. Therefore we
-might want to define the prior for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
-to rule out implausibly large changes. For example, a Gamma(2,20):</p>
+vary over time. The parameter driving these variations is <span class="math inline">\(\sigma\)</span>, whose prior can be defined with
+the <code>prior_hsd</code> argument to <code>survextrap</code>. In the
+standard <code>survextrap</code> model, <span class="math inline">\(\sigma=0\)</span> means that we are sure that the
+hazard will be constant. Therefore we might want to define the prior for
+<span class="math inline">\(\sigma\)</span> to rule out implausibly
+large changes. For example, a Gamma(2,20):</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">haz_sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prior_sample_hazard.html">prior_sample_hazard</a></span><span class="op">(</span>knots<span class="op">=</span><span class="va">sp</span><span class="op">$</span><span class="va">knots</span>, degree<span class="op">=</span><span class="va">sp</span><span class="op">$</span><span class="va">degree</span>, </span>
@@ -519,15 +429,11 @@ the <code>sd_haz</code> component is the SD over time of the hazard,
 <span><span class="co">## 2.5%  0.001515510 3.114473e+01 1.817126e+00</span></span>
 <span><span class="co">## 50%   0.008722217 6.809896e+02 4.013356e+01</span></span>
 <span><span class="co">## 97.5% 0.024717065 8.197922e+11 4.182825e+08</span></span></code></pre>
-<p>This shows that the default
-Gamma<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo>=</mo><mn>2</mn><mo>,</mo><mi>b</mi><mo>=</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(a=2,b=1)</annotation></semantics></math>
-prior used in this model is very vague. We can make it less vague by
-reducing
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mi>/</mi><mi>b</mi></mrow><annotation encoding="application/x-tex">a/b</annotation></semantics></math>.
-A Gamma(2, 5), for example, leads to an upper 90% credible limit of
-about 5 for the hazard ratio over time. Trial and error is probably
-necessary to produce a prior that is judged plausible by this
-metric.</p>
+<p>This shows that the default Gamma<span class="math inline">\((a=2,b=1)\)</span> prior used in this model is
+very vague. We can make it less vague by reducing <span class="math inline">\(a/b\)</span>. A Gamma(2, 5), for example, leads to
+an upper 90% credible limit of about 5 for the hazard ratio over time.
+Trial and error is probably necessary to produce a prior that is judged
+plausible by this metric.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/prior_haz.html">prior_haz_sd</a></span><span class="op">(</span>mspline<span class="op">=</span><span class="va">sp</span>,                              </span>
@@ -604,39 +510,29 @@ do not have any direct interpretation in terms of how an effect of the
 covariate on the hazard changes over time. In theory, the model allows
 the hazard ratio to increase and decrease arbitrarily in a flexible way,
 in the same manner as a spline function.</p>
-<p>The parameter
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>
-governs the amount of flexibility in the hazard ratio function. With
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>τ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\tau=0</annotation></semantics></math>
-the model is a proportional hazards model, and as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>
+<p>The parameter <span class="math inline">\(\tau\)</span> governs the
+amount of flexibility in the hazard ratio function. With <span class="math inline">\(\tau=0\)</span> the model is a proportional
+hazards model, and as <span class="math inline">\(\tau\)</span>
 increases the hazard ratio becomes a more flexible function of time. The
-exact value of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>
-does not have an interpretation, but as we did for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math><a href="#hrsd">above</a>, we can use <em>simulation</em> to calibrate
-the prior so that it matches plausible judgements.</p>
+exact value of <span class="math inline">\(\tau\)</span> does not have
+an interpretation, but as we did for <span class="math inline">\(\sigma\)</span> <a href="#hrsd">above</a>, we can
+use <em>simulation</em> to calibrate the prior so that it matches
+plausible judgements.</p>
 <p>This is done with the <code>prior_hr_sd</code> function, which works
-for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>
-in the same way as <code>prior_haz_sd</code> does for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>.
-The new requirement here is that the values of covariates should be
-supplied in <code>newdata</code> and <code>newdata0</code>, and the
-associated regression model formula in <code>formula</code>. The hazard
-ratio between <code>newdata</code> and <code>newdata0</code> will be
-computed.</p>
+for <span class="math inline">\(\tau\)</span> in the same way as
+<code>prior_haz_sd</code> does for <span class="math inline">\(\sigma\)</span>. The new requirement here is that
+the values of covariates should be supplied in <code>newdata</code> and
+<code>newdata0</code>, and the associated regression model formula in
+<code>formula</code>. The hazard ratio between <code>newdata</code> and
+<code>newdata0</code> will be computed.</p>
 <p>All the other priors should be supplied: <code>prior_hscale</code>
-for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>,
-<code>prior_hsd</code> for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>,
-and <code>prior_loghr</code> for the “baseline” hazard ratio to which
-the non-proportionality effects are applied. The function will simulate
-from the joint prior distribution of hazard ratios implied by all these
+for <span class="math inline">\(\eta\)</span>, <code>prior_hsd</code>
+for <span class="math inline">\(\sigma\)</span>, and
+<code>prior_loghr</code> for the “baseline” hazard ratio to which the
+non-proportionality effects are applied. The function will simulate from
+the joint prior distribution of hazard ratios implied by all these
 priors together with the one that we want to calibrate:
-<code>prior_hrsd</code>, the Gamma prior for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>.</p>
+<code>prior_hrsd</code>, the Gamma prior for <span class="math inline">\(\tau\)</span>.</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/prior_haz.html">prior_hr_sd</a></span><span class="op">(</span>mspline<span class="op">=</span><span class="va">sp</span>,                              </span>
 <span>            prior_hsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">5</span><span class="op">)</span>,   </span>
@@ -658,9 +554,8 @@ customised with the <code>hq</code> argument). These quantities both
 have their own implicit prior distributions. Since we supplied
 <code>quantiles=c(0.05,0.95)</code>, then 90% prior credible intervals
 for these two quantities are shown here. These should be checked for
-consistency with beliefs, and the Gamma prior for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>
-(supplied as <code>p_gamma(2,3)</code> revised if necessary.</p>
+consistency with beliefs, and the Gamma prior for <span class="math inline">\(\tau\)</span> (supplied as
+<code>p_gamma(2,3)</code> revised if necessary.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -674,7 +569,7 @@ consistency with beliefs, and the Gamma prior for
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>

@@ -1,5 +1,5 @@
 pandoc: '3.2'
-pkgdown: 2.1.1
+pkgdown: 2.1.2
 pkgdown_sha: ~
 articles:
   cetuximab: cetuximab.html
@@ -7,7 +7,7 @@ articles:
   methods: methods.html
   priors: priors.html
   sbc: sbc.html
-last_built: 2025-02-24T21:13Z
+last_built: 2025-05-02T14:06Z
 urls:
   reference: https://chjackson.github.io/survextrap/reference
   article: https://chjackson.github.io/survextrap/articles
