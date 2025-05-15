@@ -95,7 +95,7 @@ The model in `survextrap` simply assumes that the hazard for $t > t_{n}$ is cons
 
 Therefore, if you want to estimate survival over a period where you think the hazard might not be constant, then you should make sure that the highest spline knot $t_n$ is after the end of this period.
 
-> **Sidenote**. Another way to define the hazard beyond the last knot would be to extrapolate the final basis polynomials.  This is how [splines2](https://cran.r-project.org/web/packages/splines2/index.html) would compute the basis outside the boundary, but this is not implemented in `survextrap`. Although it would lead to a more smoothly extrapolated hazard, it would be driven by data just before the boundary, and would be making opaque assumptions about how the hazard changes after the boundary.  The idea behind the package is to make all assumptions explicit as data or mechanisms.
+> **Sidenote**. Another way to define the hazard beyond the last knot would be to extrapolate the final basis polynomials.  This is how [splines2](https://CRAN.R-project.org/package=splines2) would compute the basis outside the boundary, but this is not implemented in `survextrap`. Although it would lead to a more smoothly extrapolated hazard, it would be driven by data just before the boundary, and would be making opaque assumptions about how the hazard changes after the boundary.  The idea behind the package is to make all assumptions explicit as data or mechanisms.
 
 Examples of doing this with different kinds of data and knowledge are given in `vignette("examples")`.
 
