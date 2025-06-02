@@ -1,6 +1,6 @@
 # survextrap 
 
-`survextrap` is an R package to model survival from a combination of 
+`survextrap` is an R package for parametric survival modelling with either or both of: 
 
 1. A standard individual-level, right-censored survival dataset, e.g.
 
@@ -30,7 +30,7 @@
 
 </table>
 
-2. "External" data sources in the following aggregate "count" form:
+2. (optionally) "External" data sources in the following aggregate "count" form:
 
 <table> 
 <tr>
@@ -125,11 +125,7 @@ The [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetux
 * [Exeter, October 2022](https://chjackson.github.io/survextrap/cjackson_survextrap_exeter.pdf)
 
 
-## Development 
-
-The package is in "beta" status.  All major features are included, and there are no substantial changes expected.
-
-Further testing is planned before it is put on CRAN.  In particular, work is ongoing to determine "default settings" (for things like priors and model flexibility) that work best in a wide range of examples based on simulation.   Though the current defaults are expected to be reasonable for typical use, and there are examples in the vignettes of fine-tuning them for specific cases.
+## Installation
 
 The current version can be installed as:
 
@@ -138,7 +134,9 @@ install.packages("survextrap", repos=c('https://chjackson.r-universe.dev',
                                        'https://cloud.r-project.org'))
 ```
 
-Please give feedback and suggestions if you do.  These can be posted on [github issues](https://github.com/chjackson/survextrap/issues), or [email](mailto:chris.jackson@mrc-bsu.cam.ac.uk).
+and will soon be on CRAN as well. 
+
+Please give feedback and suggestions if you use it.  These can be posted on [github issues](https://github.com/chjackson/survextrap/issues), or [email](mailto:chris.jackson@mrc-bsu.cam.ac.uk).
 
 <!-- badges: start -->
 [![lifecycle](lifecycle-maturing.svg)](https://lifecycle.r-lib.org/articles/stages.html#maturing)
