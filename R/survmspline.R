@@ -52,8 +52,7 @@
 ##'  \code{"time"} should be 0, and the final row specifies the hazard at all
 ##'  times greater than the last element of \code{"time"}.
 ##'
-##' @param disc_rate Discounting rate used to calculate the discounted mean or
-##' restricted mean survival time, using an exponential discounting function.
+##' @inheritParams rmst
 ##'
 ##' @return \code{dsurvmspline} gives the density, \code{psurvmspline} gives the
 ##' distribution function, \code{hsurvmspline} gives the hazard and
@@ -93,7 +92,7 @@
 ##'
 ##' Brilleman, S. L., Elci, E. M., Novik, J. B., & Wolfe, R. (2020). Bayesian survival analysis using the rstanarm R package. arXiv preprint arXiv:2002.09633.
 ##'
-##' Wang, W., Yan, J. (2021). Shape-restricted regression splines with R package splines2. Journal of Data Science_, *19*(3), 498-517.
+##' Wang, W., Yan, J. (2021). Shape-restricted regression splines with R package splines2. Journal of Data Science, *19*(3), 498-517.
 ##'
 ##' @keywords distribution
 ##'
@@ -105,7 +104,9 @@ NULL
 ##' @export
 psurvmspline <- function(q, alpha, coefs, knots, degree=3, lower.tail=TRUE, log.p=FALSE,
                          pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE){
-  if (!is.null(backhaz)) offsetH <- get_cum_backhaz(q, backhaz)
+  if (!is.null(backhaz)){
+    offsetH <- get_cum_backhaz(q, backhaz)
+  }
   if (is.null(pcure)) pcure <- 0
   ind <- att <- NULL
   d <- survmspline_dist_setup(q=q, alpha=alpha, coefs=coefs, knots=knots, pcure=pcure, offsetH=offsetH)
@@ -287,12 +288,15 @@ validate_knots <- function(knots, name="knots"){
 
 ##' @rdname Survmspline
 ##' @export
-rmst_survmspline = function(t, alpha, coefs, knots, degree=3, pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE, disc_rate = 0){
+rmst_survmspline = function(t, alpha, coefs, knots, degree=3, pcure=0, offsetH=0, backhaz=NULL, bsmooth=TRUE, disc_rate = 0,
+                            method="gl", gl_nodes=100){
   if (is.null(pcure)) pcure <- 0
+  if (any(t==Inf)) method <- "adaptive"
   rmst_generic(psurvmspline, t, start=0,
                matargs = c("coefs"),
                unvectorised_args = c("knots","degree","backhaz","bsmooth"),
-               alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth, disc_rate=disc_rate)
+               alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth,
+               disc_rate=disc_rate, method=method, gl_nodes=gl_nodes)
 }
 
 ##' @rdname Survmspline
@@ -302,64 +306,106 @@ mean_survmspline = function(alpha, coefs, knots, degree=3, pcure=0, offsetH=0, b
   rmst_generic(psurvmspline, rep(Inf,nt), start=0,
                matargs = c("coefs"),
                unvectorised_args = c("knots","degree","backhaz","bsmooth"),
-               alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth, disc_rate=disc_rate)
+               alpha=alpha, coefs=coefs, knots=knots, degree=degree, pcure=pcure, offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth,
+               disc_rate=disc_rate, method="adaptive")
 }
 
-#
-# copied from flexsurv
-#
-rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL, disc_rate = 0, ...)
+##' Restricted mean survival time for a generic survival distribution
+##' specified by its CDF `pdist`.
+##' 
+##' Adapted from flexsurv.  Extended to handle Gauss-Legendre
+##' integration, discounting, tidy up code for vectorisation and to
+##' make argument and return formats explicit
+##'
+##' @param t vector of different RMST horizon times
+##'
+##' @param start left-truncation time(s), of same length as t
+##'
+##' @param disc_rate discount rate for continuous-time exponential
+##'   discounting function
+##' 
+##' @param method method of integration.  `adaptive` uses
+##'   `integrate()` in base R.  `gl` uses Gauss-Legendre with
+##'   `gl_nodes` nodes
+##'
+##' @param ... named arguments to supply to `pdist`
+##'
+##' @return vector of RMSTs for each combination of horizon times and
+##' parameter values, converted from n(times) x n(parameters) matrix
+##'
+##' Parameters are determined by replicating the arguments in ... until they
+##' all have the same length, in the usual fashion for vectorised
+##' functions.  See vectorise_args.R for source.
+##'
+##' @noRd
+rmst_generic <- function(pdist, t, start=0, matargs=NULL, unvectorised_args=NULL, disc_rate = 0,
+                         method="gl", gl_nodes=100, ...)
 {
   args <- list(...)
-  args_mat <- args[matargs]
-  args_unvectorised <- args[unvectorised_args]
-  args[c(matargs,unvectorised_args)] <- NULL
-  matlen <- if(is.null(matargs)) NULL else sapply(args_mat, function(x){if(is.matrix(x))nrow(x) else 1})
-  veclen <- if (length(args) == 0) NULL else sapply(args, length)
-  t_len <- length(t)
-  maxlen <- max(c(t_len, veclen, matlen))
-  if(length(start) == 1) start <- rep(start, length.out=maxlen)
-  na_inds <- rep(FALSE, maxlen)
-  for (i in seq(along=args)){
-      args[[i]] <- rep(args[[i]], length.out=maxlen)
-      na_inds <- na_inds | is.na(args[[i]])
-  }
-  # exponential discounting function
+  vv <- vectorise_args(args, matargs, unvectorised_args)
+  args <- vv$vargs; args_mat <- vv$margs;
+  args_unvectorised <- vv$uargs; na_inds <- vv$na_inds
+  maxlen <- length(args[[1]])
+  start <- rep(start, length.out = length(t))
+
   if (!is.numeric(disc_rate)) stop("`disc_rate` must be numeric")
   if (length(disc_rate) > 1) stop(sprintf("`disc_rate` must be a scalar. found `length(disc_rate)=`%s",length(disc_rate)))
   disc_fn <- function(t, disc_rate){ exp(-t*disc_rate) }
 
-  t <- rep(t, length.out=maxlen)
-  for (i in seq(along=args_mat)){
-      if (is.matrix(args_mat[[i]])){
-          args_mat[[i]] <- matrix(
-              apply(args_mat[[i]], 2, function(x)rep(x, length=maxlen)),
-              ncol=ncol(args_mat[[i]]),
-              byrow=F
-          )
+  ret <- matrix(nrow=length(t), ncol=maxlen)
+  ntimes <- if (method=="gl") gl_nodes else length(t)
+  tt <- stretch_dim_to(args, args_mat, ntimes)
+  targs <- tt$vargs; targs_mat <- tt$margs
+  
+  if (method=="gl"){
+
+    for (j in seq_along(t)){ # need a different GL grid for each RMST horizon
+      GL <- gaussLegendre(n = gl_nodes, a=start[j], b=t[j])
+      pdargs <- c(targs, targs_mat, args_unvectorised)
+      if (!is.null(pdargs$backhaz)){
+        offsetH <- get_cum_backhaz(GL$x, pdargs$backhaz) # recalculate for each time grid, but not for each parameter
+        pdargs$offsetH <- matrix(offsetH, nrow=gl_nodes, ncol=maxlen)
+        pdargs$backhaz <- args$backhaz <- NULL
       }
-      else args_mat[[i]] <- matrix(args_mat[[i]], nrow=maxlen, ncol=length(args_mat[[i]]), byrow=TRUE)
-      na_inds <- na_inds | apply(args_mat[[i]], 1, function(x)any(is.na(x)))
-  }
-  ret <- numeric(maxlen)
-  ret[na_inds] <- NA
-  for (i in seq_len(maxlen)[!na_inds]){
-      fargs_vec <- lapply(args, function(x)x[i])
-      fargs_mat <- lapply(args_mat, function(x)x[i,,drop=FALSE])
-      pdargs <- c(list(start[i]), fargs_vec, fargs_mat, args_unvectorised)
-      start_p <- 1 - do.call(pdist, pdargs)
+      pdargs$q <- matrix(rep(GL$x, maxlen), nrow=gl_nodes)
+
+      pd <- do.call(pdist, pdargs)  # CDF at gl_nodes time points  x  maxlen parameter values
+
+      sargs <- c(list(q=start[j]), args, args_mat, args_unvectorised) # handle left-truncation. 
+      start_p <- 1 - do.call(pdist, sargs)
+      start_p <- matrix(rep(start_p, each=gl_nodes), nrow=gl_nodes)
+
+      integrand <- (1 - pd)*disc_fn(pdargs$q, disc_rate = disc_rate) / start_p
+      integral <- colSums(diag(GL$w) %*% integrand)
+      ret[j,] <- integral
+    }
+
+  } else if (method=="adaptive") {
+
+    ret <- matrix(nrow=length(t), ncol=maxlen)
+    ret[,na_inds] <- NA
+
+    for (i in seq_len(maxlen)[!na_inds]){ # multiple parameters 
+      pdargs_vec <- lapply(args, function(x)x[i])
+      pdargs_mat <- lapply(args_mat, function(x)x[i,,drop=FALSE])
       fn <- function(end){
-        pdargs <- c(list(end), fargs_vec, fargs_mat, args_unvectorised)
+        pdargs <- c(list(end), pdargs_vec, pdargs_mat, args_unvectorised)
         pd <- do.call(pdist, pdargs)
         (1 - pd)*disc_fn(end, disc_rate = disc_rate) / start_p
       }
-      res <- try(integrate(fn, start[i], t[i]))
-      if (!inherits(res, "try-error"))
-          ret[i] <- res$value
-  }
+      for (j in seq_along(t)){  # integrate for multiple time horizons
+        pdargs <- c(list(start[j]), pdargs_vec, pdargs_mat, args_unvectorised)
+        start_p <- 1 - do.call(pdist, pdargs)
+        res <- try(integrate(fn, start[j], t[j]))
+        if (!inherits(res, "try-error"))
+          ret[j,i] <- res$value
+      }
+    }
+  } else stop(sprintf("unknown integration `method`: %s", method))
+
   ret[t<start] <- 0
   if (any(is.nan(ret))) warning("NaNs produced")
-  ret
+  as.numeric(ret)
 }
 
 ## @param basis Matrix giving spline basis
