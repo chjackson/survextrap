@@ -20,7 +20,7 @@ survextrap(
   backhaz_strata = NULL,
   mspline = NULL,
   add_knots = NULL,
-  smooth_model = "exchangeable",
+  smooth_model = "random_walk",
   hsd = "bayes",
   coefs_mean = NULL,
   fit_method = "mcmc",
@@ -236,15 +236,17 @@ specifications are set to their defaults, as described in
 \code{mspline}.  For example, \code{add_knots = 10} is a shorthand
 for \code{mspline = list(add_knots = 10)}.}
 
-\item{smooth_model}{The default \code{"exchangeable"} uses
-independent logistic priors on the multinomial-logit spline
-coefficients, conditionally on a common smoothing variance
-parameter.
-
-The alternative, \code{"random_walk"}, specifies a random walk
+\item{smooth_model}{The default \code{"random_walk"}, specifies a random walk
 prior for the multinomial-logit spline coefficients, based on
 logistic distributions.  See the \href{https://chjackson.github.io/survextrap/articles/methods.html}{methods vignette}
 for full details.
+
+The alternative \code{"exchangeable"} uses
+independent logistic priors on the multinomial-logit spline
+coefficients, conditionally on a common smoothing variance
+parameter.  Note this is the method explained in the original
+survextrap paper (Jackson, BMC Med Res 2023).  The random
+walk model is shown to perform better in Timmins et al (2025).
 
 In non-proportional hazards models, setting \code{smooth_model} also
 determines whether an exchangeable or random walk model is used for the
@@ -278,7 +280,8 @@ calculated using optimisation, via \pkg{rstan}'s
 \code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}}
 function.  A sample from a normal approximation to the
 (real-line-transformed) posterior distribution is drawn in order
-to obtain credible intervals.
+to obtain credible intervals.  This is useful for model development,
+while using MCMC for the "final answer".
 
 If \code{fit_method="vb"}, then variational Bayes methods are
 used, via \pkg{rstan}'s
@@ -331,4 +334,8 @@ versions of these models can also be used.
 Jackson, C. (2023) \code{survextrap}: a package for flexible and transparent
 survival extrapolation. BMC Medical Research Methodology 23:282.
 \doi{10.1186/s12874-023-02094-1}
+
+Timmins I, Torabi F, Jackson C, Lambert P, Sweeting M J. (2025)
+Simulation-based assessment of a Bayesian survival model with flexible baseline hazard and time-dependent effects.
+\doi{10.48550/arXiv.2503.21388}.
 }

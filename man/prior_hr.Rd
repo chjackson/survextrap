@@ -19,6 +19,9 @@ The default is \code{p_normal(0,2.5)} for all coefficients.}
 \item{quantiles}{Quantiles used to summarise the implied prior distributions
 of the simulated quantities.}
 }
+\value{
+A vector of quantiles.
+}
 \description{
 Summarises the prior for the hazard ratio implied by a particular
 prior on the log hazard ratio.   Simply applies an exponential

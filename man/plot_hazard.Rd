@@ -35,10 +35,10 @@ for each level of this factor.
 is computed at the mean of each numeric covariate in the original data, and at the
 baseline level of each factor covariate.
 
-Note caution is required about how treatment groups (for example)
+Note: caution is required about how treatment groups (for example)
 are stored in your data.  If these are coded as numeric (0/1),
-then if \code{newdata} is not specified only one output will be shown,
-which relates to the average value of this numeric variable over
+then if \code{newdata} is not specified, only one output will be shown.
+This relates to the average value of this numeric variable over
 the data, which doesn't correspond to either of the treatment
 groups.  To avoid this, a treatment group should be stored as a
 factor.}
@@ -75,11 +75,14 @@ drawing the intervals if the plot shows the curve for only one covariate value.}
 
 \item{ylab}{Y-axis label}
 
-\item{line_size}{Passed to \code{\link{geom_line}}}
+\item{line_size}{Passed to \code{\link[ggplot2]{geom_line}}}
 
 \item{ci_alpha}{Transparency for the credible interval ribbons}
 
 \item{show_knots}{Show the locations of the spline knots as vertical lines}
+}
+\value{
+A \code{ggplot2} plot object.
 }
 \description{
 Plot hazard curves from a \code{\link{survextrap}} model.  This
