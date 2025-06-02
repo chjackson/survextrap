@@ -1,3 +1,13 @@
+# Version 0.9 (2025/05/02)
+
+* `smooth_model = "random_walk"` made the default in `survextrap()`, following [Timmins et al.](https://doi.org/10.48550/arXiv.2503.21388).
+
+
+# Version 0.8.16 (2025/02/26)
+
+* `rmst()` and related functions are now faster, with the new Gauss-Legendre integration method.  Thanks to Iain Timmins.
+
+
 # Version 0.8.15 (2024/07/01)
 
 * Random walk prior for the coefficients changed to a first-order weighted model, following [Phillippo et al.](https://arxiv.org/abs/2401.12640), so that the expected smoothness accounts for the knot spacing.

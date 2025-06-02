@@ -1,13 +1,15 @@
 Package: survextrap
-Title: Survival Extrapolation with a Flexible Parametric Model and External Data
-Version: 0.8.15
-Date: 2024-06-29
+Title: Survival Extrapolation with a Flexible Bayesian Parametric Model and External Data
+Version: 0.9
+Date: 2025-05-02
 Authors@R: 
     c(person("Christopher", "Jackson", , "chris.jackson@mrc-bsu.cam.ac.uk", role = c("aut", "cre", "cph"),
              comment = c(ORCID = "0000-0002-6656-8913")),
       person("Iain", "Timmins", , "", role = c("ctb"),
-             comment = c(ORCID = "0000-0002-8761-582X")))
-Description: Survival analysis using a flexible Bayesian model for individual-level right-censored data, optionally combined with aggregate data on counts of survivors in different periods of time.   An M-spline is used to describe the hazard function, with a hierarchical prior on the coefficients to control overfitting.  Proportional hazards or flexible non-proportional hazards models can be used to relate survival to predictors.  Mixture cure models, additive hazards (relative survival) models and waning treatment effects models are also supported.  Priors can be customised and calibrated to substantive beliefs.  Posterior distributions are estimated using Stan, and outputs are arranged in a tidy format. See See Jackson (2023) <doi:10.48550/arXiv.2306.03957>.
+             comment = c(ORCID = "0000-0002-8761-582X")),
+      person("Michael", "Sweeting", , "", role = c("ctb"),
+             comment = c(ORCID = "0000-0003-0980-8965")))
+Description: Survival analysis using a flexible Bayesian model for individual-level right-censored data, optionally combined with aggregate data on counts of survivors in different periods of time.   An M-spline is used to describe the hazard function, with a prior on the coefficients that controls over-fitting.  Proportional hazards or flexible non-proportional hazards models can be used to relate survival to predictors.  Additive hazards (relative survival) models, waning treatment effects, and mixture cure models are also supported.  Priors can be customised and calibrated to substantive beliefs.  Posterior distributions are estimated using Stan, and outputs are arranged in a tidy format. See Jackson (2023) <doi:10.1186/s12874-023-02094-1>.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -24,7 +26,6 @@ Imports:
     posterior,
     Rcpp (>= 0.12.0),
     rstan (>= 2.26.0),
-    rstpm2,
     splines2,
     tibble
 LinkingTo: 
@@ -41,6 +42,7 @@ Suggests:
     rmarkdown,
     testthat,
     SHELF,
+    flexsurv,
     flexsurvcure,
     splines,
     dplyr,
@@ -53,6 +55,6 @@ Suggests:
     survminer
 VignetteBuilder: knitr
 URL: https://github.com/chjackson/survextrap,
-    https://chjackson.github.io/survextrap/
+     https://chjackson.github.io/survextrap/
 BugReports: https://github.com/chjackson/survextrap/issues
 LazyData: true

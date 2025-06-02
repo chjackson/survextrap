@@ -1,7 +1,7 @@
 ---
 title: "Case study of using survextrap: cetuximab for head and neck cancer"
 author: "Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>"
-date: "2024-06-29"
+date: "2025-05-02"
 output: 
   rmarkdown::html_document:
     toc: true
@@ -45,7 +45,7 @@ library(viridis) # for colour palettes
 survminer::ggsurvplot(survfit(Surv(years, d) ~ treat, data=cetux)) + xlab("Years")
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/packages_data.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/packages_data.png" style="display: block; margin: auto;" />
 
 ``` r
 control <- cetux[cetux$treat=="Control",]
@@ -169,7 +169,7 @@ chains <- 4; iter <- 2000
 
 The `rhat` convergence diagnostic shown when printing the results of a `survextrap` fit should be checked - this should be close to 1 if the MCMC fit has converged. 
 
-Occasionally the fitting may report "divergent transitions".  This is a limitation of the sampling algorithm, and can happen when the posterior distribution is awkward to sample from.  See the [Stan documentation](https://mc-stan.org/misc/warnings.html) for technical details.  If there are only one or two divergent transitions, the message is probably safe to ignore, but in any case the results should be examined to ensure that they make sense.  With lots of divergent transitions, it is safer to simplify the model, e.g. by using stronger priors or fewer spline knots.
+Occasionally the fitting may report "divergent transitions".  This is a limitation of the sampling algorithm, and can happen when the posterior distribution is awkward to sample from.  See the [Stan documentation](https://mc-stan.org/learn-stan/diagnostics-warnings.html) for technical details.  If there are only one or two divergent transitions, the message is probably safe to ignore, but in any case the results should be examined to ensure that they make sense.  With lots of divergent transitions, it is safer to simplify the model, e.g. by using stronger priors or fewer spline knots.
 
 
 # Models for the trial data alone
@@ -244,7 +244,7 @@ grid::grid.draw(cbind(ggplotGrob(ps),
                       ggplotGrob(ph)))
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_control.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_control.png" style="display: block; margin: auto;" />
 
 The plots show the posterior median and 95\% credible intervals. There are no data between 5 and 20 years, so the extrapolation of the trial data over this period depends on the model assumption - either that the hazard is constant, or that the hazard will change smoothly, but with an unknown direction and extent of change.   If we allow it to change, the uncertainty is appropriately greater. 
 
@@ -281,14 +281,14 @@ rescomp %>%
 
 | df| LOOIC|Restricted mean survival (5 years) |
 |--:|-----:|:----------------------------------|
-|  5| 596.5|2.88 (2.62, 3.13)                  |
-|  6| 597.4|2.88 (2.62, 3.14)                  |
-|  7| 590.8|2.87 (2.6, 3.14)                   |
-|  8| 591.7|2.88 (2.62, 3.13)                  |
-|  9| 593.8|2.88 (2.62, 3.13)                  |
-| 10| 594.1|2.88 (2.62, 3.13)                  |
-| 11| 592.6|2.89 (2.62, 3.15)                  |
-| 12| 592.6|2.89 (2.61, 3.15)                  |
+|  5| 596.6|2.88 (2.62, 3.15)                  |
+|  6| 596.9|2.88 (2.63, 3.13)                  |
+|  7| 595.8|2.88 (2.63, 3.14)                  |
+|  8| 595.8|2.88 (2.62, 3.15)                  |
+|  9| 596.3|2.88 (2.62, 3.14)                  |
+| 10| 596.0|2.88 (2.62, 3.14)                  |
+| 11| 595.6|2.88 (2.61, 3.15)                  |
+| 12| 595.8|2.88 (2.63, 3.14)                  |
 </details>
 The estimates of RMST within 5 years do not change within 0.1.   Note this is only one of many ad-hoc checks we could do - note we did not change the prior for the smoothness `prior_hsd`, which also governs the amount of smoothness of the hazard function.  LOOCV is also lower for `df=7`.  In practice we might want to switch the `df` according to what data are included, but for simplicity of illustration in this article, we stick with `df=6` for all models, which in general gives slightly stabler computation without affecting the results.
 
@@ -333,16 +333,6 @@ mod_cet <- survextrap(Surv(years, d) ~ 1, data=cetuximab, mspline=mspline,
                       prior_hscale=prior_hscale, prior_hsd = prior_hsd)
 ```
 
-```
-## Warning: There were 1 divergent transitions after warmup. See
-## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
-## to find out why this is a problem and how to eliminate them.
-```
-
-```
-## Warning: Examine the pairs() plot to diagnose sampling problems
-```
-
 The survival curves for these three models are now compared.
 
 <details>
@@ -371,7 +361,7 @@ ggplot(surv_trt, aes(x=t, y=median, col=Model, lty=treat)) +
     geom_vline(xintercept = mod_con5$mspline$iknots, col="gray80", lty=2)
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_trt.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_trt.png" style="display: block; margin: auto;" />
 </details>
 
 
@@ -436,10 +426,10 @@ knitr::kable(trtcompf, col.names=c("Model","Time horizon",
 |:-----------------------------|------------:|:------------------------|:------------------------------------|-----:|
 |(2a) Proportional hazards     |            5|2.89 (2.64,3.12)         |0.31 (-0.03,0.62)                    |  1156|
 |(2b) Non-proportional hazards |            5|2.88 (2.62,3.15)         |0.31 (-0.05,0.67)                    |  1158|
-|(2c) Separate arms            |            5|2.88 (2.63,3.14)         |0.49 (-0.84,3.64)                    |  1161|
+|(2c) Separate arms            |            5|2.88 (2.63,3.14)         |0.53 (-0.66,4.33)                    |  1163|
 |(2a) Proportional hazards     |           20|4.89 (3.79,6.79)         |1.1 (-0.13,2.47)                     |  1156|
 |(2b) Non-proportional hazards |           20|4.97 (3.8,7.03)          |1.13 (-0.47,3.04)                    |  1158|
-|(2c) Separate arms            |           20|5.11 (3.83,7.28)         |0.49 (-0.84,3.64)                    |  1161|
+|(2c) Separate arms            |           20|5.11 (3.83,7.28)         |0.53 (-0.66,4.33)                    |  1163|
 </details>
 
 There is very little difference between the fit of the three models. 
@@ -454,10 +444,10 @@ write.table(trtcompf, sep="  &  ", eol="\\\\\n", quote=FALSE, row.names = FALSE)
 ## model  &  t  &  rm  &  ir  &  looic\\
 ## (2a) Proportional hazards  &  5  &  2.89 (2.64,3.12)  &  0.31 (-0.03,0.62)  &  1156\\
 ## (2b) Non-proportional hazards  &  5  &  2.88 (2.62,3.15)  &  0.31 (-0.05,0.67)  &  1158\\
-## (2c) Separate arms  &  5  &  2.88 (2.63,3.14)  &  0.49 (-0.84,3.64)  &  1161\\
+## (2c) Separate arms  &  5  &  2.88 (2.63,3.14)  &  0.53 (-0.66,4.33)  &  1163\\
 ## (2a) Proportional hazards  &  20  &  4.89 (3.79,6.79)  &  1.1 (-0.13,2.47)  &  1156\\
 ## (2b) Non-proportional hazards  &  20  &  4.97 (3.8,7.03)  &  1.13 (-0.47,3.04)  &  1158\\
-## (2c) Separate arms  &  20  &  5.11 (3.83,7.28)  &  0.49 (-0.84,3.64)  &  1161\\
+## (2c) Separate arms  &  20  &  5.11 (3.83,7.28)  &  0.53 (-0.66,4.33)  &  1163\\
 ```
 
 
@@ -533,7 +523,7 @@ ggplot(haz_plot_reg, aes(x=t, y=median, col=Model, fill=Model)) +
     labs(col=NULL, fill=NULL)
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_registry.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_registry.png" style="display: block; margin: auto;" />
 </details>
 
 
@@ -661,7 +651,7 @@ ggplot(haz_plot_reg_pop20, aes(x=t, y=median, col=Model, fill=Model)) +
     labs(col=NULL, fill=NULL)
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_registry_pop20.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_registry_pop20.png" style="display: block; margin: auto;" />
 </details>
 
 Including the population data does not make much difference to the estimated hazards over 20 years after diagnosis. 
@@ -722,7 +712,7 @@ ggplot(haz_plot_reg_pop, aes(x=t, y=median, col=Model, fill=Model)) +
     geom_vline(xintercept = max(control$years)) 
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_registry_pop40.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_registry_pop40.png" style="display: block; margin: auto;" />
 </details>
 
 
@@ -741,6 +731,16 @@ mod_cure <- survextrap(Surv(years, d) ~ 1, data=control, mspline = mspline40,
                        cure=TRUE, 
                        chains=chains, iter=iter,
                        prior_hscale=prior_hscale, prior_hsd = prior_hsd)
+```
+
+```
+## Warning: There were 3 divergent transitions after warmup. See
+## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+## to find out why this is a problem and how to eliminate them.
+```
+
+```
+## Warning: Examine the pairs() plot to diagnose sampling problems
 ```
 
 Optionally, a Beta prior could also be specified for the "cure fraction" through e.g. `survextrap(..., prior cure = p_beta(1,10))`, though the default uniform prior is used here.  The cure fraction is the proportion of people who will never experience the event of interest.  The survival curve decreases to an asymptote at the cure fraction, hence (informally) the cure fraction can sometimes be inferred from data by examining the survival curve.  Often however it is weakly informed by data.
@@ -827,7 +827,7 @@ ggplot(haz_plot_cure, aes(x=t, y=median, col=Model, fill=Model)) +
     labs(col=NULL, fill=NULL) 
 ```
 
-<img src="C:\Users\Chris\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_cure.png" style="display: block; margin: auto;" />
+<img src="C:\Users\CHRISJ~1\ONEDRI~1\work\SURVEX~1\SURVEX~1\docs\articles\CETUXI~1/figure-html/fig_cure.png" style="display: block; margin: auto;" />
 </details>
 
 # Table of mean survival times

@@ -26,7 +26,12 @@ If the only covariate in the model is a factor with two levels,
 then \code{newdata} defaults to a data frame containing the
 levels of this factor, so that the hazard ratio for the second
 level versus the first level is computed.  For any other models,
-\code{newdata} must be supplied explicitly.}
+\code{newdata} must be supplied explicitly.
+
+Standardisation (with \code{\link{standardise_to}}) is not supported.
+This might be done by hand by using \code{hazard(...,sample=TRUE)}
+to obtain posterior samples for the two standardised hazards separately,
+then summarising by hand.}
 
 \item{t}{Vector of times at which to compute the estimates.}
 
@@ -49,9 +54,12 @@ drawing the intervals if the plot shows the curve for only one covariate value.}
 
 \item{ylab}{Y-axis label}
 
-\item{line_size}{Passed to \code{\link{geom_line}}}
+\item{line_size}{Passed to \code{\link[ggplot2]{geom_line}}}
 
 \item{ci_alpha}{Transparency for the credible interval ribbons}
+}
+\value{
+A \code{ggplot2} plot object.
 }
 \description{
 For use with non-proportional hazards models (\code{survextrap(...,nonprop=TRUE)}).   Intended as a quick check of a model fit, so there are

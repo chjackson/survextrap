@@ -15,6 +15,9 @@ constraint at boundary), defining an M-spline configuration.}
 is returned.  This is a vector of length one less than the number of coefficients,
 with the rth element defined by \eqn{log(coefs[r+1] / coefs[1])}.}
 }
+\value{
+A numeric vector of the coefficients.
+}
 \description{
 This works by obtaining the coefficients of the corresponding
 B-spline basis, which are equal if the B-spline is a constant

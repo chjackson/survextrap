@@ -247,6 +247,8 @@ msplinemodel_init <- function(df = 10,
 ##'
 ##' @references Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science, 3(4): 425-441.
 ##'
+##' @return A numeric vector of the coefficients.
+##'
 ##' @export
 mspline_constant_coefs <- function(mspline, logit=FALSE){
   mspline <- mspline_list_init(mspline)

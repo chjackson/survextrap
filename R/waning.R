@@ -262,14 +262,17 @@ rsurvmspline_wane <- function(n, alpha1, alpha0, coefs1, coefs0, knots, degree=3
 rmst_survmspline_wane = function(t, alpha1, alpha0, coefs1, coefs0,
                                  knots, degree=3, pcure1=0, pcure0=0,
                                  offsetH = 0, backhaz=NULL, bsmooth=TRUE,
-                                 wane_period, wane_nt=10, disc_rate=0){
+                                 wane_period, wane_nt=10, disc_rate=0,
+                                 method="gl", gl_nodes=100){
   if (is.null(pcure1)) pcure1 <- 0
   if (is.null(pcure0)) pcure0 <- 0
+  if (any(t==Inf)) method <- "adaptive"
   rmst_generic(psurvmspline_wane, t, start=0,
                matargs = c("coefs1","coefs0"),
                unvectorised_args = c("knots","degree","backhaz","bsmooth","wane_period","wane_nt"),
                alpha1=alpha1, alpha0=alpha0, coefs1=coefs1, coefs0=coefs0, knots=knots, degree=degree,
                wane_period=wane_period, wane_nt=wane_nt, disc_rate=disc_rate,
+               method=method, gl_nodes=gl_nodes,
                pcure1=pcure1, pcure0=pcure0,
                offsetH=offsetH, backhaz=backhaz, bsmooth=bsmooth)
 }
@@ -286,6 +289,6 @@ mean_survmspline_wane = function(alpha1, alpha0, coefs1, coefs0, knots, degree=3
                matargs = c("coefs1","coefs0"),
                unvectorised_args = c("knots","degree","backhaz","bsmooth","wane_period","wane_nt"),
                alpha1=alpha1, alpha0=alpha0, coefs1=coefs1, coefs0=coefs0, knots=knots, degree=degree,
-               wane_period=wane_period, wane_nt=wane_nt, disc_rate=disc_rate,
+               wane_period=wane_period, wane_nt=wane_nt, disc_rate=disc_rate, method="adaptive",
                pcure1=pcure1, pcure0=pcure0, backhaz=backhaz, bsmooth=bsmooth)
 }

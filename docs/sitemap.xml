@@ -1,177 +1,67 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://chjackson.github.io/survextrap/404.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/articles/cetuximab.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/articles/cetuximab_files/jqueryui-1.11.4/index.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/articles/examples.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/articles/methods.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/articles/priors.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/articles/waning.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/index.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/news/news-0.1.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/news/news-0.8.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/cetux.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/colons.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/cumhaz.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/curedata.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/get_cum_backhaz.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/get_draws.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/hazard.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/hazard_ratio.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/hrtime.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/irmst.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/mean.survextrap.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/mspline_args.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/mspline_basis.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/mspline_constant_coefs.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/mspline_constant_weights.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/mspline_plotdata.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/mspline_plotsetup.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/mspline_priorpred.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/mspline_spec.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/mspline_uniform_weights.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/plot.survextrap.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/plot_hazard.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/plot_hazard_ratio.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/plot_mspline.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/plot_mspline_priorpred.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/plot_survival.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/print.survextrap.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/print_priors.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/priors.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/prior_haz.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/prior_haz_const.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/prior_hr.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/prior_pred.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/prior_sample.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/p_hr.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/p_meansurv.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/rmst.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/summary.survextrap.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/survextrap-package.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/survextrap.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/survival.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/Survmspline.html</loc>
-  </url>
-  <url>
-    <loc>https://chjackson.github.io/survextrap/reference/Survmspline_wane.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://chjackson.github.io/survextrap/404.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/articles/cetuximab.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/articles/cetuximab_files/jqueryui-1.11.4/index.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/articles/cetuximab_files/jqueryui-1.13.2/index.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/articles/examples.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/articles/index.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/articles/methods.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/articles/priors.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/articles/sbc.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/authors.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/index.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/LICENSE.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/news/index.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/news/news-0.1.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/news/news-0.8.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/cetux.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/colons.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/cumhaz.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/curedata.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/get_cum_backhaz.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/get_draws.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/hazard.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/hazard_ratio.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/hrtime.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/index.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/irmst.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/mean.survextrap.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/msplinemodel_init.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/mspline_args.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/mspline_basis.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/mspline_constant_coefs.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/mspline_constant_weights.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/mspline_init.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/mspline_list_init.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/mspline_plotdata.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/mspline_plotsetup.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/mspline_priorpred.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/mspline_spec.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/mspline_uniform_weights.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/plot.survextrap.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/plot_hazard.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/plot_hazard_ratio.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/plot_mspline.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/plot_mspline_priorpred.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/plot_survival.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/print.survextrap.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/print_priors.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/priors.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/prior_haz.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/prior_haz_const.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/prior_hr.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/prior_pred.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/prior_sample.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/prior_sample_hazard.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/p_hr.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/p_meansurv.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/rmst.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/standardise_to.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/summary.survextrap.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/survextrap-package.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/survextrap.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/survival.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/Survmspline.html</loc></url>
+<url><loc>https://chjackson.github.io/survextrap/reference/Survmspline_wane.html</loc></url>
 </urlset>
+

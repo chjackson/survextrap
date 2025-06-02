@@ -12,6 +12,8 @@ rmst(
   wane_period = NULL,
   wane_nt = 10,
   disc_rate = 0,
+  method = "gl",
+  gl_nodes = 100,
   niter = NULL,
   summ_fns = NULL,
   sample = FALSE
@@ -34,10 +36,10 @@ for each level of this factor.
 is computed at the mean of each numeric covariate in the original data, and at the
 baseline level of each factor covariate.
 
-Note caution is required about how treatment groups (for example)
+Note: caution is required about how treatment groups (for example)
 are stored in your data.  If these are coded as numeric (0/1),
-then if \code{newdata} is not specified only one output will be shown,
-which relates to the average value of this numeric variable over
+then if \code{newdata} is not specified, only one output will be shown.
+This relates to the average value of this numeric variable over
 the data, which doesn't correspond to either of the treatment
 groups.  To avoid this, a treatment group should be stored as a
 factor.}
@@ -55,6 +57,18 @@ to the hazard during the waning period.}
 
 \item{disc_rate}{Discounting rate used to calculate the discounted mean
 or restricted mean survival time, using an exponential discounting function.}
+
+\item{method}{Method of numerical integration to obtain the
+restricted mean survival time from the survival function.
+
+The default is \code{method="gl"}, a Gauss-Legendre method with 100
+nodes between zero and the maximum of \code{t}.
+
+\code{method="adaptive"} uses the base R \code{integrate} function, which is
+much slower, but potentially more robust for badly-behaved
+survival functions.}
+
+\item{gl_nodes}{Number of nodes for the Gauss-Legendre method.}
 
 \item{niter}{Number of MCMC iterations to use to compute credible
 intervals.  Set to a low value to make this function quicker, at the cost of
@@ -82,9 +96,7 @@ values respectively.
 \description{
 Compute the restricted mean survival time from a model fitted with
 \code{\link{survextrap}}.  Defined as the integral of the fitted
-survival curve up to a specified time.  This relies on numerical
-integration, which is done for every parameter in the MCMC sample,
-so it may be slow.
+survival curve up to a specified time.
 }
 \examples{
 mod <- survextrap(Surv(years, status) ~ rx, data=colons, fit_method="opt")

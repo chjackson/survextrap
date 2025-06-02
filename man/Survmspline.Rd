@@ -102,7 +102,9 @@ rmst_survmspline(
   offsetH = 0,
   backhaz = NULL,
   bsmooth = TRUE,
-  disc_rate = 0
+  disc_rate = 0,
+  method = "gl",
+  gl_nodes = 100
 )
 
 mean_survmspline(
@@ -164,8 +166,20 @@ also have zero derivative and second derivative at the boundary.}
 
 \item{n}{Number of random numbers to simulate.}
 
-\item{disc_rate}{Discounting rate used to calculate the discounted mean or
-restricted mean survival time, using an exponential discounting function.}
+\item{disc_rate}{Discounting rate used to calculate the discounted mean
+or restricted mean survival time, using an exponential discounting function.}
+
+\item{method}{Method of numerical integration to obtain the
+restricted mean survival time from the survival function.
+
+The default is \code{method="gl"}, a Gauss-Legendre method with 100
+nodes between zero and the maximum of \code{t}.
+
+\code{method="adaptive"} uses the base R \code{integrate} function, which is
+much slower, but potentially more robust for badly-behaved
+survival functions.}
+
+\item{gl_nodes}{Number of nodes for the Gauss-Legendre method.}
 }
 \value{
 \code{dsurvmspline} gives the density, \code{psurvmspline} gives the
@@ -211,7 +225,7 @@ Ramsay, J. O. (1988). Monotone regression splines in action. Statistical Science
 
 Brilleman, S. L., Elci, E. M., Novik, J. B., & Wolfe, R. (2020). Bayesian survival analysis using the rstanarm R package. arXiv preprint arXiv:2002.09633.
 
-Wang, W., Yan, J. (2021). Shape-restricted regression splines with R package splines2. Journal of Data Science_, \emph{19}(3), 498-517.
+Wang, W., Yan, J. (2021). Shape-restricted regression splines with R package splines2. Journal of Data Science, \emph{19}(3), 498-517.
 }
 \author{
 Christopher Jackson \href{mailto:chris.jackson@mrc-bsu.cam.ac.uk}{chris.jackson@mrc-bsu.cam.ac.uk}

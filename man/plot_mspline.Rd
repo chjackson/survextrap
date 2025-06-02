@@ -59,6 +59,9 @@ terms, the function is multiplied by \code{scale}.   The log of the scale is the
 centred (defined as the mean of a random variable whose PDF is
 defined by the basis term).}
 }
+\value{
+A \code{ggplot2} plot object.
+}
 \description{
 See \code{\link{mspline_plotdata}} for the data behind the plot
 }

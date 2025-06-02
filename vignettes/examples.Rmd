@@ -117,7 +117,7 @@ head(summary(nd_mod))
 ```
 
 #### Divergent transitions {#divergences}
-* If using MCMC, there may be a warning produced by Stan about `divergent transitions after warmup`.  This is a limitation of the sampling algorithm, and can happen when the posterior distribution is awkward to sample from.  See the [Stan documentation](https://mc-stan.org/misc/warnings.html) for technical details.  If there are only one or two divergent transitions, the message is probably safe to ignore, but in any case the results should be examined to ensure they make sense.  With lots of divergent transitions, it is safer to simplify the model, e.g. by using stronger priors or fewer spline knots.
+* If using MCMC, there may be a warning produced by Stan about `divergent transitions after warmup`.  This is a limitation of the sampling algorithm, and can happen when the posterior distribution is awkward to sample from.  See the [Stan documentation](https://mc-stan.org/learn-stan/diagnostics-warnings.html) for technical details.  If there are only one or two divergent transitions, the message is probably safe to ignore, but in any case the results should be examined to ensure they make sense.  With lots of divergent transitions, it is safer to simplify the model, e.g. by using stronger priors or fewer spline knots.
 
 
 ## Restricted mean survival 
@@ -229,7 +229,7 @@ Information about long term survival could be elicited from experts.  To use thi
 
 For example, we ask the expert to consider a set of people who have survived for 10 years.  How many of them would they expect to survive a further 5 years?  Through some kind of formal elicitation process, they supply a best guess (median) of 30%, and a 95\% credible interval of 10\% to 50\%.  
 
-Using standard techniques from elicitation ([SHELF](https://shelf.sites.sheffield.ac.uk/)) we can interpret that as a $Beta(6.6, 15.0)$ prior distribution for the survival probability.  
+Using standard techniques from elicitation ([SHELF](https://shelf.sites.sheffield.ac.uk)) we can interpret that as a $Beta(6.6, 15.0)$ prior distribution for the survival probability.  
 
 ```{r}
 SHELF::fitdist(vals=c(0.1, 0.3, 0.5), probs=c(0.025, 0.5, 0.975),
@@ -378,7 +378,7 @@ The non-proportional hazards model is experimental. In theory, it can be "tuned"
 
 If a plot of the posterior hazard ratio against time is desired, this might be constructed by extracting samples from the posterior of the hazard for different covariate values by using `hazard(..., sample=TRUE)`, converting to samples from the hazard ratio, and then summarising and plotting.
 
-The functions `hazard_ratio()` and `plot_hazard_ratio()` can be used to calculate or plot the ratio of hazards between two covariate values, as a function of time.  The covariate values are supplied in a data frame with two rows - all covariates in the model should be included here (there is currently no facility for standardised effect estimation).
+The functions `hazard_ratio()` and `plot_hazard_ratio()` can be used to calculate or plot the ratio of hazards between two covariate values, as a function of time.  The covariate values are supplied in a data frame with two rows - all covariates in the model should be included here (there is currently no facility for standardised effect estimation in these functions).
 
 ```{r}
 nd <- data.frame(rx = c("Lev+5FU","Lev"))
@@ -390,13 +390,13 @@ In this example, the credible interval for the Lev+5FU / Lev hazard ratio is wid
 
 ### Treatment effect waning models 
 
-These are described in [their own vignette](waning.html).
+These are described in [the methods vignette](https://chjackson.github.io/survextrap/articles/methods.html#waning).
 
 
 
 ## Model comparison {#loocv}
 
-The leave-one-out cross-validation method of the [`loo`](http://mc-stan.org/loo/) package is automatically implemented for every model fitted with `survextrap`, unless `survextrap(..., loo=FALSE)` is used.
+The leave-one-out cross-validation method of the [`loo`](https://mc-stan.org/loo/) package is automatically implemented for every model fitted with `survextrap`, unless `survextrap(..., loo=FALSE)` is used.
 
 The cross-validation results are returned in the `loo` and `loo_external` component of the fitted model object, describing the fit of the model to the individual and external data respectively.  For the external data, "leave one out" refers to leaving out a single individual's outcome from the aggregate totals.
 
