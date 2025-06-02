@@ -150,6 +150,9 @@ make_backhaz <- function(backhaz, data, external, td, backhaz_strata){
     bh <- data[[backhaz]]
     backhaz_event <- bh[td$ind_event]
     backhaz_df <- NULL
+    message("Note: background hazard is being specified via a variable in the data.\n",
+            "The outputs will then describe the excess hazard, not the overall hazard.\n",
+            "To model the overall hazard, background hazard should be specified with a full data frame")
   } else backhaz_event <- backhaz_df <- NULL
   relative <- !is.null(backhaz)
   backhaz_event <- if (relative) aa(backhaz_event) else aa(numeric(td$nevent))
