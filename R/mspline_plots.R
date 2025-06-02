@@ -34,7 +34,9 @@ mspline_plotsetup <- function(knots, bknot=10,
 #'
 #' @param show_means Show the "mean" around which each basis term is
 #'   centred (defined as the mean of a random variable whose PDF is
-#'   defined by the basis term).    
+#'   defined by the basis term).
+#'
+#' @return A `ggplot2` plot object.
 #'
 #' @export
 plot_mspline <- function(knots=NULL, bknot=10, df=10, degree=3, bsmooth=TRUE,
@@ -68,6 +70,9 @@ plot_mspline <- function(knots=NULL, bknot=10, df=10, degree=3, bsmooth=TRUE,
 #' @param scale Scale parameter. After computing the standard M-spline function as a weighted sum of the basis
 #' terms, the function is multiplied by \code{scale}.   The log of the scale is the parameter called
 #' \code{alpha} in the results of a `survextrap` model, the intercept of the linear model on the log hazard.
+#'
+#' @return A data frame with values of the hazard at different times for different
+#'  basis functions.
 #'
 #' @export
 mspline_plotdata <- function(knots=NULL, bknot=10,

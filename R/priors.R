@@ -22,7 +22,7 @@
 #'
 #' @seealso \code{\link{survextrap}}.
 #'
-#' @return A named list to be used internally by the \code{\link{survextrap}} model fitting functions.
+#' @return A named list with the prior distribution name and parameters, to be used internally by the \code{\link{survextrap}} model fitting functions.
 #'
 #'
 NULL
@@ -489,6 +489,10 @@ prior_sample_cure <- function(sam, nsim, xcure, prior_cure, prior_logor_cure, Xc
 ##' @inheritParams prior_sample
 ##'
 ##' @name prior_sample_hazard
+##' 
+##' @return A tidy data frame containing values of the hazard at a
+##' sequence of times, for different draws from the prior distribution.
+##' 
 ##' @export
 prior_sample_hazard <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
                                 coefs_mean = NULL,
@@ -618,6 +622,8 @@ prior_haz_const <- function(mspline,
 ##' transform to quantiles of the given prior.
 ##'
 ##' @inheritParams prior_haz
+##'
+##' @return A vector of quantiles.
 ##'
 ##' @export
 prior_hr <- function(prior_loghr = p_normal(0, 2.5),
