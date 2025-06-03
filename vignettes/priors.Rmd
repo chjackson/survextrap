@@ -18,7 +18,7 @@ editor_options:
 
 The flexible survival models in `survextrap` are **Bayesian**.
 
-This means that they analyse data under a **parametric** model, which assumes that each data point $x$ comes from a sampling distribution with probability density function $f(x|\theta)$.  The parameters $\theta$ are estimated by combining a **prior** distribution $p(\theta)$, representing beliefs about model parameters external to the data, with a **"likelihood"** that represents the information from a set of data $\boldsymbol{x}$, producing a posterior distribution $p(\theta | \boldsymbol{x})$. 
+This means that they analyse data under a **parametric** model, which assumes that each data point $x$ comes from a sampling distribution with probability density function $f(x|\theta)$.  The parameters $\theta$ are estimated by combining a **prior** distribution $p(\theta)$, representing beliefs about model parameters external to the data, with a **"likelihood"** that represents the information from a set of data $\mathbf{x}$, producing a posterior distribution $p(\theta | \mathbf{x})$. 
 
 The principle behind the package is that any information that is relevant to extrapolation should be represented transparently.  This is arguably clearest if expressed through **data** or **parametric mechanisms**.
 
@@ -32,7 +32,7 @@ However, this spline model has parameters $\theta$, which still need prior distr
 
 This article describes these two kinds of "prior" judgements that can be used in `survextrap` models.
 
-1. Judgements about survival probabilities, that can be converted to pseudo-data, and treated as part of the model likelihood for data $\boldsymbol{x}$.
+1. Judgements about survival probabilities, that can be converted to pseudo-data, and treated as part of the model likelihood for data $\mathbf{x}$.
 
 2. Priors on parameters $\theta$ in spline models.
 
