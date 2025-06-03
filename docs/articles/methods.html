@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,7 +71,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2025-05-02</h4>
+            <h4 data-toc-skip class="date">2025-06-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -81,8 +81,9 @@ Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jac
     
 <p>See the <a href="../index.html">README</a> for the design principles
 of the package, and the <a href="examples.html">examples vignette</a>
-for examples of how to fit models. A more formal account of the methods
-is given in the <code>survextrap</code> <a href="https://doi.org/10.1186/s12874-023-02094-1" class="external-link">paper</a>.</p>
+for examples of how to fit models and summarise model outputs.</p>
+<p>A more formal account of the methods is given in the
+<code>survextrap</code> <a href="https://doi.org/10.1186/s12874-023-02094-1" class="external-link">paper</a>.</p>
 <div class="section level2">
 <h2 id="m-splines">M-splines<a class="anchor" aria-label="anchor" href="#m-splines"></a>
 </h2>
@@ -105,13 +106,13 @@ the <em>basis coefficients</em>.</p></li>
 the hazard.</p></li>
 </ul>
 <div class="section level3">
-<h3 id="standard-m-spline-basis">Standard M-spline basis<a class="anchor" aria-label="anchor" href="#standard-m-spline-basis"></a>
+<h3 id="traditional-m-spline-basis">Traditional M-spline basis<a class="anchor" aria-label="anchor" href="#traditional-m-spline-basis"></a>
 </h3>
-<p>In the standard basis, 10 knots implies there are 13 basis functions.
-Two of the basis functions have peaks at 0 and the upper knot, and the
-others have peaks around the knot, diminishing to zero on either side.
-See <a href="https://www.jstor.org/stable/2245395" class="external-link">Ramsay</a> for the
-exact definitions of <span class="math inline">\(b_i(t)\)</span>.</p>
+<p>In the traditional basis, 10 knots implies there are 13 basis
+functions. Two of the basis functions have peaks at 0 and the upper
+knot, and the others have peaks around the knot, diminishing to zero on
+either side. See <a href="https://www.jstor.org/stable/2245395" class="external-link">Ramsay</a> for the exact
+definitions of <span class="math inline">\(b_i(t)\)</span>.</p>
 <p>The package provides a few functions
 (e.g. <code><a href="../reference/mspline_plotdata.html">mspline_plotdata()</a></code>, <code><a href="../reference/plot_mspline.html">plot_mspline()</a></code>) to
 illustrate M-spline bases. The actual computation of the basis is done
@@ -134,10 +135,12 @@ package.</p>
 <div class="section level3">
 <h3 id="smoothed-m-spline-basis">Smoothed M-spline basis<a class="anchor" aria-label="anchor" href="#smoothed-m-spline-basis"></a>
 </h3>
-<p>An alternative basis is provided which is smoother at the upper knot
-(defined by having zero derivative and second derivative at this point).
-This is selected by setting <code>bsmooth=TRUE</code> in the various
-package functions for defining M-splines.</p>
+<p>By default, the <code>survextrap</code> package uses an M-spline
+basis which differs from the traditional basis by being smoother at the
+upper knot (defined by having zero derivative and second derivative at
+this point). This modification can be selected explicitly as
+<code>bsmooth=TRUE</code> in the various package functions for defining
+M-splines.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mspline</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>knots<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, degree<span class="op">=</span><span class="fl">3</span>, bsmooth<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">p_const</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mspline_constant_coefs.html">mspline_constant_coefs</a></span><span class="op">(</span><span class="va">mspline</span><span class="op">)</span></span>
@@ -223,11 +226,11 @@ evaluated by numerical integration, which is slow.</p></li>
 respects the constraint that a hazard has to be non-negative, while it
 can be integrated analytically to produce the cumulative
 hazard.</p></li>
-<li><p>A remaining disadvantage of M-splines is that they still rely on
-a choice of knot locations. For modelling data, knots are generally
-chosen to give equal amounts of data between the knots. The user just
-has to define the number of knots. This approach generally works well in
-practice.</p></li>
+<li><p>A remaining disadvantage of M-splines, like any splines, is that
+they still rely on a choice of knot locations. For modelling data, knots
+are generally chosen to give equal amounts of data between the knots.
+The user just has to define the number of knots. This approach generally
+works well in practice.</p></li>
 <li><p>There are many different kinds of arbitrarily-flexible model
 (fractional polynomials, particular kinds of spline), which are all
 designed to fit the data very well. In practice, they may differ in
@@ -238,7 +241,7 @@ calibrate priors to meaningful beliefs - see the <a href="priors.html">priors vi
 we don’t want to rely on opaque nuances of the functional forms used in
 specific model families. Splines are at least computationally and
 conceptually simpler than other kinds of flexible model families,
-e.g. Gaussian or Dirichlet processes.</p></li>
+e.g. Gaussian processes or Dirichlet processes.</p></li>
 </ul>
 </div>
 </div>
@@ -290,8 +293,8 @@ in each region, is specified on the multinomial logistic scale, since
 <span class="math inline">\(i = 2, \ldots, n\)</span>. The prior has the
 following parameters:</p>
 <ol style="list-style-type: lower-alpha">
-<li><p><strong>Prior mean</strong>: <span class="math inline">\(\boldsymbol{\mu} = (\mu_2,\ldots,\mu_n)\)</span>.
-By default, this is determined from the special set of <span class="math inline">\(p_i\)</span> that result in a <em>constant
+<li><p><strong>Prior mean</strong>: <span class="math inline">\({\bf{\mu}} = (\mu_2,\ldots,\mu_n)\)</span>. By
+default, this is determined from the special set of <span class="math inline">\(p_i\)</span> that result in a <em>constant
 hazard</em> <span class="math inline">\(h(t)\)</span>. See the
 <code><a href="../reference/mspline_constant_coefs.html">mspline_constant_coefs()</a></code> function in the package to compute
 this.</p></li>
@@ -300,8 +303,8 @@ this.</p></li>
 fitted hazard curve.</p>
 <ul>
 <li><p>If <span class="math inline">\(\sigma=0\)</span>, then we are
-certain that the hazard function (before being scaled by <span class="math inline">\(\eta\)</span>) is the one defined by <span class="math inline">\(\boldsymbol{\mu}\)</span>. By default this is a
-constant hazard.</p></li>
+certain that the hazard function (before being scaled by <span class="math inline">\(\eta\)</span>) is the one defined by <span class="math inline">\(\bf{\mu}\)</span>. By default this is a constant
+hazard.</p></li>
 <li><p>Values of <span class="math inline">\(\sigma\)</span> around 1
 favour wiggly curves, such that the fitted hazard curve is driven mainly
 by the the observed data.</p></li>
@@ -313,12 +316,13 @@ functions, which will not typically be useful in practice.</p></li>
 <li>
 <p><strong>A “random effect”</strong>: <span class="math inline">\(\epsilon_i\)</span>, which describes how much the
 <span class="math inline">\(i\)</span>th basis coefficient departs from
-the mean, compared to the other basis coefficients. The default is an
-“exchangeable” model, with <span class="math inline">\(\epsilon_i \sim
-Logistic(0,1)\)</span>, so that the <span class="math inline">\(\gamma_i\)</span> are conditionally independent
-given <span class="math inline">\(\mu_i\)</span> and <span class="math inline">\(\sigma\)</span>.</p>
-<p>An alternative, smoother model can be specified to relate the basis
-coefficients, using a random walk that constrains the <span class="math inline">\(\gamma_i\)</span> closer to each other in time to
+the mean, compared to the other basis coefficients. The model described
+in the <a href="https://doi.org/10.1186/s12874-023-02094-1" class="external-link">original
+<code>survextrap</code> paper</a> is an “exchangeable” model, with <span class="math inline">\(\epsilon_i \sim Logistic(0,1)\)</span>, so that
+the <span class="math inline">\(\gamma_i\)</span> are conditionally
+independent given <span class="math inline">\(\mu_i\)</span> and <span class="math inline">\(\sigma\)</span>.</p>
+<p>Since version 0.9 of the package, the default has changed from this
+exchangeable model to a “random walk” model. This constrains the <span class="math inline">\(\gamma_i\)</span> closer to each other in time to
 be more similar to each other. This model is generated as <span class="math inline">\(\epsilon_1=0\)</span>, and <span class="math inline">\(\epsilon_i \sim Logistic(\epsilon_{i-1},
 w_i)\)</span> for any <span class="math inline">\(i \geq 2\)</span>. The
 weight <span class="math inline">\(w_i\)</span> accounts for the
@@ -425,22 +429,20 @@ function, prior to observing the data.</p>
 <h2 id="effect-of-covariates-on-the-hazard">Effect of covariates on the hazard<a class="anchor" aria-label="anchor" href="#effect-of-covariates-on-the-hazard"></a>
 </h2>
 <p>In <code>survextrap</code>, the hazard may also depend on a vector of
-covariates <span class="math inline">\(\boldsymbol{x}\)</span> as well
-as time <span class="math inline">\(t\)</span>, and we write the hazard
-as <span class="math inline">\(h(t,\boldsymbol{x})\)</span>.</p>
+covariates <span class="math inline">\(\bf{x}\)</span> as well as time
+<span class="math inline">\(t\)</span>, and we write the hazard as <span class="math inline">\(h(t,{\bf{x}})\)</span>.</p>
 <div class="section level3">
 <h3 id="proportional-hazards-model">Proportional hazards model<a class="anchor" aria-label="anchor" href="#proportional-hazards-model"></a>
 </h3>
 <p>The default model fitted is a <em>proportional hazards model</em>,
-where the scale parameter <span class="math inline">\(\eta(\boldsymbol{x})\)</span> is defined as a
-log-linear function of a vector of covariates <span class="math inline">\(\boldsymbol{x}\)</span>.</p>
-<p><span class="math display">\[ \eta(\boldsymbol{x}) =
-\exp(\boldsymbol{\beta}^T \boldsymbol{x}) \]</span></p>
-<p>In this model, the ratio between the hazards <span class="math inline">\(h(t,\boldsymbol{x})\)</span> at two different
-values of <span class="math inline">\(\boldsymbol{x}\)</span> is
-constant with respect to time <span class="math inline">\(t\)</span>.
-The <em>hazard ratios</em> (i.e. between a value of 1 and 0 for each
-<span class="math inline">\(\boldsymbol{x}\)</span>) are <span class="math inline">\(exp(\boldsymbol{\beta})\)</span>.</p>
+where the scale parameter <span class="math inline">\(\eta({\bf{x}})\)</span> is defined as a log-linear
+function of a vector of covariates <span class="math inline">\({\bf{x}}\)</span>.</p>
+<p><span class="math display">\[ \eta({\bf{x}}) = \exp({\bf{\beta}}^T
+{\bf{x}}) \]</span></p>
+<p>In this model, the ratio between the hazards <span class="math inline">\(h(t,{\bf{x}})\)</span> at two different values of
+<span class="math inline">\({\bf{x}}\)</span> is constant with respect
+to time <span class="math inline">\(t\)</span>. The <em>hazard
+ratios</em> (i.e. between a value of 1 and 0 for each <span class="math inline">\({\bf{x}}\)</span>) are <span class="math inline">\(exp(\bf{\beta})\)</span>.</p>
 </div>
 <div class="section level3">
 <h3 id="nonprop">Flexible, non-proportional hazards model<a class="anchor" aria-label="anchor" href="#nonprop"></a>
@@ -448,16 +450,16 @@ The <em>hazard ratios</em> (i.e. between a value of 1 and 0 for each
 <p>An alternative <em>non-proportional hazards</em> model is available.
 This is achieved by also modelling the spline coefficients <span class="math inline">\(p_i\)</span> as functions of covariates, in
 addition to the log-linear model on <span class="math inline">\(\eta\)</span>.</p>
-<p><span class="math display">\[log(p_i(\boldsymbol{x}) /
-p_1(\boldsymbol{x})) = \gamma_i(\boldsymbol{x)} \]</span></p>
-<p><span class="math display">\[ \gamma_i(\boldsymbol{x)} \sim
-Logistic(\mu_i + \boldsymbol{\delta}^T_i \boldsymbol{x}, \sigma) \quad
-(i=2,...,n), \quad \delta_1 = 0 \]</span></p>
+<p><span class="math display">\[log(p_i({\bf{x}}) / p_1({\bf{x}})) =
+\gamma_i({\bf{x}}) \]</span></p>
+<p><span class="math display">\[ \gamma_i({\bf{x}}) \sim Logistic(\mu_i
++ {\bf{\delta}}^T_i {\bf{x}}, \sigma) \quad (i=2,...,n), \quad \delta_1
+= 0 \]</span></p>
 <p>The <span class="math inline">\(s\)</span>th element of the vector
-<span class="math inline">\(\boldsymbol{\delta}_i\)</span> describes the
+<span class="math inline">\(\bf{\delta}_i\)</span> describes the
 departure from proportional hazards for the <span class="math inline">\(s\mbox{th}\)</span> covariate in the region of
 time associated with the <span class="math inline">\(i\)</span>th spline
-basis term. With all <span class="math inline">\(\boldsymbol{\delta}_i =
+basis term. With all <span class="math inline">\(\bf{\delta}_i =
 0\)</span> the model will be the proportional hazards model.
 Non-proportional hazards can be applied to any subset of the covariates
 if needed, or all covariates.</p>
@@ -468,14 +470,12 @@ the effects from different regions of time <span class="math inline">\(i\)</span
 \]</span></p>
 <p>or a normal second-order random walk model, like the one used for the
 basis coefficients. In the non-proportional hazards model, the ratio
-between the hazards <span class="math inline">\(h(t,\boldsymbol{x})\)</span> at different
-covariate values <span class="math inline">\(\boldsymbol{x}\)</span> is
-a function of time <span class="math inline">\(t\)</span>. Since the
-<span class="math inline">\(\boldsymbol{\delta}_i\)</span> may be
-arbirtarily different in each region of time <span class="math inline">\(i\)</span>, the hazard ratio can be an
-arbitrarily-flexible function of time. The amount and shape of
-non-proportionality is estimated from the data, while the hierarchical
-model protects against overfitting.</p>
+between the hazards <span class="math inline">\(h(t,{\bf{x}})\)</span>
+at different covariate values <span class="math inline">\({\bf{x}}\)</span> is a function of time <span class="math inline">\(t\)</span>. Since the <span class="math inline">\(\bf{\delta}_i\)</span> may be arbirtarily
+different in each region of time <span class="math inline">\(i\)</span>,
+the hazard ratio can be an arbitrarily-flexible function of time. The
+amount and shape of non-proportionality is estimated from the data,
+while the hierarchical model protects against overfitting.</p>
 </div>
 </div>
 <div class="section level2">
@@ -483,11 +483,11 @@ model protects against overfitting.</p>
 </h2>
 <p>The <code>survextrap</code> package implements a mixture cure version
 of the M-spline model.</p>
-<p>In a mixture cure model, the survival is defined by <span class="math inline">\(S(t | p, \boldsymbol{\theta}) = p +
-(1-p)S_0(t|\boldsymbol{\theta})\)</span>, where <span class="math inline">\(p\)</span> is sometimes termed the “cure
-probability”, and <span class="math inline">\(S_0(t|\boldsymbol{\theta})\)</span> is a
-parametric model with parameters <span class="math inline">\(\boldsymbol{\theta}\)</span>, termed the “uncured
-survival”. In <code>survextrap</code>, <span class="math inline">\(S_0\)</span> is the M-spline model.</p>
+<p>In a mixture cure model, the survival is defined by <span class="math inline">\(S(t | p, \bf{\theta}) = p +
+(1-p)S_0(t|\bf{\theta})\)</span>, where <span class="math inline">\(p\)</span> is sometimes termed the “cure
+probability”, and <span class="math inline">\(S_0(t|\bf{\theta})\)</span> is a parametric model
+with parameters <span class="math inline">\(\bf{\theta}\)</span>, termed
+the “uncured survival”. In <code>survextrap</code>, <span class="math inline">\(S_0\)</span> is the M-spline model.</p>
 <p>This model can be interpreted in two different ways:</p>
 <ul>
 <li><p>as a mixture model, where a person has hazard <span class="math inline">\(h_1(t)=0\)</span> at all times <span class="math inline">\(t\)</span> with probability <span class="math inline">\(p\)</span>, or hazard <span class="math inline">\(h_0(t)\)</span> at all times with probability
@@ -500,6 +500,12 @@ with increasing <span class="math inline">\(t\)</span> (as long as <span class="
 <p>Since we cannot observe whether censored observations are part of the
 “cured” subgroup, these interpretations are indistinguishable in
 practice.</p>
+<p>Note the mixture cure model makes a strong parametric assumption
+about the shape of the overall hazard, even if a flexible spline is used
+to describe the “uncured” component of this hazard. A more flexible way
+of including an assumption of cure is through an elicited survival
+probability, as described in the cetuximab case study in the <a href="https://doi.org/10.1186/s12874-023-02094-1" class="external-link"><code>survextrap</code>
+paper</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="relsurv_methods">Relative survival / additive hazards models<a class="anchor" aria-label="anchor" href="#relsurv_methods"></a>
@@ -519,7 +525,7 @@ examples</a>.</p></li>
 flexible parametric (M-spline) model used in
 <code>survextrap</code>.</p></li>
 </ul>
-<p>This is known as a “relative survival” model, since the additive
+<p>This is also known as a “relative survival” model, since the additive
 model for the hazards implies a multiplicative model for survival: <span class="math inline">\(S(t) = S_b(t)S_c(t)\)</span>. This kind of model
 is often used when the background hazard is confidently known (from
 national statistics on general mortality) and the cause-specific hazard

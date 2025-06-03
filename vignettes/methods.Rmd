@@ -16,13 +16,18 @@ editor_options:
   chunk_output_type: console
 ---
 
-\newcommand{\x}{\boldsymbol{x}}
+\usepackage{amsmath}
+\usepackage{bm}
+\require{boldsymbol} 
+\newcommand{\x}{{\bf{x}}}
 
 ```{r,echo=FALSE,message=FALSE}
 knitr::opts_chunk$set(eval=TRUE)
 ```
 
-See the [README](../index.html) for the design principles of the package, and the [examples vignette](examples.html) for examples of how to fit models.
+See the [README](../index.html) for the design principles of the package, and the [examples vignette](examples.html) for examples of how to fit models and 
+summarise model outputs. 
+
 A more formal account of the methods is given in the `survextrap` [paper](https://doi.org/10.1186/s12874-023-02094-1).
 
 # M-splines 
@@ -41,9 +46,9 @@ with
     
 * a _scale_ parameter $\eta$ that describes the average level of the hazard. 
 
-## Standard M-spline basis
+## Traditional M-spline basis
 
-In the standard basis, 10 knots implies there are 13 basis functions.  Two of the basis functions have peaks at 0 and the upper knot, and the others have peaks around the knot, diminishing to zero on either side.  See [Ramsay](https://www.jstor.org/stable/2245395) for the exact definitions of $b_i(t)$.  
+In the traditional basis, 10 knots implies there are 13 basis functions.  Two of the basis functions have peaks at 0 and the upper knot, and the others have peaks around the knot, diminishing to zero on either side.  See [Ramsay](https://www.jstor.org/stable/2245395) for the exact definitions of $b_i(t)$.
 
 The package provides a few functions (e.g. `mspline_plotdata()`, `plot_mspline()`) to illustrate M-spline bases.  The actual computation of the basis is done with the [splines2](https://CRAN.R-project.org/package=splines2) package. 
 
@@ -63,7 +68,7 @@ plot_mspline(knots=mspline$knots, bsmooth=FALSE, scale=10, coefs = p_naive, tmax
 
 ## Smoothed M-spline basis
 
-An alternative basis is provided which is smoother at the upper knot (defined by having zero derivative and second derivative at this point).  This is selected by setting `bsmooth=TRUE` in the various package functions for defining M-splines.
+By default, the `survextrap` package uses an M-spline basis which differs from the traditional basis by being smoother at the upper knot (defined by having zero derivative and second derivative at this point).  This modification can be selected explicitly as `bsmooth=TRUE` in the various package functions for defining M-splines.
 
 ```{r}
 mspline <- list(knots=1:10, degree=3, bsmooth=TRUE)
@@ -115,9 +120,9 @@ plot_mspline(knots=c(1, 3, 5, 7),
 
 * The advantage of putting an M-spline on the hazard is that it respects the constraint that a hazard has to be non-negative, while it can be integrated analytically to produce the cumulative hazard. 
 
-* A remaining disadvantage of M-splines is that they still rely on a choice of knot locations.  For modelling data, knots are generally chosen to give equal amounts of data between the knots.  The user just has to define the number of knots.  This approach generally works well in practice.
+* A remaining disadvantage of M-splines, like any splines, is that they still rely on a choice of knot locations.  For modelling data, knots are generally chosen to give equal amounts of data between the knots.  The user just has to define the number of knots.  This approach generally works well in practice.
 
-* There are many different kinds of arbitrarily-flexible model (fractional polynomials, particular kinds of spline), which are all designed to fit the data very well.  In practice, they may differ in their computational efficiency, and how easily we can construct priors for their parameters.  Priors will be influential in the places where there are no data.  Though for any model we can use simulation to calibrate priors to meaningful beliefs - see the [priors vignette](priors.html) for examples.   For extrapolation, we don't want to rely on opaque nuances of the functional forms used in specific model families.  Splines are at least computationally and conceptually simpler than other kinds of flexible model families, e.g. Gaussian or Dirichlet processes.
+* There are many different kinds of arbitrarily-flexible model (fractional polynomials, particular kinds of spline), which are all designed to fit the data very well.  In practice, they may differ in their computational efficiency, and how easily we can construct priors for their parameters.  Priors will be influential in the places where there are no data.  Though for any model we can use simulation to calibrate priors to meaningful beliefs - see the [priors vignette](priors.html) for examples.   For extrapolation, we don't want to rely on opaque nuances of the functional forms used in specific model families.  Splines are at least computationally and conceptually simpler than other kinds of flexible model families, e.g. Gaussian processes or Dirichlet processes.
 
 
 # Bayesian model specification {#bayesspec}
@@ -146,19 +151,19 @@ A log-normal prior is used for the scale $\eta$.   The default in the package is
 
 The prior for the basis coefficients $p_i$, that describe the mass of the hazard in each region, is specified on the multinomial logistic scale, since $\sum_i p_i = 1$.   Define $log(p_i / p_1) = \gamma_i$, with $\gamma_1=0$,  and $\gamma_i = \mu_i + \sigma\epsilon_i$, for $i = 2, \ldots, n$.  The prior has the following parameters: 
 
-(a) **Prior mean**: $\boldsymbol{\mu} = (\mu_2,\ldots,\mu_n)$.  By default, this is determined from the special set of $p_i$ that result in a _constant hazard_ $h(t)$.  See the `mspline_constant_coefs()` function in the package to compute this.
+(a) **Prior mean**: ${\bf{\mu}} = (\mu_2,\ldots,\mu_n)$.  By default, this is determined from the special set of $p_i$ that result in a _constant hazard_ $h(t)$.  See the `mspline_constant_coefs()` function in the package to compute this.
 
 (b) **Prior variability**: $\sigma$ controls the smoothness of the fitted hazard curve.
 
-    * If $\sigma=0$, then we are certain that the hazard function (before being scaled by $\eta$) is the one defined by $\boldsymbol{\mu}$.  By default this is a constant hazard.
+    * If $\sigma=0$, then we are certain that the hazard function (before being scaled by $\eta$) is the one defined by $\bf{\mu}$.  By default this is a constant hazard.
 
     * Values of $\sigma$ around 1 favour wiggly curves, such that the fitted hazard curve is driven mainly by the the observed data. 
 
     * For _very_ high values of $\sigma$, the hazard is dominated by a random one of the $n$ basis functions, which will not typically be useful in practice.
 
-(c) **A "random effect"**: $\epsilon_i$, which describes how much the $i$th basis coefficient departs from the mean, compared to the other basis coefficients.   The default is an "exchangeable" model, with $\epsilon_i \sim Logistic(0,1)$, so that the $\gamma_i$ are conditionally independent given $\mu_i$ and $\sigma$. 
+(c) **A "random effect"**: $\epsilon_i$, which describes how much the $i$th basis coefficient departs from the mean, compared to the other basis coefficients.   The model described in the [original `survextrap` paper](https://doi.org/10.1186/s12874-023-02094-1) is an "exchangeable" model, with $\epsilon_i \sim Logistic(0,1)$, so that the $\gamma_i$ are conditionally independent given $\mu_i$ and $\sigma$. 
 
-    An alternative, smoother model can be specified to relate the basis coefficients, using a random walk that constrains the $\gamma_i$ closer to each other in time to be more similar to each other.  This model is generated as $\epsilon_1=0$, and $\epsilon_i \sim Logistic(\epsilon_{i-1}, w_i)$ for any $i \geq 2$.  The weight $w_i$ accounts for the difference in the time periods described by coefficients $i$ and $i-1$.  This ensures that we are less inclined to allow hazard variations in regions of time where the knots are more closely-spaced, leading to a more realistically smooth function than if these weights were excluded. 	The exact definition of $w_i$ is given in [Phillippo et al. 2024](https://arxiv.org/abs/2401.12640), following principles from [Li and Cao 2022](https://arxiv.org/pdf/2201.06808).
+    Since version 0.9 of the package, the default has changed from this exchangeable model to a "random walk" model.  This constrains the $\gamma_i$ closer to each other in time to be more similar to each other.  This model is generated as $\epsilon_1=0$, and $\epsilon_i \sim Logistic(\epsilon_{i-1}, w_i)$ for any $i \geq 2$.  The weight $w_i$ accounts for the difference in the time periods described by coefficients $i$ and $i-1$.  This ensures that we are less inclined to allow hazard variations in regions of time where the knots are more closely-spaced, leading to a more realistically smooth function than if these weights were excluded. 	The exact definition of $w_i$ is given in [Phillippo et al. 2024](https://arxiv.org/abs/2401.12640), following principles from [Li and Cao 2022](https://arxiv.org/pdf/2201.06808).
 
 > **Sidenote**. This multinomial logistic distribution is similar to a Dirichlet distribution for the $p_i$, but is slightly better behaved for how MCMC estimation is done in Stan.  The interpretation of $\sigma$ is not completely intuitive, but there is a function in the package (`prior_hsd()`) to choose the prior on $\sigma$ to match judgements about how much the hazard might vary over time.
 
@@ -215,40 +220,40 @@ With external data, we want a choice of knots outside the data which we can defe
 
 # Effect of covariates on the hazard
 
-In `survextrap`, the hazard may also depend on a vector of covariates $\boldsymbol{x}$ as well as time $t$, and we write the hazard as $h(t,\x)$.
+In `survextrap`, the hazard may also depend on a vector of covariates $\bf{x}$ as well as time $t$, and we write the hazard as $h(t,\x)$.
 
 
 ## Proportional hazards model
 
 The default model fitted is a _proportional hazards model_, where the scale parameter $\eta(\x)$ is defined as a log-linear function of a vector of covariates $\x$.  
 
-\[ \eta(\x) = \exp(\boldsymbol{\beta}^T \x) \]
+\[ \eta(\x) = \exp({\bf{\beta}}^T \x) \]
 
-In this model, the ratio between the hazards $h(t,\x)$ at two different values of $\x$ is constant with respect to time $t$.  The _hazard ratios_ (i.e. between a value of 1 and 0 for each $\x$) are $exp(\boldsymbol{\beta})$.
+In this model, the ratio between the hazards $h(t,\x)$ at two different values of $\x$ is constant with respect to time $t$.  The _hazard ratios_ (i.e. between a value of 1 and 0 for each $\x$) are $exp(\bf{\beta})$.
 
 
 ## Flexible, non-proportional hazards model {#nonprop}
 
 An alternative _non-proportional hazards_ model is available.  This is achieved by also modelling the spline coefficients $p_i$ as functions of covariates, in addition to the log-linear model on $\eta$.
 
-\[log(p_i(\x) / p_1(\x)) = \gamma_i(\boldsymbol{x)} \]
+\[log(p_i(\x) / p_1(\x)) = \gamma_i({\bf{x}}) \]
 
-\[ \gamma_i(\boldsymbol{x)} \sim Logistic(\mu_i + \boldsymbol{\delta}^T_i \x, \sigma) \quad (i=2,...,n), \quad \delta_1 = 0 \]
+\[ \gamma_i({\bf{x}}) \sim Logistic(\mu_i + {\bf{\delta}}^T_i \x, \sigma) \quad (i=2,...,n), \quad \delta_1 = 0 \]
 
-The $s$th element of the vector $\boldsymbol{\delta}_i$ describes the departure from proportional hazards for the $s\mbox{th}$ covariate in the region of time associated with the $i$th spline basis term.   With all $\boldsymbol{\delta}_i = 0$ the model will be the proportional hazards model.  Non-proportional hazards can be applied to any subset of the covariates if needed, or all covariates.
+The $s$th element of the vector $\bf{\delta}_i$ describes the departure from proportional hazards for the $s\mbox{th}$ covariate in the region of time associated with the $i$th spline basis term.   With all $\bf{\delta}_i = 0$ the model will be the proportional hazards model.  Non-proportional hazards can be applied to any subset of the covariates if needed, or all covariates.
 
 For each covariate $s$, a hierarchical model is used for the non-proportionality effects $\delta_{ks}$.  This model "partially pools" the effects from different regions of time $i$, either via an exchangeable model,
 
 \[ \delta_{is} \sim Normal(0, \tau_s^2) \] 
 
-or a normal second-order random walk model, like the one used for the basis coefficients.  In the non-proportional hazards model, the ratio between the hazards $h(t,\x)$ at different covariate values $\x$ is a function of time $t$.  Since the $\boldsymbol{\delta}_i$ may be arbirtarily different in each region of time $i$, the hazard ratio can be an arbitrarily-flexible function of time.  The amount and shape of non-proportionality is estimated from the data, while the hierarchical model protects against overfitting.
+or a normal second-order random walk model, like the one used for the basis coefficients.  In the non-proportional hazards model, the ratio between the hazards $h(t,\x)$ at different covariate values $\x$ is a function of time $t$.  Since the $\bf{\delta}_i$ may be arbirtarily different in each region of time $i$, the hazard ratio can be an arbitrarily-flexible function of time.  The amount and shape of non-proportionality is estimated from the data, while the hierarchical model protects against overfitting.
 
 
 # Cure models {#cure_methods}
 
 The `survextrap` package implements a mixture cure version of the M-spline model.
 
-In a mixture cure model, the survival is defined by $S(t | p, \boldsymbol{\theta}) = p + (1-p)S_0(t|\boldsymbol{\theta})$, where $p$ is sometimes termed the "cure probability", and $S_0(t|\boldsymbol{\theta})$ is a parametric model with parameters $\boldsymbol{\theta}$, termed the "uncured survival".  In `survextrap`, $S_0$ is the M-spline model. 
+In a mixture cure model, the survival is defined by $S(t | p, \bf{\theta}) = p + (1-p)S_0(t|\bf{\theta})$, where $p$ is sometimes termed the "cure probability", and $S_0(t|\bf{\theta})$ is a parametric model with parameters $\bf{\theta}$, termed the "uncured survival".  In `survextrap`, $S_0$ is the M-spline model. 
 
 This model can be interpreted in two different ways: 
 
@@ -257,6 +262,8 @@ This model can be interpreted in two different ways:
 * as a model where everyone follows the same hazard function $h(t) = f(t)/S(t)$, where the PDF is $f(t) = (1-p)f_0(t)$, and $f_0(t)$ is the PDF of the "uncured" parametric model.  Hence $h(t) = f_0(t) / (p/(1-p) + S_0(t))$, which asymptotically decreases towards zero with increasing $t$ (as long as $p>0$).
 
 Since we cannot observe whether censored observations are part of the "cured" subgroup, these interpretations are indistinguishable in practice. 
+
+Note the mixture cure model makes a strong parametric assumption about the shape of the overall hazard, even if a flexible spline is used to describe the "uncured" component of this hazard.  A more flexible way of including an assumption of cure is through an elicited survival probability, as described in the cetuximab case study in the [`survextrap` paper](https://doi.org/10.1186/s12874-023-02094-1).
 
 
 
@@ -268,7 +275,7 @@ Since we cannot observe whether censored observations are part of the "cured" su
 
 * $h_c(t)$ follows the standard flexible parametric (M-spline) model used in `survextrap`.
 
-This is known as a "relative survival" model, since the additive model for the hazards implies a multiplicative model for survival: $S(t) = S_b(t)S_c(t)$.    This kind of model is often used when the background hazard is confidently known (from national statistics on general mortality) and the cause-specific hazard can be inferred from the individual-level data.
+This is also known as a "relative survival" model, since the additive model for the hazards implies a multiplicative model for survival: $S(t) = S_b(t)S_c(t)$.    This kind of model is often used when the background hazard is confidently known (from national statistics on general mortality) and the cause-specific hazard can be inferred from the individual-level data.
 
 The model used in `survextrap` is a variant of the model by [Nelson et al](https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.3064) and should give similar results.  The only difference is that the model in `survextrap` is Bayesian, and a different kind of spline is used.
 

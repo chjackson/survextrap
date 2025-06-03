@@ -17,7 +17,7 @@ The underlying data can be extracted with hazard_ratio."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,11 @@ If the only covariate in the model is a factor with two levels,
 then <code>newdata</code> defaults to a data frame containing the
 levels of this factor, so that the hazard ratio for the second
 level versus the first level is computed.  For any other models,
-<code>newdata</code> must be supplied explicitly.</p></dd>
+<code>newdata</code> must be supplied explicitly.</p>
+<p>Standardisation (with <code><a href="standardise_to.html">standardise_to</a></code>) is not supported.
+This might be done by hand by using <code>hazard(...,sample=TRUE)</code>
+to obtain posterior samples for the two standardised hazards separately,
+then summarising by hand.</p></dd>
 
 
 <dt id="arg-t">t<a class="anchor" aria-label="anchor" href="#arg-t"></a></dt>

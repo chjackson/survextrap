@@ -81,20 +81,17 @@ The idea of the package is to make this external information as explicit as poss
 
 ### Note on model tuning {#tuning}
 
-The `survextrap` function has various options which can be used to fine-tune the basic model explained in the Methods vignette.   These options include the number of spline
-knots, the distribution on the coefficients ($p_i$), and the prior placed on the amount of smoothness in this curve $\sigma$.  
+The `survextrap` function has various options which can be used to fine-tune the basic model explained in the Methods vignette.   These options include the number of spline knots, the distribution on the coefficients ($p_i$), and the prior placed on the amount of smoothness in this curve $\sigma$.
 
-It will not usually be necessary to tune these to obtain a model that gives a survival curve that fits the observed data well, hence to estimate the restricted mean survival time well.   However they may not be optimal in every case.  See, for example, the cetuximab case study, where a tighter prior was placed on $\sigma$, and fewer knots were used.
+It will not usually be necessary to tune these to obtain a model that gives a survival curve that fits the observed data well, hence to estimate the restricted mean survival time well.   The choice of default settings in the package are informed by a simulation study [(Timmins et al.)](https://doi.org/10.48550/arXiv.2503.21388).  However they may not be optimal in every case.  See, for example, the cetuximab case study, where a tighter prior was placed on $\sigma$, and fewer knots were used.
 
 Cross-validation can be used to determine whether tuning gives an overall improvement in fit to the observed data (see "Model comparison" below).
 
-Work is ongoing to give some empirical evidence, based on simulation studies, for what the most sensible default choice should be.
-
-One particularly promising recent development in the package is the choice of a "random walk" prior to smooth the spline basis coefficients.  Here this gives a smoother, more realistic-looking hazard curve than the one above that was based on the default ("exchangeable") prior.
+Note that the method to smooth the spline basis coefficients described in the [`survextrap` paper](https://doi.org/10.1186/s12874-023-02094-1) is no longer the default method, since version 0.9 of the package.  The default is now a "random walk" model.  The old method is available with `smooth_model="exchangeable"`, which here gives a less smooth and realistic-looking hazard curve, compared to the one above that was based on the random walk.
 
 ```{r,results="hide"}
 nd_modr <- survextrap(Surv(years, status) ~ 1, data=colons, chains=1, 
-                      smooth_model = "random_walk",
+                      smooth_model = "exchangeable",
                       mspline = list(add_knots=4))
 plot(nd_modr, tmax=5)
 ```
@@ -123,8 +120,6 @@ head(summary(nd_mod))
 ## Restricted mean survival 
 
 The function `rmst` calculates the restricted mean survival time (RMST) from a fitted model.  Uncertainty is expressed by using the MCMC sample of the model parameters, and calculating the mean (or RMST) for each draw, which produces a sample from the posterior distribution.   The posterior median and credible intervals are computed by summarising this sample.
-
-For particular combinations of parameter values, the mean under the model `nd_mod` cannot be calculated 
 
 Here we compute the restricted mean survival time $RMST(t)$ over three alternative time limits $t$: 3, 10 and 1000 years.  The upper 95\% credible limit for $RMST(1000)$ is very large.
 
@@ -332,9 +327,7 @@ ref_pop <- data.frame(rx = c("Obs","Lev+5FU"))
 survival(rxph_mod, t = c(5,10), newdata = standardise_to(ref_pop))
 ```
 
-Here a reference population is defined that consists of 1 person in the Observation
-treatment group and 1 person in the Lev+5FU group.  As expected, the marginal 5 and 10 year survival probabilities for this population are about half way between the 
-treatment-specific estimates for these survival probabilities.
+Here a reference population is defined that consists of 1 person in the Observation treatment group and 1 person in the Lev+5FU group.  As expected, the marginal 5 and 10 year survival probabilities for this population are about half way between the treatment-specific estimates for these survival probabilities.
 
 
 #### Notes on computation of standardised outputs 
@@ -361,6 +354,13 @@ survival(rxph_mod, t = c(5,10), newdata = standardise_to(ref_pop, random=TRUE))
 
 The results will then be dependent on the random number seed, so care should be taken that enough MCMC iterations have been run in the original `survextrap` call that the output is stable to the required number of significant figures.
 
+
+#### Time-dependent standardised outputs 
+
+Note that if computing a marginal quantity for multiple times, such as the hazard function, care should be taken to define an appropriate standardising population, which may change over time.  For example, the [`standsurv`](https://CRAN.R-project.org/package=flexsurv/vignettes/standsurv.html) function in the `flexsurv` package computes a marginal hazard function for a reference population via weighting covariate-specific hazard functions by the survival probability.  In effect, the standardising population changes over time to account for different subgroups having different survival.    To achieve this in `survextrap`, `hazard()` must be called once for each time, with a different standardising population at each time representing the expected survivors, though these populations must currently be constructed by hand. 
+
+
+
 ### Non-proportional hazards model {#nonprop}
 
 The flexible non-proportional hazards model described in the [methods vignette](methods.html#nonprop) can be specified with the `nonprop` argument.   `nonprop=TRUE` gives all covariates in the main model formula non-proportional hazards.  A subset of covariates can be given non-proportional hazards by passing a different model formula as the `nonprop` argument.
@@ -374,7 +374,7 @@ Note the non-constant separation between the posterior median hazard curves from
 
 In this example, the sample size in each treatment group and time period is small, so this model is probably overfitted.  While the posterior median survival seems to fit poorly to the Kaplan-Meier estimates in some regions, there is large uncertainty around these estimates that isn't shown in these plots. 
 
-The non-proportional hazards model is experimental. In theory, it can be "tuned" by changing the number of spline basis terms and the knot positions (through the `mspline` argument to `survextrap`), or by changing the prior on the parameter $\sigma^{(np)}_s$ that controls the smoothness of the departures from proportional hazards (`prior_sdnp` argument).   But this has not been tested much in practice. 
+The non-proportional hazards model can be "tuned" by changing the number of spline basis terms and the knot positions (through the `mspline` argument to `survextrap`), or by changing the prior on the parameter $\sigma^{(np)}_s$ that controls the smoothness of the departures from proportional hazards (`prior_sdnp` argument).   A limitation of this model (compared to the Royston and Parmar spline model) is that there is a common set of knot positions governing the flexibility of the baseline hazard and the flexibility of covariate effects, however different levels of flexibility can still be achieved (to some extent) through tuning priors on the different smoothness parameters.
 
 If a plot of the posterior hazard ratio against time is desired, this might be constructed by extracting samples from the posterior of the hazard for different covariate values by using `hazard(..., sample=TRUE)`, converting to samples from the hazard ratio, and then summarising and plotting.
 
