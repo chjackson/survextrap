@@ -1,5 +1,5 @@
 Package: survextrap
-Title: Survival Extrapolation with a Flexible Bayesian Parametric Model and External Data
+Title: Bayesian Flexible Parametric Survival Modelling and Extrapolation
 Version: 1.0
 Date: 2025-06-02
 Authors@R: 
