@@ -248,7 +248,7 @@ survival <- function(x, newdata=NULL, t=NULL, tmax=NULL,
                             pcure=p$pcure, offsetH=p$offsetH,
                             bsmooth=x$mspline$bsmooth)
   res_sam <- array(res_sam, dim=c(p$nt, p$niter, p$nvals)) # can this be functioned?
-  res <- summarise_output(res_sam, summ_fns, t, newdata, sample=sample)
+  res <- summarise_output(res_sam, summ_fns, t, newdata, sample=sample, summ_name="survival")
   res
 }
 
@@ -269,7 +269,7 @@ hazard <- function(x, newdata=NULL, t=NULL, tmax=NULL,
                     niter=NULL, summ_fns=NULL, sample=FALSE,
                     newdata0=NULL, wane_period=NULL, wane_nt=10) {
   newdata <- default_newdata(x, newdata)
-  if (is.null(t)) t <- default_plottimes(x, tmax)
+  if (is.null(t)) t <- default_plottimes(x, tmax, zero=FALSE)
   p <- prepare_pars(x=x, newdata=newdata, t=t, niter=niter, newdata0=newdata0, wane_period=wane_period)
   if (!is.null(wane_period))
     res_sam <- hsurvmspline_wane(p$times, alpha1=p$alpha, alpha0=p$alpha0,
@@ -283,7 +283,7 @@ hazard <- function(x, newdata=NULL, t=NULL, tmax=NULL,
                             pcure=p$pcure, offseth=p$offseth,
                             bsmooth=x$mspline$bsmooth)
   res_sam <- array(res_sam, dim=c(p$nt, p$niter, p$nvals)) # can this be functioned?
-  res <- summarise_output(res_sam, summ_fns, t, newdata, sample=sample)
+  res <- summarise_output(res_sam, summ_fns, t, newdata, sample=sample, summ_name="hazard")
   res
 }
 
@@ -317,7 +317,7 @@ cumhaz <- function(x, newdata=NULL, t=NULL, tmax=NULL,
                             pcure=p$pcure, offsetH=p$offsetH,
                             bsmooth=x$mspline$bsmooth)
   res_sam <- array(res_sam, dim=c(p$nt, p$niter, p$nvals)) # can this be functioned?
-  res <- summarise_output(res_sam, summ_fns, t, newdata, sample=sample)
+  res <- summarise_output(res_sam, summ_fns, t, newdata, sample=sample, summ_name="cumhaz")
   res
 }
 
@@ -358,13 +358,13 @@ cumhaz <- function(x, newdata=NULL, t=NULL, tmax=NULL,
 #' @export
 hazard_ratio <- function(x, newdata=NULL, t=NULL, tmax=NULL, niter=NULL, summ_fns=NULL, sample=FALSE) {
   newdata <- default_newdata_comparison(x, newdata)
-  if (is.null(t)) t <- default_plottimes(x, tmax)
+  if (is.null(t)) t <- default_plottimes(x, tmax, zero=FALSE)
   if (isTRUE(attr(newdata, "std")))
     stop("Standardisation not currently supported in `hazard_ratio`")
   haz1 <- hazard(x, newdata=newdata[1,,drop=FALSE], t=t, tmax=tmax, niter=niter, sample=TRUE)[,,1,drop=FALSE]
   haz2 <- hazard(x, newdata=newdata[2,,drop=FALSE], t=t, tmax=tmax, niter=niter, sample=TRUE)[,,1,drop=FALSE]
   hr_sam <- haz2 / haz1
-  summarise_output(hr_sam, summ_fns, t, newdata=NULL, sample=sample)
+  summarise_output(hr_sam, summ_fns, t, newdata=NULL, sample=sample, summ_name="hr")
 }
 
 ##' Hazard ratio between high and low values of the hazard over time
@@ -398,7 +398,7 @@ hrtime <- function(x, newdata=NULL, niter=NULL, summ_fns=NULL, hq=c(0.1, 0.9), s
     stop("`hq` should be a numeric vector of length 2")
   haz_hilo <- apply(haz, c(2,3), quantile, hq)
   hr_sam <- haz_hilo[2,,,drop=FALSE] / haz_hilo[1,,,drop=FALSE]
-  summarise_output(hr_sam, summ_fns, t=NULL, newdata=newdata, sample=sample)
+  summarise_output(hr_sam, summ_fns, t=NULL, newdata=newdata, sample=sample, summ_name="hrtime")
 }
 
 

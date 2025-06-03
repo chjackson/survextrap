@@ -144,10 +144,11 @@ one_factor_cov <- function(x){
     ## if there are cure covs, make people choose for themselves what curves to draw
 }
 
-default_plottimes <- function(x, tmax=NULL, nplot=100){
+default_plottimes <- function(x, tmax=NULL, nplot=100, zero=TRUE){
     tmin <- 0
     if (is.null(tmax)) tmax <- max(x$mspline$knots)
     times <- seq(tmin, tmax, by = (tmax - tmin) / nplot)
+    if (!zero) times <- times[times > 0]
     times
 }
 
