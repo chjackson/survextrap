@@ -66,7 +66,7 @@ nd_mod2 <- survextrap(Surv(years, status) ~ 1, data=colons, chains=1,
 plot(nd_mod2, tmax=5)
 ```
 
-This increases the amount of uncertainty about the extrapolated survival and hazard.   The extrapolations are likely to be sensitive to the choice of any knots placed outside the data.  
+This increases the amount of uncertainty about the extrapolated survival and hazard.   The extrapolations are likely to be sensitive to the choice of any knots placed outside the data.
 
 A sensible guide is to place the upper knot at the latest time that you are interested in modelling.  Beyond this time, you either think the hazard will not change, or any changes in the hazard do not matter for the purpose of the model.
 
@@ -103,10 +103,9 @@ plot(nd_modr, tmax=5)
 
 Most of the example models in this vignette have been specified using computational approximations which allow the models to be fitted more quickly, but at the cost of some inaccuracy.  This has been done so that the vignettes build more quickly.   Specifically: 
 
-* `chains=1` was set in the examples above.   This defines the number of chains used in the MCMC method to estimate the model.    This option can be left out in practice - in which case, four MCMC chains are used, which is the default setting in the `rstan` engine that the package uses, and is more reliable in practice.  The number of iterations per chain can also be set with the
-`iter` argument, among other settings, see `stan()`.
+* `chains=1` was set in the examples above.   This defines the number of chains used in the MCMC method to estimate the model.    This option can be left out in practice - in which case, four MCMC chains are used, which is the default setting in the `rstan` engine that the package uses, and is more reliable in practice.  The number of iterations per chain can also be set with the `iter` argument, among other settings, see `stan()`.
 
-* Likewise, some models below are fitted using `fit.method="opt"`.  This uses an [approximation to the posterior](https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html).  This is OK for producing point estimates of the parameters (the posterior mode is used - note this is likely to differ from the mean or median) but the uncertainty will be only roughly approximated.  This is very useful for quick checks and model development.
+* Other models in this vignette are fitted using `fit.method="opt"`.  This uses an [approximation to the posterior](https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html).  This is OK for producing point estimates of the parameters (the posterior mode is used - note this is likely to differ from the mean or median) but the uncertainty will be only roughly approximated.  This is very useful for quick checks and model development.
 
 * If using MCMC, make sure to check the diagnostics to ensure that the fit has _converged_ - the values of `rhat` in the summary output (e.g. below) should not be more than 1.05 for each parameter ([see here](https://mc-stan.org/rstan/reference/Rhat.html) for technical details).
 ```{r}
@@ -160,7 +159,7 @@ This is passed as the `external` argument to `survextrap`.   Extra knots are add
 
 ```{r,results="hide"}
 nde_mod <- survextrap(Surv(years, status) ~ 1, data=colons, 
-                      chains=1, external = extdat,
+                      fit_method="opt", external = extdat,
                       mspline = list(add_knots=c(4, 10, 25)))
 plot(nde_mod)
 ```
@@ -194,7 +193,8 @@ hand side of the model formula in the `survextrap` command.     (See [Covariates
 
 ```{r,results="hide"}
 ndec_mod <- survextrap(Surv(years, status) ~ dataset, data=colons, 
-                      chains=1, external = extdat,
+                      external = extdat,
+                      fit_method = "opt",
                       mspline = list(add_knots=c(4, 10, 25)))
 ```
 
@@ -255,7 +255,7 @@ and we can use it in a `survextrap` model as follows:
 extdat <- data.frame(start = c(10), stop =  c(15), 
                      n = c(20), r = c(6))
 nde_mod <- survextrap(Surv(years, status) ~ 1, data=colons,
-                      chains=1, external = extdat)
+                      external = extdat, fit_method="opt")
 plot(nde_mod)
 ```
 
@@ -280,7 +280,7 @@ coxph(Surv(years, status) ~ rx, data=colons)
 
 Then fit a `survextrap` model and extract the log hazard ratios.  These agree with the Cox model - as expected, as we are using a proportional hazards model with a very flexible baseline hazard function.
 ```{r}
-rxph_mod <- survextrap(Surv(years, status) ~ rx, data=colons, chains=1, refresh=0)
+rxph_mod <- survextrap(Surv(years, status) ~ rx, data=colons, refresh=0, fit_method="opt")
 summary(rxph_mod) |>
     filter(variable=="loghr")
 ```
@@ -301,7 +301,7 @@ extdat <- data.frame(start = c(5, 10), stop =  c(10, 15),
                      n = c(100, 100), r = c(50, 40), 
                      rx = "Obs")
 rxphe_mod <- survextrap(Surv(years, status) ~ rx, data=colons, 
-                      chains=1, external = extdat, refresh=0)
+                      external = extdat, refresh=0, fit_method="opt")
 rmst(rxphe_mod, niter=100, t=20)
 plot(rxphe_mod, niter=100, tmax=5)
 plot_hazard(rxphe_mod, niter=100, tmax=20)
@@ -366,8 +366,8 @@ Note that if computing a marginal quantity for multiple times, such as the hazar
 The flexible non-proportional hazards model described in the [methods vignette](methods.html#nonprop) can be specified with the `nonprop` argument.   `nonprop=TRUE` gives all covariates in the main model formula non-proportional hazards.  A subset of covariates can be given non-proportional hazards by passing a different model formula as the `nonprop` argument.
 
 ```{r,results="hide"}
-rxnph_mod <- survextrap(Surv(years, status) ~ rx, data=colons, nonprop=TRUE, chains=1)
-plot(rxnph_mod)
+rxnph_mod <- survextrap(Surv(years, status) ~ rx, data=colons, nonprop=TRUE, fit_method="opt")
+plot(rxnph_mod, niter=200)
 ```
 
 Note the non-constant separation between the posterior median hazard curves from the three treatment groups.
@@ -402,15 +402,20 @@ The cross-validation results are returned in the `loo` and `loo_external` compon
 
 See [the loo vignette](https://mc-stan.org/loo/articles/loo2-example.html) for some information about how to interpret these.
 
-Roughly, lower values of the `looic` statistic indicate models with better predictive ability.  This is demonstrated here by comparing the proportional hazards model with the non-proportional hazards model.  `looic` is lower for the proportional hazards model, suggesting that the non-proportional hazards model is worse for prediction.  It is likely to be excessively complicated for the data. 
+Roughly, lower values of the `looic` statistic indicate models with better predictive ability.  
 
-```{r}
+These cross validation statistics can only be computed if the models are fitted with MCMC.  The models above were fitted with the posterior mode optimisation method (`fit_method="opt"`), so that this vignette runs quickly. 
+If we had used MCMC, we could compare the proportional hazards model with the non-proportional hazards model:  
+
+```{r,eval=FALSE}
 rxph_mod$loo
 ```
 
-```{r}
+```{r,eval=FALSE}
 rxnph_mod$loo
 ```
+
+We should find that `looic` is lower for the proportional hazards model, suggesting that the non-proportional hazards model is worse for prediction.  It is likely to be excessively complicated for the data. 
 
 If the warning message `"Some Pareto k diagnostic values are too high"` appears after calling `survextrap`, it was produced by the `loo` package.   The fitted model is still valid, but the cross-validation statistics may not be.  See [the loo vignette](https://mc-stan.org/loo/articles/loo2-example.html) and the references from there for more explanation.  This happens for the non-proportional hazards model here - cross-validation failed for 2 out of the 191 observations in the data.
     
@@ -428,7 +433,7 @@ plot(survfit(Surv(t, status) ~ 1, data=curedata))
 noncure_mod <- survextrap(Surv(t, status) ~ 1, data=curedata, fit_method = "opt")
 plot_survival(noncure_mod,tmax=5) 
 
-cure_mod <- survextrap(Surv(t, status) ~ 1, data=curedata, chains=1, cure=TRUE, iter=1000)
+cure_mod <- survextrap(Surv(t, status) ~ 1, data=curedata, cure=TRUE, iter=300, chains=1, loo=FALSE)
 plot(cure_mod, tmax=10, niter=20) 
 ```
 
@@ -471,7 +476,7 @@ mod <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt")
 mod_bh <- survextrap(Surv(years, status) ~ 1, data=colons, fit_method="opt", backhaz=bh)
 ```
 
-The posterior medians of the survival and hazard functions under `mod_bh` are overlaid on the posterior distributions from `mod`.   The fitted survival and hazard in the short term agrees under both models, but the survival is worse in the long term when the increase in the background hazard at times 3, 5 and 10 is accounted for. 
+The posterior medians of the survival and hazard functions under `mod_bh` are overlaid on the posterior distributions from `mod`.   The fitted survival and hazard in the short term agree under both models, but the survival is worse in the long term when the increase in the background hazard at times 3, 5 and 10 is accounted for. 
 
 ```{r}
 plot_survival(mod, tmax=15, niter=20) + 
@@ -535,7 +540,7 @@ Here the background hazard at each event time is defined in an extra column `"bh
 ```{r,results="hide"}
 colonsb <- colons
 colonsb$bh <- rep(0.05, nrow(colons))
-modb <- survextrap(Surv(years, status) ~ 1, data=colonsb, backhaz="bh", chains=1)
+modb <- survextrap(Surv(years, status) ~ 1, data=colonsb, backhaz="bh", fit_method="opt")
 ```
 
 As in the previous specification, the parameter estimates in the fitted model describe the excess or cause-specific hazard for the study population.  However, the _predictions_ from the model (e.g. fitted survival, hazard or mean survival) have a different meaning here.   Previously they described the overall hazard - we were able to do this because we defined the hazard at all times.  But now they describe the excess hazard for the study population - we cannot predict overall survival in general here, since we did not define the background hazard at all times.
@@ -543,7 +548,7 @@ As in the previous specification, the parameter estimates in the fitted model de
 In the example below, the excess hazard from the relative hazard model (with constant background 0.05) is shown in blue below the fitted overall hazard from a model with no background adjustment.  As expected, the excess hazard is around 0.05 less than the overall hazard.
 
 ```{r,results="hide"}
-mod <- survextrap(Surv(years, status) ~ 1, data=colonsb, chains=1)
+mod <- survextrap(Surv(years, status) ~ 1, data=colonsb, fit_method="opt")
 plot_hazard(mod) + 
     geom_line(data=hazard(modb), col="blue")
 ```
