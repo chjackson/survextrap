@@ -117,10 +117,14 @@
 #'
 #' @param backhaz Background hazard, that is, for causes of death
 #'   other than the cause of interest. This defines a
-#'   "relative survival" model where the overall hazard is the sum of
-#'   a cause-specific hazard and a background hazard.  The background
-#'   hazard is assumed to be known, and the cause-specific hazard is
-#'   modelled with the flexible parametric model.
+#'   "relative survival" or "additive hazards" model.  The overall
+#'   hazard that describes the all-cause survival data (given in the
+#'   `data` and/or `external` argument) is then modelled as the sum of
+#'   a cause-specific hazard and a background hazard.
+#'
+#'   The background hazard is assumed to be known, and the
+#'   cause-specific hazard is modelled with the flexible parametric
+#'   model.
 #'
 #' The background hazard can be supplied in two forms.  The meaning of predictions
 #' from the model depends on which of these is used.
@@ -309,6 +313,7 @@
 #' Simulation-based assessment of a Bayesian survival model with flexible baseline hazard and time-dependent effects.
 #' \doi{10.48550/arXiv.2503.21388}.
 #'
+#' @md 
 #' @export
 survextrap <- function(formula,
                        data=NULL,
@@ -572,10 +577,10 @@ get_prior_sample <- function(mspline,
                  nsim=nsim)
   }
   ## Summary of the hazard if coefs_mean was set to a constant hazard
-  haz_const <- function(nsim=10000, quantiles=c(0.025, 0.5, 0.975)){
+  haz_const <- function(quantiles=c(0.025, 0.5, 0.975)){
     prior_haz_const(mspline=mspline,
                     prior_hscale = prior_hscale,
-                    nsim=nsim, quantiles=quantiles)
+                    quantiles=quantiles)
   }
   ## Samples of hazard curves over time
   haz <- function(newdata=default_newdata, tmin=0, tmax=max(mspline$knots), nsim=10){

@@ -296,3 +296,9 @@ test_that("prior sampling functions returned with a fitted model",{
     mod$prior_sample$haz_sd(newdata=newdata, nsim=4)
   }, NA)
 })
+
+test_that("prior_haz_const interprets hazard scale prior",{
+  p1 <- prior_haz_const(sp)
+  p2 <- prior_haz_const(sp, prior_hscale = p_normal(0,1))
+  expect_lt(p1$haz[1], p2$haz[1])
+})

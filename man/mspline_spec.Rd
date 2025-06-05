@@ -61,10 +61,14 @@ covariates are modelled with proportional hazards.}
 
 \item{backhaz}{Background hazard, that is, for causes of death
 other than the cause of interest. This defines a
-"relative survival" model where the overall hazard is the sum of
-a cause-specific hazard and a background hazard.  The background
-hazard is assumed to be known, and the cause-specific hazard is
-modelled with the flexible parametric model.
+"relative survival" or "additive hazards" model.  The overall
+hazard that describes the all-cause survival data (given in the
+\code{data} and/or \code{external} argument) is then modelled as the sum of
+a cause-specific hazard and a background hazard.
+
+The background hazard is assumed to be known, and the
+cause-specific hazard is modelled with the flexible parametric
+model.
 
 The background hazard can be supplied in two forms.  The meaning of predictions
 from the model depends on which of these is used.

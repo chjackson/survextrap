@@ -598,12 +598,13 @@ plot_prior_hazard <- function(knots=NULL, df=10, degree=3,bsmooth=TRUE,
 ##'
 ##' @inheritParams prior_haz
 ##'
+##' @return A data frame with columns \code{haz} for the hazard and \code{mean} for the inverse hazard (on the mean survival scale) and rows for three summary quantiles.
+##'
 ##' @seealso \code{\link{p_meansurv}}, \code{\link{mspline_constant_coefs}}
 ##'
 ##' @export
 prior_haz_const <- function(mspline,
                             prior_hscale = p_normal(0, 20),
-                            nsim = 10000,
                             quantiles = c(0.025, 0.5, 0.975)){
   hscale_prior <- get_prior_hscale(prior_hscale)
   coefs_mean <- mspline_constant_coefs(mspline)

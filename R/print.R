@@ -4,6 +4,8 @@
 ##'
 ##' @param ... Other arguments (currently unused).
 ##'
+##' @return No value is returned.
+##'
 ##' This prints a summary of the data, a statement of the fitted
 ##' model, the prior distributions, and a table of summary statistics
 ##' of the posterior distributions of the model parameters.  For

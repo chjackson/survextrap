@@ -8,7 +8,6 @@ prior on the hazard scale parameter and spline specification.}
 prior_haz_const(
   mspline,
   prior_hscale = p_normal(0, 20),
-  nsim = 10000,
   quantiles = c(0.025, 0.5, 0.975)
 )
 }
@@ -67,10 +66,11 @@ meaning.  For continuous covariates, it helps for both
 computation and interpretation to define the value of zero to
 denote a typical value in the data, e.g. the mean.}
 
-\item{nsim}{Number of simulations to draw}
-
 \item{quantiles}{Quantiles used to summarise the implied prior distributions
 of the simulated quantities.}
+}
+\value{
+A data frame with columns \code{haz} for the hazard and \code{mean} for the inverse hazard (on the mean survival scale) and rows for three summary quantiles.
 }
 \description{
 Summarises the prior for the constant hazard implied by a particular

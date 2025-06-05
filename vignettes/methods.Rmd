@@ -275,6 +275,8 @@ Note the mixture cure model makes a strong parametric assumption about the shape
 
 * $h_c(t)$ follows the standard flexible parametric (M-spline) model used in `survextrap`.
 
+* the data supplied in the `data` argument (and/or the `external` argument) are all-cause survival data, and assumed to have hazard $h(t)$. 
+
 This is also known as a "relative survival" model, since the additive model for the hazards implies a multiplicative model for survival: $S(t) = S_b(t)S_c(t)$.    This kind of model is often used when the background hazard is confidently known (from national statistics on general mortality) and the cause-specific hazard can be inferred from the individual-level data.
 
 The model used in `survextrap` is a variant of the model by [Nelson et al](https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.3064) and should give similar results.  The only difference is that the model in `survextrap` is Bayesian, and a different kind of spline is used.
@@ -367,7 +369,6 @@ plot(rxph_mod, tmax=10, wane_period = c(5, 10), niter=1000,
 We also compare the restricted mean survival times (up to 50 years) with and without treatment waning.   The consequence of the waning treatment effect is to reduce this long term mean survival time under the treated group by about three years.   (Combining waning with computation of the restricted mean is computationally intensive, so in this illustration, we only use a sample of 20 from the posterior distribution).
 
 ```{r}
-options(digits=2)
 rmst(rxph_mod, t=50, niter=100, newdata=nd_full)
 rmst(rxph_mod, t=50, niter=20, newdata=nd_full, newdata0=nd_null, wane_period = c(5,10))
 ```
