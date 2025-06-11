@@ -106,6 +106,10 @@ The model is fully described in a paper: [Jackson, BMC Medical Research Methodol
 
 `vignette("priors")` goes into detail on how prior distributions and judgements can be specified in `survextrap` - an important but often-neglected part of Bayesian analysis. 
 
+### Evaluation of the methods
+
+Two papers by Timmins et al. describe simulation studies that show good performance of the methods for (a) [short-term estimation from individual-level data](https://arxiv.org/abs/2503.21388) and (b) [extrapolation including external data](https://arxiv.org/abs/2505.16835).
+
 
 ### Examples of how to use it 
 
@@ -116,6 +120,8 @@ The [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetux
 
 ### Slides from presentations about survextrap
 
+* [PSI, June 2025](https://chjackson.github.io/survextrap/cjackson_survextrap_psi.pdf)
+
 * [Belfast (RSS NI), December 2023](https://chjackson.github.io/survextrap/cjackson_survextrap_belfast.pdf)
 
 * [Royal Statistical Society, September 2023](https://chjackson.github.io/survextrap/cjackson_survextrap_rss23.pdf)
@@ -125,21 +131,32 @@ The [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetux
 * [Exeter, October 2022](https://chjackson.github.io/survextrap/cjackson_survextrap_exeter.pdf)
 
 
+
 ## Installation
 
-The current version can be installed as:
+The package can be installed in the usual way from CRAN, as:
+
+```
+install.packages("survextrap")
+```
+
+The latest development version on Github can be installed as
+
+```
+remotes::install_github("chjackson/survextrap")
+```
+
+or more easily as (but a day behind the code on Github)
 
 ```
 install.packages("survextrap", repos=c('https://chjackson.r-universe.dev',
                                        'https://cloud.r-project.org'))
 ```
 
-and will soon be on CRAN as well. 
-
 Please give feedback and suggestions if you use it.  These can be posted on [github issues](https://github.com/chjackson/survextrap/issues), or [email](mailto:chris.jackson@mrc-bsu.cam.ac.uk).
 
 <!-- badges: start -->
-[![lifecycle](lifecycle-maturing.svg)](https://lifecycle.r-lib.org/articles/stages.html#maturing)
+[![lifecycle](lifecycle-stable.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![R-CMD-check](https://github.com/chjackson/survextrap/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/chjackson/survextrap/actions/workflows/R-CMD-check.yaml)
 [![test-coverage](https://codecov.io/gh/chjackson/survextrap/branch/master/graph/badge.svg)](https://app.codecov.io/gh/chjackson/survextrap)
 <!-- badges: end -->
