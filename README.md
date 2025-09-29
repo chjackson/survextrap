@@ -153,7 +153,11 @@ install.packages("survextrap", repos=c('https://chjackson.r-universe.dev',
                                        'https://cloud.r-project.org'))
 ```
 
-Please give feedback and suggestions if you use it.  These can be posted on [github issues](https://github.com/chjackson/survextrap/issues), or [email](mailto:chris.jackson@mrc-bsu.cam.ac.uk).
+If you use it, I would be very happy to know! 
+
+Feedback, suggestions or problem reports are welcome.  Or just let me know what you are using it for, and how well it worked for your application. 
+
+[github issues](https://github.com/chjackson/survextrap/issues), or [email](mailto:chris.jackson@mrc-bsu.cam.ac.uk) are fine. 
 
 <!-- badges: start -->
 [![lifecycle](lifecycle-stable.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)

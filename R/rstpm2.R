@@ -1,6 +1,3 @@
-## TODO bundle vuniroot
-## needs Rcpp
-
 ## (c) Mark Clements. From the rstpm2 package, used under GPL.
 ## https://raw.githubusercontent.com/mclements/rstpm2/refs/heads/master/R/vuniroot.R
 ## 2025-05-02

@@ -40,7 +40,9 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/cetuximab.html">Case study of using survextrap: cetuximab for head and neck cancer</a></li>
+    <li><a class="dropdown-item" href="../articles/examples-Christopher%E2%80%99s%20MacBook%20Pro.html">Examples of using survextrap</a></li>
     <li><a class="dropdown-item" href="../articles/examples.html">Examples of using survextrap</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-Christopher%E2%80%99s%20MacBook%20Pro.html">Details of methods behind survextrap</a></li>
     <li><a class="dropdown-item" href="../articles/methods.html">Details of methods behind survextrap</a></li>
     <li><a class="dropdown-item" href="../articles/priors.html">Priors in survextrap models</a></li>
     <li><a class="dropdown-item" href="../articles/sbc.html">Simulation-based calibration of survextrap</a></li>
@@ -71,7 +73,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2025-06-05</h4>
+            <h4 data-toc-skip class="date">2025-09-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/priors.Rmd" class="external-link"><code>vignettes/priors.Rmd</code></a></small>
       <div class="d-none name"><code>priors.Rmd</code></div>
@@ -234,12 +236,12 @@ of the knowledge that exists outside the data.</p>
 <p>To use this before the model is fitted, we have to know the knots
 defining the spline, and choose a set of priors. <code>survextrap</code>
 provides a set of default priors, which may or may not be sensible in a
-given application. and a procedure for picking knots (see the <a href="../methods.html#bayesspec">methods vignette</a>).</p>
+given application, and a procedure for picking knots (see the <a href="../methods.html#bayesspec">methods vignette</a>).</p>
 <p>First we fit a default model, and print the default priors that are
 used.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/chjackson/survextrap" class="external-link">survextrap</a></span><span class="op">)</span></span>
-<span><span class="va">nd_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu">Surv</span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colons</span>, fit_method<span class="op">=</span><span class="st">"opt"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">nd_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://chjackson.github.io/survextrap/reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colons</span>, fit_method<span class="op">=</span><span class="st">"opt"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/print_priors.html">print_priors</a></span><span class="op">(</span><span class="va">nd_mod</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Priors:</span></span>
@@ -343,7 +345,7 @@ reporting purposes, we can use <code>print_priors</code> to view the
 normal prior for <span class="math inline">\(\log(\eta)\)</span> that
 was automatically derived.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ndi_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu">Surv</span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colons</span>, fit_method<span class="op">=</span><span class="st">"opt"</span>,</span>
+<code class="sourceCode R"><span><span class="va">ndi_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://chjackson.github.io/survextrap/reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colons</span>, fit_method<span class="op">=</span><span class="st">"opt"</span>,</span>
 <span>                      prior_hscale <span class="op">=</span> <span class="fu"><a href="../reference/p_meansurv.html">p_meansurv</a></span><span class="op">(</span>median<span class="op">=</span><span class="fl">50</span>, upper<span class="op">=</span><span class="fl">80</span>, mspline<span class="op">=</span><span class="va">sp</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/print_priors.html">print_priors</a></span><span class="op">(</span><span class="va">ndi_mod</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Priors:</span></span>
@@ -402,7 +404,7 @@ the data. If the data informing extrapolation are weak, then the
 extrapolations will be sensitive to the prior for these potential hazard
 changes.</p>
 <p>Plotting multiple trajectories gives a rough idea of the typical
-amount of variation through time, but , but ideally we want a more
+amount of variation through time, but ideally we want a more
 quantitative summary of this.</p>
 </div>
 </div>
@@ -454,7 +456,7 @@ interval for this hazard ratio to the prior. The posterior interval is
 narrower than the prior interval, showing the influence of the data.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="va">nd_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu">Surv</span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colons</span>, fit_method<span class="op">=</span><span class="st">"mcmc"</span>,</span>
+<span><span class="va">nd_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://chjackson.github.io/survextrap/reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">colons</span>, fit_method<span class="op">=</span><span class="st">"mcmc"</span>,</span>
 <span>                     chains<span class="op">=</span><span class="fl">1</span>, iter<span class="op">=</span><span class="fl">1000</span>,</span>
 <span>                     prior_hsd <span class="op">=</span> <span class="fu"><a href="../reference/priors.html">p_gamma</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">qgamma</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.975</span><span class="op">)</span>, <span class="fl">2</span>, <span class="fl">5</span><span class="op">)</span></span>
@@ -569,7 +571,7 @@ consistency with beliefs, and the Gamma prior for <span class="math inline">\(\t
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
