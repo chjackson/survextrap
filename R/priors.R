@@ -321,12 +321,13 @@ get_prior_hrsd <- function(prior, xnph){
 ##' `pcure` is returned in cure models (the cure probability).
 ##'
 ##' @name prior_sample
+##' @export
 prior_sample <- function(mspline,
                          coefs_mean = NULL,
                          prior_hsd = p_gamma(2,1),
                          ## no constants for the moment as they are not allowed in the model
                          prior_hscale,
-                         smooth_model = "exchangeable",
+                         smooth_model = "random_walk",
                          prior_loghr = NULL,
                          formula = NULL,
                          cure = NULL,
@@ -392,7 +393,7 @@ prior_sample_basehaz <- function(mspline,
                                  coefs_mean = NULL,
                                  prior_hsd = p_gamma(2,1), # no constants, as they are not allowed in the model
                                  prior_hscale,
-                                 smooth_model = "exchangeable",
+                                 smooth_model = "random_walk",
                                  nsim = 100){
   ## process using common code to survextrap
   hscale_prior <- get_prior_hscale(prior_hscale)
@@ -550,13 +551,57 @@ prior_sample_hazard <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
   hazdf
 }
 
+prior_sample_survival <- function(knots=NULL, df=10, degree=3, bsmooth=TRUE,
+                                coefs_mean = NULL,
+                                prior_hsd = p_gamma(2,1),
+                                prior_hscale = NULL,
+                                smooth_model = "exchangeable",
+                                prior_loghr = NULL,
+                                formula = NULL,
+                                cure = NULL,
+                                nonprop = NULL,
+                                newdata = NULL,
+                                newdata0 = NULL,
+                                prior_hrsd = NULL,
+                                tmin=0, tmax=10,
+                                nsim=10){
+  basis <- mspline_plotsetup(knots=knots, tmin=tmin, tmax=tmax, degree=degree, df=df,
+                             bsmooth=bsmooth)
+  time <- attr(basis, "times")
+  knots <- attr(basis, "knots")
+  mspline <- mspline_update(list(knots=knots, degree=degree, bsmooth=bsmooth))
+  sam <- prior_sample(mspline = mspline,
+                      coefs_mean=coefs_mean, prior_hsd=prior_hsd,
+                      prior_hscale=prior_hscale,
+                      smooth_model = smooth_model,
+                      prior_hrsd=prior_hrsd,
+                      formula=formula, cure=cure, nonprop=nonprop,
+                      newdata = newdata, newdata0=newdata0, nsim=nsim)
+  reslist <- vector(nsim, mode="list")
+  for (i in 1:nsim){
+    surv <- psurvmspline(q=time, alpha = sam$alpha[i], coefs=sam$coefs[i,],
+                         knots=mspline$knots, degree=mspline$degree,
+                         lower.tail=FALSE)
+    reslist[[i]] <- data.frame(surv=surv, time=time)
+    reslist[[i]]$rep <- i
+  }
+  resdf <- do.call("rbind", reslist)
+  resdf$mean <- 1/resdf$surv
+  resdf$rep <- factor(resdf$rep)
+
+  attr(resdf, "knots") <- knots
+  resdf
+}
+
+
+
 ##' @rdname prior_sample_hazard
 ##' @export
 plot_prior_hazard <- function(knots=NULL, df=10, degree=3,bsmooth=TRUE,
                               coefs_mean = NULL,
                               prior_hsd = p_gamma(2,1),
                               prior_hscale = p_normal(0, 20),
-                              smooth_model = "exchangeable",
+                              smooth_model = "random_walk",
                               prior_loghr = NULL,
                               formula = NULL,
                               cure = NULL,

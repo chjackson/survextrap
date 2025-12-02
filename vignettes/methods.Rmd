@@ -147,7 +147,7 @@ All priors in the package can be chosen by the user (within given distribution f
 
 # Prior distribution for the hazard curve {#priorhaz}
 
-A log-normal prior is used for the scale $\eta$.   The default in the package is normal(0, 20) for $\log(\eta)$. 
+A log-normal prior is used for the scale $\eta$.   The default in the package is a normal with mean 0 and SD 20 for $\log(\eta)$. 
 
 The prior for the basis coefficients $p_i$, that describe the mass of the hazard in each region, is specified on the multinomial logistic scale, since $\sum_i p_i = 1$.   Define $log(p_i / p_1) = \gamma_i$, with $\gamma_1=0$,  and $\gamma_i = \mu_i + \sigma\epsilon_i$, for $i = 2, \ldots, n$.  The prior has the following parameters: 
 

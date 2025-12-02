@@ -5,7 +5,7 @@ test_that("spline demo plots", {
                "dimension of `coefs` is 5, should be 7")
 })
 
-sp <- list(knots=c(1,2,3,5), degree=3)
+sp <- mspline_init(knots=c(1,2,3,5), degree=3)
 
 test_that("prior hazard parameter samples", {
   expect_error({ # ?? any sensible expectations here?
@@ -202,7 +202,7 @@ test_that("prior hazard function samples", {
     p
 
     ## multiple covariates with different priors - must be named
-    psam <- prior_sample(mspline = list(knots = c(1,2,3,5), degree=3),
+    psam <- prior_sample(mspline = mspline_init(knots = c(1,2,3,5), degree=3),
                          prior_hscale = p_normal(0,1),
                          prior_hsd = p_gamma(10, 10),
                          prior_loghr = list(age=p_normal(2,3),

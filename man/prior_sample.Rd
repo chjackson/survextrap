@@ -9,7 +9,7 @@ prior_sample(
   coefs_mean = NULL,
   prior_hsd = p_gamma(2, 1),
   prior_hscale,
-  smooth_model = "exchangeable",
+  smooth_model = "random_walk",
   prior_loghr = NULL,
   formula = NULL,
   cure = NULL,

@@ -34,7 +34,7 @@ plot_prior_hazard(
   coefs_mean = NULL,
   prior_hsd = p_gamma(2, 1),
   prior_hscale = p_normal(0, 20),
-  smooth_model = "exchangeable",
+  smooth_model = "random_walk",
   prior_loghr = NULL,
   formula = NULL,
   cure = NULL,
