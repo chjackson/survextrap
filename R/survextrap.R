@@ -493,7 +493,8 @@ survextrap <- function(formula,
 
   class(res) <- "survextrap"
   if (loo && (fit_method=="mcmc")) {
-    res$loo <- loo_survextrap(res, standata, loglik_ipd)
+    if (td$indiv)
+      res$loo <- loo_survextrap(res, standata, loglik_ipd)
     if (external$nextern > 0)
       res$loo_external <- loo_survextrap(res, standata, loglik_external)
   }
