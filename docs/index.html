@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,8 +63,13 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="survextrap">survextrap<a class="anchor" aria-label="anchor" href="#survextrap"></a>
+<div class="page-header"><h1 id="the-survextrap-r-package">The survextrap R package<a class="anchor" aria-label="anchor" href="#the-survextrap-r-package"></a>
 </h1></div>
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+</div>
+<div class="section level1">
+<h1 id="survextrap">survextrap<a class="anchor" aria-label="anchor" href="#survextrap"></a>
+</h1>
 <p><code>survextrap</code> is an R package for parametric survival modelling with either or both of:</p>
 <ol style="list-style-type: decimal">
 <li>A standard individual-level, right-censored survival dataset, e.g.</li>
@@ -242,17 +247,20 @@ etc…
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>The package can be installed in the usual way from CRAN, as:</p>
-<pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"survextrap"</span><span class="op">)</span></span></code></pre>
+<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"survextrap"</span>)</span></code></pre></div>
 <p>The latest development version on Github can be installed as</p>
-<pre><code><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"chjackson/survextrap"</span><span class="op">)</span></span></code></pre>
+<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"chjackson/survextrap"</span>)</span></code></pre></div>
 <p>or more easily as (but a day behind the code on Github)</p>
-<pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"survextrap"</span>, repos<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'https://chjackson.r-universe.dev'</span>,</span>
-<span>                                       <span class="st">'https://cloud.r-project.org'</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<p>Please give feedback and suggestions if you use it. These can be posted on <a href="https://github.com/chjackson/survextrap/issues" class="external-link">github issues</a>, or <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk">email</a>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"survextrap"</span>, <span class="at">repos=</span><span class="fu">c</span>(<span class="st">'https://chjackson.r-universe.dev'</span>,</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                                       <span class="st">'https://cloud.r-project.org'</span>))</span></code></pre></div>
+<p>If you use it, I would be very happy to know!</p>
+<p>Feedback, suggestions or problem reports are welcome. Or just let me know what you are using it for, and how well it worked for your application.</p>
+<p><a href="https://github.com/chjackson/survextrap/issues" class="external-link">github issues</a>, or <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk">email</a> are fine.</p>
 <!-- badges: start -->
 
 </div>
 </div>
+
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">

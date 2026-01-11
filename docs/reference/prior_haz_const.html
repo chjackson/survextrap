@@ -19,7 +19,7 @@ using mspline_constant_coefs."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,7 +65,6 @@ using <code><a href="mspline_constant_coefs.html">mspline_constant_coefs</a></co
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">prior_haz_const</span><span class="op">(</span></span>
 <span>  <span class="va">mspline</span>,</span>
 <span>  prior_hscale <span class="op">=</span> <span class="fu"><a href="priors.html">p_normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span><span class="op">)</span>,</span>
-<span>  nsim <span class="op">=</span> <span class="fl">10000</span>,</span>
 <span>  quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -124,15 +123,15 @@ computation and interpretation to define the value of zero to
 denote a typical value in the data, e.g. the mean.</p></dd>
 
 
-<dt id="arg-nsim">nsim<a class="anchor" aria-label="anchor" href="#arg-nsim"></a></dt>
-<dd><p>Number of simulations to draw</p></dd>
-
-
 <dt id="arg-quantiles">quantiles<a class="anchor" aria-label="anchor" href="#arg-quantiles"></a></dt>
 <dd><p>Quantiles used to summarise the implied prior distributions
 of the simulated quantities.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A data frame with columns <code>haz</code> for the hazard and <code>mean</code> for the inverse hazard (on the mean survival scale) and rows for three summary quantiles.</p>
+    </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="p_meansurv.html">p_meansurv</a></code>, <code><a href="mspline_constant_coefs.html">mspline_constant_coefs</a></code></p></div>
@@ -147,7 +146,7 @@ of the simulated quantities.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

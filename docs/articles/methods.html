@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">survextrap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,7 +71,7 @@
 Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jackson@mrc-bsu.cam.ac.uk</a>
 </h4>
             
-            <h4 data-toc-skip class="date">2025-06-05</h4>
+            <h4 data-toc-skip class="date">2026-01-11</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/chjackson/survextrap/blob/HEAD/vignettes/methods.Rmd" class="external-link"><code>vignettes/methods.Rmd</code></a></small>
       <div class="d-none name"><code>methods.Rmd</code></div>
@@ -79,9 +79,9 @@ Jackson <a href="mailto:chris.jackson@mrc-bsu.cam.ac.uk" class="email">chris.jac
 
     
     
-<p>See the <a href="../index.html">README</a> for the design principles
-of the package, and the <a href="examples.html">examples vignette</a>
-for examples of how to fit models and summarise model outputs.</p>
+<p>See the <a href="https://chjackson.github.io/survextrap">home
+page</a> for the design principles of the package, and the <a href="examples.html">examples vignette</a> for examples of how to fit
+models and summarise model outputs.</p>
 <p>A more formal account of the methods is given in the
 <code>survextrap</code> <a href="https://doi.org/10.1186/s12874-023-02094-1" class="external-link">paper</a>.</p>
 <div class="section level2">
@@ -285,8 +285,8 @@ explicitly.</p>
 <div class="section level2">
 <h2 id="priorhaz">Prior distribution for the hazard curve<a class="anchor" aria-label="anchor" href="#priorhaz"></a>
 </h2>
-<p>A log-normal prior is used for the scale <span class="math inline">\(\eta\)</span>. The default in the package is
-normal(0, 20) for <span class="math inline">\(\log(\eta)\)</span>.</p>
+<p>A log-normal prior is used for the scale <span class="math inline">\(\eta\)</span>. The default in the package is a
+normal with mean 0 and SD 20 for <span class="math inline">\(\log(\eta)\)</span>.</p>
 <p>The prior for the basis coefficients <span class="math inline">\(p_i\)</span>, that describe the mass of the hazard
 in each region, is specified on the multinomial logistic scale, since
 <span class="math inline">\(\sum_i p_i = 1\)</span>. Define <span class="math inline">\(log(p_i / p_1) = \gamma_i\)</span>, with <span class="math inline">\(\gamma_1=0\)</span>, and <span class="math inline">\(\gamma_i = \mu_i + \sigma\epsilon_i\)</span>, for
@@ -369,6 +369,8 @@ Gamma(2,1)\)</span> allows a wide range of wiggly shapes.</p>
 <span>                        nsim<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/bquote.html" class="external-link">bquote</a></span><span class="op">(</span><span class="va">sigma</span> <span class="op">~</span> <span class="st">"~ Gamma(2,1)"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">gridExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html" class="external-link">grid.arrange</a></span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Removed 47 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`geom_line()`).</span></span></code></pre>
 <p><img src="methods_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
 <p>By default, the package estimates <span class="math inline">\(\sigma\)</span> as part of the full Bayesian model
 (with a gamma(2,1) prior), so that uncertainty about the level of
@@ -644,11 +646,11 @@ example, an M-spline model with 5 basis terms). See the <a href="examples.html">
 <p>We extrapolate the survival and hazard curves up to 10 years under a
 naive assumption of proportional hazards beyond the end of follow-up (3
 years).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/chjackson/survextrap" class="external-link">survextrap</a></span><span class="op">)</span></span>
 <span><span class="va">colons2</span> <span class="op">&lt;-</span> <span class="va">colons</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">rx</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Obs"</span>, <span class="st">"Lev"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/droplevels.html" class="external-link">droplevels</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">rxph_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu">Surv</span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">rx</span>, data<span class="op">=</span><span class="va">colons2</span>, </span>
+<span><span class="va">rxph_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/survextrap.html">survextrap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">years</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">rx</span>, data<span class="op">=</span><span class="va">colons2</span>, </span>
 <span>                       fit_method<span class="op">=</span><span class="st">"opt"</span>, mspline<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>df<span class="op">=</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rxph_mod</span>, tmax<span class="op">=</span><span class="fl">10</span>, niter<span class="op">=</span><span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 <p><img src="methods_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
@@ -679,7 +681,7 @@ treated group and the modelled hazard of the control group.</p>
 “null” covariate values, as data frames with two rows, one for the
 treated group and one for the control group. Note for the control group,
 the “full” and “null” covariate values are the same.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nd_full</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>rx <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Lev"</span>,<span class="st">"Obs"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">nd_null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>rx <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Obs"</span>,<span class="st">"Obs"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>We then supply these as arguments to the <code>plot</code> method,
@@ -689,7 +691,7 @@ this waning model. Note how the hazard curves converge over the waning
 period. The survival curves have only just started to converge - the
 effects of the waning on survival would be more noticeable over longer
 extrapolation periods (say 30-40 years).</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rxph_mod</span>, tmax<span class="op">=</span><span class="fl">10</span>, wane_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">10</span><span class="op">)</span>, niter<span class="op">=</span><span class="fl">1000</span>, </span>
 <span>     newdata <span class="op">=</span> <span class="va">nd_full</span>, newdata0 <span class="op">=</span> <span class="va">nd_null</span><span class="op">)</span></span></code></pre></div>
 <p><img src="methods_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
@@ -700,14 +702,14 @@ the treated group by about three years. (Combining waning with
 computation of the restricted mean is computationally intensive, so in
 this illustration, we only use a sample of 20 from the posterior
 distribution).</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/rmst.html">rmst</a></span><span class="op">(</span><span class="va">rxph_mod</span>, t<span class="op">=</span><span class="fl">50</span>, niter<span class="op">=</span><span class="fl">100</span>, newdata<span class="op">=</span><span class="va">nd_full</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 2 × 6</span></span></span>
 <span><span class="co">##   variable rx        t median lower upper</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">1</span> rmst     Lev      50   7.45  4.17 17.0 </span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">2</span> rmst     Obs      50   4.88  3.09  9.07</span></span></code></pre>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/rmst.html">rmst</a></span><span class="op">(</span><span class="va">rxph_mod</span>, t<span class="op">=</span><span class="fl">50</span>, niter<span class="op">=</span><span class="fl">20</span>, newdata<span class="op">=</span><span class="va">nd_full</span>, newdata0<span class="op">=</span><span class="va">nd_null</span>, wane_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 2 × 6</span></span></span>
 <span><span class="co">##   variable rx        t median lower upper</span></span>
@@ -737,7 +739,7 @@ summaries or predictions from this model.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>

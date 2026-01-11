@@ -1,7 +1,7 @@
 Package: survextrap
 Title: Bayesian Flexible Parametric Survival Modelling and Extrapolation
-Version: 1.0
-Date: 2025-06-05
+Version: 1.0.1
+Date: 2026-01-11
 Authors@R: 
     c(person("Christopher", "Jackson", , "chris.jackson@mrc-bsu.cam.ac.uk", role = c("aut", "cre", "cph"),
              comment = c(ORCID = "0000-0002-6656-8913")),

@@ -25,8 +25,7 @@ editor_options:
 knitr::opts_chunk$set(eval=TRUE)
 ```
 
-See the [README](../index.html) for the design principles of the package, and the [examples vignette](examples.html) for examples of how to fit models and 
-summarise model outputs. 
+See the [home page](https://chjackson.github.io/survextrap) for the design principles of the package, and the [examples vignette](examples.html) for examples of how to fit models and summarise model outputs. 
 
 A more formal account of the methods is given in the `survextrap` [paper](https://doi.org/10.1186/s12874-023-02094-1).
 

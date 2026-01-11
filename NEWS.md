@@ -1,3 +1,8 @@
+# Version 1.0.1 (2026/01/11)
+
+* Minor changes to links in vignettes to satisfy CRAN check.
+
+
 # Version 1.0 (2025/06/05)
 
 * First CRAN release.

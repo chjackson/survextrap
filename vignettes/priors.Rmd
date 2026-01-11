@@ -103,7 +103,7 @@ A general way to ensure that the chosen priors represent meaningful beliefs is t
 
 Before fitting a model, we can use the `prior_sample_hazard` function to check that hazard curves simulated from the prior would be considered plausible representations of the knowledge that exists outside the data. 
 
-To use this before the model is fitted, we have to know the knots defining the spline, and choose a set of priors. `survextrap` provides a set of default priors, which may or may not be sensible in a given application, and a procedure for picking knots (see the [methods vignette](../methods.html#bayesspec)).
+To use this before the model is fitted, we have to know the knots defining the spline, and choose a set of priors. `survextrap` provides a set of default priors, which may or may not be sensible in a given application, and a procedure for picking knots (see the [methods vignette](methods.html#bayesspec)).
 
 First we fit a default model, and print the default priors that are used.
 
