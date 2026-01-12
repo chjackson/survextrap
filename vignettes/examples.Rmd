@@ -29,7 +29,7 @@ options(mc.cores = 2) # CRAN check limits to 2 cores
 
 This vignette gives a quick tour of the features of the `survextrap` package, showing how to use it to fit a range of survival models.   See the [cetuximab case study](https://chjackson.github.io/survextrap/articles/cetuximab.html) for a more in-depth demonstration of how it might be used in a typical health technology assessment. 
 
-See the [home page](https://chjackson.github.io/survextrap) for the design principles of the package, and the [methods vignette](methods.html) for technical details of the methods.
+See the [home page](https://chjackson.github.io/survextrap/) for the design principles of the package, and the [methods vignette](methods.html) for technical details of the methods.
 
 
 # Examples
