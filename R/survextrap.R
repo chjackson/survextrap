@@ -459,8 +459,6 @@ survextrap <- function(formula,
                            pars = "beta", include=FALSE), rstan_vb_ops(...)))
   else stop(sprintf("Unknown fit_method: %s",fit_method))
 
-  km <- if (td$indiv) surv_summary(survfit(formula, data=data), data=data) else NULL
-
   misc_keep <- nlist(formula, indiv=td$indiv, stanfit=fits,
                      fit_method,
                      cure_formula = xcure$cure_formula,
@@ -470,14 +468,14 @@ survextrap <- function(formula,
   standata_keep <- standata[c("nvars","ncovs","ncurecovs","nnphcovs","nevent","nrcens","nextern")]
   model_keep <- nlist(cure=xcure$cure, est_hsd)
   spline_keep <- nlist(mspline)
-  covinfo_names <- c("xnames","xlevs","xinds","mfbase")
+  covinfo_names <- c("xnames","xlevs","mfbase","factors","numerics")
   x <- list(x = x[covinfo_names])
   xcure <- list(xcure = xcure[covinfo_names])
   xnph <- list(xnph = xnph[covinfo_names])
   prior_keep <- list(priors=priors)
   prioretc_keep <- nlist(coefs_mean, hsd)
   res <- c(misc_keep, standata_keep, model_keep, spline_keep, x, xcure, xnph,
-           prior_keep, prioretc_keep, nlist(km))
+           prior_keep, prioretc_keep)
   prior_sample <- get_prior_sample(mspline=mspline,
                                    coefs_mean=coefs_mean,
                                    prior_hsd=prior_hsd,
@@ -492,6 +490,10 @@ survextrap <- function(formula,
   res <- c(res, nlist(prior_sample))
 
   class(res) <- "survextrap"
+
+  if (one_factor_cov(res) & td$indiv)
+    res$km <- surv_summary(survfit(formula, data=data), data=data)
+
   if (loo && (fit_method=="mcmc")) {
     if (td$indiv)
       res$loo <- loo_survextrap(res, standata, loglik_ipd)

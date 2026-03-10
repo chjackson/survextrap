@@ -82,13 +82,12 @@ plot_hazard <- function(x, newdata=NULL, t=NULL, tmax=NULL, niter=NULL,
 ##' @param km If \code{TRUE} then a Kaplan-Meier curve of the observed
 ##'   data is plotted, using the results of
 ##'   \code{\link[survival:survfit]{survival::survfit()}} on the
-##'   formula originally used for the \code{survextrap} fit.  By
-##'   default, this is only done when there are no covariates or one
-##'   factor covariate.
-##'
-##' The Kaplan-Meier estimates are returned in the \code{km} component
-##' of the fitted model object returned by \code{\link{survextrap}},
-##' for use in hand-crafted plots like these.
+##'   formula originally used for the \code{survextrap} fit.  This is
+##'   only available when there are no covariates or one factor
+##'   covariate.  When this is the case, the Kaplan-Meier estimates
+##'   are returned in the \code{km} component of the fitted model
+##'   object returned by \code{\link{survextrap}}, for use in
+##'   hand-crafted plots like these.
 ##'
 ##' @return A `ggplot2` plot object.
 ##'
